@@ -1,7 +1,7 @@
-import { queryGeneric, mutationGeneric } from 'convex/server';
 import { v } from 'convex/values';
+import { query, mutation } from './_generated/server';
 
-export const current = queryGeneric({
+export const me = query({
   args: {},
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -16,14 +16,14 @@ export const current = queryGeneric({
   },
 });
 
-export const getById = queryGeneric({
+export const getById = query({
   args: { id: v.id('user') },
   handler: async (ctx, args) => {
     return await ctx.db.get(args.id);
   },
 });
 
-export const updateProfile = mutationGeneric({
+export const updateProfile = mutation({
   args: { name: v.string() },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();

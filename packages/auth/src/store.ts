@@ -17,7 +17,7 @@ interface AppState {
   isLoading: boolean;
   setUser: (user: User | null) => void;
   setLoading: (loading: boolean) => void;
-  logout: () => void;
+  clearUser: () => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -25,9 +25,9 @@ export const useAppStore = create<AppState>()(
     (set) => ({
       user: null,
       isLoading: true,
-      setUser: (user) => set({ user }),
+      setUser: (user) => set({ user, isLoading: false }),
       setLoading: (isLoading) => set({ isLoading }),
-      logout: () => set({ user: null }),
+      clearUser: () => set({ user: null, isLoading: false }),
     }),
     {
       name: 'pelis-storage',

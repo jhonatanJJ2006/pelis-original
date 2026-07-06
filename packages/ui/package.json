@@ -6,6 +6,7 @@
   "sideEffects": false,
   "exports": {
     "./components": "./src/shared/ui/index.tsx",
+    "./utils": "./src/shared/utils.ts",
     "./features/*": "./src/features/*/index.tsx",
     "./pages/*": "./src/pages/*/index.ts"
   },
@@ -16,9 +17,12 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@pelis/auth": "workspace:*",
+    "@pelis/convex": "workspace:*",
     "@pelis/validators": "workspace:*",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "convex": "^1.42.1",
     "lucide-react": "^0.447.0",
     "sonner": "^1.7.0",
     "tailwind-merge": "^2.5.4"

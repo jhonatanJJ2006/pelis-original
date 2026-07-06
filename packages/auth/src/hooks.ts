@@ -1,7 +1,9 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useQuery } from 'convex/react';
 import { useAppStore } from './store';
+import { api } from '@pelis/convex';
+import { useEffect } from 'react';
 
 interface UseUserReturn {
   user: ReturnType<typeof useAppStore>['user'];
@@ -10,47 +12,39 @@ interface UseUserReturn {
 }
 
 export function useUser(): UseUserReturn {
-  const { user, setUser, setLoading, logout: clearStoreUser } = useAppStore();
+  const { user, setUser, isLoading } = useAppStore();
+  const convexUser = useQuery(api.users.me, {});
 
   useEffect(() => {
-    async function fetchUser() {
-      try {
-        const res = await fetch('/api/auth/currentUser');
-        if (res.ok) {
-          const data = await res.json();
-          if (data) {
-            setUser({
-              _id: data._id,
-              name: data.name ?? 'User',
-              email: data.email ?? '',
-              image: data.image,
-              planId: data.planId,
-              planExpiresAt: data.planExpiresAt,
-            });
-          } else {
-            setUser(null);
-          }
-        } else {
-          setUser(null);
-        }
-      } catch {
+    if (convexUser !== undefined) {
+      if (convexUser) {
+        setUser({
+          _id: convexUser._id,
+          name: convexUser.name ?? 'User',
+          email: convexUser.email ?? '',
+          image: convexUser.image ?? undefined,
+          planId: convexUser.planId ?? undefined,
+          planExpiresAt: convexUser.planExpiresAt ?? undefined,
+        });
+      } else {
         setUser(null);
-      } finally {
-        setLoading(false);
       }
     }
-
-    fetchUser();
-  }, [setUser, setLoading]);
+  }, [convexUser, setUser]);
 
   const logout = async () => {
-    await fetch('/api/auth/logout', { method: 'POST' });
-    clearStoreUser();
+    try {
+      const siteUrl = process.env.NEXT_PUBLIC_CONVEX_SITE_URL;
+      await fetch(`${siteUrl}/api/auth/signout`, { method: 'POST' });
+    } catch {
+      // Ignore
+    }
+    setUser(null);
   };
 
   return {
     user,
-    isLoading: user === null && useAppStore.getState().isLoading,
+    isLoading: user === null && isLoading,
     logout,
   };
 }

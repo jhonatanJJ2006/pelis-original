@@ -8,13 +8,13 @@
  * @module
  */
 
-import type * as convex_auth from "../convex/auth.js";
-import type * as convex_favorites_index from "../convex/favorites/index.js";
-import type * as convex_history_index from "../convex/history/index.js";
-import type * as convex_movies_index from "../convex/movies/index.js";
-import type * as convex_subscriptions_index from "../convex/subscriptions/index.js";
-import type * as convex_subscriptions_subscribe from "../convex/subscriptions/subscribe.js";
-import type * as convex_users_index from "../convex/users/index.js";
+import type * as auth from "../auth.js";
+import type * as favorites from "../favorites.js";
+import type * as history from "../history.js";
+import type * as http from "../http.js";
+import type * as movies from "../movies.js";
+import type * as subscriptions from "../subscriptions.js";
+import type * as users from "../users.js";
 
 import type {
   ApiFromModules,
@@ -23,13 +23,13 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
-  "convex/auth": typeof convex_auth;
-  "convex/favorites/index": typeof convex_favorites_index;
-  "convex/history/index": typeof convex_history_index;
-  "convex/movies/index": typeof convex_movies_index;
-  "convex/subscriptions/index": typeof convex_subscriptions_index;
-  "convex/subscriptions/subscribe": typeof convex_subscriptions_subscribe;
-  "convex/users/index": typeof convex_users_index;
+  auth: typeof auth;
+  favorites: typeof favorites;
+  history: typeof history;
+  http: typeof http;
+  movies: typeof movies;
+  subscriptions: typeof subscriptions;
+  users: typeof users;
 }>;
 
 /**

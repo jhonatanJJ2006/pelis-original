@@ -1,7 +1,7 @@
 import { v } from 'convex/values';
-import { queryGeneric, mutationGeneric } from 'convex/server';
+import { query, mutation } from './_generated/server';
 
-export const listByUser = queryGeneric({
+export const listByUser = query({
   args: { userId: v.id('user') },
   handler: async (ctx, args) => {
     const favorites = await ctx.db
@@ -17,7 +17,7 @@ export const listByUser = queryGeneric({
   },
 });
 
-export const check = queryGeneric({
+export const check = query({
   args: { userId: v.id('user'), movieId: v.id('movies') },
   handler: async (ctx, args) => {
     const favorite = await ctx.db
@@ -31,7 +31,7 @@ export const check = queryGeneric({
   },
 });
 
-export const add = mutationGeneric({
+export const add = mutation({
   args: { userId: v.id('user'), movieId: v.id('movies') },
   handler: async (ctx, args) => {
     const existing = await ctx.db
@@ -53,7 +53,7 @@ export const add = mutationGeneric({
   },
 });
 
-export const remove = mutationGeneric({
+export const remove = mutation({
   args: { userId: v.id('user'), movieId: v.id('movies') },
   handler: async (ctx, args) => {
     const favorite = await ctx.db

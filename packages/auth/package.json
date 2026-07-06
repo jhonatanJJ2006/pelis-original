@@ -14,7 +14,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@pelis/convex": "workspace:*",
     "@tanstack/react-query": "catalog:",
+    "convex": "^1.42.1",
     "zustand": "^5.0.0"
   },
   "devDependencies": {

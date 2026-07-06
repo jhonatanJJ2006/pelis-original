@@ -1,5 +1,15 @@
 import { HomePageClient } from './(protected)/components/home-page-client';
+import { Header } from './(protected)/components/header';
+import { Footer } from './(protected)/components/footer';
 
 export default function HomePage() {
-  return <HomePageClient />;
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <main className="flex-1">
+        <HomePageClient />
+      </main>
+      <Footer />
+    </div>
+  );
 }

@@ -1,7 +1,7 @@
-import { queryGeneric, mutationGeneric } from 'convex/server';
 import { v } from 'convex/values';
+import { query, mutation } from './_generated/server';
 
-export const list = queryGeneric({
+export const list = query({
   args: {
     genre: v.optional(v.string()),
     year: v.optional(v.string()),
@@ -38,14 +38,14 @@ export const list = queryGeneric({
   },
 });
 
-export const getById = queryGeneric({
+export const getById = query({
   args: { id: v.id('movies') },
   handler: async (ctx, args) => {
     return await ctx.db.get(args.id);
   },
 });
 
-export const getFeatured = queryGeneric({
+export const getFeatured = query({
   args: {},
   handler: async (ctx) => {
     const movies = await ctx.db.query('movies').take(10);
@@ -53,7 +53,7 @@ export const getFeatured = queryGeneric({
   },
 });
 
-export const getGenres = queryGeneric({
+export const getGenres = query({
   args: {},
   handler: async (ctx) => {
     const movies = await ctx.db.query('movies').collect();
@@ -62,7 +62,7 @@ export const getGenres = queryGeneric({
   },
 });
 
-export const getYears = queryGeneric({
+export const getYears = query({
   args: {},
   handler: async (ctx) => {
     const movies = await ctx.db.query('movies').collect();
@@ -71,7 +71,7 @@ export const getYears = queryGeneric({
   },
 });
 
-export const getClassifications = queryGeneric({
+export const getClassifications = query({
   args: {},
   handler: async (ctx) => {
     const movies = await ctx.db.query('movies').collect();
@@ -80,7 +80,7 @@ export const getClassifications = queryGeneric({
   },
 });
 
-export const create = mutationGeneric({
+export const create = mutation({
   args: {
     name: v.string(),
     image: v.string(),
@@ -99,7 +99,7 @@ export const create = mutationGeneric({
   },
 });
 
-export const update = mutationGeneric({
+export const update = mutation({
   args: {
     id: v.id('movies'),
     name: v.string(),
@@ -120,14 +120,14 @@ export const update = mutationGeneric({
   },
 });
 
-export const remove = mutationGeneric({
+export const remove = mutation({
   args: { id: v.id('movies') },
   handler: async (ctx, args) => {
     await ctx.db.delete(args.id);
   },
 });
 
-export const generateUploadUrl = mutationGeneric({
+export const generateUploadUrl = mutation({
   args: {},
   handler: async (ctx) => {
     return await ctx.storage.generateUploadUrl();
