@@ -1,0 +1,26 @@
+{
+  "name": "@pelis/auth",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./hooks": "./src/hooks.ts",
+    "./store": "./src/store.ts",
+    "./providers": "./src/providers.tsx"
+  },
+  "scripts": {
+    "clean": "git clean -xdf .cache .turbo node_modules",
+    "format": "prettier --check . --ignore-path ../../.gitignore",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "catalog:",
+    "zustand": "^5.0.0"
+  },
+  "devDependencies": {
+    "@pelis/eslint-config": "workspace:*",
+    "@pelis/tsconfig": "workspace:*",
+    "eslint": "catalog:",
+    "typescript": "catalog:"
+  }
+}

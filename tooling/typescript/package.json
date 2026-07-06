@@ -1,0 +1,10 @@
+{
+  "name": "@pelis/tsconfig",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    "./base.json": "./base.json",
+    "./internal-package.json": "./internal-package.json"
+  }
+}
