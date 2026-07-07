@@ -1,5 +1,10 @@
 import { v } from 'convex/values';
 import { query, mutation } from './_generated/server';
+import {
+  enrichMovieImage,
+  enrichMovies,
+  resolveImageFromStorage,
+} from './lib/resolveMovieImage';
 
 export const list = query({
   args: {
@@ -41,14 +46,15 @@ export const list = query({
     }
 
     movies.sort((a, b) => a.name.localeCompare(b.name));
-    return movies;
+    return enrichMovies(ctx, movies);
   },
 });
 
 export const getById = query({
   args: { id: v.id('movies') },
   handler: async (ctx, args) => {
-    return await ctx.db.get(args.id);
+    const movie = await ctx.db.get(args.id);
+    return enrichMovieImage(ctx, movie);
   },
 });
 
@@ -57,10 +63,9 @@ export const getFeatured = query({
   handler: async (ctx) => {
     const movies = await ctx.db.query('movies').collect();
     const featured = movies.filter((m) => m.featured);
-    if (featured.length > 0) {
-      return featured.slice(0, 10);
-    }
-    return movies.slice(0, 10);
+    const selected =
+      featured.length > 0 ? featured.slice(0, 10) : movies.slice(0, 10);
+    return enrichMovies(ctx, selected);
   },
 });
 
@@ -68,9 +73,10 @@ export const getTrending = query({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
     const movies = await ctx.db.query('movies').collect();
-    return movies
+    const trending = movies
       .sort((a, b) => b.releaseYear.localeCompare(a.releaseYear))
       .slice(0, args.limit ?? 12);
+    return enrichMovies(ctx, trending);
   },
 });
 
@@ -78,9 +84,10 @@ export const getByGenre = query({
   args: { genre: v.string(), limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
     const movies = await ctx.db.query('movies').collect();
-    return movies
+    const filtered = movies
       .filter((m) => m.genre === args.genre)
       .slice(0, args.limit ?? 12);
+    return enrichMovies(ctx, filtered);
   },
 });
 
@@ -90,11 +97,19 @@ export const listSeries = query({
     const movies = await ctx.db.query('movies').collect();
     const series = movies.filter((m) => m.mediaType === 'series');
     if (series.length > 0) {
-      return series.sort((a, b) => a.name.localeCompare(b.name));
+      return enrichMovies(
+        ctx,
+        series.sort((a, b) => a.name.localeCompare(b.name))
+      );
     }
-    return movies
+    const fallback = movies
       .filter((_, index) => index % 3 === 0)
-      .map((m) => ({ ...m, mediaType: 'series' as const, episodes: m.episodes ?? 8 }));
+      .map((m) => ({
+        ...m,
+        mediaType: 'series' as const,
+        episodes: m.episodes ?? 8,
+      }));
+    return enrichMovies(ctx, fallback);
   },
 });
 
@@ -142,7 +157,8 @@ export const create = mutation({
     featured: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    const id = await ctx.db.insert('movies', args);
+    const image = await resolveImageFromStorage(ctx, args.image, args.imageId);
+    const id = await ctx.db.insert('movies', { ...args, image });
     return id;
   },
 });
@@ -166,7 +182,12 @@ export const update = mutation({
   },
   handler: async (ctx, args) => {
     const { id, ...updates } = args;
-    await ctx.db.patch(id, updates);
+    const image = await resolveImageFromStorage(
+      ctx,
+      updates.image,
+      updates.imageId
+    );
+    await ctx.db.patch(id, { ...updates, image });
     return id;
   },
 });

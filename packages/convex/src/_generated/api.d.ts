@@ -12,6 +12,7 @@ import type * as auth from "../auth.js";
 import type * as favorites from "../favorites.js";
 import type * as history from "../history.js";
 import type * as http from "../http.js";
+import type * as lib_resolveMovieImage from "../lib/resolveMovieImage.js";
 import type * as movies from "../movies.js";
 import type * as subscriptions from "../subscriptions.js";
 import type * as users from "../users.js";
@@ -27,6 +28,7 @@ declare const fullApi: ApiFromModules<{
   favorites: typeof favorites;
   history: typeof history;
   http: typeof http;
+  "lib/resolveMovieImage": typeof lib_resolveMovieImage;
   movies: typeof movies;
   subscriptions: typeof subscriptions;
   users: typeof users;

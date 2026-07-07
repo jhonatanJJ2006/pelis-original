@@ -5,6 +5,7 @@ import { useQuery } from 'convex/react';
 import { Play, Info, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import { useUser } from '@pelis/auth/hooks';
 import { MovieRow } from '@pelis/ui/features/movie-row';
+import { MoviePoster } from '@pelis/ui/features/movie-poster';
 import { ContinueWatchingCard } from '@pelis/ui/features/continue-watching-card';
 import { SectionHeader } from '@pelis/ui/features/section-header';
 import { api } from '@pelis/convex';
@@ -33,10 +34,11 @@ export function HomePageClient() {
     <div className="animate-fade-in pb-12">
       {hero && (
         <section className="relative h-[70vh] min-h-[480px] max-h-[820px] overflow-hidden group cinema-grain">
-          <img
+          <MoviePoster
             src={hero.image}
             alt={hero.name}
             className="w-full h-full object-cover animate-hero-zoom"
+            loading="eager"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-cinema-bg via-cinema-bg/70 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-t from-cinema-bg via-cinema-bg/20 to-transparent" />

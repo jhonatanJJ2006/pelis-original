@@ -1,5 +1,6 @@
 import { v } from 'convex/values';
 import { query, mutation } from './_generated/server';
+import { enrichMovieImage } from './lib/resolveMovieImage';
 
 export const listByUser = query({
   args: { userId: v.id('user') },
@@ -10,7 +11,10 @@ export const listByUser = query({
       .collect();
 
     const movies = await Promise.all(
-      favorites.map((fav) => ctx.db.get(fav.movieId))
+      favorites.map(async (fav) => {
+        const movie = await ctx.db.get(fav.movieId);
+        return enrichMovieImage(ctx, movie);
+      })
     );
 
     return movies.filter(Boolean);

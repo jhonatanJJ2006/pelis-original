@@ -7,6 +7,7 @@ import { useUser } from '@pelis/auth/hooks';
 import { api } from '@pelis/convex';
 import { toast } from 'sonner';
 import { Badge } from '../../shared/ui/badge';
+import { MoviePoster } from '../movie-poster';
 import { cn } from '../../shared/utils';
 import type { MediaItem } from '../../shared/types';
 
@@ -58,11 +59,10 @@ export function MovieCard({ movie, showFavorite = true, variant = 'poster' }: Mo
         )}
       >
         <div className={cn('relative overflow-hidden', variant === 'poster' ? 'aspect-[2/3]' : 'aspect-video')}>
-          <img
+          <MoviePoster
             src={movie.image}
             alt={movie.name}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-            loading="lazy"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent opacity-60 group-hover:opacity-90 transition-opacity duration-300" />
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">

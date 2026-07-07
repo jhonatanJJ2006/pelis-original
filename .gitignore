@@ -34,3 +34,18 @@ coverage/
 
 # Misc
 .DS_Store
+
+# TypeScript
+*.tsbuildinfo
+
+# Next.js / Vercel
+out/
+.vercel
+
+# Cursor (clones temporales al instalar skills)
+.cursor/tmp-skills/
+
+# Media assets locales (copiar desde pelis/public/peliculas/peliculas)
+apps/web/public/peliculas/peliculas/*
+!apps/web/public/peliculas/peliculas/.gitkeep
+apps/web/public/peliculas/placeholder.webp

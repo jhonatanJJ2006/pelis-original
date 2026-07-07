@@ -8,6 +8,7 @@ import { api } from '@pelis/convex';
 import { useUser } from '@pelis/auth/hooks';
 import { Badge, Spinner } from '@pelis/ui/components';
 import { VideoPlayer } from '@pelis/ui/features/video-player';
+import { MoviePoster } from '@pelis/ui/features/movie-poster';
 import { MovieRow } from '@pelis/ui/features/movie-row';
 import { toast } from 'sonner';
 import { cn } from '@pelis/ui/utils';
@@ -76,7 +77,12 @@ export default function MovieDetailPageClient() {
   return (
     <div className="animate-fade-in pb-12">
       <div className="relative h-[420px] md:h-[520px] overflow-hidden cinema-grain">
-        <img src={movie.image} alt={movie.name} className="w-full h-full object-cover" />
+        <MoviePoster
+          src={movie.image}
+          alt={movie.name}
+          className="w-full h-full object-cover"
+          loading="eager"
+        />
         <div className="absolute inset-0 bg-gradient-to-r from-cinema-bg via-cinema-bg/80 to-cinema-bg/40" />
         <div className="absolute inset-0 bg-gradient-to-t from-cinema-bg via-transparent to-transparent" />
 

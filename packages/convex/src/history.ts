@@ -1,5 +1,6 @@
 import { v } from 'convex/values';
 import { query, mutation } from './_generated/server';
+import { enrichMovieImage } from './lib/resolveMovieImage';
 
 export const listByUser = query({
   args: { userId: v.id('user') },
@@ -12,7 +13,7 @@ export const listByUser = query({
     const historyWithMovies = await Promise.all(
       history.map(async (h) => {
         const movie = await ctx.db.get(h.movieId);
-        return { ...h, movie };
+        return { ...h, movie: await enrichMovieImage(ctx, movie) };
       })
     );
 
@@ -118,7 +119,7 @@ export const getContinueWatching = query({
     return Promise.all(
       limited.map(async (h) => {
         const movie = await ctx.db.get(h.movieId);
-        return { ...h, movie };
+        return { ...h, movie: await enrichMovieImage(ctx, movie) };
       })
     );
   },

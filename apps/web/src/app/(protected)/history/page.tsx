@@ -6,6 +6,7 @@ import { History, Play, Trash2 } from 'lucide-react';
 import { api } from '@pelis/convex';
 import { useUser } from '@pelis/auth/hooks';
 import { EmptyState } from '@pelis/ui/features/empty-state';
+import { MoviePoster } from '@pelis/ui/features/movie-poster';
 import { Spinner, Button } from '@pelis/ui/components';
 import { formatDate, formatDuration, getProgressPercentage } from '@pelis/ui/utils';
 import { toast } from 'sonner';
@@ -165,7 +166,7 @@ function HistoryRow({
     <div className="flex items-center gap-4 bg-cinema-surface rounded-2xl border border-cinema-border p-4 hover:border-cinema-accent/30 transition-all group">
       <Link href={`/movies/${item.movieId}${resume ? '?play=true' : ''}`} className="shrink-0">
         {item.movie ? (
-          <img
+          <MoviePoster
             src={item.movie.image}
             alt={item.movie.name}
             className="w-20 h-28 md:w-24 md:h-32 rounded-xl object-cover"

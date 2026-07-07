@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { Play } from 'lucide-react';
+import { MoviePoster } from '../movie-poster';
 import { getProgressPercentage } from '../../shared/utils';
 import type { MediaItem } from '../../shared/types';
 
@@ -24,7 +25,7 @@ export function ContinueWatchingCard({
       className="group relative shrink-0 w-[280px] sm:w-[320px] snap-start"
     >
       <div className="relative aspect-video rounded-xl overflow-hidden border border-cinema-border bg-cinema-surface">
-        <img
+        <MoviePoster
           src={movie.image}
           alt={movie.name}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
