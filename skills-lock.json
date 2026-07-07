@@ -1,0 +1,359 @@
+{
+  "version": 1,
+  "skills": {
+    "audit": {
+      "source": "accesslint/claude-marketplace",
+      "sourceType": "github",
+      "skillPath": "plugins/accesslint/skills/audit/SKILL.md",
+      "computedHash": "ee3ddbe11e6a2a3aef8f1bc86eeddc460b7514bd8d0869e33b59d8e2737406f3"
+    },
+    "brandkit": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/brandkit/SKILL.md",
+      "computedHash": "735007879f5110aeae1e981a53fe74a12afde70347f9773dacd50e4697a091bf"
+    },
+    "clean-architecture": {
+      "source": "nathankim0/clean-architecture-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/clean-architecture/skills/clean-architecture/SKILL.md",
+      "computedHash": "5a9398cfbd8c315aed07f898a83b971ff6e1dcc79bdcbf84b4cd7f66b87fc40f"
+    },
+    "color-palette-generator": {
+      "source": "AlpacaLabsLLC/skills-for-architects",
+      "sourceType": "github",
+      "skillPath": "plugins/07-presentations/skills/color-palette-generator/SKILL.md",
+      "computedHash": "853c93c1e50e09975738c4261789d2c331108fe272d1987bbfcc43b465b5b37f"
+    },
+    "csv-to-sif": {
+      "source": "AlpacaLabsLLC/skills-for-architects",
+      "sourceType": "github",
+      "skillPath": "plugins/06-materials-research/skills/csv-to-sif/SKILL.md",
+      "computedHash": "a6bbce84a26d8c797bb102928a3ff9d0f85406a6fec1f1d325d09384a8edd2db"
+    },
+    "decision": {
+      "source": "AlpacaLabsLLC/skills-for-architects",
+      "sourceType": "github",
+      "skillPath": "plugins/09-project-dossier/skills/decision/SKILL.md",
+      "computedHash": "e29ea3c4ecb08de41558152394f10f7090d30b9ff2184597c514c741bae1727b"
+    },
+    "demographics-analysis": {
+      "source": "AlpacaLabsLLC/skills-for-architects",
+      "sourceType": "github",
+      "skillPath": "plugins/01-site-planning/skills/demographics-analysis/SKILL.md",
+      "computedHash": "89fa39bdcf77fdd467790311a03f1e4409fcb5d61d4da3f8eafecae908e51d8c"
+    },
+    "design-taste-frontend": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/taste-skill/SKILL.md",
+      "computedHash": "899b84384f74f540ea5284d9b2e9234e050998b42eacc805410b518d4226c0b3"
+    },
+    "design-taste-frontend-v1": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/taste-skill-v1/SKILL.md",
+      "computedHash": "0a226c13d69639553cf8a7c40aa5527b026820f8ddaf7a6b263988e32ab44a27"
+    },
+    "diff": {
+      "source": "accesslint/claude-marketplace",
+      "sourceType": "github",
+      "skillPath": "plugins/accesslint/skills/diff/SKILL.md",
+      "computedHash": "b060fe925a40f60e3040e82efeaf1ea76ee6b60544c50fed1d310aa79a97f51a"
+    },
+    "environmental-analysis": {
+      "source": "AlpacaLabsLLC/skills-for-architects",
+      "sourceType": "github",
+      "skillPath": "plugins/01-site-planning/skills/environmental-analysis/SKILL.md",
+      "computedHash": "0138b141114979e6ee2370500eed307071e6e62d23930f52a2df1383afc3ddcf"
+    },
+    "epd-compare": {
+      "source": "AlpacaLabsLLC/skills-for-architects",
+      "sourceType": "github",
+      "skillPath": "plugins/05-sustainability/skills/epd-compare/SKILL.md",
+      "computedHash": "24bdebcbac2a5edfad657cc2557fb60c6b9f73fc11956c350eaab33871b3c596"
+    },
+    "epd-parser": {
+      "source": "AlpacaLabsLLC/skills-for-architects",
+      "sourceType": "github",
+      "skillPath": "plugins/05-sustainability/skills/epd-parser/SKILL.md",
+      "computedHash": "e54561c594cd1304e04288cc041c9dadb8ce7926bb742ae43d533f77630befc1"
+    },
+    "epd-research": {
+      "source": "AlpacaLabsLLC/skills-for-architects",
+      "sourceType": "github",
+      "skillPath": "plugins/05-sustainability/skills/epd-research/SKILL.md",
+      "computedHash": "a46ee5215f237afe3ad37772f8eabe095c9231ad98004fb5f8d076ba5f725d38"
+    },
+    "epd-to-spec": {
+      "source": "AlpacaLabsLLC/skills-for-architects",
+      "sourceType": "github",
+      "skillPath": "plugins/05-sustainability/skills/epd-to-spec/SKILL.md",
+      "computedHash": "53102f5b2c74a5b0e50d561b64dcff31a12d18e9fda76d0c00bb32f9b37ca002"
+    },
+    "frontend-design": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/frontend-design/SKILL.md",
+      "computedHash": "93f53fd1c0352d3d7ec17b8f73d7351bf76f4821e55d123c9d2abc2c53ba48e4"
+    },
+    "full-output-enforcement": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/output-skill/SKILL.md",
+      "computedHash": "524f7c7950c3fde726101613f630140411c7d080e63be718687f4b38f919be81"
+    },
+    "gpt-taste": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/gpt-tasteskill/SKILL.md",
+      "computedHash": "7bd1bfdda0e51016ca222693401a65fc0dd9bf9487e0bd5b1740ba510f6f963a"
+    },
+    "high-end-visual-design": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/soft-skill/SKILL.md",
+      "computedHash": "f730e4132775f13eea19e3dc39afc6bb453cfc0498872b127ad8f0d47cfd802d"
+    },
+    "history": {
+      "source": "AlpacaLabsLLC/skills-for-architects",
+      "sourceType": "github",
+      "skillPath": "plugins/01-site-planning/skills/history/SKILL.md",
+      "computedHash": "8d6d189e4816cb429db5afd803bda80fbd24a257eca9f0259fce848292dd1a67"
+    },
+    "image-to-code": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/image-to-code-skill/SKILL.md",
+      "computedHash": "3d2ac14d956fdafc5500d2108b90895e134d847f9f199e7f1d18bf1f814cf7c8"
+    },
+    "imagegen-frontend-mobile": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/imagegen-frontend-mobile/SKILL.md",
+      "computedHash": "7c1d1dc59cd0df4063b8621af543bf5dea1d576b261507e17b0323c69680b048"
+    },
+    "imagegen-frontend-web": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/imagegen-frontend-web/SKILL.md",
+      "computedHash": "27255c7c50181e58add156b2aa2bd5325285b85f04027e4c8b73742d98d7be0a"
+    },
+    "industrial-brutalist-ui": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/brutalist-skill/SKILL.md",
+      "computedHash": "e66e5a2a8b73cef79ab6546459c665e8b983645689c5f3772f7eed8b9f1e8e0e"
+    },
+    "kent-beck-style": {
+      "source": "nathankim0/clean-architecture-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/kent-beck-style/skills/kent-beck-style/SKILL.md",
+      "computedHash": "6664605b39a4e1f5684734047ab35d65e6af11777e4e8660d15db72958b8378a"
+    },
+    "master-schedule": {
+      "source": "AlpacaLabsLLC/skills-for-architects",
+      "sourceType": "github",
+      "skillPath": "plugins/06-materials-research/skills/master-schedule/SKILL.md",
+      "computedHash": "d6dacccd2ab5ff298a4ef0e345c14556354304322aae5eb3f2ffa6fc5e961341"
+    },
+    "minimalist-ui": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/minimalist-skill/SKILL.md",
+      "computedHash": "7e88897e0371184e97a82b8d9ef080323c13f21eb067b58ef71eb05173a08ac2"
+    },
+    "mobility-analysis": {
+      "source": "AlpacaLabsLLC/skills-for-architects",
+      "sourceType": "github",
+      "skillPath": "plugins/01-site-planning/skills/mobility-analysis/SKILL.md",
+      "computedHash": "b7e0141a2d9059363ef3b654b450a57eb0eb7a53b581724953f506bd611f8bc9"
+    },
+    "nyc-acris": {
+      "source": "AlpacaLabsLLC/skills-for-architects",
+      "sourceType": "github",
+      "skillPath": "plugins/00-due-diligence/skills/nyc-acris/SKILL.md",
+      "computedHash": "07d7880220c3f324a2f334b8a3882c23cfb0ccadd92b386394da809145ba2581"
+    },
+    "nyc-bsa": {
+      "source": "AlpacaLabsLLC/skills-for-architects",
+      "sourceType": "github",
+      "skillPath": "plugins/00-due-diligence/skills/nyc-bsa/SKILL.md",
+      "computedHash": "419c04eaaf8cc5cc4f6e03fe46fe927917d296c418541acf93d6dfb621d8809a"
+    },
+    "nyc-dob-permits": {
+      "source": "AlpacaLabsLLC/skills-for-architects",
+      "sourceType": "github",
+      "skillPath": "plugins/00-due-diligence/skills/nyc-dob-permits/SKILL.md",
+      "computedHash": "f5c09d4c31ceea5c9933e7914ee77ade6512f7db6b999ec44ae15e47709af28e"
+    },
+    "nyc-dob-violations": {
+      "source": "AlpacaLabsLLC/skills-for-architects",
+      "sourceType": "github",
+      "skillPath": "plugins/00-due-diligence/skills/nyc-dob-violations/SKILL.md",
+      "computedHash": "6b6f107f05b3fa12f4c562869ab8872a732dbd1f0ab8a6659ba586152bc018a2"
+    },
+    "nyc-hpd": {
+      "source": "AlpacaLabsLLC/skills-for-architects",
+      "sourceType": "github",
+      "skillPath": "plugins/00-due-diligence/skills/nyc-hpd/SKILL.md",
+      "computedHash": "d11e9789280e5ed6e3a38d71a78fbd4cc55cebc8ebb4a4f9e225accb63d5ea14"
+    },
+    "nyc-landmarks": {
+      "source": "AlpacaLabsLLC/skills-for-architects",
+      "sourceType": "github",
+      "skillPath": "plugins/00-due-diligence/skills/nyc-landmarks/SKILL.md",
+      "computedHash": "fc7ade20a1e1b53d216668437444e34d554daadcf71e4baf435f20a3d86168f6"
+    },
+    "nyc-property-report": {
+      "source": "AlpacaLabsLLC/skills-for-architects",
+      "sourceType": "github",
+      "skillPath": "plugins/00-due-diligence/skills/nyc-property-report/SKILL.md",
+      "computedHash": "d11fe0c0148aaea73f1aed0825b8ce82feb19a56e50ede53e0b697a0697f9ea6"
+    },
+    "occupancy-calculator": {
+      "source": "AlpacaLabsLLC/skills-for-architects",
+      "sourceType": "github",
+      "skillPath": "plugins/03-programming/skills/occupancy-calculator/SKILL.md",
+      "computedHash": "b8a7a13da4bcc41ff98a18127cb4f386f9a6da34f8f137fadf258e1163ecf528"
+    },
+    "product-data-cleanup": {
+      "source": "AlpacaLabsLLC/skills-for-architects",
+      "sourceType": "github",
+      "skillPath": "plugins/06-materials-research/skills/product-data-cleanup/SKILL.md",
+      "computedHash": "082dce3f6b477be590f8b49f79bb9e53a070669a90a26f071542594e4026b152"
+    },
+    "product-data-import": {
+      "source": "AlpacaLabsLLC/skills-for-architects",
+      "sourceType": "github",
+      "skillPath": "plugins/06-materials-research/skills/product-data-import/SKILL.md",
+      "computedHash": "f17bf7925e5089819b879ad2e53c6dc16c1e68a0dab8d06473f269beddecefea"
+    },
+    "product-enrich": {
+      "source": "AlpacaLabsLLC/skills-for-architects",
+      "sourceType": "github",
+      "skillPath": "plugins/06-materials-research/skills/product-enrich/SKILL.md",
+      "computedHash": "4c4843a792035fa4a74a7188ae744a3dba8bead4e110bb5f33e0996962d494fb"
+    },
+    "product-image-processor": {
+      "source": "AlpacaLabsLLC/skills-for-architects",
+      "sourceType": "github",
+      "skillPath": "plugins/06-materials-research/skills/product-image-processor/SKILL.md",
+      "computedHash": "7e61e0c1c7d099ee10ebf89c5b5ef77542651b474f50101a76828b97649d8e31"
+    },
+    "product-match": {
+      "source": "AlpacaLabsLLC/skills-for-architects",
+      "sourceType": "github",
+      "skillPath": "plugins/06-materials-research/skills/product-match/SKILL.md",
+      "computedHash": "59967b70fc78a30d2eb324b114ba0b4bd35a9d2e6e82f6c27d6317b5151f9cf4"
+    },
+    "product-pair": {
+      "source": "AlpacaLabsLLC/skills-for-architects",
+      "sourceType": "github",
+      "skillPath": "plugins/06-materials-research/skills/product-pair/SKILL.md",
+      "computedHash": "0e8a9c03aeaa62eab304b508cf356d8960d25b3ce4a872e9004f76501cd68e5a"
+    },
+    "product-research": {
+      "source": "AlpacaLabsLLC/skills-for-architects",
+      "sourceType": "github",
+      "skillPath": "plugins/06-materials-research/skills/product-research/SKILL.md",
+      "computedHash": "1c4dec95eec7309fed45afeb9b4b092bafba385c11b2ab7fcf8f418d73678278"
+    },
+    "product-spec-bulk-fetch": {
+      "source": "AlpacaLabsLLC/skills-for-architects",
+      "sourceType": "github",
+      "skillPath": "plugins/06-materials-research/skills/product-spec-bulk-fetch/SKILL.md",
+      "computedHash": "06dddc567ba2329e2f8bff93ccdf53b1381836ae2de62576814ef81c10b4cc91"
+    },
+    "product-spec-pdf-parser": {
+      "source": "AlpacaLabsLLC/skills-for-architects",
+      "sourceType": "github",
+      "skillPath": "plugins/06-materials-research/skills/product-spec-pdf-parser/SKILL.md",
+      "computedHash": "235f5e51028400f666ee99adb5f8ac95f38849b7cb7242e1a90b0ee545022f44"
+    },
+    "project-dossier": {
+      "source": "AlpacaLabsLLC/skills-for-architects",
+      "sourceType": "github",
+      "skillPath": "plugins/09-project-dossier/skills/project-dossier/SKILL.md",
+      "computedHash": "471918d4a210dca6da9be215fd725b0df3006b7b798bf57b4304a2870cfe5cf7"
+    },
+    "redesign-existing-projects": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/redesign-skill/SKILL.md",
+      "computedHash": "47eced3e960a2c961d3cbee11fa1216264f589344b586a5cbd03967cd6b9c54b"
+    },
+    "resize-images": {
+      "source": "AlpacaLabsLLC/skills-for-architects",
+      "sourceType": "github",
+      "skillPath": "plugins/07-presentations/skills/resize-images/SKILL.md",
+      "computedHash": "a5b7595453f898e0b4055796016d3946c23681b7889f2aea8e6e5623b6b5ee43"
+    },
+    "scan": {
+      "source": "accesslint/claude-marketplace",
+      "sourceType": "github",
+      "skillPath": "plugins/accesslint/skills/scan/SKILL.md",
+      "computedHash": "d1e4ceac708b208b6054bd9bb7210d043b73a9df59f4cf4384921f7aea2b9c53"
+    },
+    "sif-to-csv": {
+      "source": "AlpacaLabsLLC/skills-for-architects",
+      "sourceType": "github",
+      "skillPath": "plugins/06-materials-research/skills/sif-to-csv/SKILL.md",
+      "computedHash": "9ded1bb2d66206bea69d385298ef99e96301adbcfd852b91514f1ec0067737c2"
+    },
+    "skills-menu": {
+      "source": "AlpacaLabsLLC/skills-for-architects",
+      "sourceType": "github",
+      "skillPath": "plugins/08-dispatcher/skills/skills-menu/SKILL.md",
+      "computedHash": "f66f9228f00a594850203904aaa1a5a88f62a2f9dae9161897b09835802bad8b"
+    },
+    "slide-deck-generator": {
+      "source": "AlpacaLabsLLC/skills-for-architects",
+      "sourceType": "github",
+      "skillPath": "plugins/07-presentations/skills/slide-deck-generator/SKILL.md",
+      "computedHash": "5fa750d6ffc9cdf4ce208278b4a0da9fee1764b2656fa2f3d40e9d8e81c646a2"
+    },
+    "spec-writer": {
+      "source": "AlpacaLabsLLC/skills-for-architects",
+      "sourceType": "github",
+      "skillPath": "plugins/04-specifications/skills/spec-writer/SKILL.md",
+      "computedHash": "fa78e907de0bdfd4119c199a507bd2a1d24838d26aa952ff0dd3fb75f7029d18"
+    },
+    "stitch-design-taste": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/stitch-skill/SKILL.md",
+      "computedHash": "c96b580192b34167efa01f460bbc669ff4315cf97f3cf6ff85ded8029aa720b8"
+    },
+    "studio": {
+      "source": "AlpacaLabsLLC/skills-for-architects",
+      "sourceType": "github",
+      "skillPath": "plugins/08-dispatcher/skills/studio/SKILL.md",
+      "computedHash": "4fda5cf8d6fa2d847ff6c9bdd1c0ed6c9c9529ffc54004027bbe839378cc34bf"
+    },
+    "web-design-guidelines": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/web-design-guidelines/SKILL.md",
+      "computedHash": "f3bc47f890f42a44db1007ab390709ec368e4b8c089baee6b0007182236ac474"
+    },
+    "workplace-programmer": {
+      "source": "AlpacaLabsLLC/skills-for-architects",
+      "sourceType": "github",
+      "skillPath": "plugins/03-programming/skills/workplace-programmer/SKILL.md",
+      "computedHash": "e456bed03eec59f4abcb3ebd6a0b994ca04797e95ffc417eba3773a7e892a5ca"
+    },
+    "zoning-analysis-nyc": {
+      "source": "AlpacaLabsLLC/skills-for-architects",
+      "sourceType": "github",
+      "skillPath": "plugins/02-zoning-analysis/skills/zoning-analysis-nyc/SKILL.md",
+      "computedHash": "093ef9387f4a7135dd650f69525eee28bb1ca50bb88545e0d28cf509d68a6622"
+    },
+    "zoning-envelope": {
+      "source": "AlpacaLabsLLC/skills-for-architects",
+      "sourceType": "github",
+      "skillPath": "plugins/02-zoning-analysis/skills/zoning-envelope/SKILL.md",
+      "computedHash": "d1156d477f0902210300d9fab4c926d9c16a7b31f85deb468c4a85ac3b1cf853"
+    }
+  }
+}
