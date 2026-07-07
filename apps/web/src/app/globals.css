@@ -34,14 +34,14 @@
   }
 
   ::selection {
-    @apply bg-cinema-accent/30 text-white;
+    @apply bg-cinema-accent/40 text-white;
   }
 
   input:-webkit-autofill,
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus {
     -webkit-text-fill-color: white;
-    -webkit-box-shadow: 0 0 0px 1000px #121214 inset;
+    -webkit-box-shadow: 0 0 0px 1000px #141418 inset;
     transition: background-color 5000s ease-in-out 0s;
   }
 }
@@ -52,11 +52,19 @@
   }
 
   .btn-primary {
-    @apply bg-cinema-accent hover:bg-cinema-accent-light text-white font-semibold py-2.5 px-5 rounded-lg transition-all duration-200 active:scale-[0.98] shadow-lg shadow-cinema-accent/20;
+    @apply bg-cinema-accent hover:bg-cinema-accent-light text-white font-semibold py-2.5 px-5 rounded-lg transition-all duration-200 active:scale-[0.98] shadow-lg shadow-cinema-accent/30;
+  }
+
+  .btn-primary-glow {
+    @apply bg-cinema-accent hover:bg-cinema-accent-light text-white font-semibold py-2.5 px-5 rounded-lg transition-all duration-200 active:scale-[0.98] shadow-lg shadow-cinema-accent/40 hover:shadow-cinema-accent/60;
   }
 
   .btn-secondary {
-    @apply bg-cinema-surface hover:bg-cinema-elevated text-white font-medium py-2.5 px-5 rounded-lg border border-cinema-border transition-all duration-200 active:scale-[0.98];
+    @apply bg-white/10 hover:bg-white/20 text-white font-medium py-2.5 px-5 rounded-lg border border-white/20 backdrop-blur-sm transition-all duration-200 active:scale-[0.98];
+  }
+
+  .btn-violet {
+    @apply bg-cinema-violet hover:bg-cinema-violet-light text-white font-semibold py-2.5 px-5 rounded-lg transition-all duration-200 active:scale-[0.98] shadow-lg shadow-cinema-violet/30;
   }
 
   .input-field {
@@ -67,8 +75,16 @@
     @apply bg-cinema-surface rounded-xl border border-cinema-border overflow-hidden transition-all duration-300 hover:border-cinema-accent/30;
   }
 
+  .card-glow {
+    @apply bg-cinema-surface rounded-xl border border-cinema-border overflow-hidden transition-all duration-500 hover:border-cinema-accent/40 hover:shadow-xl hover:shadow-cinema-accent/10 hover:-translate-y-1;
+  }
+
   .glass {
     @apply bg-cinema-bg/80 backdrop-blur-xl border border-white/5;
+  }
+
+  .glass-strong {
+    @apply bg-cinema-bg/90 backdrop-blur-2xl border border-white/10;
   }
 
   .cinema-grain {
@@ -80,12 +96,58 @@
     pointer-events: none;
     position: absolute;
     inset: 0;
-    opacity: 0.04;
+    opacity: 0.035;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
   .page-shell {
     @apply container mx-auto px-4 py-8 md:py-10 animate-fade-in;
+  }
+
+  .hero-gradient-right {
+    background: linear-gradient(90deg, rgba(10,10,15,1) 0%, rgba(10,10,15,0.8) 25%, rgba(10,10,15,0.4) 50%, transparent 75%);
+  }
+
+  .hero-gradient-bottom {
+    background: linear-gradient(0deg, rgba(10,10,15,1) 0%, rgba(10,10,15,0.7) 30%, rgba(10,10,15,0.2) 60%, transparent 100%);
+  }
+
+  .hero-gradient-accent {
+    background: linear-gradient(135deg, rgba(229,9,20,0.15) 0%, transparent 50%, rgba(139,92,246,0.08) 100%);
+  }
+
+  .text-gradient-accent {
+    @apply bg-gradient-to-r from-cinema-accent via-cinema-accent-light to-cinema-violet bg-clip-text text-transparent;
+  }
+
+  .text-gradient-violet {
+    @apply bg-gradient-to-r from-cinema-violet to-cinema-teal bg-clip-text text-transparent;
+  }
+}
+
+/*
+ * Keyframes declared outside @layer so they always ship in the bundle,
+ * regardless of whether a matching Tailwind `animate-*` utility class
+ * is scanned in content (avoids "invisible" elements stuck at opacity: 0
+ * when only referenced via inline `style={{ animation: '...' }}`).
+ */
+@keyframes slideUpFade {
+  0% {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes heroKenBurns {
+  0% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
   }
 }
 
@@ -105,6 +167,34 @@
 
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+
+  .animation-delay-100 {
+    animation-delay: 100ms;
+  }
+
+  .animation-delay-200 {
+    animation-delay: 200ms;
+  }
+
+  .animation-delay-300 {
+    animation-delay: 300ms;
+  }
+
+  .animation-delay-400 {
+    animation-delay: 400ms;
+  }
+
+  .animation-delay-500 {
+    animation-delay: 500ms;
+  }
+
+  .animation-delay-600 {
+    animation-delay: 600ms;
+  }
+
+  .animation-delay-700 {
+    animation-delay: 700ms;
   }
 }
 

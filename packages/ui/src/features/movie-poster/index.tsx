@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 import { cn } from '../../shared/utils';
 
 const PLACEHOLDER = '/peliculas/placeholder.webp';
@@ -18,6 +18,7 @@ interface MoviePosterProps {
   alt: string;
   className?: string;
   loading?: 'lazy' | 'eager';
+  style?: CSSProperties;
 }
 
 export function MoviePoster({
@@ -25,6 +26,7 @@ export function MoviePoster({
   alt,
   className,
   loading = 'lazy',
+  style,
 }: MoviePosterProps) {
   const [stage, setStage] = useState(0);
   const currentSrc = getFallbackSrc(src, stage);
@@ -35,6 +37,7 @@ export function MoviePoster({
       alt={alt}
       className={cn(className)}
       loading={loading}
+      style={style}
       onError={() => {
         if (stage < 2) setStage((prev) => prev + 1);
       }}

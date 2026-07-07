@@ -64,14 +64,14 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 glass border-b border-white/5">
+    <header className="sticky top-0 z-50 glass-strong border-b border-white/5">
       <nav className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
-            <div className="w-9 h-9 rounded-lg bg-cinema-accent flex items-center justify-center shadow-lg shadow-cinema-accent/20 group-hover:scale-105 transition-transform">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-cinema-accent to-cinema-accent-light flex items-center justify-center shadow-lg shadow-cinema-accent/30 group-hover:scale-110 transition-transform duration-300">
               <Film className="w-5 h-5 text-white" />
             </div>
-            <span className="font-display text-2xl tracking-widest text-white uppercase">
+            <span className="font-display text-2xl tracking-widest bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent uppercase">
               Pelis
             </span>
           </Link>
@@ -84,7 +84,7 @@ export function Header() {
                 placeholder="Buscar películas y series..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-cinema-surface/80 border border-cinema-border rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-cinema-accent/40 transition-all"
+                className="w-full bg-cinema-surface/80 border border-cinema-border rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-cinema-accent/50 focus:border-cinema-accent/40 transition-all"
               />
             </form>
           </div>
@@ -95,10 +95,10 @@ export function Header() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all',
+                  'flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200',
                   isActive(item.href, item.exact)
-                    ? 'bg-cinema-accent/15 text-cinema-gold'
-                    : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                    ? 'bg-cinema-accent/15 text-cinema-accent-light shadow-sm'
+                    : 'text-zinc-400 hover:text-white hover:bg-white/10'
                 )}
               >
                 <item.icon className="w-4 h-4" />
@@ -110,7 +110,7 @@ export function Header() {
           <div className="hidden md:flex items-center gap-3">
             {!hasActivePlan && user && (
               <Link href="/subscribe">
-                <button className="flex items-center gap-1.5 px-3 py-2 bg-cinema-gold hover:bg-cinema-gold-light text-black rounded-lg text-sm font-bold transition-all hover:scale-105">
+                <button className="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-cinema-gold to-cinema-gold-light text-black rounded-lg text-sm font-bold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-cinema-gold/20">
                   <Crown className="w-4 h-4" />
                   <span className="hidden lg:inline">Premium</span>
                 </button>
@@ -124,10 +124,10 @@ export function Header() {
                     <img
                       src={user.image}
                       alt={user.name}
-                      className="w-8 h-8 rounded-full ring-2 ring-cinema-accent/30"
+                      className="w-8 h-8 rounded-full ring-2 ring-cinema-accent/40 shadow-lg shadow-cinema-accent/10"
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-cinema-accent flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cinema-accent to-cinema-violet flex items-center justify-center shadow-lg shadow-cinema-accent/20">
                       <User className="w-4 h-4 text-white" />
                     </div>
                   )}
@@ -138,7 +138,7 @@ export function Header() {
                 <button
                   type="button"
                   onClick={logout}
-                  className="p-2 text-zinc-500 hover:text-red-400 transition-colors rounded-lg hover:bg-white/5"
+                  className="p-2 text-zinc-500 hover:text-cinema-accent transition-colors rounded-lg hover:bg-white/5"
                   title="Cerrar sesión"
                 >
                   <LogOut className="w-4 h-4" />
