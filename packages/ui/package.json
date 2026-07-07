@@ -7,6 +7,7 @@
   "exports": {
     "./components": "./src/shared/ui/index.tsx",
     "./utils": "./src/shared/utils.ts",
+    "./types": "./src/shared/types.ts",
     "./features/*": "./src/features/*/index.tsx",
     "./pages/*": "./src/pages/*/index.ts"
   },

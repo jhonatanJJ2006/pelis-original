@@ -17,13 +17,13 @@ export default function LoginPage() {
 
   return (
     <div className="w-full max-w-md">
-      <div className="bg-dark-200 rounded-2xl border border-slate-800 p-8 shadow-xl">
+      <div className="bg-cinema-surface rounded-2xl border border-cinema-border p-8 shadow-2xl shadow-black/40">
         <div className="text-center mb-8">
-          <div className="w-14 h-14 bg-gradient-to-br from-primary-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <div className="w-14 h-14 bg-cinema-accent rounded-xl flex items-center justify-center mx-auto mb-4">
             <Film className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold">Iniciar sesi&oacute;n</h1>
-          <p className="text-slate-400 mt-2">Accede a tu cuenta para continuar</p>
+          <h1 className="font-display text-3xl tracking-wide text-white uppercase">Iniciar sesión</h1>
+          <p className="text-zinc-400 mt-2">Accede a tu cuenta para continuar</p>
         </div>
 
         <button
@@ -70,7 +70,7 @@ export default function LoginPage() {
 
         <p className="text-center text-slate-400 text-sm mt-6">
           &iquest;No tienes cuenta?{' '}
-          <Link href="/auth/register" className="text-primary-400 hover:text-primary-300 font-medium">
+          <Link href="/register" className="text-cinema-gold hover:text-cinema-gold-light font-medium">
             Reg&iacute;strate
           </Link>
         </p>

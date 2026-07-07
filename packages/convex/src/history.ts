@@ -87,3 +87,39 @@ export const remove = mutation({
     return true;
   },
 });
+
+export const clearAll = mutation({
+  args: { userId: v.id('user') },
+  handler: async (ctx, args) => {
+    const history = await ctx.db
+      .query('history')
+      .withIndex('by_user', (q) => q.eq('userId', args.userId))
+      .collect();
+
+    await Promise.all(history.map((item) => ctx.db.delete(item._id)));
+    return true;
+  },
+});
+
+export const getContinueWatching = query({
+  args: { userId: v.id('user'), limit: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    const history = await ctx.db
+      .query('history')
+      .withIndex('by_user', (q) => q.eq('userId', args.userId))
+      .collect();
+
+    const inProgress = history
+      .filter((h) => h.duration > 0 && h.progress > 0 && h.progress < h.duration * 0.95)
+      .sort((a, b) => b.lastWatched - a.lastWatched);
+
+    const limited = inProgress.slice(0, args.limit ?? 10);
+
+    return Promise.all(
+      limited.map(async (h) => {
+        const movie = await ctx.db.get(h.movieId);
+        return { ...h, movie };
+      })
+    );
+  },
+});

@@ -101,11 +101,15 @@ export default defineSchema({
     classification: v.string(),
     releaseYear: v.string(),
     videoUrl: v.optional(v.string()),
+    mediaType: v.optional(v.union(v.literal('movie'), v.literal('series'))),
+    episodes: v.optional(v.number()),
+    featured: v.optional(v.boolean()),
   })
     .index('by_genre', ['genre'])
     .index('by_name', ['name'])
     .index('by_releaseYear', ['releaseYear'])
-    .index('by_classification', ['classification']),
+    .index('by_classification', ['classification'])
+    .index('by_mediaType', ['mediaType']),
 
   plans: defineTable({
     name: v.string(),

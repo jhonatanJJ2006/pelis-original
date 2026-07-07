@@ -4,12 +4,12 @@
 
 @layer base {
   * {
-    @apply border-slate-800;
+    @apply border-cinema-border;
   }
 
   body {
-    @apply bg-dark-400 text-white antialiased;
-    font-family: 'Inter', system-ui, sans-serif;
+    @apply bg-cinema-bg text-zinc-100 antialiased;
+    font-family: var(--font-body), system-ui, sans-serif;
   }
 
   html {
@@ -17,58 +17,75 @@
   }
 
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-dark-300;
+    @apply bg-cinema-bg;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-slate-600 rounded-full;
+    @apply bg-zinc-700 rounded-full;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-slate-500;
+    @apply bg-zinc-600;
   }
 
   ::selection {
-    @apply bg-primary-500/30 text-white;
+    @apply bg-cinema-accent/30 text-white;
   }
 
   input:-webkit-autofill,
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus {
     -webkit-text-fill-color: white;
-    -webkit-box-shadow: 0 0 0px 1000px #15181f inset;
+    -webkit-box-shadow: 0 0 0px 1000px #121214 inset;
     transition: background-color 5000s ease-in-out 0s;
   }
 }
 
 @layer components {
+  .font-display {
+    font-family: var(--font-display), system-ui, sans-serif;
+  }
+
   .btn-primary {
-    @apply bg-primary-600 hover:bg-primary-500 text-white font-medium py-2.5 px-4 rounded-lg transition-all duration-200 active:scale-95 shadow-lg shadow-primary-500/20;
+    @apply bg-cinema-accent hover:bg-cinema-accent-light text-white font-semibold py-2.5 px-5 rounded-lg transition-all duration-200 active:scale-[0.98] shadow-lg shadow-cinema-accent/20;
   }
 
   .btn-secondary {
-    @apply bg-dark-100 hover:bg-dark-200 text-white font-medium py-2.5 px-4 rounded-lg border border-slate-700 transition-all duration-200 active:scale-95;
+    @apply bg-cinema-surface hover:bg-cinema-elevated text-white font-medium py-2.5 px-5 rounded-lg border border-cinema-border transition-all duration-200 active:scale-[0.98];
   }
 
   .input-field {
-    @apply w-full bg-dark-300 border border-slate-700 rounded-lg py-2.5 px-4 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200;
+    @apply w-full bg-cinema-surface border border-cinema-border rounded-xl py-3 px-4 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-cinema-accent/50 focus:border-transparent transition-all duration-200;
   }
 
   .card {
-    @apply bg-dark-200 rounded-xl border border-slate-800 overflow-hidden transition-all duration-300 hover:border-primary-500/50 hover:shadow-lg hover:shadow-primary-500/10;
-  }
-
-  .gradient-overlay {
-    @apply absolute inset-0 bg-gradient-to-t from-dark-400 via-transparent to-transparent;
+    @apply bg-cinema-surface rounded-xl border border-cinema-border overflow-hidden transition-all duration-300 hover:border-cinema-accent/30;
   }
 
   .glass {
-    @apply bg-dark-200/80 backdrop-blur-md border border-slate-800/50;
+    @apply bg-cinema-bg/80 backdrop-blur-xl border border-white/5;
+  }
+
+  .cinema-grain {
+    position: relative;
+  }
+
+  .cinema-grain::after {
+    content: '';
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .page-shell {
+    @apply container mx-auto px-4 py-8 md:py-10 animate-fade-in;
   }
 }
 
@@ -77,7 +94,30 @@
     text-wrap: balance;
   }
 
-  .text-gradient {
-    @apply bg-gradient-to-r from-primary-400 to-purple-500 bg-clip-text text-transparent;
+  .text-gradient-gold {
+    @apply bg-gradient-to-r from-cinema-gold via-amber-200 to-cinema-gold bg-clip-text text-transparent;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

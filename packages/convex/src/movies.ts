@@ -7,9 +7,16 @@ export const list = query({
     year: v.optional(v.string()),
     classification: v.optional(v.string()),
     search: v.optional(v.string()),
+    mediaType: v.optional(v.union(v.literal('movie'), v.literal('series'))),
   },
   handler: async (ctx, args) => {
     let movies = await ctx.db.query('movies').collect();
+
+    if (args.mediaType) {
+      movies = movies.filter(
+        (m) => (m.mediaType ?? 'movie') === args.mediaType
+      );
+    }
 
     if (args.genre) {
       movies = movies.filter((m) => m.genre === args.genre);
@@ -48,8 +55,46 @@ export const getById = query({
 export const getFeatured = query({
   args: {},
   handler: async (ctx) => {
-    const movies = await ctx.db.query('movies').take(10);
-    return movies;
+    const movies = await ctx.db.query('movies').collect();
+    const featured = movies.filter((m) => m.featured);
+    if (featured.length > 0) {
+      return featured.slice(0, 10);
+    }
+    return movies.slice(0, 10);
+  },
+});
+
+export const getTrending = query({
+  args: { limit: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    const movies = await ctx.db.query('movies').collect();
+    return movies
+      .sort((a, b) => b.releaseYear.localeCompare(a.releaseYear))
+      .slice(0, args.limit ?? 12);
+  },
+});
+
+export const getByGenre = query({
+  args: { genre: v.string(), limit: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    const movies = await ctx.db.query('movies').collect();
+    return movies
+      .filter((m) => m.genre === args.genre)
+      .slice(0, args.limit ?? 12);
+  },
+});
+
+export const listSeries = query({
+  args: {},
+  handler: async (ctx) => {
+    const movies = await ctx.db.query('movies').collect();
+    const series = movies.filter((m) => m.mediaType === 'series');
+    if (series.length > 0) {
+      return series.sort((a, b) => a.name.localeCompare(b.name));
+    }
+    return movies
+      .filter((_, index) => index % 3 === 0)
+      .map((m) => ({ ...m, mediaType: 'series' as const, episodes: m.episodes ?? 8 }));
   },
 });
 
@@ -92,6 +137,9 @@ export const create = mutation({
     classification: v.string(),
     releaseYear: v.string(),
     videoUrl: v.optional(v.string()),
+    mediaType: v.optional(v.union(v.literal('movie'), v.literal('series'))),
+    episodes: v.optional(v.number()),
+    featured: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const id = await ctx.db.insert('movies', args);
@@ -112,6 +160,9 @@ export const update = mutation({
     classification: v.string(),
     releaseYear: v.string(),
     videoUrl: v.optional(v.string()),
+    mediaType: v.optional(v.union(v.literal('movie'), v.literal('series'))),
+    episodes: v.optional(v.number()),
+    featured: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const { id, ...updates } = args;
