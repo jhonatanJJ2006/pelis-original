@@ -1,12 +1,12 @@
 'use client';
 
 import { useQuery } from 'convex/react';
-import { useAppStore } from './store';
+import { useAppStore, type User } from './store';
 import { api } from '@pelis/convex';
 import { useEffect } from 'react';
 
 interface UseUserReturn {
-  user: ReturnType<typeof useAppStore>['user'];
+  user: User | null;
   isLoading: boolean;
   logout: () => void;
 }

@@ -27,6 +27,7 @@ export default function LoginPage() {
         </div>
 
         <button
+          type="button"
           onClick={handleGoogleLogin}
           className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white hover:bg-gray-100 text-gray-800 rounded-xl font-medium transition-colors mb-6"
         >
@@ -41,10 +42,10 @@ export default function LoginPage() {
 
         <div className="relative mb-6">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-slate-700" />
+            <div className="w-full border-t border-cinema-border" />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="bg-dark-200 px-3 text-slate-500">o con email</span>
+            <span className="bg-cinema-surface px-3 text-zinc-500">o con email</span>
           </div>
         </div>
 
@@ -68,7 +69,7 @@ export default function LoginPage() {
           </Button>
         </form>
 
-        <p className="text-center text-slate-400 text-sm mt-6">
+        <p className="text-center text-zinc-400 text-sm mt-6">
           &iquest;No tienes cuenta?{' '}
           <Link href="/register" className="text-cinema-gold hover:text-cinema-gold-light font-medium">
             Reg&iacute;strate

@@ -15,10 +15,10 @@ export function Badge({
       className={cn(
         'inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full',
         {
-          'bg-slate-700 text-slate-300': variant === 'default',
-          'bg-primary-600/20 text-primary-400': variant === 'primary',
-          'bg-green-600/20 text-green-400': variant === 'success',
-          'bg-yellow-600/20 text-yellow-400': variant === 'warning',
+          'bg-cinema-elevated text-zinc-300 border border-cinema-border': variant === 'default',
+          'bg-cinema-accent/20 text-cinema-accent-light': variant === 'primary',
+          'bg-emerald-500/20 text-emerald-400': variant === 'success',
+          'bg-cinema-gold/20 text-cinema-gold': variant === 'warning',
           'bg-red-600/20 text-red-400': variant === 'danger',
         },
         className

@@ -19,18 +19,19 @@ export default function RegisterPage() {
 
   return (
     <div className="w-full max-w-md">
-      <div className="bg-dark-200 rounded-2xl border border-slate-800 p-8 shadow-xl">
+      <div className="bg-cinema-surface rounded-2xl border border-cinema-border p-8 shadow-2xl shadow-black/40">
         <div className="text-center mb-8">
-          <div className="w-14 h-14 bg-gradient-to-br from-primary-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <div className="w-14 h-14 bg-cinema-accent rounded-xl flex items-center justify-center mx-auto mb-4">
             <Film className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold">Crear cuenta</h1>
-          <p className="text-slate-400 mt-2">&Uacute;nete a Pelis y disfruta del streaming</p>
+          <h1 className="font-display text-3xl tracking-wide text-white uppercase">Crear cuenta</h1>
+          <p className="text-zinc-400 mt-2">Únete a Pelis y disfruta del streaming</p>
         </div>
 
         <button
+          type="button"
           onClick={handleGoogleLogin}
-          className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white hover:bg-gray-100 text-gray-800 rounded-xl font-medium transition-colors mb-6"
+          className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white hover:bg-zinc-100 text-zinc-800 rounded-xl font-medium transition-colors mb-6"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
@@ -43,10 +44,10 @@ export default function RegisterPage() {
 
         <div className="relative mb-6">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-slate-700" />
+            <div className="w-full border-t border-cinema-border" />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="bg-dark-200 px-3 text-slate-500">o con email</span>
+            <span className="bg-cinema-surface px-3 text-zinc-500">o con email</span>
           </div>
         </div>
 
@@ -66,16 +67,16 @@ export default function RegisterPage() {
             onChange={(e) => setEmail(e.target.value)}
           />
           <Input
-            label="Contrase&ntilde;a"
+            label="Contraseña"
             type="password"
-            placeholder="M&iacute;nimo 6 caracteres"
+            placeholder="Mínimo 6 caracteres"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
           <Input
-            label="Confirmar contrase&ntilde;a"
+            label="Confirmar contraseña"
             type="password"
-            placeholder="Repite tu contrase&ntilde;a"
+            placeholder="Repite tu contraseña"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
@@ -84,10 +85,10 @@ export default function RegisterPage() {
           </Button>
         </form>
 
-        <p className="text-center text-slate-400 text-sm mt-6">
-          &iquest;Ya tienes cuenta?{' '}
-          <Link href="/auth/login" className="text-primary-400 hover:text-primary-300 font-medium">
-            Inicia sesi&oacute;n
+        <p className="text-center text-zinc-400 text-sm mt-6">
+          ¿Ya tienes cuenta?{' '}
+          <Link href="/login" className="text-cinema-gold hover:text-cinema-gold-light font-medium">
+            Inicia sesión
           </Link>
         </p>
       </div>

@@ -10,7 +10,7 @@ export function Spinner({ className, size = 'md' }: SpinnerProps) {
   return (
     <Loader2
       className={cn(
-        'animate-spin text-primary-500',
+        'animate-spin text-cinema-accent',
         {
           'w-4 h-4': size === 'sm',
           'w-6 h-6': size === 'md',
@@ -24,10 +24,10 @@ export function Spinner({ className, size = 'md' }: SpinnerProps) {
 
 export function FullScreenSpinner() {
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-dark-400 z-50">
+    <div className="fixed inset-0 flex items-center justify-center bg-cinema-bg z-50">
       <div className="flex flex-col items-center gap-4">
         <Spinner size="lg" />
-        <p className="text-slate-400">Cargando...</p>
+        <p className="text-zinc-400">Cargando...</p>
       </div>
     </div>
   );

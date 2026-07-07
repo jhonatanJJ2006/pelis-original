@@ -1,4 +1,4 @@
-import type { Config } from '@pelis/tailwind-config/web';
+import type { Config } from 'tailwindcss';
 
 const config: Config = {
   darkMode: 'class',
