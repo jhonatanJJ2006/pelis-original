@@ -13,7 +13,6 @@ const nextConfig = {
     'better-auth',
     '@convex-dev/better-auth',
   ],
-  serverExternalPackages: ['pg'],
   webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,

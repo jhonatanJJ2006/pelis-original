@@ -3,11 +3,10 @@ const net = require("net");
 const fs = require("fs");
 const path = require("path");
 
-function loadRootEnv() {
-  const envPath = path.join(__dirname, "../../.env");
-  if (!fs.existsSync(envPath)) return;
+function loadEnvFile(filePath) {
+  if (!fs.existsSync(filePath)) return;
 
-  const content = fs.readFileSync(envPath, "utf8");
+  const content = fs.readFileSync(filePath, "utf8");
   for (const line of content.split("\n")) {
     const trimmed = line.trim();
     if (!trimmed || trimmed.startsWith("#")) continue;
@@ -19,14 +18,23 @@ function loadRootEnv() {
   }
 }
 
-loadRootEnv();
+const rootDir = path.join(__dirname, "../../..");
+loadEnvFile(path.join(rootDir, ".env"));
+loadEnvFile(path.join(rootDir, "packages/convex/.env.local"));
 
 const basePort = parseInt(process.env.PORT || "3000", 10);
-const convexUrl =
-  process.env.NEXT_PUBLIC_CONVEX_URL || "https://neat-rook-914.convex.cloud";
+const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
 const convexSiteUrl =
   process.env.NEXT_PUBLIC_CONVEX_SITE_URL ||
-  convexUrl.replace(".convex.cloud", ".convex.site");
+  process.env.CONVEX_SITE_URL ||
+  (convexUrl ? convexUrl.replace(".convex.cloud", ".convex.site") : "");
+
+if (!convexUrl || !convexSiteUrl) {
+  console.error(
+    "Missing NEXT_PUBLIC_CONVEX_URL / NEXT_PUBLIC_CONVEX_SITE_URL in .env"
+  );
+  process.exit(1);
+}
 
 function isPortFree(port) {
   return new Promise((resolve) => {
@@ -53,20 +61,19 @@ async function findFreePort(startPort) {
 async function start() {
   const port = await findFreePort(basePort);
   console.log(`Starting dev server on port ${port}`);
+  console.log(`Convex URL: ${convexUrl}`);
 
-  const dev = spawn(
-    "npx",
-    ["next", "dev", "-p", String(port)],
-    {
-      stdio: "inherit",
-      shell: true,
-      env: {
-        ...process.env,
-        NEXT_PUBLIC_CONVEX_URL: convexUrl,
-        NEXT_PUBLIC_CONVEX_SITE_URL: convexSiteUrl,
-      },
-    }
-  );
+  const dev = spawn("npx", ["next", "dev", "-p", String(port)], {
+    stdio: "inherit",
+    shell: true,
+    env: {
+      ...process.env,
+      NEXT_PUBLIC_CONVEX_URL: convexUrl,
+      NEXT_PUBLIC_CONVEX_SITE_URL: convexSiteUrl,
+      CONVEX_SITE_URL: convexSiteUrl,
+      SITE_URL: process.env.SITE_URL || `http://localhost:${port}`,
+    },
+  });
 
   dev.on("close", (code) => {
     process.exit(code);

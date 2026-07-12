@@ -28,8 +28,8 @@ export default function RegisterPage() {
       setError('Las contraseñas no coinciden');
       return;
     }
-    if (password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres');
+    if (password.length < 8) {
+      setError('La contraseña debe tener al menos 8 caracteres');
       return;
     }
 
@@ -115,7 +115,7 @@ export default function RegisterPage() {
           <Input
             label="Contraseña"
             type="password"
-            placeholder="Mínimo 6 caracteres"
+            placeholder="Mínimo 8 caracteres"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
