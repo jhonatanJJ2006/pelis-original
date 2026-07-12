@@ -48,6 +48,23 @@ export default defineSchema({
     .index('by_user', ['userId'])
     .index('by_plan', ['planId']),
 
+  series: defineTable({
+    name: v.string(),
+    image: v.string(),
+    synopsis: v.string(),
+    genre: v.string(),
+    token: v.string(),
+    actors: v.string(),
+    classification: v.string(),
+    releaseYear: v.string(),
+    episodes: v.optional(v.number()),
+    season: v.optional(v.number()),
+    featured: v.optional(v.boolean()),
+  })
+    .index('by_genre', ['genre'])
+    .index('by_name', ['name'])
+    .index('by_classification', ['classification']),
+
   favorites: defineTable({
     userId: v.string(),
     movieId: v.id('movies'),

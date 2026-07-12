@@ -50,12 +50,15 @@ export function GenreChip({ href, label, gradient }: GenreChipProps) {
   return (
     <Link
       href={href}
-      className="group relative overflow-hidden px-5 py-3 bg-cinema-surface border border-cinema-border hover:border-cinema-violet/50 rounded-full text-sm text-cinema-muted hover:text-white whitespace-nowrap motion-safe:transition-[transform,border-color,color] motion-safe:duration-fast active:scale-95 [@media(hover:hover)_and_(pointer:fine)]:hover:scale-105"
+      className="group inline-block motion-safe:transition-transform motion-safe:duration-fast active:scale-95 [@media(hover:hover)_and_(pointer:fine)]:hover:scale-105"
     >
-      <span
-        className={`absolute inset-0 bg-gradient-to-r opacity-0 group-hover:opacity-100 motion-safe:transition-opacity motion-safe:duration-fast ${grad}`}
-      />
-      <span className="relative z-10">{label}</span>
+      <span className="relative block overflow-hidden rounded-full px-5 py-3 bg-cinema-surface border border-cinema-border/60 group-hover:border-cinema-gold/40 text-sm text-cinema-muted group-hover:text-white whitespace-nowrap motion-safe:transition-[color,border-color,box-shadow] motion-safe:duration-fast group-hover:shadow-[0_0_20px_-4px_rgba(245,200,66,0.2)]">
+        <span
+          aria-hidden
+          className={`pointer-events-none absolute inset-0 rounded-full bg-gradient-to-r opacity-0 group-hover:opacity-100 motion-safe:transition-opacity motion-safe:duration-fast ${grad}`}
+        />
+        <span className="relative z-10">{label}</span>
+      </span>
     </Link>
   );
 }

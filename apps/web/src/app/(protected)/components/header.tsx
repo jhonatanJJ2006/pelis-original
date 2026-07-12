@@ -16,6 +16,7 @@ import {
   Tv,
 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
+import { toast } from 'sonner';
 import { useUser } from '@pelis/auth/hooks';
 import { Button } from '@pelis/ui/components';
 import { cn } from '@pelis/ui/utils';
@@ -42,6 +43,12 @@ export function Header({ sticky = true }: HeaderProps) {
   const searchRef = useRef<HTMLInputElement>(null);
 
   const hasActivePlan = user?.planExpiresAt && user.planExpiresAt > Date.now();
+
+  const handleLogout = () => {
+    logout();
+    toast.success('Sesión cerrada correctamente');
+    router.push('/login');
+  };
 
   useEffect(() => {
     if (searchOpen && searchRef.current) {
@@ -156,7 +163,7 @@ export function Header({ sticky = true }: HeaderProps) {
                 </div>
                 <button
                   type="button"
-                  onClick={logout}
+                  onClick={handleLogout}
                   className="p-2 text-cinema-silver hover:text-cinema-accent transition-colors rounded hover:bg-cinema-elevated/50"
                   aria-label="Cerrar sesión"
                 >
@@ -256,7 +263,7 @@ export function Header({ sticky = true }: HeaderProps) {
                     <button
                       type="button"
                       onClick={() => {
-                        logout();
+                        handleLogout();
                         setMobileMenuOpen(false);
                       }}
                       className="flex items-center gap-3 px-4 py-3 text-cinema-silver hover:text-red-400 w-full text-left rounded-lg hover:bg-cinema-elevated/50"

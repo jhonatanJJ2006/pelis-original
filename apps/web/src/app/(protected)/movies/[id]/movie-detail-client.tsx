@@ -3,7 +3,7 @@
 import { useQuery, useMutation } from 'convex/react';
 import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Calendar, Heart, Play, Tag, User } from 'lucide-react';
+import { ArrowLeft, Calendar, Crown, Heart, Play, Tag, User } from 'lucide-react';
 import { api } from '@pelis/convex';
 import { useUser } from '@pelis/auth/hooks';
 import { Badge, Spinner } from '@pelis/ui/components';
@@ -75,6 +75,7 @@ export default function MovieDetailPageClient() {
 
   const isSeries = movie.mediaType === 'series';
   const relatedFiltered = (related ?? []).filter((m) => m._id !== movie._id);
+  const hasActivePlan = !!(user?.planExpiresAt && user.planExpiresAt > Date.now());
 
   return (
     <div className="pb-12">
@@ -129,10 +130,22 @@ export default function MovieDetailPageClient() {
             </div>
 
             <div className="flex flex-wrap gap-3">
-              <a href="#player" className="btn-primary-glow inline-flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  if (!hasActivePlan) {
+                    toast.error('Necesitas un plan para reproducir', {
+                      action: { label: 'Ver planes', onClick: () => window.location.href = '/subscribe' },
+                    });
+                  } else {
+                    document.getElementById('player')?.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+                className="btn-primary-glow inline-flex items-center gap-2"
+              >
                 <Play className="w-5 h-5" fill="currentColor" aria-hidden />
                 Reproducir
-              </a>
+              </button>
               <button
                 type="button"
                 onClick={handleFavorite}
@@ -155,7 +168,28 @@ export default function MovieDetailPageClient() {
           <h2 className="font-display text-2xl tracking-wide text-white uppercase mb-6">
             Reproductor
           </h2>
-          {user ? (
+          {!user ? (
+            <div className="aspect-video rounded-2xl card-feature border border-cinema-violet/20 flex flex-col items-center justify-center gap-4 p-8">
+              <Play className="w-12 h-12 text-cinema-muted/40" aria-hidden />
+              <p className="text-cinema-muted text-center max-w-md">
+                Inicia sesión para reproducir y guardar tu progreso
+              </p>
+              <Link href="/login" className="btn-primary">
+                Iniciar sesión
+              </Link>
+            </div>
+          ) : !hasActivePlan ? (
+            <div className="aspect-video rounded-2xl card-feature border border-cinema-gold/20 flex flex-col items-center justify-center gap-4 p-8">
+              <Crown className="w-12 h-12 text-cinema-gold/40" aria-hidden />
+              <p className="text-cinema-muted text-center max-w-md">
+                Necesitas un plan activo para reproducir este contenido
+              </p>
+              <Link href="/subscribe" className="btn-primary-glow inline-flex items-center gap-2">
+                <Crown className="w-4 h-4" aria-hidden />
+                Ver planes
+              </Link>
+            </div>
+          ) : (
             <VideoPlayer
               videoUrl={movie.videoUrl}
               poster={movie.image}
@@ -164,15 +198,6 @@ export default function MovieDetailPageClient() {
               movieId={movie._id}
               autoPlay={shouldPlay}
             />
-          ) : (
-            <div className="aspect-video rounded-2xl card-feature border border-cinema-violet/20 flex flex-col items-center justify-center gap-4 p-8">
-              <p className="text-cinema-muted text-center">
-                Inicia sesión para reproducir y guardar tu progreso
-              </p>
-              <Link href="/login" className="btn-primary">
-                Iniciar sesión
-              </Link>
-            </div>
           )}
         </ScrollReveal>
 

@@ -1,15 +1,25 @@
 'use client';
 
 import { useQuery } from 'convex/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Search, SlidersHorizontal } from 'lucide-react';
-import { MovieSwiper } from '@pelis/ui/features/movie-swiper';
+import { MovieCard } from '@pelis/ui/features/movie-card';
 import { EmptyState } from '@pelis/ui/features/empty-state';
 import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';
 import { api } from '@pelis/convex';
 import { Spinner } from '@pelis/ui/components';
 import type { MediaItem } from '@pelis/ui/types';
+
+const classificationOrder = ['G', 'PG', 'PG-13', 'R', 'NC-17'];
+
+const classificationLabels: Record<string, string> = {
+  G: 'Para toda la familia',
+  PG: 'Guía paternal sugerida',
+  'PG-13': 'Mayores de 13 años',
+  R: 'Mayores de 17 años',
+  'NC-17': 'Solo adultos',
+};
 
 export default function MoviesPageClient() {
   const searchParams = useSearchParams();
@@ -35,6 +45,21 @@ export default function MoviesPageClient() {
 
   const isLoading = movies === undefined;
 
+  const grouped = useMemo(() => {
+    if (!movies) return [];
+    const groups: Record<string, MediaItem[]> = {};
+    for (const m of movies) {
+      const key = m.classification || 'Otros';
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(m);
+    }
+    return Object.entries(groups).sort(([a], [b]) => {
+      const ia = classificationOrder.indexOf(a);
+      const ib = classificationOrder.indexOf(b);
+      return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
+    });
+  }, [movies]);
+
   return (
     <div className="page-shell">
       <div className="mb-10">
@@ -45,7 +70,9 @@ export default function MoviesPageClient() {
           <h1 className="font-display text-4xl md:text-5xl tracking-wide text-white uppercase mb-2">
             Películas
           </h1>
-          <p className="text-cinema-muted mb-8">Desliza para explorar el catálogo completo</p>
+          <p className="text-cinema-muted mb-8">
+            {movies ? `${movies.length} películas disponibles` : 'Cargando...'}
+          </p>
         </ScrollReveal>
 
         <div className="flex flex-col lg:flex-row gap-4">
@@ -131,11 +158,37 @@ export default function MoviesPageClient() {
           actionLabel="Ver todo el catálogo"
           actionHref="/movies"
         />
-      ) : (
+      ) : search || selectedGenre || selectedYear ? (
         <ScrollReveal>
-          <p className="text-cinema-silver text-sm mb-6">{movies.length} películas encontradas</p>
-          <MovieSwiper movies={movies} slideWidth="lg" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
+            {movies.map((movie) => (
+              <MovieCard key={movie._id} movie={movie} />
+            ))}
+          </div>
         </ScrollReveal>
+      ) : (
+        <div className="space-y-10">
+          {grouped.map(([classification, items]) => (
+            <ScrollReveal key={classification}>
+              <div className="flex items-baseline gap-3 mb-5">
+                <h2 className="font-display text-2xl tracking-wide text-white uppercase">
+                  {classification}
+                </h2>
+                <span className="text-sm text-cinema-muted hidden sm:inline">
+                  {classificationLabels[classification] || ''}
+                </span>
+                <span className="text-xs text-cinema-ash ml-auto">
+                  {items.length} {items.length === 1 ? 'título' : 'títulos'}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
+                {items.map((movie) => (
+                  <MovieCard key={movie._id} movie={movie} />
+                ))}
+              </div>
+            </ScrollReveal>
+          ))}
+        </div>
       )}
     </div>
   );

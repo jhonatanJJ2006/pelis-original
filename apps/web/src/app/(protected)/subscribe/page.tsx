@@ -95,7 +95,7 @@ export default function SubscribePage() {
           description="Vuelve más tarde para ver nuestras membresías."
         />
       ) : (
-        <div className="relative group/swiper max-w-5xl mx-auto">
+        <div className="relative group/swiper max-w-5xl mx-auto overflow-visible">
           <button
             ref={prevRef}
             type="button"
@@ -135,26 +135,27 @@ export default function SubscribePage() {
             breakpoints={{
               768: { centeredSlides: false },
             }}
-            className="movie-row-swiper pb-4"
+            className="subscription-plans-swiper pb-4"
           >
             {plans.map((plan) => {
               const Icon = iconMap[plan.icon] || Star;
               return (
                 <SwiperSlide key={plan._id} className="!w-[280px] sm:!w-[300px] md:!w-[320px] h-auto">
-                  <div
-                    className={cn(
-                      'relative rounded-2xl border p-8 h-full motion-safe:transition-transform motion-safe:duration-normal [@media(hover:hover)_and_(pointer:fine)]:hover:-translate-y-1',
-                      plan.recommended
-                        ? 'card-feature border-cinema-gold/40 shadow-[0_8px_32px_rgba(245,200,66,0.15)]'
-                        : 'bg-cinema-surface border-cinema-border hover:border-cinema-violet/40'
-                    )}
-                  >
+                  <div className="relative h-full pt-4">
                     {plan.recommended && (
-                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-cinema-gold to-cinema-gold-light text-black text-xs font-bold rounded-full uppercase tracking-wide">
+                      <span className="absolute top-0 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap px-4 py-1 bg-gradient-to-r from-cinema-gold to-cinema-gold-light text-black text-xs font-bold rounded-full uppercase tracking-wide shadow-[0_2px_12px_rgba(245,200,66,0.4)]">
                         Recomendado
-                      </div>
+                      </span>
                     )}
 
+                    <div
+                      className={cn(
+                        'flex flex-col rounded-2xl border p-8 h-full overflow-visible motion-safe:transition-[transform,box-shadow,border-color] motion-safe:duration-normal [@media(hover:hover)_and_(pointer:fine)]:hover:-translate-y-1',
+                        plan.recommended
+                          ? 'card-feature border-cinema-gold/40 shadow-[0_8px_32px_rgba(245,200,66,0.15)] [@media(hover:hover)_and_(pointer:fine)]:hover:border-cinema-gold/60 [@media(hover:hover)_and_(pointer:fine)]:hover:shadow-[0_12px_40px_rgba(245,200,66,0.25)]'
+                          : 'bg-cinema-surface border-cinema-border [@media(hover:hover)_and_(pointer:fine)]:hover:border-cinema-violet/40'
+                      )}
+                    >
                     <div
                       className={cn(
                         'w-12 h-12 rounded-xl flex items-center justify-center mb-5',
@@ -177,7 +178,7 @@ export default function SubscribePage() {
                       </span>
                     </div>
 
-                    <ul className="space-y-3 mb-8">
+                    <ul className="flex-1 space-y-3 mb-8">
                       {plan.features.map((feature, i) => (
                         <li key={i} className="flex items-start gap-2 text-sm">
                           <Check className="w-4 h-4 text-cinema-teal mt-0.5 shrink-0" aria-hidden />
@@ -199,6 +200,7 @@ export default function SubscribePage() {
                     >
                       {hasActivePlan ? 'Ya tienes un plan' : 'Suscribirse'}
                     </button>
+                    </div>
                   </div>
                 </SwiperSlide>
               );

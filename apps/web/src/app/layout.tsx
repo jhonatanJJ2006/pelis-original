@@ -32,6 +32,7 @@ export default function RootLayout({
           <ConvexClientProvider>
             {children}
             <Toaster
+              closeButton
               position="top-right"
               toastOptions={{
                 style: {

@@ -174,7 +174,7 @@
 
   .card-feature {
     background: var(--gradient-feature-card);
-    @apply rounded-2xl border border-cinema-violet/20 overflow-hidden;
+    @apply rounded-2xl border border-cinema-violet/20;
     border-radius: var(--radius-cards);
   }
 
@@ -310,36 +310,109 @@
     perspective: 1000px;
   }
 
-  /* Movie card hover — overlay + botones con stagger (ease-out-expo) */
+  /* Movie card hover — overlay, toolbar y botones con stagger */
   .card-media-scrim {
     opacity: 0;
-    background: rgba(1, 8, 16, 0.6);
+    background: rgba(1, 8, 16, 0.65);
     transition: opacity var(--duration-normal) var(--ease-out-expo);
     pointer-events: none;
   }
 
   .card-actions-layer {
-    opacity: 1;
+    opacity: 0;
     pointer-events: none;
+    transition: opacity var(--duration-normal) var(--ease-out-expo);
+  }
+
+  .card-actions-toolbar {
+    opacity: 0;
+    transform: scale(0.9) translateY(14px);
+    transition:
+      opacity var(--duration-normal) var(--ease-out-expo),
+      transform var(--duration-normal) var(--ease-out-expo);
+    will-change: transform, opacity;
   }
 
   .card-action-btn {
     opacity: 0;
-    transform: scale(0.88) translateY(10px);
+    transform: scale(0.75) translateY(12px);
     transition:
-      opacity var(--duration-fast) var(--ease-out-expo),
-      transform var(--duration-fast) var(--ease-out-expo),
+      opacity 0.22s var(--ease-out-expo),
+      transform 0.22s var(--ease-out-expo),
       background-color var(--duration-fast) var(--ease-out-expo),
       box-shadow var(--duration-fast) var(--ease-out-expo);
     will-change: transform, opacity;
   }
 
-  .card-action-btn--play {
-    transition-delay: 0ms;
+  @keyframes card-toolbar-enter {
+    0% {
+      opacity: 0;
+      transform: scale(0.9) translateY(14px);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
   }
 
-  .card-action-btn--heart {
-    transition-delay: 0ms;
+  @keyframes card-play-enter {
+    0% {
+      opacity: 0;
+      transform: scale(0.5) translateY(12px);
+    }
+    55% {
+      opacity: 1;
+      transform: scale(1.12) translateY(-2px);
+    }
+    78% {
+      transform: scale(0.96) translateY(0);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  @keyframes card-play-icon-pop {
+    0% {
+      transform: scale(0) translateX(-4px);
+    }
+    60% {
+      transform: scale(1.18) translateX(2px);
+    }
+    100% {
+      transform: scale(1) translateX(0);
+    }
+  }
+
+  @keyframes card-heart-enter {
+    0% {
+      opacity: 0;
+      transform: scale(0.45) translateY(14px);
+    }
+    55% {
+      opacity: 1;
+      transform: scale(1.1) translateY(-2px);
+    }
+    78% {
+      transform: scale(0.96) translateY(0);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  @keyframes card-heart-icon-pop {
+    0% {
+      transform: scale(0) rotate(-12deg);
+    }
+    60% {
+      transform: scale(1.2) rotate(4deg);
+    }
+    100% {
+      transform: scale(1) rotate(0deg);
+    }
   }
 
   .card-meta-reveal {
@@ -354,33 +427,55 @@
   @media (hover: hover) and (pointer: fine) {
     .card-container:hover .card-media-scrim {
       opacity: 1;
+      transition-delay: 0ms;
     }
 
     .card-container:hover .card-actions-layer {
+      opacity: 1;
       pointer-events: auto;
+      transition-delay: 50ms;
+    }
+
+    .card-container:hover .card-actions-toolbar {
+      animation: card-toolbar-enter 0.44s var(--ease-out-expo) 90ms both;
     }
 
     .card-container:hover .card-action-btn--play {
-      opacity: 1;
-      transform: scale(1) translateY(0);
-      transition-delay: 60ms;
+      animation: card-play-enter 0.48s var(--ease-out-expo) 150ms both;
+    }
+
+    .card-container:hover .card-action-btn--play .card-play-icon {
+      animation: card-play-icon-pop 0.4s var(--ease-out-expo) 230ms both;
     }
 
     .card-container:hover .card-action-btn--heart {
-      opacity: 1;
-      transform: scale(1) translateY(0);
-      transition-delay: 120ms;
+      animation: card-heart-enter 0.5s var(--ease-out-expo) 230ms both;
+    }
+
+    .card-container:hover .card-action-btn--heart .card-heart-icon {
+      animation: card-heart-icon-pop 0.44s var(--ease-out-expo) 310ms both;
+    }
+
+    .card-container:hover .card-action-btn--play:hover,
+    .card-container:hover .card-action-btn--heart:hover {
+      transform: scale(1.08);
+      transition:
+        transform 0.18s var(--ease-out-expo),
+        background-color var(--duration-fast) var(--ease-out-expo),
+        box-shadow var(--duration-fast) var(--ease-out-expo);
     }
 
     .card-container:hover .card-meta-reveal {
       opacity: 1;
       transform: translateY(0);
-      transition-delay: 80ms;
+      transition-delay: 120ms;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .card-media-scrim,
+    .card-actions-layer,
+    .card-actions-toolbar,
     .card-action-btn,
     .card-meta-reveal {
       transition-duration: 0.01ms !important;
@@ -388,10 +483,23 @@
     }
 
     @media (hover: hover) and (pointer: fine) {
+      .card-container:hover .card-actions-toolbar,
+      .card-container:hover .card-action-btn--play,
+      .card-container:hover .card-action-btn--heart,
+      .card-container:hover .card-action-btn--play .card-play-icon,
+      .card-container:hover .card-action-btn--heart .card-heart-icon,
+      .card-container:hover .card-meta-reveal {
+        transform: none;
+        animation: none !important;
+      }
+
+      .card-container:hover .card-actions-layer,
+      .card-container:hover .card-media-scrim,
+      .card-container:hover .card-actions-toolbar,
       .card-container:hover .card-action-btn--play,
       .card-container:hover .card-action-btn--heart,
       .card-container:hover .card-meta-reveal {
-        transform: none;
+        opacity: 1;
       }
     }
   }
@@ -437,31 +545,95 @@
   }
 
   .movie-row-swiper {
+    overflow: hidden !important;
+    margin: 0;
+    padding: 2px 0;
+  }
+
+  .subscription-plans-swiper {
     overflow: visible !important;
+    margin: 0;
+    padding: 6px 0 8px;
+  }
+
+  .subscription-plans-swiper .swiper-wrapper {
+    align-items: stretch;
+  }
+
+  .subscription-plans-swiper .swiper-slide {
+    height: auto;
+  }
+
+  .movie-row-swiper .swiper-wrapper {
+    align-items: stretch;
   }
 
   .movie-row-swiper .swiper-slide {
     height: auto;
-    transition: opacity var(--duration-fast) var(--ease-out-expo),
-      transform var(--duration-fast) var(--ease-out-expo);
+    transition: opacity var(--duration-fast) var(--ease-out-expo);
   }
 
   .movie-row-slide {
-    transition: transform var(--duration-normal) var(--ease-out-expo) !important;
+    transform: none !important;
   }
 
   @media (hover: hover) and (pointer: fine) {
-    .movie-row-slide.swiper-slide-active {
-      transform: scale(1.02);
-      z-index: 2;
-    }
-
+    .movie-row-slide.swiper-slide-active,
     .movie-row-slide.swiper-slide-next,
     .movie-row-slide.swiper-slide-prev {
-      transform: scale(0.98);
-      opacity: 0.9;
+      transform: none !important;
+      opacity: 1;
     }
   }
+}
+
+/* Sonner toast close button — esquina superior derecha, color según tipo */
+[data-sonner-toaster] [data-close-button] {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  left: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  background: transparent !important;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease;
+}
+
+[data-sonner-toaster] [data-close-button]:hover {
+  background: rgba(0, 0, 0, 0.25) !important;
+}
+
+[data-sonner-toaster] [data-close-button] svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Color del botón cerrar según tipo de toast */
+[data-sonner-toaster] [data-type="error"] [data-close-button] svg {
+  color: #ef4444;
+}
+
+[data-sonner-toaster] [data-type="success"] [data-close-button] svg {
+  color: #22c55e;
+}
+
+[data-sonner-toaster] [data-type="warning"] [data-close-button] svg {
+  color: #eab308;
+}
+
+[data-sonner-toaster] [data-type="info"] [data-close-button] svg {
+  color: #3b82f6;
+}
+
+[data-sonner-toaster] [data-type="default"] [data-close-button] svg {
+  color: #b8d4f0;
 }
 
 @media (prefers-reduced-motion: reduce) {

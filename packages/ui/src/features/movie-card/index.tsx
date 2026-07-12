@@ -73,12 +73,12 @@ export function MovieCard({ movie, showFavorite = true, variant = 'poster' }: Mo
           <div className="card-media-scrim absolute inset-0 z-[2]" aria-hidden />
 
           <div className="card-actions-layer absolute inset-0 z-[3] flex items-center justify-center">
-            <div className="flex items-center gap-3">
+            <div className="card-actions-toolbar flex items-center gap-3">
               <div
-                className="card-action-btn card-action-btn--play p-3 rounded-full bg-cinema-accent text-white shadow-glow [@media(hover:hover)_and_(pointer:fine)]:hover:scale-105 motion-safe:transition-transform"
+                className="card-action-btn card-action-btn--play p-3 rounded-full bg-cinema-accent text-white shadow-glow"
                 aria-hidden
               >
-                <Play className="w-5 h-5" fill="currentColor" />
+                <Play className="w-5 h-5 card-play-icon" fill="currentColor" />
               </div>
               {showFavorite && (
                 <button
@@ -92,7 +92,7 @@ export function MovieCard({ movie, showFavorite = true, variant = 'poster' }: Mo
                   )}
                   aria-label={isFavorited ? 'Quitar de favoritos' : 'Agregar a favoritos'}
                 >
-                  <Heart className={cn('w-5 h-5', isFavorited && 'fill-current')} />
+                  <Heart className={cn('w-5 h-5 card-heart-icon', isFavorited && 'fill-current')} />
                 </button>
               )}
             </div>
