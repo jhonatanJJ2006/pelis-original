@@ -6,7 +6,8 @@
   "exports": {
     "./hooks": "./src/hooks.ts",
     "./store": "./src/store.ts",
-    "./providers": "./src/providers.tsx"
+    "./providers": "./src/providers.tsx",
+    "./convex-site": "./src/convex-site.ts"
   },
   "scripts": {
     "clean": "git clean -xdf .cache .turbo node_modules",

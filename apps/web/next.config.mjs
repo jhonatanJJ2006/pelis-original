@@ -1,6 +1,26 @@
 /** @type {import('next').NextConfig} */
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 const nextConfig = {
-  transpilePackages: ['@pelis/ui', '@pelis/convex', '@pelis/auth', '@pelis/validators'],
+  transpilePackages: [
+    '@pelis/ui',
+    '@pelis/convex',
+    '@pelis/auth',
+    '@pelis/validators',
+    'better-auth',
+    '@convex-dev/better-auth',
+  ],
+  serverExternalPackages: ['pg'],
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      zod: path.resolve(__dirname, '../../node_modules/zod'),
+    };
+    return config;
+  },
   images: {
     remotePatterns: [
       {

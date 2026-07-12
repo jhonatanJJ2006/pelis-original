@@ -3,7 +3,7 @@ import { query, mutation } from './_generated/server';
 import { enrichMovieImage } from './lib/resolveMovieImage';
 
 export const listByUser = query({
-  args: { userId: v.id('user') },
+  args: { userId: v.string() },
   handler: async (ctx, args) => {
     const history = await ctx.db
       .query('history')
@@ -22,7 +22,7 @@ export const listByUser = query({
 });
 
 export const getByUserAndMovie = query({
-  args: { userId: v.id('user'), movieId: v.id('movies') },
+  args: { userId: v.string(), movieId: v.id('movies') },
   handler: async (ctx, args) => {
     const history = await ctx.db
       .query('history')
@@ -37,7 +37,7 @@ export const getByUserAndMovie = query({
 
 export const upsert = mutation({
   args: {
-    userId: v.id('user'),
+    userId: v.string(),
     movieId: v.id('movies'),
     progress: v.number(),
     duration: v.number(),
@@ -72,7 +72,7 @@ export const upsert = mutation({
 });
 
 export const remove = mutation({
-  args: { userId: v.id('user'), movieId: v.id('movies') },
+  args: { userId: v.string(), movieId: v.id('movies') },
   handler: async (ctx, args) => {
     const history = await ctx.db
       .query('history')
@@ -90,7 +90,7 @@ export const remove = mutation({
 });
 
 export const clearAll = mutation({
-  args: { userId: v.id('user') },
+  args: { userId: v.string() },
   handler: async (ctx, args) => {
     const history = await ctx.db
       .query('history')
@@ -103,7 +103,7 @@ export const clearAll = mutation({
 });
 
 export const getContinueWatching = query({
-  args: { userId: v.id('user'), limit: v.optional(v.number()) },
+  args: { userId: v.string(), limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
     const history = await ctx.db
       .query('history')

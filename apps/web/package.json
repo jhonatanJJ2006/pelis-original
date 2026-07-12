@@ -14,11 +14,13 @@
     "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
+    "@convex-dev/better-auth": "^0.10.10",
     "@pelis/auth": "workspace:*",
     "@pelis/convex": "workspace:*",
     "@pelis/ui": "workspace:*",
     "@pelis/validators": "workspace:*",
     "@t3-oss/env-nextjs": "^0.11.1",
+    "better-auth": "1.4.9",
     "convex": "^1.42.1",
     "geist": "catalog:",
     "next": "^14.2.15",
@@ -26,7 +28,7 @@
     "react-dom": "catalog:react18",
     "sonner": "^1.7.0",
     "swiper": "^14.0.2",
-    "zod": "catalog:"
+    "zod": "4.0.0"
   },
   "devDependencies": {
     "@pelis/eslint-config": "workspace:*",

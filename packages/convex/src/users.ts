@@ -1,5 +1,4 @@
-import { v } from 'convex/values';
-import { query, mutation } from './_generated/server';
+import { query } from './_generated/server';
 
 export const me = query({
   args: {},
@@ -7,36 +6,19 @@ export const me = query({
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) return null;
 
-    const user = await ctx.db
-      .query('user')
-      .withIndex('email', (q) => q.eq('email', identity.email!))
+    const subscription = await ctx.db
+      .query('subscriptions')
+      .withIndex('by_user', (q) => q.eq('userId', identity.subject))
+      .filter((q) => q.eq(q.field('status'), 'active'))
       .first();
 
-    return user;
-  },
-});
-
-export const getById = query({
-  args: { id: v.id('user') },
-  handler: async (ctx, args) => {
-    return await ctx.db.get(args.id);
-  },
-});
-
-export const updateProfile = mutation({
-  args: { name: v.string() },
-  handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error('Not authenticated');
-
-    const user = await ctx.db
-      .query('user')
-      .withIndex('email', (q) => q.eq('email', identity.email!))
-      .first();
-
-    if (!user) throw new Error('User not found');
-
-    await ctx.db.patch(user._id, { name: args.name });
-    return user._id;
+    return {
+      _id: identity.subject,
+      name: identity.name ?? 'User',
+      email: identity.email ?? '',
+      image: identity.pictureUrl ?? undefined,
+      planId: subscription?.planId,
+      planExpiresAt: subscription?.endDate,
+    };
   },
 });

@@ -65,13 +65,6 @@ export const subscribe = mutation({
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error('Not authenticated');
 
-    const user = await ctx.db
-      .query('user')
-      .withIndex('email', (q) => q.eq('email', identity.email!))
-      .first();
-
-    if (!user) throw new Error('User not found');
-
     const plan = await ctx.db.get(args.planId);
     if (!plan) throw new Error('Plan not found');
 
@@ -79,17 +72,12 @@ export const subscribe = mutation({
     const endDate = now + plan.months * 30 * 24 * 60 * 60 * 1000;
 
     const subscriptionId = await ctx.db.insert('subscriptions', {
-      userId: user._id,
+      userId: identity.subject,
       planId: args.planId,
       startDate: now,
       endDate,
       status: 'active',
       stripeSubscriptionId: args.stripeSubscriptionId,
-    });
-
-    await ctx.db.patch(user._id, {
-      planId: args.planId,
-      planExpiresAt: endDate,
     });
 
     return subscriptionId;
@@ -102,26 +90,14 @@ export const cancel = mutation({
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error('Not authenticated');
 
-    const user = await ctx.db
-      .query('user')
-      .withIndex('email', (q) => q.eq('email', identity.email!))
-      .first();
-
-    if (!user) throw new Error('User not found');
-
     const subscription = await ctx.db
       .query('subscriptions')
-      .withIndex('by_user', (q) => q.eq('userId', user._id))
+      .withIndex('by_user', (q) => q.eq('userId', identity.subject))
       .first();
 
     if (subscription) {
       await ctx.db.patch(subscription._id, { status: 'cancelled' });
     }
-
-    await ctx.db.patch(user._id, {
-      planId: undefined,
-      planExpiresAt: undefined,
-    });
 
     return true;
   },

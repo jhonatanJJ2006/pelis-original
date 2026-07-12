@@ -3,7 +3,7 @@ import { query, mutation } from './_generated/server';
 import { enrichMovieImage } from './lib/resolveMovieImage';
 
 export const listByUser = query({
-  args: { userId: v.id('user') },
+  args: { userId: v.string() },
   handler: async (ctx, args) => {
     const favorites = await ctx.db
       .query('favorites')
@@ -22,7 +22,7 @@ export const listByUser = query({
 });
 
 export const check = query({
-  args: { userId: v.id('user'), movieId: v.id('movies') },
+  args: { userId: v.string(), movieId: v.id('movies') },
   handler: async (ctx, args) => {
     const favorite = await ctx.db
       .query('favorites')
@@ -36,7 +36,7 @@ export const check = query({
 });
 
 export const add = mutation({
-  args: { userId: v.id('user'), movieId: v.id('movies') },
+  args: { userId: v.string(), movieId: v.id('movies') },
   handler: async (ctx, args) => {
     const existing = await ctx.db
       .query('favorites')
@@ -58,7 +58,7 @@ export const add = mutation({
 });
 
 export const remove = mutation({
-  args: { userId: v.id('user'), movieId: v.id('movies') },
+  args: { userId: v.string(), movieId: v.id('movies') },
   handler: async (ctx, args) => {
     const favorite = await ctx.db
       .query('favorites')

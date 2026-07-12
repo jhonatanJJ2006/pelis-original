@@ -3,6 +3,7 @@
 import { useQuery } from 'convex/react';
 import { useAppStore, type User } from './store';
 import { api } from '@pelis/convex';
+import { getAuthApiBase } from './convex-site';
 import { useEffect } from 'react';
 
 interface UseUserReturn {
@@ -34,8 +35,10 @@ export function useUser(): UseUserReturn {
 
   const logout = async () => {
     try {
-      const siteUrl = process.env.NEXT_PUBLIC_CONVEX_SITE_URL;
-      await fetch(`${siteUrl}/api/auth/signout`, { method: 'POST' });
+      await fetch(`${getAuthApiBase()}/signout`, {
+        method: 'POST',
+        credentials: 'include',
+      });
     } catch {
       // Ignore
     }

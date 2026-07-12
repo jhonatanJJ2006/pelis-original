@@ -4,9 +4,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Film } from 'lucide-react';
 import { Button, Input } from '@pelis/ui/components';
+import { getAuthApiBase } from '@pelis/auth/convex-site';
 import { useState } from 'react';
-
-const CONVEX_SITE_URL = process.env.NEXT_PUBLIC_CONVEX_SITE_URL || '';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -18,7 +17,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
 
   const handleGoogleLogin = () => {
-    window.location.href = `${CONVEX_SITE_URL}/api/auth/signin/google`;
+    window.location.href = `${getAuthApiBase()}/signin/google`;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -36,9 +35,10 @@ export default function RegisterPage() {
 
     setLoading(true);
     try {
-      const res = await fetch(`${CONVEX_SITE_URL}/api/auth/sign-up/email`, {
+      const res = await fetch(`${getAuthApiBase()}/sign-up/email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ name, email, password }),
       });
       const data = await res.json();
