@@ -7,6 +7,8 @@ import { api } from '@pelis/convex';
 import { useUser } from '@pelis/auth/hooks';
 import { EmptyState } from '@pelis/ui/features/empty-state';
 import { MoviePoster } from '@pelis/ui/features/movie-poster';
+import { ContentSwiper } from '@pelis/ui/features/content-swiper';
+import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';
 import { Spinner, Button } from '@pelis/ui/components';
 import { formatDate, formatDuration, getProgressPercentage } from '@pelis/ui/utils';
 import { toast } from 'sonner';
@@ -78,27 +80,36 @@ export default function HistoryPage() {
 
   const isLoading = history === undefined;
 
+  const recentItems =
+    continueItems.length > 0
+      ? completedItems.concat(
+          (history ?? []).filter(
+            (h) => !continueItems.includes(h) && !completedItems.includes(h)
+          )
+        )
+      : history ?? [];
+
   return (
     <div className="page-shell">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
+      <ScrollReveal className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
         <div>
-          <p className="text-cinema-gold text-sm font-medium uppercase tracking-widest mb-2">
+          <p className="text-cinema-violet-light text-sm font-medium uppercase tracking-widest mb-2">
             Actividad
           </p>
           <h1 className="font-display text-4xl md:text-5xl tracking-wide text-white uppercase">
             Historial
           </h1>
-          <p className="text-zinc-400 mt-2">{history?.length ?? 0} títulos en tu historial</p>
+          <p className="text-cinema-muted mt-2">{history?.length ?? 0} títulos en tu historial</p>
         </div>
         {(history?.length ?? 0) > 0 && (
           <Button variant="outline" onClick={handleClearAll}>
             Limpiar todo
           </Button>
         )}
-      </div>
+      </ScrollReveal>
 
       {isLoading ? (
-        <div className="flex items-center justify-center py-24">
+        <div className="flex items-center justify-center py-24" role="status" aria-label="Cargando">
           <Spinner size="lg" />
         </div>
       ) : (history?.length ?? 0) === 0 ? (
@@ -116,16 +127,16 @@ export default function HistoryPage() {
               <h2 className="font-display text-2xl tracking-wide text-white uppercase mb-5">
                 Continuar viendo
               </h2>
-              <div className="space-y-3">
+              <ContentSwiper slideClassName="!w-[320px] sm:!w-[360px]">
                 {continueItems.map((item) => (
-                  <HistoryRow
+                  <HistoryCard
                     key={item._id}
                     item={item}
                     onRemove={() => handleRemove(item.movieId)}
                     resume
                   />
                 ))}
-              </div>
+              </ContentSwiper>
             </section>
           )}
 
@@ -133,17 +144,15 @@ export default function HistoryPage() {
             <h2 className="font-display text-2xl tracking-wide text-white uppercase mb-5">
               {continueItems.length > 0 ? 'Visto recientemente' : 'Todo tu historial'}
             </h2>
-            <div className="space-y-3">
-              {(continueItems.length > 0 ? completedItems.concat(
-                (history ?? []).filter((h) => !continueItems.includes(h) && !completedItems.includes(h))
-              ) : history ?? []).map((item) => (
-                <HistoryRow
+            <ContentSwiper slideClassName="!w-[320px] sm:!w-[360px]">
+              {recentItems.map((item) => (
+                <HistoryCard
                   key={item._id}
                   item={item}
                   onRemove={() => handleRemove(item.movieId)}
                 />
               ))}
-            </div>
+            </ContentSwiper>
           </section>
         </div>
       )}
@@ -151,7 +160,7 @@ export default function HistoryPage() {
   );
 }
 
-function HistoryRow({
+function HistoryCard({
   item,
   onRemove,
   resume = false,
@@ -163,69 +172,71 @@ function HistoryRow({
   const pct = getProgressPercentage(item.progress, item.duration);
 
   return (
-    <div className="flex items-center gap-4 bg-cinema-surface rounded-2xl border border-cinema-border p-4 hover:border-cinema-accent/30 transition-all group">
-      <Link href={`/movies/${item.movieId}${resume ? '?play=true' : ''}`} className="shrink-0">
+    <div className="bg-cinema-surface rounded-2xl border border-cinema-border overflow-hidden hover:border-cinema-violet/40 motion-safe:transition-[border-color,box-shadow] motion-safe:duration-normal h-full flex flex-col group">
+      <Link
+        href={`/movies/${item.movieId}${resume ? '?play=true' : ''}`}
+        className="relative aspect-video block overflow-hidden"
+      >
         {item.movie ? (
           <MoviePoster
             src={item.movie.image}
-            alt={item.movie.name}
-            className="w-20 h-28 md:w-24 md:h-32 rounded-xl object-cover"
+            alt=""
+            className="w-full h-full object-cover motion-safe:transition-transform motion-safe:duration-normal [@media(hover:hover)_and_(pointer:fine)]:group-hover:scale-105"
           />
         ) : (
-          <div className="w-20 h-28 rounded-xl bg-cinema-elevated flex items-center justify-center">
-            <History className="w-6 h-6 text-zinc-600" />
+          <div className="w-full h-full bg-cinema-elevated flex items-center justify-center">
+            <History className="w-8 h-8 text-cinema-ash" aria-hidden />
+          </div>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-cinema-bg via-cinema-bg/40 to-transparent" />
+        {resume && (
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 [@media(hover:hover)_and_(pointer:fine)]:group-hover:opacity-100 motion-safe:transition-opacity">
+            <div className="p-3 rounded-full bg-cinema-violet text-white shadow-glow-violet">
+              <Play className="w-5 h-5" fill="currentColor" />
+            </div>
           </div>
         )}
       </Link>
 
-      <div className="flex-1 min-w-0">
-        <div className="flex items-start justify-between gap-3">
-          <div>
+      <div className="p-4 flex-1 flex flex-col">
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <div className="min-w-0">
             <Link
               href={`/movies/${item.movieId}${resume ? '?play=true' : ''}`}
-              className="font-medium text-lg hover:text-cinema-gold transition-colors truncate block"
+              className="font-medium hover:text-cinema-violet-light transition-colors truncate block"
             >
               {item.movie?.name ?? 'Título eliminado'}
             </Link>
-            <p className="text-sm text-zinc-500 mt-1">
+            <p className="text-xs text-cinema-silver mt-1">
               {item.movie?.genre}
               {item.movie?.mediaType === 'series' && ' · Serie'}
-              {' · '}
-              {formatDate(item.lastWatched)}
             </p>
           </div>
           <button
             type="button"
             onClick={onRemove}
-            className="p-2 text-zinc-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all rounded-lg hover:bg-red-500/10"
+            className="p-1.5 text-cinema-ash hover:text-red-400 rounded-lg hover:bg-red-500/10 shrink-0"
             aria-label="Eliminar del historial"
           >
-            <Trash2 className="w-4 h-4" />
+            <Trash2 className="w-4 h-4" aria-hidden />
           </button>
         </div>
 
+        <p className="text-xs text-cinema-ash mb-3">{formatDate(item.lastWatched)}</p>
+
         {item.duration > 0 && (
-          <div className="mt-4">
-            <div className="flex items-center justify-between text-xs text-zinc-500 mb-1.5">
+          <div className="mt-auto">
+            <div className="flex items-center justify-between text-xs text-cinema-silver mb-1">
               <span>{formatDuration(item.progress)}</span>
               <span>{pct}%</span>
             </div>
             <div className="h-1.5 bg-cinema-elevated rounded-full overflow-hidden">
               <div
-                className="h-full bg-cinema-accent rounded-full transition-all"
+                className="h-full bg-gradient-to-r from-cinema-violet to-cinema-teal rounded-full"
                 style={{ width: `${pct}%` }}
               />
             </div>
           </div>
-        )}
-
-        {resume && (
-          <Link href={`/movies/${item.movieId}?play=true`}>
-            <button className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-cinema-gold hover:text-cinema-gold-light transition-colors">
-              <Play className="w-4 h-4" fill="currentColor" />
-              Reanudar reproducción
-            </button>
-          </Link>
         )}
       </div>
     </div>

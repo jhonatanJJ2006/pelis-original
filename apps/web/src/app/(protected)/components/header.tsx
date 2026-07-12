@@ -28,7 +28,11 @@ const navItems = [
   { href: '/history', label: 'Historial', icon: History },
 ];
 
-export function Header() {
+interface HeaderProps {
+  sticky?: boolean;
+}
+
+export function Header({ sticky = true }: HeaderProps) {
   const { user, logout } = useUser();
   const router = useRouter();
   const pathname = usePathname();
@@ -64,27 +68,39 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 glass-strong border-b border-white/5">
-      <nav className="container mx-auto px-4">
+    <header
+      className={cn(
+        sticky && 'sticky top-0 z-50',
+        'glass-strong border-b border-cinema-border/50'
+      )}
+    >
+      <nav className="container mx-auto px-4" aria-label="Principal">
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-cinema-accent to-cinema-accent-light flex items-center justify-center shadow-lg shadow-cinema-accent/30 group-hover:scale-110 transition-transform duration-300">
+            <div className="w-9 h-9 rounded bg-gradient-to-br from-cinema-violet to-cinema-teal flex items-center justify-center shadow-glow-violet group-hover:scale-105 transition-transform duration-200">
               <Film className="w-5 h-5 text-white" />
             </div>
-            <span className="font-display text-2xl tracking-widest bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent uppercase">
+            <span className="font-display text-2xl tracking-widest text-gradient-accent uppercase">
               Pelis
             </span>
           </Link>
 
           <div className="hidden lg:flex items-center gap-1 flex-1 max-w-md mx-8">
-            <form onSubmit={handleSearch} className="w-full relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+            <form onSubmit={handleSearch} className="w-full relative" role="search">
+              <label htmlFor="header-search" className="sr-only">
+                Buscar películas y series
+              </label>
+              <Search
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cinema-ash"
+                aria-hidden
+              />
               <input
+                id="header-search"
                 type="search"
                 placeholder="Buscar películas y series..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-cinema-surface/80 border border-cinema-border rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-cinema-accent/50 focus:border-cinema-accent/40 transition-all"
+                className="w-full bg-cinema-surface/80 border border-cinema-border rounded py-2.5 pl-10 pr-4 text-sm text-white placeholder-cinema-ash focus:outline-none focus:ring-2 focus:ring-cinema-accent/50 focus:border-cinema-accent/40 transition-all"
               />
             </form>
           </div>
@@ -95,13 +111,13 @@ export function Header() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200',
+                  'flex items-center gap-1.5 px-3 py-2 rounded text-sm font-medium transition-all duration-200',
                   isActive(item.href, item.exact)
-                    ? 'bg-cinema-accent/15 text-cinema-accent-light shadow-sm'
-                    : 'text-zinc-400 hover:text-white hover:bg-white/10'
+                    ? 'bg-cinema-violet/20 text-cinema-violet-light'
+                    : 'text-cinema-silver hover:text-white hover:bg-cinema-elevated/50'
                 )}
               >
-                <item.icon className="w-4 h-4" />
+                <item.icon className="w-4 h-4" aria-hidden />
                 <span className="hidden xl:inline">{item.label}</span>
               </Link>
             ))}
@@ -110,8 +126,11 @@ export function Header() {
           <div className="hidden md:flex items-center gap-3">
             {!hasActivePlan && user && (
               <Link href="/subscribe">
-                <button className="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-cinema-gold to-cinema-gold-light text-black rounded-lg text-sm font-bold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-cinema-gold/20">
-                  <Crown className="w-4 h-4" />
+                <button
+                  type="button"
+                  className="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-cinema-gold to-cinema-gold-light text-black rounded text-sm font-bold transition-all duration-200 hover:brightness-110 shadow-[0_4px_16px_rgba(245,200,66,0.25)]"
+                >
+                  <Crown className="w-4 h-4" aria-hidden />
                   <span className="hidden lg:inline">Premium</span>
                 </button>
               </Link>
@@ -123,23 +142,23 @@ export function Header() {
                   {user.image ? (
                     <img
                       src={user.image}
-                      alt={user.name}
-                      className="w-8 h-8 rounded-full ring-2 ring-cinema-accent/40 shadow-lg shadow-cinema-accent/10"
+                      alt=""
+                      className="w-8 h-8 rounded-full ring-2 ring-cinema-violet/50"
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cinema-accent to-cinema-violet flex items-center justify-center shadow-lg shadow-cinema-accent/20">
-                      <User className="w-4 h-4 text-white" />
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cinema-accent to-cinema-violet flex items-center justify-center">
+                      <User className="w-4 h-4 text-white" aria-hidden />
                     </div>
                   )}
-                  <span className="text-sm text-zinc-300 hidden lg:inline max-w-[120px] truncate">
+                  <span className="text-sm text-cinema-muted hidden lg:inline max-w-[120px] truncate">
                     {user.name}
                   </span>
                 </div>
                 <button
                   type="button"
                   onClick={logout}
-                  className="p-2 text-zinc-500 hover:text-cinema-accent transition-colors rounded-lg hover:bg-white/5"
-                  title="Cerrar sesión"
+                  className="p-2 text-cinema-silver hover:text-cinema-accent transition-colors rounded hover:bg-cinema-elevated/50"
+                  aria-label="Cerrar sesión"
                 >
                   <LogOut className="w-4 h-4" />
                 </button>
@@ -155,16 +174,18 @@ export function Header() {
             <button
               type="button"
               onClick={() => setSearchOpen(!searchOpen)}
-              className="p-2 text-zinc-400 hover:text-white transition-colors"
+              className="p-2 text-cinema-silver hover:text-white transition-colors rounded"
               aria-label="Buscar"
+              aria-expanded={searchOpen}
             >
               <Search className="w-5 h-5" />
             </button>
             <button
               type="button"
-              className="p-2 text-zinc-400 hover:text-white"
+              className="p-2 text-cinema-silver hover:text-white rounded"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label={mobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
+              aria-expanded={mobileMenuOpen}
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -173,9 +194,13 @@ export function Header() {
 
         {searchOpen && (
           <div className="lg:hidden pb-4 animate-slide-down">
-            <form onSubmit={handleSearch}>
+            <form onSubmit={handleSearch} role="search">
+              <label htmlFor="mobile-search" className="sr-only">
+                Buscar
+              </label>
               <input
                 ref={searchRef}
+                id="mobile-search"
                 type="search"
                 placeholder="Buscar películas y series..."
                 value={searchQuery}
@@ -196,11 +221,11 @@ export function Header() {
                   className={cn(
                     'flex items-center gap-3 px-4 py-3 rounded-xl transition-colors',
                     isActive(item.href, item.exact)
-                      ? 'bg-cinema-accent/15 text-cinema-gold'
-                      : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                      ? 'bg-cinema-accent/15 text-cinema-accent-light'
+                      : 'text-cinema-silver hover:text-white hover:bg-cinema-elevated/50'
                   )}
                 >
-                  <item.icon className="w-5 h-5" />
+                  <item.icon className="w-5 h-5" aria-hidden />
                   {item.label}
                 </Link>
               ))}
@@ -210,7 +235,7 @@ export function Header() {
                   href="/subscribe"
                   className="flex items-center gap-3 px-4 py-3 text-cinema-gold font-semibold"
                 >
-                  <Crown className="w-5 h-5" />
+                  <Crown className="w-5 h-5" aria-hidden />
                   Premium
                 </Link>
               )}
@@ -220,13 +245,13 @@ export function Header() {
                   <div className="px-4 py-3">
                     <div className="flex items-center gap-3 mb-2">
                       {user.image ? (
-                        <img src={user.image} alt={user.name} className="w-8 h-8 rounded-full" />
+                        <img src={user.image} alt="" className="w-8 h-8 rounded-full" />
                       ) : (
                         <div className="w-8 h-8 rounded-full bg-cinema-accent flex items-center justify-center">
-                          <User className="w-4 h-4 text-white" />
+                          <User className="w-4 h-4 text-white" aria-hidden />
                         </div>
                       )}
-                      <span className="text-sm text-zinc-300">{user.name}</span>
+                      <span className="text-sm text-cinema-muted">{user.name}</span>
                     </div>
                     <button
                       type="button"
@@ -234,9 +259,9 @@ export function Header() {
                         logout();
                         setMobileMenuOpen(false);
                       }}
-                      className="flex items-center gap-3 px-4 py-3 text-zinc-400 hover:text-red-400 w-full text-left"
+                      className="flex items-center gap-3 px-4 py-3 text-cinema-silver hover:text-red-400 w-full text-left rounded-lg hover:bg-cinema-elevated/50"
                     >
-                      <LogOut className="w-5 h-5" />
+                      <LogOut className="w-5 h-5" aria-hidden />
                       Cerrar sesión
                     </button>
                   </div>

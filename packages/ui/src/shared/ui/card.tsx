@@ -1,16 +1,23 @@
 import { HTMLAttributes, forwardRef } from 'react';
 import { cn } from '../utils';
 
-interface CardProps extends HTMLAttributes<HTMLDivElement> {}
+interface CardProps extends HTMLAttributes<HTMLDivElement> {
+  variant?: 'default' | 'feature' | 'glow';
+}
 
 export const Card = forwardRef<HTMLDivElement, CardProps>(
-  ({ className, ...props }, ref) => {
+  ({ className, variant = 'default', ...props }, ref) => {
     return (
       <div
         ref={ref}
         className={cn(
-          'bg-cinema-surface rounded-xl border border-cinema-border overflow-hidden transition-all duration-300',
-          'hover:border-cinema-accent/40 hover:shadow-lg hover:shadow-cinema-accent/10',
+          'rounded-2xl border overflow-hidden transition-all duration-300',
+          variant === 'default' &&
+            'bg-cinema-surface border-cinema-border hover:border-cinema-violet/40',
+          variant === 'feature' &&
+            'card-feature border-cinema-violet/20',
+          variant === 'glow' &&
+            'bg-cinema-surface border-cinema-border hover:border-cinema-accent/40 hover:-translate-y-0.5 shadow-[0_4px_24px_rgba(139,92,246,0.08)]',
           className
         )}
         {...props}
@@ -23,7 +30,7 @@ Card.displayName = 'Card';
 
 export const CardContent = forwardRef<HTMLDivElement, CardProps>(
   ({ className, ...props }, ref) => {
-    return <div ref={ref} className={cn('p-4', className)} {...props} />;
+    return <div ref={ref} className={cn('p-6', className)} {...props} />;
   }
 );
 

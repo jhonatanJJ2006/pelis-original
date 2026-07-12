@@ -8,6 +8,11 @@ export const auth = betterAuth({
     connectionString: process.env.DATABASE_URL!,
   },
   authSecrets: process.env.BETTER_AUTH_SECRET!,
+  emailAndPassword: {
+    enabled: true,
+    autoSignIn: true,
+    requireEmailVerification: false,
+  },
   providers: [
     google({
       clientId: process.env.AUTH_GOOGLE_ID!,

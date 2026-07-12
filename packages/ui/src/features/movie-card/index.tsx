@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Heart, Play, Tv, TrendingUp, Film } from 'lucide-react';
+import { Heart, Play, Tv, Film, TrendingUp } from 'lucide-react';
 import { useMutation, useQuery } from 'convex/react';
 import { useUser } from '@pelis/auth/hooks';
 import { api } from '@pelis/convex';
@@ -49,26 +49,35 @@ export function MovieCard({ movie, showFavorite = true, variant = 'poster' }: Mo
   };
 
   return (
-    <Link href={`/movies/${movie._id}`} className="group block">
+    <Link
+      href={`/movies/${movie._id}`}
+      className="card-container block group active:scale-[0.97] motion-safe:transition-transform motion-safe:duration-fast motion-safe:ease-out-expo"
+    >
       <div
         className={cn(
-          'rounded-xl overflow-hidden transition-all duration-500',
+          'rounded-2xl overflow-hidden',
           'bg-cinema-surface border border-cinema-border',
-          'hover:border-cinema-accent/50 hover:shadow-2xl hover:shadow-cinema-accent/15',
-          'group-hover:-translate-y-2'
+          'motion-safe:transition-[transform,border-color,box-shadow] motion-safe:duration-normal motion-safe:ease-out-expo',
+          '[@media(hover:hover)_and_(pointer:fine)]:group-hover:border-cinema-violet/50',
+          '[@media(hover:hover)_and_(pointer:fine)]:group-hover:shadow-[0_8px_32px_rgba(59,130,246,0.2)]',
+          '[@media(hover:hover)_and_(pointer:fine)]:group-hover:-translate-y-1'
         )}
       >
         <div className={cn('relative overflow-hidden', variant === 'poster' ? 'aspect-[2/3]' : 'aspect-video')}>
           <MoviePoster
             src={movie.image}
             alt={movie.name}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+            className="w-full h-full object-cover motion-safe:transition-transform motion-safe:duration-slow motion-safe:ease-out-expo [@media(hover:hover)_and_(pointer:fine)]:group-hover:scale-[1.05]"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-transparent opacity-60 group-hover:opacity-95 transition-opacity duration-300" />
-          <div className="absolute inset-0 bg-gradient-to-b from-cinema-accent/0 via-transparent to-cinema-accent/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-400">
-            <div className="flex items-center gap-3 translate-y-4 group-hover:translate-y-0 transition-all duration-400">
-              <div className="p-3.5 rounded-full bg-cinema-accent text-white shadow-lg shadow-cinema-accent/40 group-hover:shadow-cinema-accent/60 transition-shadow hover:scale-110">
+          <div className="absolute inset-0 bg-gradient-to-t from-cinema-bg/95 via-cinema-bg/30 to-transparent opacity-70 [@media(hover:hover)_and_(pointer:fine)]:group-hover:opacity-90 motion-safe:transition-opacity motion-safe:duration-normal z-[1]" />
+          <div className="card-media-scrim absolute inset-0 z-[2]" aria-hidden />
+
+          <div className="card-actions-layer absolute inset-0 z-[3] flex items-center justify-center">
+            <div className="flex items-center gap-3">
+              <div
+                className="card-action-btn card-action-btn--play p-3 rounded-full bg-cinema-accent text-white shadow-glow [@media(hover:hover)_and_(pointer:fine)]:hover:scale-105 motion-safe:transition-transform"
+                aria-hidden
+              >
                 <Play className="w-5 h-5" fill="currentColor" />
               </div>
               {showFavorite && (
@@ -76,10 +85,10 @@ export function MovieCard({ movie, showFavorite = true, variant = 'poster' }: Mo
                   type="button"
                   onClick={handleFavorite}
                   className={cn(
-                    'p-3.5 rounded-full transition-all duration-300 hover:scale-110',
+                    'card-action-btn card-action-btn--heart p-3 rounded-full motion-safe:active:scale-95',
                     isFavorited
-                      ? 'bg-cinema-accent text-white shadow-lg shadow-cinema-accent/30'
-                      : 'bg-black/60 text-white hover:bg-black/80 border border-white/20'
+                      ? 'bg-cinema-accent text-white shadow-glow'
+                      : 'bg-cinema-elevated/90 text-white hover:bg-cinema-violet/40 border border-cinema-border'
                   )}
                   aria-label={isFavorited ? 'Quitar de favoritos' : 'Agregar a favoritos'}
                 >
@@ -88,45 +97,44 @@ export function MovieCard({ movie, showFavorite = true, variant = 'poster' }: Mo
               )}
             </div>
           </div>
-          <div className="absolute top-2 left-2 flex flex-wrap gap-1.5">
-            {isSeries && (
-              <Badge className="text-[10px] bg-cinema-gold text-black border-0 gap-1 shadow-lg shadow-cinema-gold/20">
+          <div className="absolute top-2 left-2 flex flex-wrap gap-1.5 z-[5]">
+            {isSeries ? (
+              <Badge className="text-[10px] bg-cinema-gold text-black border-0 gap-1">
                 <Tv className="w-3 h-3" />
                 Serie
               </Badge>
-            )}
-            {!isSeries && (
-              <Badge className="text-[10px] bg-cinema-accent/90 text-white border-0 gap-1 shadow-lg shadow-cinema-accent/20">
+            ) : (
+              <Badge variant="primary" className="text-[10px] gap-1">
                 <Film className="w-3 h-3" />
                 Película
               </Badge>
             )}
           </div>
-          <div className="absolute top-2 right-2">
-            <Badge variant="primary" className="text-[10px] bg-black/60 backdrop-blur-sm border-white/10">
+          <div className="absolute top-2 right-2 z-[5]">
+            <Badge variant="violet" className="text-[10px] bg-cinema-elevated/80 backdrop-blur-sm">
               {movie.classification}
             </Badge>
           </div>
-          <div className="absolute bottom-2 left-2 right-2 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
-            <div className="flex items-center gap-1 text-[10px] text-zinc-300 bg-black/60 backdrop-blur-sm px-2 py-1 rounded-full">
+          <div className="card-meta-reveal absolute bottom-2 left-2 right-2 flex items-center gap-2 z-[4]">
+            <div className="flex items-center gap-1.5 text-[10px] text-cinema-muted bg-cinema-elevated/90 backdrop-blur-sm px-2.5 py-1.5 rounded-full">
               <TrendingUp className="w-3 h-3 text-cinema-accent" />
               <span>{movie.releaseYear}</span>
             </div>
           </div>
         </div>
         <div className="p-3">
-          <h3 className="font-medium text-sm truncate mb-1 group-hover:text-cinema-accent-light transition-colors duration-300">
+          <h3 className="font-medium text-sm truncate mb-1 transition-colors duration-200 group-hover:text-cinema-accent-light">
             {movie.name}
           </h3>
-          <div className="flex items-center justify-between text-xs text-zinc-500">
-            <span className="truncate">{movie.genre}</span>
+          <div className="flex items-center justify-between text-xs text-cinema-silver">
+            <span className="truncate group-hover:text-cinema-muted">{movie.genre}</span>
             <span className="shrink-0 ml-2 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-cinema-accent/60" />
+              <span className="w-1.5 h-1.5 rounded-full bg-cinema-accent/70 group-hover:bg-cinema-accent group-hover:shadow-glow" />
               {movie.releaseYear}
             </span>
           </div>
           {isSeries && movie.episodes && (
-            <p className="text-[11px] text-zinc-600 mt-1">{movie.episodes} episodios</p>
+            <p className="text-[11px] text-cinema-ash mt-1">{movie.episodes} episodios</p>
           )}
         </div>
       </div>

@@ -18,16 +18,21 @@ export function Spinner({ className, size = 'md' }: SpinnerProps) {
         },
         className
       )}
+      aria-hidden
     />
   );
 }
 
 export function FullScreenSpinner() {
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-cinema-bg z-50">
+    <div
+      className="fixed inset-0 flex items-center justify-center bg-cinema-bg/90 z-50 backdrop-blur-sm"
+      role="status"
+      aria-label="Cargando"
+    >
       <div className="flex flex-col items-center gap-4">
         <Spinner size="lg" />
-        <p className="text-zinc-400">Cargando...</p>
+        <p className="text-cinema-muted">Cargando...</p>
       </div>
     </div>
   );

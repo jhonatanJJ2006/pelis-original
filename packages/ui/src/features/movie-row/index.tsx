@@ -1,11 +1,18 @@
 'use client';
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { useRef, useEffect, useState } from 'react';
+import { useRef } from 'react';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, FreeMode, Autoplay } from 'swiper/modules';
 import { MovieCard } from '../movie-card';
 import { SectionHeader } from '../section-header';
+import { ScrollReveal } from '../scroll-reveal';
 import type { MediaItem } from '../../shared/types';
 import { cn } from '../../shared/utils';
+
+import 'swiper/css';
+import 'swiper/css/free-mode';
+import 'swiper/css/navigation';
 
 interface MovieRowProps {
   title: string;
@@ -24,103 +31,81 @@ export function MovieRow({
   linkLabel,
   className,
 }: MovieRowProps) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(0);
+  const prevRef = useRef<HTMLButtonElement>(null);
+  const nextRef = useRef<HTMLButtonElement>(null);
 
   if (movies.length === 0) return null;
 
-  const updateScrollState = () => {
-    const el = scrollRef.current;
-    if (!el) return;
-    setCanScrollLeft(el.scrollLeft > 0);
-    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 10);
-    const cardWidth = 180 + 16;
-    const idx = Math.round(el.scrollLeft / cardWidth);
-    setActiveIndex(Math.min(idx, movies.length - 1));
-  };
-
-  const scroll = (direction: 'left' | 'right') => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const amount = el.clientWidth * 0.8;
-    el.scrollBy({ left: direction === 'left' ? -amount : amount, behavior: 'smooth' });
-  };
-
   return (
-    <section className={cn('relative group/row', className)}>
+    <ScrollReveal as="section" className={cn('relative', className)}>
       <SectionHeader
         title={title}
         subtitle={subtitle}
         href={href}
         linkLabel={linkLabel}
       />
-      <div className="relative">
+      <div className="relative group/row">
         <button
+          ref={prevRef}
           type="button"
-          onClick={() => scroll('left')}
-          className={cn(
-            'absolute -left-0 top-1/2 -translate-y-1/2 z-10 p-2.5 rounded-full bg-black/80 border border-white/10 text-white transition-all duration-300 hover:bg-black hover:scale-110 hidden md:flex items-center justify-center shadow-lg',
-            canScrollLeft ? 'opacity-100' : 'opacity-0 pointer-events-none'
-          )}
+          className="absolute -left-1 top-1/2 -translate-y-1/2 z-10 p-2.5 rounded-full bg-cinema-elevated/95 border border-cinema-border text-white motion-safe:transition-[opacity,background-color,border-color] motion-safe:duration-fast motion-safe:ease-out-expo hover:bg-cinema-violet/30 hover:border-cinema-violet/50 hidden md:flex items-center justify-center opacity-0 group-hover/row:opacity-100 focus-visible:opacity-100 active:scale-95"
           aria-label="Anterior"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
         <button
+          ref={nextRef}
           type="button"
-          onClick={() => scroll('right')}
-          className={cn(
-            'absolute -right-0 top-1/2 -translate-y-1/2 z-10 p-2.5 rounded-full bg-black/80 border border-white/10 text-white transition-all duration-300 hover:bg-black hover:scale-110 hidden md:flex items-center justify-center shadow-lg',
-            canScrollRight ? 'opacity-100' : 'opacity-0 pointer-events-none'
-          )}
+          className="absolute -right-1 top-1/2 -translate-y-1/2 z-10 p-2.5 rounded-full bg-cinema-elevated/95 border border-cinema-border text-white motion-safe:transition-[opacity,background-color,border-color] motion-safe:duration-fast motion-safe:ease-out-expo hover:bg-cinema-violet/30 hover:border-cinema-violet/50 hidden md:flex items-center justify-center opacity-0 group-hover/row:opacity-100 focus-visible:opacity-100 active:scale-95"
           aria-label="Siguiente"
         >
           <ChevronRight className="w-5 h-5" />
         </button>
 
-        <div
-          ref={scrollRef}
-          onScroll={updateScrollState}
-          className="flex gap-4 overflow-x-auto pb-2 scroll-smooth snap-x snap-mandatory scrollbar-hide -mx-1 px-1"
+        <Swiper
+          modules={[Navigation, FreeMode, Autoplay]}
+          navigation={{
+            prevEl: prevRef.current,
+            nextEl: nextRef.current,
+          }}
+          onInit={(swiper) => {
+            if (swiper.params.navigation && typeof swiper.params.navigation === 'object') {
+              swiper.params.navigation.prevEl = prevRef.current;
+              swiper.params.navigation.nextEl = nextRef.current;
+              swiper.navigation.init();
+              swiper.navigation.update();
+            }
+          }}
+          autoplay={{
+            delay: 5000,
+            disableOnInteraction: false,
+            pauseOnMouseEnter: true,
+          }}
+          freeMode={{
+            enabled: true,
+            momentum: true,
+            momentumRatio: 0.8,
+            momentumVelocityRatio: 0.6,
+          }}
+          slidesPerView="auto"
+          spaceBetween={12}
+          grabCursor
+          touchRatio={1.5}
+          resistanceRatio={0.6}
+          speed={400}
+          watchSlidesProgress
+          className="movie-row-swiper"
         >
-          {movies.map((movie, i) => (
-            <div
+          {movies.map((movie) => (
+            <SwiperSlide
               key={movie._id}
-              className="w-[140px] sm:w-[160px] md:w-[180px] shrink-0 snap-start"
-              style={{
-                animation: `slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) ${Math.min(i, 12) * 0.06}s forwards`,
-                opacity: 0,
-              }}
+              className="!w-[140px] sm:!w-[160px] md:!w-[180px] movie-row-slide"
             >
               <MovieCard movie={movie} />
-            </div>
+            </SwiperSlide>
           ))}
-        </div>
-
-        {movies.length > 4 && (
-          <div className="hidden md:flex items-center justify-center gap-1.5 mt-3">
-            {movies.slice(0, Math.min(movies.length, 20)).map((_, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => {
-                  const el = scrollRef.current;
-                  if (!el) return;
-                  el.scrollTo({ left: i * (180 + 16), behavior: 'smooth' });
-                }}
-                className={`rounded-full transition-all duration-300 ${
-                  i === activeIndex
-                    ? 'w-5 h-1.5 bg-cinema-accent'
-                    : 'w-1.5 h-1.5 bg-zinc-700 hover:bg-zinc-500'
-                }`}
-                aria-label={`Ir a ${i + 1}`}
-              />
-            ))}
-          </div>
-        )}
+        </Swiper>
       </div>
-    </section>
+    </ScrollReveal>
   );
 }

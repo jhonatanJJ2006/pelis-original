@@ -25,7 +25,7 @@
     "react": "catalog:react18",
     "react-dom": "catalog:react18",
     "sonner": "^1.7.0",
-    "swiper": "^11.1.14",
+    "swiper": "^14.0.2",
     "zod": "catalog:"
   },
   "devDependencies": {
@@ -36,10 +36,10 @@
     "@types/node": "^22.19.0",
     "@types/react": "catalog:react18",
     "@types/react-dom": "catalog:react18",
+    "autoprefixer": "^10.4.20",
     "dotenv-cli": "^7.4.2",
     "eslint": "catalog:",
     "jiti": "^1.21.6",
-    "autoprefixer": "^10.4.20",
     "prettier": "catalog:",
     "tailwindcss": "catalog:",
     "typescript": "catalog:"

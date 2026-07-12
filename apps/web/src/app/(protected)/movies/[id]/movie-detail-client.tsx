@@ -10,6 +10,8 @@ import { Badge, Spinner } from '@pelis/ui/components';
 import { VideoPlayer } from '@pelis/ui/features/video-player';
 import { MoviePoster } from '@pelis/ui/features/movie-poster';
 import { MovieRow } from '@pelis/ui/features/movie-row';
+import { EmptyState } from '@pelis/ui/features/empty-state';
+import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';
 import { toast } from 'sonner';
 import { cn } from '@pelis/ui/utils';
 import type { MediaItem } from '@pelis/ui/types';
@@ -53,7 +55,7 @@ export default function MovieDetailPageClient() {
 
   if (movie === undefined) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="flex items-center justify-center min-h-[60vh]" role="status" aria-label="Cargando">
         <Spinner size="lg" />
       </div>
     );
@@ -61,13 +63,13 @@ export default function MovieDetailPageClient() {
 
   if (movie === null) {
     return (
-      <div className="page-shell text-center">
-        <h2 className="font-display text-3xl uppercase mb-2">No encontrado</h2>
-        <p className="text-zinc-400 mb-6">Este título no existe en el catálogo</p>
-        <Link href="/movies" className="text-cinema-gold hover:text-cinema-gold-light">
-          ← Volver al catálogo
-        </Link>
-      </div>
+      <EmptyState
+        icon={Play}
+        title="No encontrado"
+        description="Este título no existe en el catálogo."
+        actionLabel="Volver al catálogo"
+        actionHref="/movies"
+      />
     );
   }
 
@@ -75,32 +77,33 @@ export default function MovieDetailPageClient() {
   const relatedFiltered = (related ?? []).filter((m) => m._id !== movie._id);
 
   return (
-    <div className="animate-fade-in pb-12">
-      <div className="relative h-[420px] md:h-[520px] overflow-hidden cinema-grain">
+    <div className="pb-12">
+      <div className="relative h-[420px] md:h-[520px] overflow-hidden">
         <MoviePoster
           src={movie.image}
-          alt={movie.name}
+          alt=""
           className="w-full h-full object-cover"
           loading="eager"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-cinema-bg via-cinema-bg/80 to-cinema-bg/40" />
-        <div className="absolute inset-0 bg-gradient-to-t from-cinema-bg via-transparent to-transparent" />
+        <div className="absolute inset-0 hero-gradient-right" />
+        <div className="absolute inset-0 hero-gradient-bottom" />
+        <div className="absolute inset-0 hero-gradient-accent" />
 
         <div className="absolute bottom-0 left-0 right-0 p-8 md:p-14">
           <Link
             href={isSeries ? '/series' : '/movies'}
-            className="inline-flex items-center gap-2 text-zinc-400 hover:text-white mb-6 transition-colors text-sm"
+            className="inline-flex items-center gap-2 text-cinema-silver hover:text-white mb-6 transition-colors text-sm"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-4 h-4" aria-hidden />
             Volver
           </Link>
           <div className="container mx-auto">
             <div className="flex flex-wrap gap-2 mb-4">
               <Badge variant="primary">{movie.classification}</Badge>
-              <Badge>{movie.genre}</Badge>
-              <Badge variant="default">{movie.releaseYear}</Badge>
+              <Badge variant="violet">{movie.genre}</Badge>
+              <Badge>{movie.releaseYear}</Badge>
               {isSeries && movie.episodes && (
-                <Badge className="bg-cinema-gold/90 text-black border-0">
+                <Badge variant="warning" className="bg-cinema-gold/90 text-black border-0">
                   {movie.episodes} episodios
                 </Badge>
               )}
@@ -108,37 +111,38 @@ export default function MovieDetailPageClient() {
             <h1 className="font-display text-4xl md:text-6xl tracking-wide text-white uppercase max-w-3xl mb-4">
               {movie.name}
             </h1>
-            <p className="text-zinc-300 text-lg mb-6 max-w-2xl line-clamp-2">{movie.synopsis}</p>
+            <p className="text-cinema-muted text-lg mb-6 max-w-2xl line-clamp-2">{movie.synopsis}</p>
 
-            <div className="flex flex-wrap gap-6 text-sm text-zinc-400 mb-8">
+            <div className="flex flex-wrap gap-6 text-sm text-cinema-silver mb-8">
               <div className="flex items-center gap-1.5">
-                <User className="w-4 h-4" />
+                <User className="w-4 h-4" aria-hidden />
                 <span>{movie.actors}</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <Tag className="w-4 h-4" />
+                <Tag className="w-4 h-4" aria-hidden />
                 <span>{movie.genre}</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <Calendar className="w-4 h-4" />
+                <Calendar className="w-4 h-4" aria-hidden />
                 <span>{movie.releaseYear}</span>
               </div>
             </div>
 
             <div className="flex flex-wrap gap-3">
-              <a href="#player" className="btn-primary flex items-center gap-2">
-                <Play className="w-5 h-5" fill="currentColor" />
+              <a href="#player" className="btn-primary-glow inline-flex items-center gap-2">
+                <Play className="w-5 h-5" fill="currentColor" aria-hidden />
                 Reproducir
               </a>
               <button
                 type="button"
                 onClick={handleFavorite}
                 className={cn(
-                  'btn-secondary flex items-center gap-2',
-                  isFavorited && 'border-red-500/50 text-red-400'
+                  'btn-secondary inline-flex items-center gap-2',
+                  isFavorited && 'border-cinema-accent/50 text-cinema-accent-light'
                 )}
+                aria-pressed={isFavorited ?? false}
               >
-                <Heart className={cn('w-5 h-5', isFavorited && 'fill-current')} />
+                <Heart className={cn('w-5 h-5', isFavorited && 'fill-current')} aria-hidden />
                 {isFavorited ? 'En favoritos' : 'Agregar a favoritos'}
               </button>
             </div>
@@ -147,7 +151,7 @@ export default function MovieDetailPageClient() {
       </div>
 
       <div className="container mx-auto px-4 py-12 space-y-12">
-        <section id="player">
+        <ScrollReveal as="section" id="player">
           <h2 className="font-display text-2xl tracking-wide text-white uppercase mb-6">
             Reproductor
           </h2>
@@ -161,23 +165,25 @@ export default function MovieDetailPageClient() {
               autoPlay={shouldPlay}
             />
           ) : (
-            <div className="aspect-video rounded-2xl bg-cinema-surface border border-cinema-border flex flex-col items-center justify-center gap-4">
-              <p className="text-zinc-400">Inicia sesión para reproducir y guardar tu progreso</p>
+            <div className="aspect-video rounded-2xl card-feature border border-cinema-violet/20 flex flex-col items-center justify-center gap-4 p-8">
+              <p className="text-cinema-muted text-center">
+                Inicia sesión para reproducir y guardar tu progreso
+              </p>
               <Link href="/login" className="btn-primary">
                 Iniciar sesión
               </Link>
             </div>
           )}
-        </section>
+        </ScrollReveal>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+        <ScrollReveal className="grid grid-cols-1 lg:grid-cols-3 gap-10">
           <div className="lg:col-span-2">
             <h2 className="font-display text-2xl tracking-wide text-white uppercase mb-4">
               Sinopsis
             </h2>
-            <p className="text-zinc-300 leading-relaxed text-lg">{movie.synopsis}</p>
+            <p className="text-cinema-muted leading-relaxed text-lg">{movie.synopsis}</p>
           </div>
-          <div className="card p-6 h-fit">
+          <div className="card-feature p-6 h-fit">
             <h3 className="font-display text-lg tracking-wide text-white uppercase mb-5">
               Detalles
             </h3>
@@ -191,15 +197,15 @@ export default function MovieDetailPageClient() {
               ].map(([label, value]) => (
                 <div
                   key={label}
-                  className="flex justify-between gap-4 border-b border-cinema-border pb-3 last:border-0"
+                  className="flex justify-between gap-4 border-b border-cinema-border/50 pb-3 last:border-0"
                 >
-                  <dt className="text-zinc-500">{label}</dt>
-                  <dd className="font-medium text-right">{value}</dd>
+                  <dt className="text-cinema-silver">{label}</dt>
+                  <dd className="font-medium text-right text-white">{value}</dd>
                 </div>
               ))}
             </dl>
           </div>
-        </div>
+        </ScrollReveal>
 
         {relatedFiltered.length > 0 && (
           <MovieRow

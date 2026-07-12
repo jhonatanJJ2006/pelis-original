@@ -32,6 +32,7 @@ export function VideoPlayer({
   const [muted, setMuted] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [showControls, setShowControls] = useState(false);
   const lastSaved = useRef(0);
 
   const src = videoUrl || DEMO_VIDEO;
@@ -78,7 +79,12 @@ export function VideoPlayer({
   };
 
   return (
-    <div className="relative aspect-video rounded-2xl overflow-hidden bg-black border border-cinema-border group">
+    <div
+      className="relative aspect-video rounded-2xl overflow-hidden bg-cinema-bg border border-cinema-border group shadow-[0_8px_40px_rgba(139,92,246,0.12)]"
+      onMouseEnter={() => setShowControls(true)}
+      onMouseLeave={() => setShowControls(false)}
+      onFocus={() => setShowControls(true)}
+    >
       <video
         ref={videoRef}
         src={src}
@@ -99,9 +105,20 @@ export function VideoPlayer({
         onClick={togglePlay}
         aria-label={`Reproducir ${title}`}
       />
-      <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+      <div
+        className={cn(
+          'absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-cinema-bg/95 to-transparent transition-opacity duration-200',
+          showControls || !playing ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+        )}
+      >
         <div
-          className="h-1 bg-white/20 rounded-full mb-3 cursor-pointer"
+          className="h-1.5 bg-cinema-elevated rounded-full mb-3 cursor-pointer"
+          role="slider"
+          aria-label="Progreso de reproducción"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={duration ? Math.round((progress / duration) * 100) : 0}
+          tabIndex={0}
           onClick={(e) => {
             e.stopPropagation();
             const video = videoRef.current;
@@ -110,24 +127,34 @@ export function VideoPlayer({
             const ratio = (e.clientX - rect.left) / rect.width;
             video.currentTime = ratio * duration;
           }}
+          onKeyDown={(e) => {
+            const video = videoRef.current;
+            if (!video || !duration) return;
+            if (e.key === 'ArrowRight') video.currentTime = Math.min(video.currentTime + 10, duration);
+            if (e.key === 'ArrowLeft') video.currentTime = Math.max(video.currentTime - 10, 0);
+          }}
         >
           <div
-            className="h-full bg-cinema-accent rounded-full"
+            className="h-full bg-gradient-to-r from-cinema-accent to-cinema-violet rounded-full"
             style={{ width: `${duration ? (progress / duration) * 100 : 0}%` }}
           />
         </div>
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 togglePlay();
               }}
-              className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+              className="p-2 rounded-full bg-cinema-elevated/90 hover:bg-cinema-violet/40 border border-cinema-border transition-colors focus-visible:ring-2 focus-visible:ring-cinema-accent/60"
               aria-label={playing ? 'Pausar' : 'Reproducir'}
             >
-              {playing ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" fill="currentColor" />}
+              {playing ? (
+                <Pause className="w-5 h-5" />
+              ) : (
+                <Play className="w-5 h-5" fill="currentColor" />
+              )}
             </button>
             <button
               type="button"
@@ -136,7 +163,7 @@ export function VideoPlayer({
                 setMuted(!muted);
                 if (videoRef.current) videoRef.current.muted = !muted;
               }}
-              className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+              className="p-2 rounded-full bg-cinema-elevated/90 hover:bg-cinema-violet/40 border border-cinema-border transition-colors focus-visible:ring-2 focus-visible:ring-cinema-accent/60"
               aria-label={muted ? 'Activar sonido' : 'Silenciar'}
             >
               {muted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
@@ -148,7 +175,7 @@ export function VideoPlayer({
               e.stopPropagation();
               toggleFullscreen();
             }}
-            className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+            className="p-2 rounded-full bg-cinema-elevated/90 hover:bg-cinema-violet/40 border border-cinema-border transition-colors focus-visible:ring-2 focus-visible:ring-cinema-accent/60"
             aria-label="Pantalla completa"
           >
             <Maximize className="w-5 h-5" />
@@ -159,13 +186,10 @@ export function VideoPlayer({
         <button
           type="button"
           onClick={togglePlay}
-          className={cn(
-            'absolute inset-0 flex items-center justify-center',
-            'bg-black/30 transition-opacity group-hover:bg-black/40'
-          )}
+          className="absolute inset-0 flex items-center justify-center bg-cinema-bg/40 transition-opacity hover:bg-cinema-bg/50 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-cinema-accent/60"
           aria-label="Reproducir"
         >
-          <div className="p-5 rounded-full bg-cinema-accent/90 text-white shadow-lg shadow-cinema-accent/30">
+          <div className="p-5 rounded-full bg-cinema-accent text-white shadow-glow">
             <Play className="w-8 h-8" fill="currentColor" />
           </div>
         </button>

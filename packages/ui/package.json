@@ -26,6 +26,7 @@
     "convex": "^1.42.1",
     "lucide-react": "^0.447.0",
     "sonner": "^1.7.0",
+    "swiper": "^14.0.2",
     "tailwind-merge": "^2.5.4"
   },
   "devDependencies": {
