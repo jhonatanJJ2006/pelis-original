@@ -1,4 +1,6 @@
 {
   "buildCommand": "pnpm build:vercel",
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "outputDirectory": "apps/web/.next",
+  "ignoreCommand": "npx turbo-ignore"
 }
