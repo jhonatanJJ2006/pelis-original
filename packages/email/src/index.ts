@@ -10,7 +10,7 @@ interface SendEmailOptions {
 
 export async function sendEmail({ to, subject, html }: SendEmailOptions) {
   const { data, error } = await resend.emails.send({
-    from: 'Pelis <noreply@pelis.com>',
+    from: 'Pelis <onboarding@resend.dev>',
     to,
     subject,
     html,

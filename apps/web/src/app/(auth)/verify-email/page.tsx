@@ -95,7 +95,7 @@ function VerifyForm() {
       }
 
       setError('');
-      setResendCooldown(60);
+      setResendCooldown(30);
     } catch {
       setError('Error de conexión. Intenta de nuevo.');
     } finally {
@@ -168,17 +168,41 @@ function VerifyForm() {
         </form>
 
         <div className="text-center mt-6">
-          <p className="text-cinema-muted text-sm mb-2">
+          <p className="text-cinema-muted text-sm mb-3">
             ¿No recibiste el código?
           </p>
-          <button
-            type="button"
-            onClick={handleResend}
-            disabled={resending || resendCooldown > 0}
-            className="text-cinema-gold hover:text-cinema-gold-light font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {resending ? 'Reenviando…' : resendCooldown > 0 ? `Reenviar en ${resendCooldown}s` : 'Reenviar código'}
-          </button>
+          <div className="relative inline-flex items-center justify-center">
+            {resendCooldown > 0 && (
+              <svg className="absolute w-20 h-20 -rotate-90" viewBox="0 0 64 64">
+                <circle cx="32" cy="32" r="28" fill="none" stroke="rgba(139,92,246,0.15)" strokeWidth="3" />
+                <circle
+                  cx="32" cy="32" r="28" fill="none" stroke="url(#timerGradient)"
+                  strokeWidth="3" strokeLinecap="round"
+                  strokeDasharray={2 * Math.PI * 28}
+                  strokeDashoffset={2 * Math.PI * 28 * (1 - resendCooldown / 30)}
+                  className="transition-all duration-1000 ease-linear"
+                />
+                <defs>
+                  <linearGradient id="timerGradient" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="#8b5cf6" />
+                    <stop offset="100%" stopColor="#14b8a6" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            )}
+            <button
+              type="button"
+              onClick={handleResend}
+              disabled={resending || resendCooldown > 0}
+              className="relative text-cinema-gold hover:text-cinema-gold-light font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {resending
+                ? 'Reenviando…'
+                : resendCooldown > 0
+                  ? `${resendCooldown}s`
+                  : 'Reenviar código'}
+            </button>
+          </div>
         </div>
 
         <p className="text-center text-cinema-muted text-sm mt-6 pt-6 border-t border-cinema-border">
