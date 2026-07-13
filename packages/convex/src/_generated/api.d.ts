@@ -16,6 +16,7 @@ import type * as movies from "../movies.js";
 import type * as seed from "../seed.js";
 import type * as seed_enhance from "../seed_enhance.js";
 import type * as seed_sql from "../seed_sql.js";
+import type * as seed_update_images from "../seed_update_images.js";
 import type * as subscriptions from "../subscriptions.js";
 import type * as users from "../users.js";
 
@@ -34,6 +35,7 @@ declare const fullApi: ApiFromModules<{
   seed: typeof seed;
   seed_enhance: typeof seed_enhance;
   seed_sql: typeof seed_sql;
+  seed_update_images: typeof seed_update_images;
   subscriptions: typeof subscriptions;
   users: typeof users;
 }>;

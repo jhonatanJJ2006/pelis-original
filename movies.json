@@ -1,0 +1,402 @@
+[
+  {
+    "tmdbId": 83533,
+    "title": "Avatar: Fuego y ceniza",
+    "overview": "Devastados por la guerra contra la RDA y la perdida de su hijo mayor, Jake Sully y Neytiri se enfrentan a una nueva amenaza en Pandora: el pueblo de la ceniza, una violenta tribu Na'vi ávida de poder liderada por los despiadados Varang.",
+    "genre": "Ciencia ficción, Aventura, Fantasía",
+    "releaseYear": 2025,
+    "actors": ["Sam Worthington", "Zoe Saldaña", "Sigourney Weaver", "Stephen Lang"]
+  },
+  {
+    "tmdbId": 1311031,
+    "title": "Demon Slayer: Kimetsu no Yaiba Castillo infinito",
+    "overview": "Tanjiro Kamado es un chico que se unió a una organización dedicada a cazar demonios después de que su hermana menor, Nezuko, fuera convertida. Mientras los miembros de la organización y los Pilares participaban en un programa de entrenamiento grupal, como preparación para la inminente batalla contra los demonios, Muzan Kibutsuji aparece en la Mansión Ubuyashiki. Con el jefe de la organización en peligro, Tanjiro y los Pilares corren hacia la mansión, pero son arrastrados a un espacio misterioso por obra de Kibutsuji. El lugar al que han caído Tanjiro y los cazadores es el bastión de los demonios: el Castillo Infinito. Así, el campo de batalla queda establecido para dar fin a la guerra entre humanos y demonios.",
+    "genre": "Animación, Acción, Fantasía",
+    "releaseYear": 2025,
+    "actors": ["Natsuki Hanae", "Akari Kito", "Hiro Shimono", "Yoshitsugu Matsuoka"]
+  },
+  {
+    "tmdbId": 1419406,
+    "title": "Operación Sombra",
+    "overview": "Unos astutos y traicioneros ladrones desafian a la Policía Judicial de Macao. La Policía, que se encontraba en una dura batalla, invita de nuevo al experto en rastreo Huang De Zhong, retirado desde hace muchos años, a unir fuerzas con la joven élite del Departamento de Investigación Criminal de la Policía Judicial. Bajo la colisión de las técnicas tradicionales de rastreo y la alta tecnología, la policía y los criminales luchan con ingenio y valentía, y se lanzan a un duelo entre el bien y el mal parecido al juego del gato y el ratón.",
+    "genre": "Acción, Crimen, Drama, Suspense",
+    "releaseYear": 2025,
+    "actors": ["Jackie Chan", "Han Jiang", "Wang Yutian", "Cya Liu"]
+  },
+  {
+    "tmdbId": 1084242,
+    "title": "Zootopia 2",
+    "overview": "Tras resolver el caso más importante de la historia de Zootopia, los policías novatos Judy Hopps y Nick Wilde se encuentran en la sinuosa pista de un gran misterio cuando Gary De'Snake llega y revoluciona la metrópolis animal.",
+    "genre": "Animación, Aventura, Comedia, Misterio, Familia",
+    "releaseYear": 2025,
+    "actors": ["Ginnifer Goodwin", "Jason Bateman", "Ke Huy Quan", "Fortune Feimster"]
+  },
+  {
+    "tmdbId": 755898,
+    "title": "La guerra de los mundos",
+    "overview": "Will Radford, un destacado analista de ciberseguridad, pasa sus días rastreando posibles amenazas a la seguridad nacional a través de un programa de vigilancia masiva. Un ataque de una entidad desconocida le lleva a cuestionarse si el gobierno le está ocultando algo a él... y al resto del mundo.",
+    "genre": "Ciencia ficción, Suspense",
+    "releaseYear": 2025,
+    "actors": ["Ice Cube", "Eva Longoria", "Clark Gregg", "Iman Benson"]
+  },
+  {
+    "tmdbId": 1368166,
+    "title": "La Empleada",
+    "overview": "Una mujer que atraviesa un momento difícil encuentra una nueva oportunidad al empezar de nuevo como criada para una pareja adinerada.",
+    "genre": "Misterio, Suspense",
+    "releaseYear": 2025,
+    "actors": ["Sydney Sweeney", "Amanda Seyfried", "Brandon Sklenar", "Michele Morrone"]
+  },
+  {
+    "tmdbId": 1242898,
+    "title": "Depredador: Tierras salvajes",
+    "overview": "En el futuro, en un planeta remoto, un joven Depredador, marginado de su clan, encuentra un aliado inesperado en Thia y se embarca en un peligroso viaje en busca del adversario definitivo.",
+    "genre": "Acción, Ciencia ficción, Aventura",
+    "releaseYear": 2025,
+    "actors": ["Elle Fanning", "Dimitrius Schuster-Koloamatangi", "Ravi Narayan", "Michael Homick"]
+  },
+  {
+    "tmdbId": 1287141,
+    "title": "Pasajero",
+    "overview": "Colin, un hombre introvertido, se queda prendado de Ray, el carismático y atractivo líder de una banda de moteros que le toma como sumiso, dinamitando su rutina y cambiándole la vida.",
+    "genre": "Romance, Drama, Comedia",
+    "releaseYear": 2025,
+    "actors": ["Harry Melling", "Alexander Skarsgård", "Lesley Sharp", "Douglas Hodge"]
+  },
+  {
+    "tmdbId": 980477,
+    "title": "Ne Zha 2: El Renacer del Alma",
+    "overview": "Después de la catástrofe, aunque las almas de Nezha y Aobing fueron salvadas, sus cuerpos pronto serían destrozados. Taiyi Zhenren planeaba usar el loto de siete colores para reconstruir sus cuerpos.",
+    "genre": "Animación, Acción, Fantasía, Aventura",
+    "releaseYear": 2025,
+    "actors":["Lü Yanting", "Cao Yalin", "Chen Hao", "Yang Wei"]
+  },
+  {
+    "tmdbId": 803796,
+    "title": "Las guerreras k-pop",
+    "overview": "Cuando no están llenando estadios, las superestrellas del k-pop Rumi, Mira y Zoey usan sus superpoderes secretos para proteger a sus fans de amenazas sobrenaturales.",
+    "genre": "Fantasía, Música, Comedia, Animación",
+    "releaseYear": 2025,
+    "actors": ["Arden Cho", "May Hong", "Ji-young Yoo", "Mike Han"]
+  },
+  {
+    "tmdbId": 1234821,
+    "title": "Jurassic World: Renace",
+    "overview": "Cinco años después de los acontecimientos de Jurassic World Dominion, Zora Bennett, una experta en operaciones encubiertas, es contratada para dirigir a un equipo de especialistas cuya misión es conseguir fabricar un medicamento hecho de ADN de tres criaturas más grandes para la raza humana.",
+    "genre": "Ciencia ficción, Aventura, Acción",
+    "releaseYear": 2025,
+    "actors": ["Scarlett Johansson", "Mahershala Ali", "Jonathan Bailey", "Rupert Friend"]
+  },
+  {
+    "tmdbId": 1061474,
+    "title": "Superman",
+    "overview": "Mientras el mundo pierde la fe en la bondad, Clark Kent, un periodista en Metrópolis, se embarca en un viaje para reconciliar su herencia kryptoniana con su educación humana como Superman.",
+    "genre": "Ciencia ficción, Aventura, Acción",
+    "releaseYear": 2025,
+    "actors": ["David Corenswet", "Rachel Brosnahan", "Nicholas Hoult", "Edi Gathegi"]
+  },
+  {
+    "tmdbId": 950387,
+    "title": "Una película de Minecraft",
+    "overview": "Henry, Natalie, Dawn y Garrett, cuatro inadaptados, son arrastrados a un misterioso portal hacia el extraño y cúbico mundo principal. Para volver a casa, tendrán que dominar este mundo con la ayuda de un artesano inesperado y experto llamado, Steve, mientras se embarcan en una búsqueda mágica.",
+    "genre": "Familia, Fantasía, Comedia, Aventura",
+    "releaseYear": 2025,
+    "actors": ["Jason Momoa", "Jack Black", "Sebastian Eugene Hansen", "Emma Myers"]
+  },
+  {
+    "tmdbId": 1156594,
+    "title": "Culpa nuestra",
+    "overview": "La relación entre Nick y Noah está pasando por su mejor momento. Se van a producir una serie de eventos para que ambos puedan comprender finalmente si de verdad están hechos el uno para el otro o, si de lo contrario, lo que más les conviene es seguir caminos separados.",
+    "genre": "Romance, Drama",
+    "releaseYear": 2025,
+    "actors": ["Nicole Wallace", "Gabriel Guevara", "Gabriela Andrada", "Marta Hazas"]
+  },
+  {
+    "tmdbId": 1246049,
+    "title": "Drácula",
+    "overview": "Tras la muerte de su esposa, un príncipe del siglo XV renuncia a Dios y se convierte en vampiro. Siglos más tarde, en el Londres del siglo XIX, ve a una mujer parecida a su difunta esposa y la persigue, sellando así su propio destino.",
+    "genre": "Terror, Fantasía, Romance",
+    "releaseYear": 2025,
+    "actors": ["Caleb Landry Jones", "Zoé Bleu Sidel", "Christoph Waltz", "Matilda De Angelis"]
+  },
+  {
+    "tmdbId": 1038392,
+    "title": "El Conjuro 4: Últimos ritos",
+    "overview": "En 1986, los investigadores paranormales, Ed y Lorraine Warren, salen de su retiro para investigar, junto con su hija adulta Judy y su compañero Tony, el caso Smurl, una entidad demoníaca más oscura.",
+    "genre": "Terror",
+    "releaseYear": 2025,
+    "actors": ["Patrick Wilson", "Vera Farmiga", "Mia Tomlinson", "Ben Hardy"]
+  },
+  {
+    "tmdbId": 1233413,
+    "title": "Pecadores",
+    "overview": "Intentando dejar atrás sus vidas problemáticas, los hermanos gemelos regresan a su pueblo natal para empezar de nuevo, solo para descubrir que un mal aún mayor los espera para darles la bienvenida.",
+    "genre": "Terror, Acción, Suspense",
+    "releaseYear": 2025,
+    "actors": ["Michael B. Jordan", "Hailee Steinfeld", "Miles Caton", "Jack O'Connell"]
+  },
+  {
+    "tmdbId": 911430,
+    "title": "F1 la película",
+    "overview": "El piloto legendario Sonny Hayes es convencido de salir de su retiro para liderar a un equipo de la Fórmula 1 en dificultades y ser mentor de un joven piloto talentoso, mientras se busca una última oportunidad de gloria.",
+    "genre": "Acción, Drama",
+    "releaseYear": 2025,
+    "actors": ["Brad Pitt", "Damson Idris", "Javier Bardem", "Kerry Condon"]
+  },
+  {
+    "tmdbId": 1087192,
+    "title": "Cómo entrenar a tu dragón",
+    "overview": "En la agreste isla de Berk, donde vikingos y dragones han sido enemigos acérrimos durante generaciones, Hipo se distingue, desafiando siglos de tradición al entablar amistad con Desdentao, un temido dragón Furia Nocturna. Su improbable vínculo revela la verdadera naturaleza de los dragones, desafiando los cimientos de la sociedad vikinga.",
+    "genre": "Fantasía, Familia, Acción, Aventura",
+    "releaseYear": 2025,
+    "actors": ["Mason Thames", "Nico Parker", "Gerard Butler", "Nick Frost"]
+  },
+  {
+    "tmdbId": 425274,
+    "title": "Los ilusionistas 3: Ahora me ves, ahora no",
+    "overview": "La historia remota un robo de diamantes que involucra a dos generaciones de ilusionistas, lo que forza a los Jinetes a salir de su retiro y unirse a los nuevos protagonistas para detener a un poderoso grupo de criminales.",
+    "genre": "Crimen, Suspense",
+    "releaseYear": 2025,
+    "actors": ["Jesse Eisenberg", "Dominic Sessa", "Ariana Greenblatt", "Justice Smith"]
+  },
+  {
+    "tmdbId": 1218925,
+    "title": "Chainsaw Man - La película: Arco de Reze",
+    "overview": "En una brutal guerra entre demonios, cazadores y enemigos secretos, una misteriosa chica llamada Reze ha entrado en el mundo de Denji, y él enfrenta su batalla más mortal hasta ahora, impulsado por el amor en un mundo donde la supervivencia no conoce reglas.",
+    "genre": "Animación, Acción, Romance, Fantasía",
+    "releaseYear": 2025,
+    "actors": ["Kikunosuke Toya", "Tomori Kusunoki", "Shogo Sakta", "Naomi Oozora"]
+  },
+  {
+    "tmdbId": 575265,
+    "title": "Misión: Imposible - La sentencia final",
+    "overview": "La Entidad, la IA experimental que se ha convertido en el villano de la historia, sigue activa y cuenta con el apoyo del malvado Gabriel en el mundo de los cínicos. Por suerte, Ethan y su equipo tienen la llave que les podría dar el control de la Entidad, algo que les obligará a arriesgarse para eliminar a esa IA que descansa en el fondo del mar.",
+    "genre": "Acción, Suspense, Aventura",
+    "releaseYear": 2025,
+    "actors": ["Tom Cruise", "Hayley Atwell", "Ving Rhames", "Simon Pegg"]
+  },
+  {
+    "tmdbId": 1317288,
+    "title": "Marty Supremo",
+    "overview": "Ambientada en el vibrante mundo del tenis de mesa de los años 50, Marty Supreme sigue a Marty Mauser (Timothée Chalamet), un joven soñador decidido a ganarse el respeto en un deporte que nadie toma en serio. Inspirada en el espíritu del legendario jugador de ping-pong, la película narra el descenso de Marty hacia la obsesión, las apuestas y la redención, mientras arriesga todo para transformar su improbable pasión en grandeza.",
+    "genre": "Drama, Suspense",
+    "releaseYear": 2025,
+    "actors": ["Timothée Chalamet", "Gwyneth Paltrow", "Odessa A'zion", "Kevin O'Leary"]
+  },
+  {
+    "tmdbId": 1539104,
+    "title": "JUJUTSU KAISEN: Ejecución",
+    "overview": "Durante Halloween en Shibuya, un misterioso velo atrapa a la multitud dentro del distrito. Como consecuencia, diez colonias japonesas se convierten en zonas dominadas por maldiciones.",
+    "genre": "Animación, Acción, Fantasía",
+    "releaseYear": 2025,
+    "actors": ["Junya Enoki", "Yuma Uchida", "Asami Seto", "Yuichi Nakamura"]
+  },
+  {
+    "tmdbId": 991494,
+    "title": "Bob Esponja: En busca de los pantalones cuadrados",
+    "overview": "Bob Esponja se sumerge en lo más profundo del océano para probar su valor persiguiendo al Holandés Errante.",
+    "genre": "Aventura, Animación, Comedia, Familia, Fantasía",
+    "releaseYear": 2025,
+    "actors": ["Tom Kenny", "Clancy Brown", "Rodger Bumpass", "Bill Fagerbakke"]
+  },
+  {
+    "tmdbId": 1294203,
+    "title": "Culpa Mía: Londres",
+    "overview": "Noah, de 18 años, se muda de Estados Unidos a Londres con su madre y William, un empresario británico adinerado. Noah conoce al hijo de William, un chico malo llamado Nick, y crece entre ellos una atracción innegable. Mientras Noah se adapta a su nueva vida y se enamora por primera vez, su devastador pasado la alcanzará.",
+    "genre": "Drama, Romance",
+    "releaseYear": 2025,
+    "actors": ["Asha Banks", "Matthew Broome", "Eve Macklin", "Ray Fearon"]
+  },
+  {
+    "tmdbId": 858024,
+    "title": "Hamnet",
+    "overview": "Agnes y su esposo William Shakespeare luchan por superar la pérdida de su único hijo, Hamnet.",
+    "genre": "Drama, Romance, Historia",
+    "releaseYear": 2025,
+    "actors": ["Jessie Buckley", "Paul Mescal", "Emily Watson", "Joe Alwyn"]
+  },
+  {
+    "tmdbId": 1197306,
+    "title": "Rescate implacable",
+    "overview": "Levon Cade dejó atrás una distinguida carrera militar en operaciones encubiertas para llevar una vida sencilla trabajando en la construcción. Pero cuando la hija de su jefe, quien es como familia para él, es capturada por traficantes de personas, su búsqueda para traerla de regreso revela un mundo de corrupción mucho mayor de lo que jamás pudo imaginar.",
+    "genre": "Acción, Crimen, Suspense",
+    "releaseYear": 2025,
+    "actors": ["Jason Statham", "Jason Flemyng", "Merab Ninidze", "Maximilian Osinski"]
+  },
+  {
+    "tmdbId": 447273,
+    "title": "Blanca Nieves",
+    "overview": "Una adaptación en vivo del clásico cuento de hadas sobre una hermosa joven princesa que, mientras es acosada por una reina celosa, busca refugio en la casa de siete enanos en la campiña alemana.",
+    "genre": "Familia, Fantasía",
+    "releaseYear": 2025,
+    "actors": ["Rachel Zegler", "Gal Gadot", "Andrew Burnap", "Andrew Barth Feldman"]
+  },
+  {
+    "tmdbId": 552524,
+    "title": "Lilo y Stitch",
+    "overview": "Remake en imagen real de 'Lilo & Stitch'. Narra la historia de una niña hawaiana solitaria y un extraterrestre fugitivo que la ayuda a recomponer su rota familia.",
+    "genre": "Familia, Ciencia ficción, Comedia",
+    "releaseYear": 2025,
+    "actors": ["Maia Kealoha", "Sydney Agudong", "Chris Sanders", "Zach Galifianakis"]
+  },
+  {
+    "tmdbId": 1339713,
+    "title": "Obsesión",
+    "overview": "Tras romper el misterioso \"Sauce de un Deseo\" para conquistar el corazón de la chica que le gusta, un romántico empedernido consigue exactamente lo que pedía, pero pronto descubre que algunos deseos tienen un precio oscuro y siniestro.",
+    "genre": "Terror, Suspense",
+    "releaseYear": 2026,
+    "actors": ["Michael Johnston", "Inde Navarrette", "Cooper Tomlinson", "Megan Lawless"]
+  },
+  {
+    "tmdbId": 1084244,
+    "title": "Toy Story 5",
+    "overview": "Cuando Woody logra regresar con Buzz, Jessie y el resto de la pandilla, descubren una nueva amenaza: la tecnología. Un nuevo tiempo de juego para los niños.",
+    "genre": "Animación, Familia, Comedia, Aventura",
+    "releaseYear": 2026,
+    "actors": ["Tom Hanks", "Tim Allen", "Joan Cusack", "Greta Lee"]
+  },
+  {
+    "tmdbId": 1275779,
+    "title": "El día de la revelación",
+    "overview": "Si descubrieras que no estamos solos, si alguien te abriera los ojos y te lo demostrase, ¿te asustarías?",
+    "genre": "Ciencia ficción, Suspense",
+    "releaseYear": 2026,
+    "actors": ["Emily Blunt", "Josh O'Connor", "Colin Firth", "Colman Domingo"]
+  },
+  {
+    "tmdbId": 1273221,
+    "title": "Scary Movie: Terroríficamente incorrecta",
+    "overview": "Veintiséis años después de conseguir escapar de un asesino enmascarado sospechosamente familiar, el Core Four están de vuelta en el punto de mira del asesino y ninguna película de terror está a salvo.",
+    "genre": "Comedia, Terror",
+    "releaseYear": 2026,
+    "actors": ["Marlon Wayans", "Shawn Wayans", "Anna Faris", "Regina Hall"]
+  },
+  {
+    "tmdbId": 1083381,
+    "title": "Backrooms: Sin salida",
+    "overview": "Una extraña puerta aparece en el sótano de una exposición de muebles. Cuando el paciente de una terapeuta desaparece en una dimensión más allá de la realidad, ella deberá adentrarse en lo desconocido para salvarlo.",
+    "genre": "Terror, Misterio, Ciencia ficción",
+    "releaseYear": 2026,
+    "actors": ["Chiwetel Ejiofor", "Renate Reinsve", "Mark Duplass", "Finn Bennett"]
+  },
+  {
+    "tmdbId": 1314481,
+    "title": "El diablo viste a la moda 2",
+    "overview": "Sigue la lucha de Miranda Priestly contra Emily Charlton, su ex asistente convertida en ejecutiva rival, mientras compiten por los ingresos por publicidad en medio de la decadencia de los medios impresos y Miranda se acerca a la jubilación.",
+    "genre": "Comedia, Drama",
+    "releaseYear": 2026,
+    "actors": ["Meryl Streep", "Anne Hathaway", "Emily Blunt", "Stanley Tucci"]
+  },
+  {
+    "tmdbId": 1280738,
+    "title": "The Furious",
+    "overview": "Tras el secuestro de su hija y atrapado en una red de corrupción policial, un padre desesperado se une a un astuto periodista para tomar la justicia por sus propias manos. En un territorio hostil dominado por mafias, su única opción para rescatar a quienes aman será desatar una guerra sin cuartel a puño limpio.",
+    "genre": "Acción, Crimen, Suspense",
+    "releaseYear": 2026,
+    "actors": ["Xie Miao", "Joe Taslim", "An Xing", "Yayan Ruhian"]
+  },
+  {
+    "tmdbId": 1368314,
+    "title": "El Pasajero Del Diablo",
+    "overview": "Tras presenciar un espantoso accidente de tráfico en la autopista, una joven pareja pronto se da cuenta de que no salieron solos del lugar del accidente, ya que una presencia demoníaca llamada el Pasajero, que no se detendrá hasta reclamarlos a ambos, convierte su aventura en furgoneta en una pesadilla.",
+    "genre": "Terror, Suspense",
+    "releaseYear": 2026,
+    "actors": ["Lou Llobell", "Jacob Scipio", "Melissa Leo", "Joseph Lopez"]
+  },
+  {
+    "tmdbId": 1523145,
+    "title": "Tu corazón será destrozado",
+    "overview": "Polina, una estudiante de secundaria, se salva del acoso en su nueva escuela y hace un trato con el principal acosador, Bars: él debe fingir ser su novio y protegerla, y ella debe hacer todo lo que él dice. Durante este juego, la pareja desarrolla sentimientos reales, pero su familia y compañeros tienen motivos para separar a los amantes.",
+    "genre": "Romance",
+    "releaseYear": 2026,
+    "actors": ["Nino Chkhetia", "Tornike Khitarishvili", "Ana Jinjikhadze", "Mariam Mumladze"]
+  },
+  {
+    "tmdbId": 1413976,
+    "title": "Citizen Vigilante",
+    "overview": "Un hombre decide impartir justicia por su cuenta. Su cruzada lo convierte en un fenómeno de las redes sociales, pero también lo enfrenta al jefe de policía de la ciudad.",
+    "genre": "Suspense, Acción, Crimen",
+    "releaseYear": 2026,
+    "actors": ["Armie Hammer", "Costas Mandylor", "Désirée Giorgetti", "Steffen Mennekes"]
+  },
+  {
+    "tmdbId": 1108427,
+    "title": "Moana",
+    "overview": "Moana que quiere ser una viajera marinera. Cuando su isla natal se ve amenazada, Moana debe adentrarse en el mar junto a un semidiós llamado Maui para salvar a su pueblo.",
+    "genre": "Familia, Fantasía, Comedia, Aventura",
+    "releaseYear": 2026,
+    "actors": ["Catherine Laga'aia", "Dwayne Johnson", "John Tui", "Frankie Adams"]
+  },
+  {
+    "tmdbId": 1127384,
+    "title": "Impacto Mortal",
+    "overview": "Un grupo de pasajeros internacionales en ruta de Los Ángeles a Shanghai se ven obligados a realizar un aterrizaje de emergencia en aguas infestadas de tiburones. Ahora deben superar el frenesí de los tiburones merodeantes.",
+    "genre": "Terror, Suspense",
+    "releaseYear": 2026,
+    "actors": ["Aaron Eckhart", "Ben Kingsley", "Molly Belle Wright", "Angus Sampson"]
+  },
+  {
+    "tmdbId": 936075,
+    "title": "Michael",
+    "overview": "Narra la vida de Michael Jackson más allá de la música, recorriendo su trayectoria desde el descubrimiento de su extraordinario talento como líder de los Jackson Five hasta convertirse en un artista visionario cuya ambición creativa le impulsó a convertirse en el artista más grande del mundo.",
+    "genre": "Música, Drama",
+    "releaseYear": 2026,
+    "actors": ["Jaafar Jackson", "Colman Domingo", "Nia Long", "Juliano Krue Valdi"]
+  },
+  {
+    "tmdbId": 687163,
+    "title": "Proyecto Fin del Mundo",
+    "overview": "El profesor de ciencias Ryland Grace despierta en una nave espacial a años luz de su hogar sin recordar quién es ni cómo llegó allí. A medida que recupera la memoria, comienza a descubrir su misión: resolver el enigma de la misteriosa sustancia que está causando la extinción del sol.",
+    "genre": "Ciencia ficción, Aventura",
+    "releaseYear": 2026,
+    "actors": ["Ryan Gosling", "Sandra Hüller", "James Ortiz", "Lionel Boyce"]
+  },
+  {
+    "tmdbId": 931285,
+    "title": "Mortal Kombat II",
+    "overview": "Los campeones favoritos de los fans -ahora acompañados por el mismísimo Johnny Cage- se enfrentan entre sí en la batalla definitiva, sangrienta y sin reglas, para derrotar el oscuro dominio de Shao Kahn, que amenaza con destruir el Reino de la Tierra y a sus defensores.",
+    "genre": "Acción, Fantasía, Aventura",
+    "releaseYear": 2026,
+    "actors": ["Karl Urban", "Adeline Rudolph", "Ludi Lin", "Jessica McNamee"]
+  },
+  {
+    "tmdbId": 1226863,
+    "title": "Super Mario Galaxy: La película",
+    "overview": "Mario y Luigi se enfrentan una nueva amenaza: Bowser Jr., quién está decidido liberar a su padre del cautiverio y restaurar el legado familiar. Junto con nuevos y viejos compañeros, los hermanos viajan a través de las estrellas para detener la cruzada del joven heredero.",
+    "genre": "Familia, Comedia, Aventura, Fantasía, Animación",
+    "releaseYear": 2026,
+    "actors": ["Chris Pratt", "Anya Taylor-Joy", "Charlie Day", "Jack Black"]
+  },
+  {
+    "tmdbId": 1315772,
+    "title": "Minions & Monstruos",
+    "overview": "Esta es la historia alocada, ridícula y totalmente verídica de cómo los Minions conquistaron Hollywood, se convirtieron en estrellas de cine, lo perdieron todo, desataron monstruos en el mundo y luego se unieron para intentar salvar al planeta del caos que acababan de crear.",
+    "genre": "Aventura, Animación, Comedia, Familia, Fantasía",
+    "releaseYear": 2026,
+    "actors": ["Pierre Coffin", "Trey Parker", "Allison Janney", "Christoph Waltz"]
+  },
+  {
+    "tmdbId": 1212763,
+    "title": "Evil Dead: En llamas",
+    "overview": "Tras la muerte de su esposo, una mujer busca consuelo en sus suegros. A medida que uno a uno se transforman en muertos vivientes, descubre que los votos que hizo en vida perduran incluso en la muerte.",
+    "genre": "Terror, Suspense",
+    "releaseYear": 2026,
+    "actors": ["Souheila Yacoub", "Tandi Wright", "Hunter Doohan", "Luciane Buchanan"]
+  },
+  {
+    "tmdbId": 1304313,
+    "title": "La posesión de la momia",
+    "overview": "La joven hija de un periodista desaparece en el desierto sin dejar rastro. Ocho años después, la familia rota se sorprende cuando ella regresa con ellos, mientras lo que debería ser una reunión alegre se convierte en una pesadilla viviente.",
+    "genre": "Terror, Misterio",
+    "releaseYear": 2026,
+    "actors": ["Jack Reynor", "Laia Costa", "May Calamawy", "Natalie Grace"]
+  },
+  {
+    "tmdbId": 1202033,
+    "title": "Enola Holmes 3",
+    "overview": "La aventura sigue a la detective Enola Holmes hasta Malta, donde sus planes de matrimonio se desmoronan cuando la desaparición de Sherlock la sumerge en un peligroso caso.",
+    "genre": "Aventura, Crimen, Misterio",
+    "releaseYear": 2026,
+    "actors": ["Millie Bobby Brown", "Henry Cavill", "Helena Bonham Carter", "Louis Partridge"]
+  }
+]

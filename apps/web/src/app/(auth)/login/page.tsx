@@ -1,26 +1,45 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Film } from 'lucide-react';
 import { Button, Input } from '@pelis/ui/components';
 import { getAuthApiBase } from '@pelis/auth/convex-site';
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const verified = searchParams.get('verified') === 'true';
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showVerifyMessage, setShowVerifyMessage] = useState(false);
+  const [resending, setResending] = useState(false);
 
   const handleGoogleLogin = () => {
     window.location.href = `${getAuthApiBase()}/signin/google`;
   };
 
+  const handleResendVerification = async () => {
+    setResending(true);
+    try {
+      await fetch(`${getAuthApiBase()}/email-otp/send-verification-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, type: 'email-verification' }),
+      });
+    } finally {
+      setResending(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setShowVerifyMessage(false);
     setLoading(true);
     try {
       const res = await fetch(`${getAuthApiBase()}/sign-in/email`, {
@@ -31,6 +50,9 @@ export default function LoginPage() {
       });
       const data = await res.json();
       if (!res.ok) {
+        if (data?.message?.toLowerCase().includes('verify') || data?.message?.toLowerCase().includes('email')) {
+          setShowVerifyMessage(true);
+        }
         setError(data?.message || 'Credenciales inválidas');
         return;
       }
@@ -79,7 +101,27 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {error && (
+        {verified && (
+          <div className="mb-4 p-3 rounded bg-green-500/10 border border-green-500/30 text-green-400 text-sm text-center" role="alert">
+            ¡Email verificado! Ahora puedes iniciar sesión.
+          </div>
+        )}
+
+        {showVerifyMessage && (
+          <div className="mb-4 p-3 rounded bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 text-sm text-center">
+            <p className="mb-2">Debes verificar tu email antes de iniciar sesión.</p>
+            <button
+              type="button"
+              onClick={handleResendVerification}
+              disabled={resending}
+              className="text-yellow-300 hover:text-yellow-200 underline font-medium disabled:opacity-50"
+            >
+              {resending ? 'Reenviando…' : 'Reenviar código de verificación'}
+            </button>
+          </div>
+        )}
+
+        {error && !showVerifyMessage && (
           <div className="mb-4 p-3 rounded bg-red-500/10 border border-red-500/30 text-red-400 text-sm text-center" role="alert">
             {error}
           </div>
@@ -115,5 +157,28 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+function LoginPageFallback() {
+  return (
+    <div className="w-full max-w-md">
+      <div className="card-glow p-8 shadow-[0_8px_40px_rgba(59,130,246,0.15)]">
+        <div className="text-center mb-8">
+          <div className="w-14 h-14 bg-gradient-to-br from-cinema-violet to-cinema-teal rounded-xl flex items-center justify-center mx-auto mb-4 shadow-glow-violet">
+            <Film className="w-8 h-8 text-white" aria-hidden />
+          </div>
+          <h1 className="font-display text-3xl tracking-wide text-white uppercase">Iniciar sesión</h1>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<LoginPageFallback />}>
+      <LoginForm />
+    </Suspense>
   );
 }

@@ -46,7 +46,7 @@ export default function RegisterPage() {
         setError(data?.message || 'Error al crear la cuenta');
         return;
       }
-      router.push('/');
+      router.push(`/verify-email?email=${encodeURIComponent(email)}`);
       router.refresh();
     } catch {
       setError('Error de conexión. Intenta de nuevo.');

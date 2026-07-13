@@ -1,0 +1,7 @@
+{
+  "buildCommand": "pnpm build:vercel",
+  "framework": "nextjs",
+  "ignoreCommand": "npx turbo-ignore"
+}
+
+
