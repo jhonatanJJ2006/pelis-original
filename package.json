@@ -8,7 +8,7 @@
   "packageManager": "pnpm@9.15.4",
   "scripts": {
     "build": "turbo run build",
-    "build:vercel": "pnpm install && pnpm exec turbo run build:vercel --filter=@pelis/web",
+    "build:vercel": "pnpm exec turbo run build:vercel --filter=@pelis/web",
     "clean": "git clean -xdf node_modules",
     "clean:workspaces": "turbo run clean",
     "dev": "turbo watch dev --continue",
