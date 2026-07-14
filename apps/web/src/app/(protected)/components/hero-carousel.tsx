@@ -39,7 +39,7 @@ export function HeroCarousel({ movies }: HeroCarouselProps) {
   if (movies.length === 0) return null;
 
   return (
-    <section className="relative h-[75vh] min-h-[500px] max-h-[900px] overflow-hidden" aria-label="Destacados">
+    <section className="relative h-[75vh] min-h-[400px] sm:min-h-[500px] max-h-[900px] overflow-hidden" aria-label="Destacados">
       <Swiper
         modules={[Autoplay, EffectCreative, Pagination]}
         effect="creative"
@@ -94,7 +94,7 @@ export function HeroCarousel({ movies }: HeroCarouselProps) {
                   <div className="absolute inset-0 hero-gradient-accent" />
 
                   <div className="absolute inset-0 flex items-center">
-                    <div className="container mx-auto px-8 md:px-14 lg:px-20">
+                    <div className="container mx-auto px-6 sm:px-8 md:px-14 lg:px-20">
                       <div className="max-w-3xl">
                         <div
                           className={`flex items-center gap-3 mb-4 transition-all duration-500 ease-out ${
@@ -110,7 +110,7 @@ export function HeroCarousel({ movies }: HeroCarouselProps) {
                           </span>
                         </div>
                         <h1
-                          className={`font-display text-5xl md:text-7xl lg:text-8xl tracking-wide text-white uppercase leading-[0.95] mb-5 transition-all duration-500 ease-out delay-75 ${
+                          className={`font-display text-3xl sm:text-5xl md:text-7xl lg:text-8xl tracking-wide text-white uppercase leading-[0.95] mb-5 transition-all duration-500 ease-out delay-75 break-words ${
                             isActive ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
                           }`}
                         >

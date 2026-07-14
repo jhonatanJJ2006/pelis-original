@@ -23,7 +23,7 @@ function VerifyForm() {
   if (!emailFromUrl) {
     return (
       <div className="w-full max-w-md">
-        <div className="card-glow p-8 shadow-[0_8px_40px_rgba(59,130,246,0.15)] text-center">
+        <div className="card-glow p-6 md:p-8 shadow-[0_8px_40px_rgba(59,130,246,0.15)] text-center">
           <h1 className="font-display text-2xl tracking-wide text-white uppercase mb-4">Enlace inválido</h1>
           <p className="text-cinema-muted mb-6">No se ha proporcionado un correo electrónico.</p>
           <Link href="/register" className="text-cinema-gold hover:text-cinema-gold-light font-medium">
@@ -110,13 +110,13 @@ function VerifyForm() {
   if (success) {
     return (
       <div className="w-full max-w-md">
-        <div className="card-glow p-8 shadow-[0_8px_40px_rgba(59,130,246,0.15)] text-center">
+        <div className="card-glow p-6 md:p-8 shadow-[0_8px_40px_rgba(59,130,246,0.15)] text-center">
           <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
             <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h1 className="font-display text-3xl tracking-wide text-white uppercase mb-2">¡Cuenta verificada!</h1>
+          <h1 className="font-display text-2xl md:text-3xl tracking-wide text-white uppercase mb-2">¡Cuenta verificada!</h1>
           <p className="text-cinema-muted">Te estamos redirigiendo...</p>
         </div>
       </div>
@@ -125,12 +125,12 @@ function VerifyForm() {
 
   return (
     <div className="w-full max-w-md">
-      <div className="card-glow p-8 shadow-[0_8px_40px_rgba(59,130,246,0.15)]">
+      <div className="card-glow p-6 md:p-8 shadow-[0_8px_40px_rgba(59,130,246,0.15)]">
         <div className="text-center mb-8">
           <div className="w-14 h-14 bg-gradient-to-br from-cinema-violet to-cinema-teal rounded-xl flex items-center justify-center mx-auto mb-4 shadow-glow-violet">
             <Film className="w-8 h-8 text-white" aria-hidden />
           </div>
-          <h1 className="font-display text-3xl tracking-wide text-white uppercase">Verifica tu email</h1>
+          <h1 className="font-display text-2xl md:text-3xl tracking-wide text-white uppercase">Verifica tu email</h1>
           <p className="text-cinema-muted mt-2">
             Hemos enviado un código de verificación a<br />
             <span className="text-white font-medium">{maskedEmail}</span>
@@ -156,7 +156,7 @@ function VerifyForm() {
               placeholder="000000"
               value={otp}
               onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, OTP_LENGTH))}
-              className="w-full bg-cinema-surface border border-cinema-border rounded-lg py-4 px-4 text-white text-center text-3xl font-mono tracking-[0.5em] focus:outline-none focus:ring-2 focus:ring-cinema-accent/50 focus:border-cinema-accent/40 transition-all duration-200 placeholder-cinema-ash/40"
+              className="w-full bg-cinema-surface border border-cinema-border rounded-lg py-4 px-4 text-white text-center text-2xl sm:text-3xl font-mono tracking-[0.3em] sm:tracking-[0.5em] focus:outline-none focus:ring-2 focus:ring-cinema-accent/50 focus:border-cinema-accent/40 transition-all duration-200 placeholder-cinema-ash/40"
               required
               autoFocus
             />

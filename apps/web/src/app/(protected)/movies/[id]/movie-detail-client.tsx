@@ -114,7 +114,7 @@ export default function MovieDetailPageClient() {
             </h1>
             <p className="text-cinema-muted text-lg mb-6 max-w-2xl line-clamp-2">{movie.synopsis}</p>
 
-            <div className="flex flex-wrap gap-6 text-sm text-cinema-silver mb-8">
+            <div className="flex flex-wrap gap-4 md:gap-6 text-sm text-cinema-silver mb-8">
               <div className="flex items-center gap-1.5">
                 <User className="w-4 h-4" aria-hidden />
                 <span>{movie.actors}</span>
@@ -129,7 +129,7 @@ export default function MovieDetailPageClient() {
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-3">
               <button
                 type="button"
                 onClick={() => {

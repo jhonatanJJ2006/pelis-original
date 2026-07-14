@@ -67,12 +67,12 @@ function LoginForm() {
 
   return (
     <div className="w-full max-w-md">
-      <div className="card-glow p-8 shadow-[0_8px_40px_rgba(59,130,246,0.15)]">
+      <div className="card-glow p-6 md:p-8 shadow-[0_8px_40px_rgba(59,130,246,0.15)]">
         <div className="text-center mb-8">
           <div className="w-14 h-14 bg-gradient-to-br from-cinema-violet to-cinema-teal rounded-xl flex items-center justify-center mx-auto mb-4 shadow-glow-violet">
             <Film className="w-8 h-8 text-white" aria-hidden />
           </div>
-          <h1 className="font-display text-3xl tracking-wide text-white uppercase">
+          <h1 className="font-display text-2xl md:text-3xl tracking-wide text-white uppercase">
             Iniciar sesión
           </h1>
           <p className="text-cinema-muted mt-2">Accede a tu cuenta para continuar</p>
@@ -163,12 +163,12 @@ function LoginForm() {
 function LoginPageFallback() {
   return (
     <div className="w-full max-w-md">
-      <div className="card-glow p-8 shadow-[0_8px_40px_rgba(59,130,246,0.15)]">
+      <div className="card-glow p-6 md:p-8 shadow-[0_8px_40px_rgba(59,130,246,0.15)]">
         <div className="text-center mb-8">
           <div className="w-14 h-14 bg-gradient-to-br from-cinema-violet to-cinema-teal rounded-xl flex items-center justify-center mx-auto mb-4 shadow-glow-violet">
             <Film className="w-8 h-8 text-white" aria-hidden />
           </div>
-          <h1 className="font-display text-3xl tracking-wide text-white uppercase">Iniciar sesión</h1>
+          <h1 className="font-display text-2xl md:text-3xl tracking-wide text-white uppercase">Iniciar sesión</h1>
         </div>
       </div>
     </div>
