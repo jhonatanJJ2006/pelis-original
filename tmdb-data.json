@@ -1,0 +1,482 @@
+[
+  {
+    "token": "ultimo-horizonte",
+    "title": "Misión Rescate",
+    "synopsis": "Durante una misión a Marte de la nave tripulada Ares III, una fuerte tormenta se desata dando por desaparecido y muerto al astronauta Mark Watney (Matt Damon), sus compañeros toman la decisión de irse pero él ha sobrevivido. Está solo y sin apenas recursos en el planeta. Con muy pocos medios deberá recurrir a sus conocimientos, su sentido del humor y un gran instinto de supervivencia para lograr sobrevivir y comunicar a la Tierra que todavía está vivo esperando que acudan en su rescate.",
+    "genre": "Ciencia",
+    "year": "2015",
+    "actors": "Matt Damon, Jessica Chastain, Kristen Wiig, Jeff Daniels"
+  },
+  {
+    "token": "sombras-pasado",
+    "title": "El secreto de sus ojos",
+    "synopsis": "Un consejero legítimo jubilado escribe una novela que espera encontrar el cierre para uno de sus casos de homicidio no resueltos pasados y para su amor no intercambiado con su superior - ambos de los cuales todavía le frecuentan unas décadas más tarde.",
+    "genre": "Misterio",
+    "year": "2009",
+    "actors": "Ricardo Darín, Soledad Villamil, Pablo Rago, Javier Godino"
+  },
+  {
+    "token": "risas-cadena",
+    "title": "Supercool",
+    "synopsis": "En una de sus últimas noches como estudiantes de instituto, Evan y Seth , dos amigos inadaptados, tropezarán con diversas dificultades para comprar bebidas para una fiesta a la que han invitado a las chicas de sus sueños. En su peripecia les acompañará el indescriptible McLovin, otro inadaptado que acaba de comprarse un carnet falso para que le sirva de salvoconducto en la compra de alcohol.",
+    "genre": "Comedia",
+    "year": "2007",
+    "actors": "Jonah Hill, Michael Cera, Christopher Mintz-Plasse, Bill Hader"
+  },
+  {
+    "token": "corazon-fuego",
+    "title": "Como agua para chocolate",
+    "synopsis": "Tita está apasionadamente enamorada de Pedro, pero su madre controladora le prohíbe casarse con él. Cuando Pedro se casa con su hermana, Tita se lanza a cocinar y descubre que puede trasladar sus emociones a través de la comida que prepara, contagiando a todos los que la comen con su intenso desamor.",
+    "genre": "Drama",
+    "year": "1992",
+    "actors": "Lumi Cavazos, Marco Leonardi, Regina Torné, Mario Iván Martínez"
+  },
+  {
+    "token": "bosque-susurrante",
+    "title": "La Bruja",
+    "synopsis": "Nueva Inglaterra, 1630. Una pareja puritana decide abandonar su pueblo para hacer vida en el bosque con sus cinco hijos. Desde la extraña desaparición de su bebé, sucederán otros hechos terroríficos contra los que sus oraciones no tendrán poder.",
+    "genre": "Terror",
+    "year": "2016",
+    "actors": "Anya Taylor-Joy, Ralph Ineson, Kate Dickie, Harvey Scrimshaw"
+  },
+  {
+    "token": "aventura-cumbre",
+    "title": "Everest",
+    "synopsis": "Inspirado por los acontecimientos increíbles que rodean una tentativa traidora de alcanzar la cumbre de la montaña del mundo más alta, «Everest» documenta el viaje sobrecogedor de dos expediciones diferentes desafiadas más allá de sus límites por una de las tormentas de nieve más feroces alguna vez encontradas por la humanidad. Su valor probado por el más áspero de elementos encontrados en el planeta, los trepadores afrontarán obstáculos casi imposibles ya que una obsesión de toda la vida se hace una lucha impresionante por la supervivencia.",
+    "genre": "Aventura",
+    "year": "2015",
+    "actors": "Jason Clarke, Josh Brolin, Jake Gyllenhaal, Elizabeth Debicki"
+  },
+  {
+    "token": "dibujos-animados",
+    "title": "Intensa-Mente",
+    "synopsis": "Riley es una chica que disfruta o padece toda clase de sentimientos. Aunque su vida ha estado marcada por la Alegría, también se ve afectada por otro tipo de emociones. Lo que Riley no entiende muy bien es por qué motivo tiene que existir la Tristeza en su vida. Una serie de acontecimientos hacen que Alegría y Tristeza se mezclen en una peligrosa aventura que dará un vuelco al mundo de Riley.",
+    "genre": "Animación",
+    "year": "2015",
+    "actors": "Amy Poehler, Phyllis Smith, Richard Kind, Bill Hader"
+  },
+  {
+    "token": "codigo-rojo",
+    "title": "Misión Imposible 6: Repercusión",
+    "synopsis": "Ethan Hunt y su equipo del FMI, junto con algunos aliados conocidos, corren contrarreloj tras una misión que salió mal.",
+    "genre": "Acción",
+    "year": "2018",
+    "actors": "Tom Cruise, Henry Cavill, Ving Rhames, Simon Pegg"
+  },
+  {
+    "token": "juicio-final",
+    "title": "El veredicto",
+    "synopsis": "Frank Galvin es un abogado maduro, decrépito y alcohólico, que sobrevive gracias a trabajos pequeños y rutinarios. Un antiguo socio le recuerda el caso, todavía sin resolver, de un error médico cometido en un hospital y Frank decide trabajar en él.",
+    "genre": "Drama",
+    "year": "1982",
+    "actors": "Paul Newman, Charlotte Rampling, Jack Warden, James Mason"
+  },
+  {
+    "token": "ultima-frontera",
+    "title": "Blade Runner 2049",
+    "synopsis": "En 2049, K es uno de los esclavos androides de la nueva serie Nexus-9 llamados replicantes. K también es un Blade Runner, un cazador de replicantes rebeldes, que termina realizando un importante descubrimiento durante una de sus misiones. Luego de ser ordenado buscar y destruir cualquier evidencia del suceso, el androide termina tras la pista de Rick Deckard, un misterioso ex Blade Runner desparecido por más de 30 años. Secuela del icónico filme de ciencia ficción de 1982, Blade Runner.",
+    "genre": "Ciencia",
+    "year": "2017",
+    "actors": "Ryan Gosling, Harrison Ford, Ana de Armas, Dave Bautista"
+  },
+  {
+    "token": "noche-mentiras",
+    "title": "La cena",
+    "synopsis": "Dos matrimonios se reúnen en un restaurante de lujo para tratar un trágico incidente que les incumbe muy directamente.",
+    "genre": "Drama",
+    "year": "2017",
+    "actors": "Richard Gere, Laura Linney, Steve Coogan, Rebecca Hall"
+  },
+  {
+    "token": "enigma-faraon",
+    "title": "La Momia",
+    "synopsis": "Un aventurero imprudente y un grupo de exploradores desentierran accidentalmente una antigua maldición egipcia. Ahora, deben luchar contra la resucitada momia del sacerdote Imhotep, que busca recuperar su poder y venganza sobre el mundo moderno.",
+    "genre": "Aventura",
+    "year": "1999",
+    "actors": "Brendan Fraser, Rachel Weisz, John Hannah, Arnold Vosloo"
+  },
+  {
+    "token": "tormenta-inminente",
+    "title": "Tornado",
+    "synopsis": "El meteorólogo de televisión Bill Harding está tratando de conseguir que su esposa, la cazadora de tormentas, Jo, firme documentos de divorcio para poder casarse con su novia Melissa. Pero la Madre Naturaleza, en forma de una serie de intensas tormentas que recorren Oklahoma, tiene otros planes. Pronto, los tres se unieron al equipo de stormchasers mientras intentaban insertar un revolucionario dispositivo de medición en el corazón de varios tornados extremadamente violentos.",
+    "genre": "Acción",
+    "year": "1996",
+    "actors": "Helen Hunt, Bill Paxton, Jami Gertz, Cary Elwes"
+  },
+  {
+    "token": "lazos-sangre",
+    "title": "Una buena mentira",
+    "synopsis": "Un refugiado de la guerra civil sudanesa convive en los Estados Unidos con otros jóvenes sudaneses. Tras su llegada a América, ellos conocen a Carrie (Reese Witherspoon), una trabajadora social que, consciente de su tragedia, trata de enseñarles cómo deben desenvolverse en un mundo tan distinto al suyo.",
+    "genre": "Drama",
+    "year": "2014",
+    "actors": "Reese Witherspoon, Corey Stoll, Arnold Oceng, Ger Duany"
+  },
+  {
+    "token": "cupido-electrico",
+    "title": "Ella",
+    "synopsis": "En un futuro cercano, Theodore, un hombre solitario a punto de divorciarse que trabaja en una empresa como escritor de cartas para terceras personas, compra un día un nuevo sistema operativo basado en el modelo de Inteligencia Artificial, diseñado para satisfacer todas las necesidades del usuario. Para su sorpresa, se crea una relación romántica entre él y Samantha, la voz femenina de ese sistema operativo.",
+    "genre": "Romance",
+    "year": "2013",
+    "actors": "Joaquin Phoenix, Scarlett Johansson, Lynn Adrianna, Lisa Renee Pitts"
+  },
+  {
+    "token": "panico",
+    "title": "El Conjuro",
+    "synopsis": "Una familia aterrorizada pide ayuda a los investigadores paranormales Ed y Lorraine Warren a investigar una presencia oscura en su granja. Al ser obligados a enfrentarse a una entidad poderosa, los Warren se ven atrapados en el caso más aterrador de sus vidas.",
+    "genre": "Terror",
+    "year": "2013",
+    "actors": "Vera Farmiga, Patrick Wilson, Lili Taylor, Ron Livingston"
+  },
+  {
+    "token": "ritmo-salvaje",
+    "title": "Step Up 3",
+    "synopsis": "Un grupo muy unido de bailarines callejeros de Nueva York se enfrenta a los mejores bailarines de hip hop del mundo en un enfrentamiento de alto nivel.",
+    "genre": "Drama",
+    "year": "2010",
+    "actors": "Sharni Vinson, Rick Malambri, Adam Sevani, Alyson Stoner"
+  },
+  {
+    "token": "traves-espejo",
+    "title": "Coherencia",
+    "synopsis": "En Finlandia, en 1923, el paso de un cometa hizo que los habitantes de un pueblo quedaran completamente desorientados; incluso una mujer llegó a llamar a la policía denunciando que el hombre que estaba en su casa no era su marido. Décadas más tarde, un grupo de amigos recuerda este caso mientras cenan, brindan y se preparan para ver pasar un cometa...",
+    "genre": "Suspenso",
+    "year": "2014",
+    "actors": "Emily Baldoni, Maury Sterling, Nicholas Brendon, Lorene Scafaria"
+  },
+  {
+    "token": "guerra-vecinos",
+    "title": "La Guerra de los Roses",
+    "synopsis": "La desintegración de un matrimonio perfecto, tan modélico que resultan insultantes sus vidas tan cómodas como vacías, se produce cuando la esposa, madre y ama de casa perfecta, con una eficaz y oronda sirvienta alemana que completa el cuadro familiar, cae en la cuenta de que desea algo más: recobrar su propia identidad.",
+    "genre": "Comedia",
+    "year": "1989",
+    "actors": "Michael Douglas, Kathleen Turner, Danny DeVito, Marianne Sägebrecht"
+  },
+  {
+    "token": "mar-profundo",
+    "title": "El Secreto del Abismo",
+    "synopsis": "Durante una tormenta, una plataforma submarina en ultra mar queda incomunicada de la superficie. Dentro de ella, además del equipo técnico de la propia plataforma, se encuentra un grupo de militares, que deben recuperar unas cabezas explosivas. Todo se complica con la aparición de unos extraños seres que vienen de las profundidades abisales.",
+    "genre": "Aventura",
+    "year": "1989",
+    "actors": "Ed Harris, Mary Elizabeth Mastrantonio, Michael Biehn, Leo Burmester"
+  },
+  {
+    "token": "secreto-abuela",
+    "title": "No se Aceptan Devoluciones",
+    "synopsis": "Valentín, un tipo mujeriego, soltero y egoísta, de repente, tiene que hacerse cargo de una hija a la que no conocía, fruto de una aventura ocasional. Decidido a devolverle la niña a su madre, emprende un viaje con ella a Los Ángeles.",
+    "genre": "Comedia",
+    "year": "2013",
+    "actors": "Eugenio Derbez, Loreto Peralta, Jessica Lindsey, Daniel Raymont"
+  },
+  {
+    "token": "galaxia-perdida",
+    "title": "Perdidos en el espacio",
+    "synopsis": "El profesor John Robinson se embarca junto a su familia en la nave Júpiter II para realizar una misión. Pero en la nave también navega el Dr. Smith, enviado por fuerzas enemigas para sabotear la misión, que provocará un incidente a partir del cual la nave deambulará sin rumbo fijo por las galaxias.",
+    "genre": "Ciencia",
+    "year": "1998",
+    "actors": "William Hurt, Matt LeBlanc, Mimi Rogers, Heather Graham"
+  },
+  {
+    "token": "amor-primera-linea",
+    "title": "Diario de una pasión",
+    "synopsis": "En una residencia de ancianos, un hombre mayor lee a una mujer una historia de amor escrita en su viejo libro de notas. El libro cuenta la vida en los años 40 de Noah Calhoun y Allie Nelson, dos jóvenes adolescentes de Carolina del Norte que, a pesar de vivir en dos ambientes sociales muy diferentes, pasaron un verano idílico juntos y profundamente enamorados, antes de ser separados, primero por sus padres, y más tarde por la Segunda Guerra Mundial.",
+    "genre": "Romance",
+    "year": "2004",
+    "actors": "Ryan Gosling, Rachel McAdams, Gena Rowlands, James Garner"
+  },
+  {
+    "token": "mas-alla-razon",
+    "title": "La Isla Siniestra",
+    "synopsis": "En el verano de 1954, los agentes judiciales Teddy Daniels (DiCaprio) y Chuck Aule (Ruffalo) son destinados a una remota isla del puerto de Boston para investigar la desaparición de una peligrosa asesina (Mortimer) que estaba recluida en el hospital psiquiátrico Ashecliffe, un centro penitenciario para criminales perturbados dirigido por el siniestro doctor John Cawley (Kingsley). Pronto descubrirán que el centro guarda muchos secretos y que la isla esconde algo más peligroso que los pacientes.",
+    "genre": "Drama",
+    "year": "2010",
+    "actors": "Leonardo DiCaprio, Mark Ruffalo, Ben Kingsley, Max von Sydow"
+  },
+  {
+    "token": "rio-lavanda",
+    "title": "Un Buen Año",
+    "synopsis": "Max Skinner (Russell Crowe), un experto en inversiones viaja desde Londres hasta Provenza para vender un pequeño viñedo que ha heredado de un tío, al que estuvo muy unido en su niñez. Lo que no esperaba en absoluto es que éste fuera el punto de partida de un estimulante capítulo de su vida.",
+    "genre": "Comedia",
+    "year": "2006",
+    "actors": "Russell Crowe, Albert Finney, Marion Cotillard, Abbie Cornish"
+  },
+  {
+    "token": "operacion-fenix",
+    "title": "Rambo II - La misión",
+    "synopsis": "Rambo, encarcelado por sus antiguos crímenes, recibe por parte del coronel Trautman la misión optativa de ir a Vietnam para comprobar si aún quedan prisioneros de guerra. Si la misión saliera bien, el presidente le concedería el perdón, y así sería libre. Rambo acepta. Está bajo las órdenes de un falso teniente (Murdock), al que muy en el fondo sólo le interesa el dinero y el poder de su nación, y al que le da igual perder a unos cuantos hombres, por muy inocentes que sean, si sigue controlando las cosas como él quiere. Murdock le encarga que sólo saque fotos, y que no ataque al enemigo. Pero al saltar en paracaídas sobre un área selvática prohibida, Rambo pierde todo su equipo, excepto un cuchillo dentado y un arco.",
+    "genre": "Acción",
+    "year": "1985",
+    "actors": "Sylvester Stallone, Richard Crenna, Charles Napier, Steven Berkoff"
+  },
+  {
+    "token": "reino-hielo",
+    "title": "Frozen: Una Aventura Congelada",
+    "synopsis": "Cuando la recién coronada Reina Elsa accidentalmente usa su poder para convertir cosas en hielo y maldecir su hogar en un invierno infinito, su hermana Anna se une a un hombre de montaña, su juguetón reno y un muñeco de nieve para cambiar las condiciones climáticas.",
+    "genre": "Animación",
+    "year": "2013",
+    "actors": "Idina Menzel, Kristen Bell, Jonathan Groff, Josh Gad"
+  },
+  {
+    "token": "noche-juego",
+    "title": "Jumanji: En la selva",
+    "synopsis": "Un videojuego absorbe a cuatro estudiantes. Una vez en la selva, deben embarcarse en una búsqueda en sus avatares, que no coinciden para nada con la realidad.",
+    "genre": "Aventura",
+    "year": "2017",
+    "actors": "Dwayne Johnson, Kevin Hart, Jack Black, Karen Gillan"
+  },
+  {
+    "token": "casa-acantilado",
+    "title": "Los otros",
+    "synopsis": "Grace es una mujer religiosa que vive en una vieja casa mantenida oscura porque sus dos hijos, Anne y Nicholas, tienen una rara sensibilidad a la luz. Cuando la familia comienza a sospechar que la casa está embrujada, Grace lucha para proteger a sus hijos a cualquier costo ante los extraños acontecimientos y las visiones inquietantes.",
+    "genre": "Terror",
+    "year": "2001",
+    "actors": "Nicole Kidman, Alakina Mann, James Bentley, Fionnula Flanagan"
+  },
+  {
+    "token": "camino-casa",
+    "title": "Siempre a tu Lado: Hachiko",
+    "synopsis": "Basada en una historia real. Un profesor de universidad adopta a un perro vagabundo en una estación del tren. Tras recabar información sobre el animal, el profesor descubre que el perro iba a los andenes a diario durante semanas para esperar el regreso de su amo, pero éste había muerto en un accidente en la ciudad. El perro Hachiko, al lado de su nuevo amo a quien también le cambiará la vida cuando descubre los lazos que se pueden crear entre un animal y una persona.",
+    "genre": "Drama",
+    "year": "2009",
+    "actors": "Richard Gere, Joan Allen, Sarah Roemer, Cary-Hiroyuki Tagawa"
+  },
+  {
+    "token": "nomada-digital",
+    "title": "Camino salvaje",
+    "synopsis": "A principios de los años noventa, el joven e idealista Christopher McCandless, adopta el nombre de Alexander Supertramp, deja sus posesiones y sus ahorros a la beneficencia y abandona el mundo civilizado con rumbo a la salvaje Alaska para entrar en contacto con la Naturaleza y descubrir el verdadero sentido de la vida. Adaptación del best-seller de Jon Krakauer, basado en las notas del diario de McCandless.",
+    "genre": "Aventura",
+    "year": "2007",
+    "actors": "Emile Hirsch, Marcia Gay Harden, William Hurt, Jena Malone"
+  },
+  {
+    "token": "ultima-cancion",
+    "title": "Coco",
+    "synopsis": "A pesar de la desconcertante prohibición de la generación de música de su familia, Miguel sueña con convertirse en un músico consumado como su ídolo, Ernesto de la Cruz. Desesperado por demostrar su talento, Miguel se encuentra en la deslumbrante y colorida Tierra de los Muertos siguiendo una misteriosa cadena de eventos. En el camino, se encuentra con el encantador y tramposo Héctor. Juntos, realizan un viaje extraordinario para descubrir la historia real detrás de la familia de Miguel.",
+    "genre": "Familia",
+    "year": "2017",
+    "actors": "Anthony Gonzalez, Gael García Bernal, Benjamin Bratt, Alanna Ubach"
+  },
+  {
+    "token": "super-familia",
+    "title": "Los increíbles",
+    "synopsis": "Una familia de superhéroes encubiertos, mientras intentan vivir la tranquila vida suburbana, se ven obligados a entrar en acción para salvar el mundo.",
+    "genre": "Acción",
+    "year": "2004",
+    "actors": "Craig T. Nelson, Holly Hunter, Sarah Vowell, Spencer Fox"
+  },
+  {
+    "token": "hacker",
+    "title": "Hackers: Ningún sistema es seguro",
+    "synopsis": "Benjamin, un joven alemán genio de las computadoras, se une a un grupo de hackers subversivo que quiere hacerse notar en el escenario del mundo.",
+    "genre": "Suspenso",
+    "year": "2014",
+    "actors": "Tom Schilling, Elyas M'Barek, Wotan Wilke Möhring, Antoine Monot Jr."
+  },
+  {
+    "token": "ultimo-dragon",
+    "title": "Cómo entrenar a tu dragón",
+    "synopsis": "En la agreste isla de Berk, donde vikingos y dragones han sido enemigos acérrimos durante generaciones, Hipo se distingue, desafiando siglos de tradición al entablar amistad con Desdentao, un temido dragón Furia Nocturna. Su improbable vínculo revela la verdadera naturaleza de los dragones, desafiando los cimientos de la sociedad vikinga.",
+    "genre": "Fantasía",
+    "year": "2025",
+    "actors": "Mason Thames, Nico Parker, Gerard Butler, Nick Frost"
+  },
+  {
+    "token": "punto-quiebre",
+    "title": "Rocky",
+    "synopsis": "Cuando el campeón mundial de boxeo de peso pesado, Apollo Creed quiere darle a un luchador desconocido una oportunidad por el título como un truco publicitario, sus manejadores eligen a Rocky Balboa, un coleccionista sin educación para un prestamista de Filadelfia. Rocky se une con el entrenador Mickey Goldmill para aprovechar al máximo esta vez en un descanso de por vida.",
+    "genre": "Drama",
+    "year": "1976",
+    "actors": "Sylvester Stallone, Talia Shire, Burt Young, Carl Weathers"
+  },
+  {
+    "token": "gran-salto",
+    "title": "Talentos ocultos",
+    "synopsis": "Narra la historia nunca contada de tres brillantes mujeres científicas afroamericanas que trabajaron en la NASA a comienzos de los años sesenta (en plena carrera espacial, y asimismo en mitad de la lucha por los derechos civiles de los negros estadounidenses) en el ambicioso proyecto de poner en órbita al astronauta John Glenn.",
+    "genre": "Drama",
+    "year": "2016",
+    "actors": "Taraji P. Henson, Octavia Spencer, Janelle Monáe, Kevin Costner"
+  },
+  {
+    "token": "misterio-venecia",
+    "title": "Muerte en el Nilo",
+    "synopsis": "Basada en la novela de Agatha Christie, publicada en 1937. \"Muerte en el Nilo\" es un thriller de misterio dirigido por Kenneth Branagh sobre el caos emocional y las consecuencias letales que provocan los amores obsesivos. Las vacaciones egipcias del detective belga Hércules Poirot, a bordo de un glamuroso barco de vapor, se ven alteradas por la búsqueda de un asesino cuando la idílica luna de miel de una pareja perfecta se ve truncada de la forma más trágica.",
+    "genre": "Misterio",
+    "year": "2022",
+    "actors": "Kenneth Branagh, Tom Bateman, Annette Bening, Russell Brand"
+  },
+  {
+    "token": "planeta-salvaje",
+    "title": "El Libro de la Selva",
+    "synopsis": "Mowgli, un niño criado en la selva por una manada de lobos, emprende un fascinante viaje de autodescubrimiento cuando se ve obligado a abandonar el único hogar que ha conocido en toda su vida.",
+    "genre": "Aventura",
+    "year": "2016",
+    "actors": "Neel Sethi, Bill Murray, Ben Kingsley, Idris Elba"
+  },
+  {
+    "token": "amigas-siempre",
+    "title": "Damas en Guerra",
+    "synopsis": "Annie es una treintañera soltera del Medio Oeste, con una vida sentimental más bien precaria, a la que Lilliam, su mejor amiga, le pide que sea su dama de honor. Mientras tanto, la otra amiga de Lillian hará todo lo posible por arrebatarle el papel a la inexperta Annie.",
+    "genre": "Comedia",
+    "year": "2011",
+    "actors": "Kristen Wiig, Maya Rudolph, Rose Byrne, Chris O'Dowd"
+  },
+  {
+    "token": "latidos-corazon",
+    "title": "Dulce noviembre",
+    "synopsis": "Nelson es un hombre dedicado a su carrera publicitaria en San Francisco. Un día, tomando un examen de conducir en el DMV, encuentra a Sara. Es muy diferente de las otras mujeres en su vida. Nelson hace que ella deje pasar la toma de la prueba y más tarde ese día le detecta. Una cosa lleva al otro y Nelson termina por vivir con ella en un noviembre que cambiará su vida para siempre.",
+    "genre": "Drama",
+    "year": "2001",
+    "actors": "Keanu Reeves, Charlize Theron, Jason Isaacs, Greg Germann"
+  },
+  {
+    "token": "eclipse",
+    "title": "El Sexto Sentido",
+    "synopsis": "El doctor Malcom Crowe es un conocido psicólogo infantil de Philadelphia que vive obsesionado por el doloroso recuerdo de un joven paciente desequilibrado al que fue incapaz de ayudar. Cuando conoce a Cole Sear, un aterrorizado y confuso niño de ocho años que necesita tratamiento, ve que se le presenta la oportunidad de redimirse haciendo todo lo posible por ayudarlo. Sin embargo, el doctor Crowe no está preparado para conocer la terrible verdad acerca del don sobrenatural de su paciente: recibe visitas no deseadas de espíritus atormentados.",
+    "genre": "Misterio",
+    "year": "1999",
+    "actors": "Bruce Willis, Haley Joel Osment, Toni Collette, Olivia Williams"
+  },
+  {
+    "token": "rebano",
+    "title": "Un día para sobrevivir",
+    "synopsis": "En “The Grey”, el personaje interpretado por Liam Neeson es el líder de un indisciplinado grupo de trabajadores de una refinería cuyo avión se estrella en las remotas montañas de Alaska. Los supervivientes, expuestos a heridas mortales y un tiempo inclemente, disponen de pocos días para escapar de los gélidos elementos. Y por si el terrible frío fuera poco enemigo, una manada de lobos salvajes, amenazantes y sanguinarios, persiguen incansablemente a sus presas humanas. A medida que las indefensas víctimas caen una a una, las posibilidades de supervivencia del último de estos hombres son cada vez más remotas.",
+    "genre": "Acción",
+    "year": "2012",
+    "actors": "Liam Neeson, Dermot Mulroney, Frank Grillo, Dallas Roberts"
+  },
+  {
+    "token": "inventor",
+    "title": "La invención de Hugo Cabret",
+    "synopsis": "París, años 30. Hugo es un niño huérfano, relojero y ladrón que vive entre los muros de una ajetreada estación de trenes parisina. Nadie sabe de su existencia hasta que le descubre una excéntrica niña junto a la que vivirá una increíble aventura.",
+    "genre": "Aventura",
+    "year": "2011",
+    "actors": "Asa Butterfield, Ben Kingsley, Chloë Grace Moretz, Sacha Baron Cohen"
+  },
+  {
+    "token": "filo-tiempo",
+    "title": "Volver al Futuro",
+    "synopsis": "El adolescente de los ochenta Marty McFly es enviado accidentalmente al pasado, a 1955, interrumpiendo sin darse cuenta el primer encuentro de sus padres y atrayendo el interés romántico de su madre. Marty debe reparar el daño a la historia reavivando el romance de sus padres y, con la ayuda de su excéntrico amigo inventor Doc Brown, regresar a 1985.",
+    "genre": "Aventura",
+    "year": "1985",
+    "actors": "Michael J. Fox, Christopher Lloyd, Crispin Glover, Lea Thompson"
+  },
+  {
+    "token": "rescate-altamar",
+    "title": "La aventura del Poseidón",
+    "synopsis": "Mientras los 1.500 pasajeros del Poseidón, un lujoso trasatlántico que navega de Estados Unidos a Europa, celebran la Nochevieja, estalla una feroz tormenta y una enorme ola transforma el placentero viaje en una catástrofe que puede acabar con la vida de todos los pasajeros.",
+    "genre": "Aventura",
+    "year": "1972",
+    "actors": "Gene Hackman, Ernest Borgnine, Stella Stevens, Shelley Winters"
+  },
+  {
+    "token": "hechizo-luna",
+    "title": "Hechizo de amor",
+    "synopsis": "Como consecuencia de la maldición lanzada por uno de sus antepasados, todas las mujeres de la familia a la que pertenecen las hermanas Sally y Gilliam, han sufrido a lo largo de la historia la muerte trágica de los hombre de quienes se han enamorado. Ahora viven con sus tías, que son brujas, pero Sally, más rebelde que Gilliam, está dispuesta a alejarse de ellas para vivir con el amor de su vida.",
+    "genre": "Romance",
+    "year": "1998",
+    "actors": "Sandra Bullock, Nicole Kidman, Stockard Channing, Dianne Wiest"
+  },
+  {
+    "token": "zombielandia",
+    "title": "Guerra mundial Z",
+    "synopsis": "Gerry Lane, antiguo empleado de las Naciones Unidas, recorre el mundo en una carrera contrarreloj para detener una pandemia zombi que está derribando ejércitos y gobiernos y amenaza con destruir a la propia humanidad.",
+    "genre": "Acción",
+    "year": "2013",
+    "actors": "Brad Pitt, Mireille Enos, דניאלה קרטס‎, James Badge Dale"
+  },
+  {
+    "token": "bajo-cero",
+    "title": "La cosa del otro mundo",
+    "synopsis": "En una estación experimental de la Antártida, un equipo de investigadores descubre a un ente extraño venido del espacio, que según todos los indicios ha permanecido enterrado en la nieve durante más de 100.000 años. Al descongelarse, experimenta una metamorfosis sorprendente.",
+    "genre": "Terror",
+    "year": "1982",
+    "actors": "Kurt Russell, Wilford Brimley, T.K. Carter, David Clennon"
+  },
+  {
+    "token": "receta-secreta",
+    "title": "Ratatouille",
+    "synopsis": "Remy, una simpática rata, sueña en convertirse en un chef que pueda crear sus obras culinarias a su gusto. Pero cuando termina en la alcantarilla debajo de uno de los mejores restaurantes de París, el Roedor Gourmet, se encuentra en el lugar ideal para hacer realidad su sueño.",
+    "genre": "Animación",
+    "year": "2007",
+    "actors": "Patton Oswalt, Ian Holm, Lou Romano, Brian Dennehy"
+  },
+  {
+    "token": "desaparecida",
+    "title": "Desapareció una Noche",
+    "synopsis": "La pareja de detectives privados Patrick Kenzie y Angela \"Angie\" Gennaro son contratados por los tíos de la pequeña Amanda McCready, de cuatro años de edad, para encontrar a su sobrina desaparecida de su casa en el barrio de Dorchester, en la ciudad estadounidense de Boston, mientras su madre drogadicta, Helen, estaba en casa de una vecina viendo la televisión.Kenzie y Gennaro deberán colaborar con dos policías de Boston, los detectives Remy Bressant y Nick Poole, bajo el mando del capitán Jack Doyle, e indagar en los bajos fondos de la ciudad tras la pista de la niña en una investigación en la que todo apunta hacia un ajuste de cuentas por drogas contra la madre de la pequeña.Pero las cosas se complican y la niña es dada por muerta, hasta que otro niño desaparece unos meses más tarde poniendo a Kenzie tras la pista de un grupo de pederastas residentes en la zona.",
+    "genre": "Crimen",
+    "year": "2007",
+    "actors": "Casey Affleck, Michelle Monaghan, Morgan Freeman, Ed Harris"
+  },
+  {
+    "token": "luna-sangre",
+    "title": "Midsommar: el terror no espera la noche",
+    "synopsis": "Una pareja estadounidense que no está pasando por su mejor momento acude con unos amigos a un festival de verano que se celebra cada noventa años en una aldea remota de Suecia. Lo que comienza como unas vacaciones de ensueño en un lugar en el que el sol no se pone nunca, poco a poco se convierte en una oscura pesadilla cuando los misteriosos aldeanos les invitan a participar en sus perturbadoras actividades festivas.",
+    "genre": "Terror",
+    "year": "2019",
+    "actors": "Florence Pugh, Jack Reynor, William Jackson Harper, Will Poulter"
+  },
+  {
+    "token": "vuelo-colibri",
+    "title": "Río",
+    "synopsis": "Capturado por contrabandistas cuando era apenas una cría, un guacamayo llamado Blu nunca aprendió a volar y vive una vida feliz domesticado en Minnesota con su amiga humana, Linda. Blu se piensa que es el último de su especie, pero cuando escuchan que Jewel, una solitaria hembra, vive en Río de Janeiro, Blu y Linda emprenderán un viaje a su encuentro.",
+    "genre": "Animación",
+    "year": "2011",
+    "actors": "Jesse Eisenberg, Anne Hathaway, Leslie Mann, Jane Lynch"
+  },
+  {
+    "token": "8-segundos",
+    "title": "8 Seconds",
+    "synopsis": "",
+    "genre": "Drama",
+    "year": "1994",
+    "actors": "Luke Perry, Stephen Baldwin, Red Mitchell, Cynthia Geary"
+  },
+  {
+    "token": "amigo-robot",
+    "title": "Grandes Héroes",
+    "synopsis": "Se desarrolla un vínculo especial entre el robot inflable de gran tamaño Baymax y el prodigio Hiro Hamada, quienes se unen a un grupo de amigos para formar una banda de héroes de alta tecnología.",
+    "genre": "Aventura",
+    "year": "2014",
+    "actors": "Scott Adsit, Ryan Potter, Daniel Henney, T.J. Miller"
+  },
+  {
+    "token": "amor-cafe",
+    "title": "Tienes Un E-mail",
+    "synopsis": "Kathleen Kelly es la propietaria de una librería infantil, un verdadero tesoro cultural de uno de los barrios más esclusivos de Nueva York, y pasa largas noches aburridas junto a su novio Frank , un escritor frustrado que escribe columnas en el periódico. Lo único que apasiona a Kathleen es intercambiar mensajes de correo electrónico con un hombre del que sólo conoce su seudónimo.",
+    "genre": "Comedia",
+    "year": "1998",
+    "actors": "Meg Ryan, Tom Hanks, Greg Kinnear, Parker Posey"
+  },
+  {
+    "token": "contrarreloj",
+    "title": "Zona de miedo",
+    "synopsis": "En Irak, una unidad de élite de artificieros norteamericanos actúa en una caótica ciudad donde cualquier persona puede ser un enemigo y cualquier objeto, una bomba. El jefe del grupo, el sargento Thompson, muere en el transcurso de una misión y es sustituido por el impredecible y temerario sargento William James. Cuando falta poco para que la brigada sea relevada, el imprudente comportamiento de James hará que dos de sus subordinados, se planteen seriamente el riesgo que corren.",
+    "genre": "Drama",
+    "year": "2008",
+    "actors": "Jeremy Renner, Anthony Mackie, Brian Geraghty, David Morse"
+  },
+  {
+    "token": "legado",
+    "title": "Diarios de motocicleta",
+    "synopsis": "En 1952, siendo el «Che» Guevara (Gael García Bernal) estudiante de medicina, recorrió América del Sur, con su amigo Alberto Granado (Rodrigo de la Serna), en una destartalada moto. Ernesto es un joven estudiante de medicina de 23 años de edad, especializado en lepra. Alberto es un bioquímico de 29 años. Ambos jóvenes emprenden un viaje de descubrimiento de la rica y compleja topografía humana y social del continente hispanoamericano. Los dos dejaron atrás el familiar entorno de Buenos Aires en una desvencijada motocicleta Norton de 500 cc, imbuidos de un romántico espíritu aventurero.",
+    "genre": "Drama",
+    "year": "2004",
+    "actors": "Gael García Bernal, Rodrigo de la Serna, Mercedes Morán, Mía Maestro"
+  },
+  {
+    "token": "aventura-prehistorica",
+    "title": "Parque Jurásico",
+    "synopsis": "El multimillonario John Hammond tiene una idea para un espectacular parque temático: una isla retirada donde los visitantes puedan observar dinosaurios reales. Con la última tecnología en el desarrollo de DNA, los científicos pueden clonar braquiosaurios, triceratops, velociraptors y un tiranosaurio rex, utilizando para ello la sangre fosilizada en ámbar contenida en insectos que los mordieron hace millones de años. Los paleontólogos Alan Grant, Ellie Sattler y Ian Malcolm visitan el parque y quedan muy sorprendidos con los resultados obtenidos. Pero cuando un problemático empleado manipula el sofisticado sistema de seguridad los dinosaurios escapan, obligando a los visitantes a luchar por su supervivencia.",
+    "genre": "Aventura",
+    "year": "1993",
+    "actors": "Sam Neill, Laura Dern, Jeff Goldblum, Richard Attenborough"
+  },
+  {
+    "token": "ciudad-cristal",
+    "title": "El diablo viste a la moda",
+    "synopsis": "En el vertiginoso mundo de la moda de Nueva York, la cumbre del éxito la representa la revista Runway, dirigida con mano de hierro por Miranda Priestly. Trabajar como ayudante de Miranda podría abrirle cualquier puerta a Andy Sachs, si no fuera porque es una chica que destaca por su desaliño estilo dentro del grupo de guapísimas periodistas de la revista. Andy comprende muy pronto que para triunfar en ese negocio va a necesitar algo más que iniciativa y preparación. Y la prueba está delante de ella, vestida de pies a cabeza de Prada.",
+    "genre": "Drama",
+    "year": "2006",
+    "actors": "Meryl Streep, Anne Hathaway, Emily Blunt, Stanley Tucci"
+  }
+]

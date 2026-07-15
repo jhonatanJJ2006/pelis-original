@@ -1,0 +1,242 @@
+[
+  {
+    "tmdbId": 1368337,
+    "title": "La Odisea",
+    "overview": "Odiseo, el legendario rey de Ítaca, emprende un largo y peligroso viaje de regreso a casa tras la guerra de Troya. A lo largo de su travesía, se ve obligado a enfrentarse a los caprichos de los dioses, a monstruos mitológicos y a pruebas que ponen a prueba su astucia y su humanidad hasta el límite.",
+    "genre": "Aventura",
+    "releaseYear": 2026,
+    "actors": ["Matt Damon", "Tom Holland", "Anne Hathaway", "Robert Pattinson"]
+  },
+  {
+    "tmdbId": 1301421,
+    "title": "Las ovejas detectives",
+    "overview": "Cada noche, un pastor lee en voz alta un asesinato misterioso, fingiendo que sus ovejas pueden entenderlo. Cuando lo encuentran muerto, las ovejas se dan cuenta enseguida de que ha sido un asesinato y creen saber cómo resolverlo.",
+    "genre": "Comedia",
+    "releaseYear": 2026,
+    "actors": ["Hugh Jackman", "Nicholas Braun", "Nicholas Galitzine", "Molly Gordon"]
+  },
+  {
+    "tmdbId": 1228710,
+    "title": "Star Wars: The Mandalorian and Grogu",
+    "overview": "Continuación de la serie \"The Mandalorian\" en forma de película. El malvado Imperio ha caído y los señores de la guerra imperiales siguen dispersos por toda la galaxia. Mientras la incipiente Nueva República trabaja para proteger todo por lo que luchó la Rebelión, ha reclutado la ayuda del legendario cazarrecompensas mandaloriano Din Djarin (Pedro Pascal) y su joven aprendiz Grogu.",
+    "genre": "Acción",
+    "releaseYear": 2026,
+    "actors": ["Pedro Pascal", "Jeremy Allen White", "Sigourney Weaver", "Steve Blum"]
+  },
+  {
+    "tmdbId": 969681,
+    "title": "Spider-Man: Un nuevo día",
+    "overview": "A medida qué Spider-Man está en la cima de su carrera protegiendo la ciudad de Nueva York, una serie de crímenes inusuales lo arrastran a una red de misterios más grande de lo que jamás haya enfrentado.",
+    "genre": "Ciencia ficción",
+    "releaseYear": 2026,
+    "actors": ["Tom Holland", "Zendaya", "Sadie Sink", "Jacob Batalon"]
+  },
+  {
+    "tmdbId": 1007757,
+    "title": "Intercambiados",
+    "overview": "Una pequeña criatura del bosque y un ave majestuosa intercambian cuerpos. Ahora, deben aliarse para sobrevivir a la aventura más salvaje de sus vidas.",
+    "genre": "Aventura",
+    "releaseYear": 2026,
+    "actors": ["Michael B. Jordan", "Juno Temple", "Tracy Morgan", "Cedric the Entertainer"]
+  },
+  {
+    "tmdbId": 1327819,
+    "title": "Hoppers: Operación castor",
+    "overview": "Mabel, una amante de los animales, utiliza una nueva e inteligente tecnología diseñada para \"transmitir\" la conciencia humana a animales robóticos realistas en un intento de comunicarse con los castores, descubriendo misterios dentro del mundo animal más allá de lo que pudiera haber imaginado.",
+    "genre": "Aventura",
+    "releaseYear": 2026,
+    "actors": ["Piper Curda", "Bobby Moynihan", "Jon Hamm", "Kathy Najimy"]
+  },
+  {
+    "tmdbId": 1439930,
+    "title": "The Punisher: La última muerte",
+    "overview": "Mientras Frank Castle busca propósito más allá de la venganza, una fuerza inesperada lo arrastra de nuevo a la lucha.",
+    "genre": "Acción",
+    "releaseYear": 2026,
+    "actors": ["Jon Bernthal", "Deborah Ann Woll", "Jason R. Moore", "Judith Light"]
+  },
+  {
+    "tmdbId": 1081003,
+    "title": "Supergirl",
+    "overview": "Mientras celebra su cumpleaños número 21, Kara Zor-El viaja por la galaxia con su perro Krypto, durante el cual conoce a la joven Ruthye Marye Knoll y emprende una \"búsqueda asesina de venganza\".",
+    "genre": "Acción",
+    "releaseYear": 2026,
+    "actors": ["Milly Alcock", "Eve Ridley", "Matthias Schoenaerts", "Jason Momoa"]
+  },
+  {
+    "tmdbId": 614945,
+    "title": "Mensajes de voz para Isabelle",
+    "overview": "Los entretenidos mensajes de voz que una joven mujer le deja a su hermana fallecida le llegan por azar a un desconocido, quien se enamora de ella sin siquiera verla.",
+    "genre": "Romance",
+    "releaseYear": 2026,
+    "actors": ["Zoey Deutch", "Nick Robinson", "Ciara Bravo", "Nick Offerman"]
+  },
+  {
+    "tmdbId": 1397385,
+    "title": "Hermanito",
+    "overview": "La vida perfecta de un impasible agente inmobiliario da un vuelco radical cuando su adorable y caótico «hermanito» llega para sacudir su existencia.",
+    "genre": "Comedia",
+    "releaseYear": 2026,
+    "actors": ["John Cena", "Eric André", "Michelle Monaghan", "Christopher Meloni"]
+  },
+  {
+    "tmdbId": 1122573,
+    "title": "En la zona gris",
+    "overview": "Gira en torno a dos especialistas en extracción que tienen que designar una ruta de escape para una negociadora de alto rango.",
+    "genre": "Acción",
+    "releaseYear": 2026,
+    "actors": ["Henry Cavill", "Jake Gyllenhaal", "Eiza González", "Carlos Bardem"]
+  },
+  {
+    "tmdbId": 1159559,
+    "title": "Scream 7",
+    "overview": "La tranquila y rehecha vida Sidney Prescott se cae a pedazos cuando Ghostface llega al pueblo. Sin embargo, sus peores temores se hacen realidad cuando su hija Tatum se convierte en la próxima víctima.",
+    "genre": "Terror",
+    "releaseYear": 2026,
+    "actors": ["Neve Campbell", "Courteney Cox", "Isabel May", "Jasmin Savoy Brown"]
+  },
+  {
+    "tmdbId": 1003596,
+    "title": "Avengers: Doomsday",
+    "overview": "Héroes queridos de tres universos distintos se encaminan hacia una colisión mortal y se enfrentan a una amenaza existencial como nunca antes habían encontrado.",
+    "genre": "Ciencia ficción",
+    "releaseYear": 2026,
+    "actors": ["Robert Downey Jr.", "Chris Evans", "Chris Hemsworth", "Pedro Pascal"]
+  },
+  {
+    "tmdbId": 1272837,
+    "title": "Exterminio: El templo de huesos",
+    "overview": "El Dr. Kelson se encuentra en una nueva relación impactante, con consecuencias que podrían cambiar el mundo tal como lo conocen, y el encuentro de Spike con Jimmy Crystal se convierte en una pesadilla de la que no puede escapar.",
+    "genre": "Terror",
+    "releaseYear": 2026,
+    "actors": ["Ralph Fiennes", "Jack O'Connell", "Alfie Williams", "Erin Kellyman"]
+  },
+  {
+    "tmdbId": 1279493,
+    "title": "El último gran golpe",
+    "overview": "El dueño de un club nocturno está a punto de dejar atrás su peligroso pasado para volver a vivir con su novia. Cuando unos pistoleros enmascarados le roban y se ve acorralado por despiadados cárteles, llega un misterioso hombre interesado en comprar el negocio.",
+    "genre": "Acción",
+    "releaseYear": 2026,
+    "actors": ["Russell Crowe", "Luke Evans", "Aaron Paul", "Teresa Palmer"]
+  },
+  {
+    "tmdbId": 980431,
+    "title": "Avatar: Aang, El último Maestro Aire",
+    "overview": "Avatar Aang, el último Maestro Aire del mundo, se entera de un antiguo poder que podría salvar a su cultura de la extinción. Con la ayuda de sus amigos, se embarca en una búsqueda global para encontrarlo antes de que caiga en las manos equivocadas.",
+    "genre": "Animación",
+    "releaseYear": 2026,
+    "actors": ["Eric Nam", "Dave Bautista", "Jessica Matten", "Román Zaragoza"]
+  },
+  {
+    "tmdbId": 1087192,
+    "title": "Cómo entrenar a tu dragón",
+    "overview": "En la agreste isla de Berk, donde vikingos y dragones han sido enemigos acérrimos durante generaciones, Hipo se distingue, desafiando siglos de tradición al entablar amistad con Desdentao, un temido dragón Furia Nocturna.",
+    "genre": "Fantasía",
+    "releaseYear": 2025,
+    "actors": ["Mason Thames", "Nico Parker", "Gerard Butler", "Nick Frost"]
+  },
+  {
+    "tmdbId": 617126,
+    "title": "Los 4 Fantásticos: Primeros pasos",
+    "overview": "Con un estruendoso trasfondo en un mundo retrofuturista inspirado en los años 60, la Primera Familia de Marvel enfrenta su desafío más intimidante hasta ahora. Obligados a equilibrar sus roles como héroes con la fuerza de su vínculo familiar, deben defender la Tierra de un voraz dios espacial llamado Galactus.",
+    "genre": "Ciencia ficción",
+    "releaseYear": 2025,
+    "actors": ["Pedro Pascal", "Vanessa Kirby", "Joseph Quinn", "Ebon Moss-Bachrach"]
+  },
+  {
+    "tmdbId": 986056,
+    "title": "Thunderbolts*",
+    "overview": "Un grupo de supervillanos poco convencional es reclutado para hacer misiones para el gobierno: Yelena Belova, Bucky Barnes, Red Guardian, Ghost, Taskmaster y John Walker. Después de verse atrapados en una trampa mortal, estos marginados deben embarcarse en una peligrosa misión.",
+    "genre": "Acción",
+    "releaseYear": 2025,
+    "actors": ["Florence Pugh", "Sebastian Stan", "David Harbour", "Wyatt Russell"]
+  },
+  {
+    "tmdbId": 541671,
+    "title": "Bailarina",
+    "overview": "Eve Macarro es una asesina entrenada por la Ruska Roma desde su infancia, la misma organización criminal encargada del adiestramiento de John Wick. En esta violenta historia de venganza, Eve intentará por todos los medios averiguar quién está detrás del asesinato de su padre.",
+    "genre": "Acción",
+    "releaseYear": 2025,
+    "actors": ["Ana de Armas", "Keanu Reeves", "Ian McShane", "Anjelica Huston"]
+  },
+  {
+    "tmdbId": 533533,
+    "title": "TRON: Ares",
+    "overview": "Un programa altamente sofisticado llamado Ares es enviado del mundo digital al mundo real en una misión peligrosa, marcando el primer encuentro de la humanidad con seres de IA.",
+    "genre": "Ciencia ficción",
+    "releaseYear": 2025,
+    "actors": ["Jared Leto", "Greta Lee", "Evan Peters", "Gillian Anderson"]
+  },
+  {
+    "tmdbId": 1100988,
+    "title": "Exterminio: La evolución",
+    "overview": "Casi tres décadas desde que el virus de la ira escapó de un laboratorio de armas biológicas. Uno de los supervivientes abandona la pequeña isla en una misión hacía el oscuro corazón del continente, descubriendo secretos, maravillas y horrores.",
+    "genre": "Terror",
+    "releaseYear": 2025,
+    "actors": ["Aaron Taylor-Johnson", "Alfie Williams", "Ralph Fiennes", "Jodie Comer"]
+  },
+  {
+    "tmdbId": 798645,
+    "title": "El sobreviviente",
+    "overview": "Un hombre se une a un programa de juegos en el que los concursantes, a los que se les permite ir a cualquier parte del mundo, son perseguidos por cazadores empleados para matarlos.",
+    "genre": "Acción",
+    "releaseYear": 2025,
+    "actors": ["Glen Powell", "William H. Macy", "Lee Pace", "Michael Cera"]
+  },
+  {
+    "tmdbId": 1078605,
+    "title": "La hora de la desaparición",
+    "overview": "Cuando todos los niños de una secundaria, menos uno, desaparecen misteriosamente la misma noche y exactamente a la misma hora, toda la comunidad de un pequeño pueblo se pregunta quién (o qué) es responsable de su desaparición.",
+    "genre": "Terror",
+    "releaseYear": 2025,
+    "actors": ["Julia Garner", "Josh Brolin", "Alden Ehrenreich", "Austin Abrams"]
+  },
+  {
+    "tmdbId": 1175942,
+    "title": "Los tipos malos 2",
+    "overview": "Un genial equipo de animales que no respetan la ley, los ahora muy reformados Tipos Malos, se esfuerzan (mucho, muchísimo) en ser buenos, pero se ven envueltos involuntariamente en un golpe de envergadura mundial planeado por un inesperado grupo de criminales: las Tipas Malas.",
+    "genre": "Familia",
+    "releaseYear": 2025,
+    "actors": ["Sam Rockwell", "Marc Maron", "Awkwafina", "Craig Robinson"]
+  },
+  {
+    "tmdbId": 1022787,
+    "title": "Elio",
+    "overview": "Con una imaginación desbordante y una enorme obsesión por los extraterrestres, Elio, de 11 años, es transportado al espacio. Pero es identificado por error como el embajador galáctico de la tierra.",
+    "genre": "Animación",
+    "releaseYear": 2025,
+    "actors": ["Yonas Kibreab", "Remy Edgerly", "Zoe Saldaña", "Brad Garrett"]
+  },
+  {
+    "tmdbId": 1228246,
+    "title": "Five Nights at Freddy's 2",
+    "overview": "Un año después de los sucesos de Freddy Fazbear's Pizza, y con la llegada de un nuevo Faszfest al pueblo. Abby se escapa para reencontrarse con Freddy, Bonnie, Chica y Foxy con oscuros secretos revelándose.",
+    "genre": "Terror",
+    "releaseYear": 2025,
+    "actors": ["Josh Hutcherson", "Piper Rubio", "Elizabeth Lail", "Matthew Lillard"]
+  },
+  {
+    "tmdbId": 1062722,
+    "title": "Frankenstein",
+    "overview": "El Dr. Victor Frankenstein, un científico brillante pero egoísta, da vida a una criatura en un monstruoso experimento que finalmente conduce a la ruina tanto del creador como de su trágica creación.",
+    "genre": "Drama",
+    "releaseYear": 2025,
+    "actors": ["Oscar Isaac", "Jacob Elordi", "Christoph Waltz", "Mia Goth"]
+  },
+  {
+    "tmdbId": 822119,
+    "title": "Capitán América: Un nuevo mundo",
+    "overview": "Tras reunirse con el recientemente electo presidente de los Estados Unidos Thaddeus Ross, Sam se encuentra en medio de un conflicto internacional. Debe descubrir la razón de un nefasto complot mundial antes de que el verdadero artífice detrás del mismo haga que el mundo entero entre en caos.",
+    "genre": "Acción",
+    "releaseYear": 2025,
+    "actors": ["Anthony Mackie", "Danny Ramirez", "Carl Lumbly", "Tim Blake Nelson"]
+  },
+  {
+    "tmdbId": 574475,
+    "title": "Destino final lazos de sangre",
+    "overview": "Atragantada por una violenta pesadilla recurrente, la estudiante universitaria Stefanie regresa a casa para encontrar a la única persona que podría romper el ciclo y salvar a su familia de la horrible muerte que inevitablemente les espera a todos.",
+    "genre": "Terror",
+    "releaseYear": 2025,
+    "actors": ["Kaitlyn Santa Juana", "Teo Briones", "Rya Kihlstedt", "Richard Harmon"]
+  }
+]

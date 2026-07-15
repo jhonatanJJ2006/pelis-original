@@ -1,0 +1,14 @@
+{
+  "name": "@pelis/android",
+  "version": "1.0.0",
+  "private": true,
+  "description": "APK Android (TWA) para Pelis — distribución directa sin Play Store",
+  "scripts": {
+    "init": "bubblewrap update --manifest=../web/public/manifest.json",
+    "build": "node ../../scripts/android-build.mjs",
+    "fingerprint": "node ../../scripts/android-fingerprint.mjs"
+  },
+  "devDependencies": {
+    "@bubblewrap/cli": "^1.24.1"
+  }
+}

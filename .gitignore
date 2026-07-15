@@ -1,0 +1,64 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+dist/
+.next/
+.cache/
+.turbo/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Testing
+coverage/
+
+# Misc
+.DS_Store
+
+# TypeScript
+*.tsbuildinfo
+
+# Next.js / Vercel
+out/
+.vercel
+
+# Android TWA / APK
+apps/android/android.keystore
+apps/android/*.apk
+apps/android/app/
+apps/android/.gradle/
+apps/android/build/
+apps/android/local.properties
+apps/android/gradle.properties
+apps/android/manifest-checksum.txt
+apps/android/store_icon.png
+
+# Cursor (clones temporales al instalar skills)
+.cursor/tmp-skills/
+
+# Media assets locales (copiar desde pelis/public/peliculas/peliculas)
+apps/web/public/peliculas/peliculas/*
+!apps/web/public/peliculas/peliculas/.gitkeep
+apps/web/public/peliculas/placeholder.webp
+
+.vercel

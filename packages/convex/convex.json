@@ -1,0 +1,12 @@
+{
+  "functions": "src/",
+  "node": {
+    "externalPackages": [
+      "better-auth",
+      "@better-auth/core",
+      "@convex-dev/better-auth",
+      "@convex-dev/better-auth/plugins",
+      "resend"
+    ]
+  }
+}

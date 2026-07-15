@@ -1,0 +1,53 @@
+{
+  "name": "@pelis/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "pnpm with-env next build",
+    "build:vercel": "next build",
+    "clean": "git clean -xdf .cache .next .turbo node_modules",
+    "dev": "node scripts/find-port.js",
+    "format": "prettier --check . --ignore-path ../../.gitignore",
+    "lint": "eslint . --max-warnings 0",
+    "start": "pnpm with-env next start",
+    "typecheck": "tsc --noEmit",
+    "with-env": "dotenv -e ../../.env --"
+  },
+  "dependencies": {
+    "@convex-dev/better-auth": "^0.10.10",
+    "@pelis/auth": "workspace:*",
+    "@pelis/convex": "workspace:*",
+    "@pelis/ui": "workspace:*",
+    "@pelis/validators": "workspace:*",
+    "@serwist/next": "8",
+    "@serwist/precaching": "8",
+    "@serwist/sw": "8",
+    "@t3-oss/env-nextjs": "^0.11.1",
+    "autoprefixer": "^10.4.20",
+    "better-auth": "1.4.9",
+    "convex": "^1.42.1",
+    "geist": "catalog:",
+    "next": "^14.2.15",
+    "react": "catalog:react18",
+    "react-dom": "catalog:react18",
+    "sonner": "^1.7.0",
+    "swiper": "^14.0.2",
+    "tailwindcss": "catalog:",
+    "zod": "4.0.0"
+  },
+  "devDependencies": {
+    "@pelis/eslint-config": "workspace:*",
+    "@pelis/prettier-config": "workspace:*",
+    "@pelis/tailwind-config": "workspace:*",
+    "@pelis/tsconfig": "workspace:*",
+    "@types/node": "^22.19.0",
+    "@types/react": "catalog:react18",
+    "@types/react-dom": "catalog:react18",
+    "dotenv-cli": "^7.4.2",
+    "jiti": "^1.21.6",
+    "prettier": "catalog:",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:"
+  },
+  "prettier": "@pelis/prettier-config"
+}
