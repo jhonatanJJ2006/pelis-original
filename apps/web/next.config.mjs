@@ -1,8 +1,16 @@
 /** @type {import('next').NextConfig} */
 import path from 'path';
 import { fileURLToPath } from 'url';
+import withSerwistInit from '@serwist/next';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+const withSerwist = withSerwistInit({
+  swSrc: 'sw.ts',
+  swDest: 'public/sw.js',
+  // En dev, webpack genera sw.js con eval() que el navegador rechaza en Service Workers.
+  disable: process.env.NODE_ENV === 'development',
+});
 
 const nextConfig = {
   transpilePackages: [
@@ -36,4 +44,4 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSerwist(nextConfig);

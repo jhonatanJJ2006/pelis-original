@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <rect width="192" height="192" rx="32" fill="#0a0e1a"/>
+  <!-- Clapperboard body -->
+  <rect x="36" y="52" width="120" height="88" rx="8" fill="#1a2248"/>
+  <!-- Clapperboard top stripe -->
+  <rect x="36" y="52" width="120" height="24" rx="8" fill="#2a3a7a"/>
+  <!-- Clapper top triangle -->
+  <polygon points="56,76 72,52 88,76" fill="#4fc3f7"/>
+  <polygon points="88,76 104,52 120,76" fill="#4fc3f7"/>
+  <!-- Play button triangle -->
+  <polygon points="76,90 76,130 116,110" fill="#4fc3f7" opacity="0.9"/>
+  <!-- Film strip dots -->
+  <circle cx="48" cy="106" r="3" fill="#4fc3f7" opacity="0.5"/>
+  <circle cx="60" cy="106" r="3" fill="#4fc3f7" opacity="0.5"/>
+  <circle cx="72" cy="106" r="3" fill="#4fc3f7" opacity="0.5"/>
+  <circle cx="48" cy="120" r="3" fill="#4fc3f7" opacity="0.5"/>
+  <circle cx="60" cy="120" r="3" fill="#4fc3f7" opacity="0.5"/>
+  <circle cx="72" cy="120" r="3" fill="#4fc3f7" opacity="0.5"/>
+</svg>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery } from 'convex/react';
+import { useQuery, useConvexAuth } from 'convex/react';
 import { useAppStore, type User } from './store';
 import { api } from '@pelis/convex';
 import { getAuthApiBase } from './convex-site';
@@ -14,24 +14,26 @@ interface UseUserReturn {
 
 export function useUser(): UseUserReturn {
   const { user, setUser, isLoading } = useAppStore();
+  const { isAuthenticated, isLoading: isAuthLoading } = useConvexAuth();
   const convexUser = useQuery(api.users.me, {});
 
   useEffect(() => {
-    if (convexUser !== undefined) {
-      if (convexUser) {
-        setUser({
-          _id: convexUser._id,
-          name: convexUser.name ?? 'User',
-          email: convexUser.email ?? '',
-          image: convexUser.image ?? undefined,
-          planId: convexUser.planId ?? undefined,
-          planExpiresAt: convexUser.planExpiresAt ?? undefined,
-        });
-      } else {
-        setUser(null);
-      }
+    if (!isAuthLoading && !isAuthenticated) {
+      setUser(null);
+      return;
     }
-  }, [convexUser, setUser]);
+
+    if (convexUser) {
+      setUser({
+        _id: convexUser._id,
+        name: convexUser.name ?? 'User',
+        email: convexUser.email ?? '',
+        image: convexUser.image ?? undefined,
+        planId: convexUser.planId ?? undefined,
+        planExpiresAt: convexUser.planExpiresAt ?? undefined,
+      });
+    }
+  }, [convexUser, setUser, isAuthenticated, isAuthLoading]);
 
   const logout = async () => {
     try {
@@ -45,9 +47,14 @@ export function useUser(): UseUserReturn {
     setUser(null);
   };
 
+  const resolvedUser = isAuthenticated ? user : null;
+
   return {
-    user,
-    isLoading: user === null && isLoading,
+    user: resolvedUser,
+    isLoading:
+      isAuthLoading ||
+      (isAuthenticated && convexUser === undefined) ||
+      (resolvedUser === null && isLoading),
     logout,
   };
 }

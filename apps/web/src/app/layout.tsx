@@ -18,6 +18,13 @@ const bebasNeue = Bebas_Neue({
 export const metadata = {
   title: 'Pelis — Cine y series en streaming',
   description: 'Disfruta películas y series con una experiencia de streaming premium',
+  manifest: '/manifest.json',
+  icons: {
+    apple: '/icons/icon-192.svg',
+  },
+  other: {
+    'mobile-web-app-capable': 'yes',
+  },
 };
 
 export default function RootLayout({
@@ -27,6 +34,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es" className="dark">
+      <head>
+        <meta name="theme-color" content="#0a0e1a" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="application-name" content="Pelis" />
+      </head>
       <body className={`${outfit.variable} ${bebasNeue.variable} font-sans`}>
         <Providers>
           <ConvexClientProvider>

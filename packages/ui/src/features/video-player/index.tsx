@@ -112,7 +112,7 @@ export function VideoPlayer({
         )}
       >
         <div
-          className="h-1.5 bg-cinema-elevated rounded-full mb-3 cursor-pointer"
+          className="h-2 md:h-1.5 bg-cinema-elevated rounded-full mb-3 cursor-pointer"
           role="slider"
           aria-label="Progreso de reproducción"
           aria-valuemin={0}
@@ -147,7 +147,7 @@ export function VideoPlayer({
                 e.stopPropagation();
                 togglePlay();
               }}
-              className="p-2 rounded-full bg-cinema-elevated/90 hover:bg-cinema-violet/40 border border-cinema-border transition-colors focus-visible:ring-2 focus-visible:ring-cinema-accent/60"
+              className="p-3 md:p-2 rounded-full bg-cinema-elevated/90 hover:bg-cinema-violet/40 border border-cinema-border transition-colors focus-visible:ring-2 focus-visible:ring-cinema-accent/60"
               aria-label={playing ? 'Pausar' : 'Reproducir'}
             >
               {playing ? (
@@ -163,7 +163,7 @@ export function VideoPlayer({
                 setMuted(!muted);
                 if (videoRef.current) videoRef.current.muted = !muted;
               }}
-              className="p-2 rounded-full bg-cinema-elevated/90 hover:bg-cinema-violet/40 border border-cinema-border transition-colors focus-visible:ring-2 focus-visible:ring-cinema-accent/60"
+              className="p-3 md:p-2 rounded-full bg-cinema-elevated/90 hover:bg-cinema-violet/40 border border-cinema-border transition-colors focus-visible:ring-2 focus-visible:ring-cinema-accent/60"
               aria-label={muted ? 'Activar sonido' : 'Silenciar'}
             >
               {muted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
@@ -175,7 +175,7 @@ export function VideoPlayer({
               e.stopPropagation();
               toggleFullscreen();
             }}
-            className="p-2 rounded-full bg-cinema-elevated/90 hover:bg-cinema-violet/40 border border-cinema-border transition-colors focus-visible:ring-2 focus-visible:ring-cinema-accent/60"
+            className="p-3 md:p-2 rounded-full bg-cinema-elevated/90 hover:bg-cinema-violet/40 border border-cinema-border transition-colors focus-visible:ring-2 focus-visible:ring-cinema-accent/60"
             aria-label="Pantalla completa"
           >
             <Maximize className="w-5 h-5" />

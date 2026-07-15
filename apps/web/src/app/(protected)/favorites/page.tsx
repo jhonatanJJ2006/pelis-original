@@ -74,7 +74,7 @@ export default function FavoritesPage() {
         </div>
 
         <div
-          className="flex gap-2 p-1 bg-cinema-surface border border-cinema-border rounded-xl"
+          className="flex gap-2 p-1 bg-cinema-surface border border-cinema-border rounded-xl overflow-x-auto"
           role="tablist"
           aria-label="Filtrar favoritos"
         >
