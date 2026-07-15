@@ -1,6 +1,7 @@
 {
   "buildCommand": "pnpm build:vercel",
+  "installCommand": "pnpm install --filter @pelis/web...",
   "framework": "nextjs",
   "outputDirectory": "apps/web/.next",
-  "ignoreCommand": "npx turbo-ignore @pelis/web"
+  "ignoreCommand": "node scripts/vercel-ignore.mjs"
 }
