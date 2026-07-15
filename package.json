@@ -26,13 +26,17 @@
     "test:watch": "vitest",
     "test:e2e": "npx playwright test --config=e2e/playwright.config.ts",
     "test:e2e:ui": "npx playwright test --ui --config=e2e/playwright.config.ts",
-    "test:setup": "pnpm add -D vitest @playwright/test -w && npx playwright install chromium"
+    "test:setup": "pnpm add -D vitest @playwright/test -w && npx playwright install chromium",
+    "icons:generate": "node scripts/generate-pwa-icons.mjs",
+    "android:build": "node scripts/android-build.mjs",
+    "android:fingerprint": "node scripts/android-fingerprint.mjs"
   },
   "devDependencies": {
     "@pelis/prettier-config": "workspace:*",
     "@rolldown/binding-win32-x64-msvc": "^1.1.5",
     "@turbo/gen": "^2.1.3",
     "prettier": "catalog:",
+    "sharp": "^0.35.3",
     "turbo": "^2.1.3",
     "typescript": "catalog:",
     "vitest": "^2.1.9"
