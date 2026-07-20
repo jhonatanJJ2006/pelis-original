@@ -14,6 +14,8 @@ import {
   Crown,
   Search,
   Tv,
+  Radio,
+  Clapperboard,
 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
@@ -25,6 +27,8 @@ const navItems = [
   { href: '/', label: 'Inicio', icon: Home, exact: true },
   { href: '/movies', label: 'Películas', icon: Film },
   { href: '/series', label: 'Series', icon: Tv },
+  { href: '/tv', label: 'TV', icon: Radio },
+  { href: '/anime', label: 'Anime', icon: Clapperboard },
   { href: '/favorites', label: 'Favoritos', icon: Heart },
   { href: '/history', label: 'Historial', icon: History },
 ];

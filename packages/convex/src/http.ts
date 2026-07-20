@@ -5,9 +5,14 @@ import { convex } from '@convex-dev/better-auth/plugins';
 import { getAuthConfigProvider } from '@convex-dev/better-auth/auth-config';
 import { emailOTP } from 'better-auth/plugins';
 import { Resend } from 'resend';
-import { components } from './_generated/api';
+import Stripe from 'stripe';
+import { components, api } from './_generated/api';
 
 const http = httpRouter();
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: '2025-09-30' as any,
+});
 
 const authClient = createClient(components.betterAuth);
 
@@ -244,6 +249,110 @@ authClient.registerRoutes(http, (ctx) => {
       updateAge: 60 * 60 * 24,
     },
   });
+});
+
+http.route({
+  path: '/stripe/webhook',
+  method: 'POST',
+  handler: async (ctx, request) => {
+    const body = await request.text();
+    const signature = request.headers.get('stripe-signature');
+
+    if (!signature) {
+      return new Response('Missing stripe-signature header', { status: 400 });
+    }
+
+    let event: Stripe.Event;
+    try {
+      event = stripe.webhooks.constructEvent(
+        body,
+        signature,
+        process.env.STRIPE_WEBHOOK_SECRET!
+      );
+    } catch (err) {
+      return new Response(
+        `Webhook signature verification failed: ${err instanceof Error ? err.message : 'unknown error'}`,
+        { status: 400 }
+      );
+    }
+
+    try {
+      switch (event.type) {
+        case 'checkout.session.completed': {
+          const session = event.data.object as Stripe.Checkout.Session;
+          const convexUserId = session.metadata?.convexUserId;
+          const planId = session.metadata?.planId;
+
+          if (!convexUserId || !planId || !session.subscription) break;
+
+          const subscription = await stripe.subscriptions.retrieve(
+            session.subscription as string
+          );
+
+          const startDate = subscription.current_period_start * 1000;
+          const endDate = subscription.current_period_end * 1000;
+
+          await ctx.runMutation(api.stripeWebhook.handleSubscriptionCreated, {
+            subscriptionId: subscription.id,
+            stripeCustomerId: session.customer as string,
+            stripePriceId: subscription.items.data[0]?.price.id ?? '',
+            convexUserId,
+            planId: planId as any,
+            startDate,
+            endDate,
+          });
+          break;
+        }
+
+        case 'customer.subscription.updated': {
+          const subscription = event.data.object as Stripe.Subscription;
+          const status = subscription.status;
+          const mappedStatus = status === 'active' ? 'active'
+            : status === 'canceled' ? 'cancelled'
+            : status === 'past_due' ? 'past_due'
+            : status === 'incomplete' ? 'incomplete'
+            : 'expired';
+
+          await ctx.runMutation(api.stripeWebhook.handleSubscriptionUpdated, {
+            subscriptionId: subscription.id,
+            status: mappedStatus as any,
+            endDate: subscription.current_period_end * 1000,
+            cancelAtPeriodEnd: subscription.cancel_at_period_end,
+          });
+          break;
+        }
+
+        case 'customer.subscription.deleted': {
+          const subscription = event.data.object as Stripe.Subscription;
+          await ctx.runMutation(api.stripeWebhook.handleSubscriptionDeleted, {
+            subscriptionId: subscription.id,
+          });
+          break;
+        }
+
+        case 'invoice.payment_failed': {
+          const invoice = event.data.object as Stripe.Invoice;
+          const subId = invoice.subscription as string;
+          if (subId) {
+            await ctx.runMutation(api.stripeWebhook.handleSubscriptionUpdated, {
+              subscriptionId: subId,
+              status: 'past_due',
+            });
+          }
+          break;
+        }
+      }
+
+      return new Response(JSON.stringify({ received: true }), {
+        headers: { 'Content-Type': 'application/json' },
+      });
+    } catch (err) {
+      return new Response(
+        `Webhook handler error: ${err instanceof Error ? err.message : 'unknown error'}`,
+        { status: 500 }
+      );
+    }
+  },
 });
 
 export default http;

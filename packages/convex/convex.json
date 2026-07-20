@@ -6,7 +6,8 @@
       "@better-auth/core",
       "@convex-dev/better-auth",
       "@convex-dev/better-auth/plugins",
-      "resend"
+      "resend",
+    "stripe"
     ]
   }
 }

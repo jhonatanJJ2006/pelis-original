@@ -3,6 +3,7 @@
 import { useQuery, useMutation } from 'convex/react';
 import Link from 'next/link';
 import { useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, FreeMode } from 'swiper/modules';
 import { Crown, Check, Zap, Star, Rocket, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -38,10 +39,11 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 
 export default function SubscribePage() {
   const { user } = useUser();
+  const router = useRouter();
   const prevRef = useRef<HTMLButtonElement>(null);
   const nextRef = useRef<HTMLButtonElement>(null);
   const plans = (useQuery(api.subscriptions.list, {}) as Plan[] | undefined) ?? [];
-  const subscribe = useMutation(api.subscriptions.subscribe);
+  const createCheckoutSession = useMutation(api.stripe.createCheckoutSession);
 
   const isLoading = plans === undefined;
 
@@ -51,10 +53,15 @@ export default function SubscribePage() {
       return;
     }
     try {
-      await subscribe({ planId: planId as any });
-      toast.success('Suscripción activada con éxito');
-    } catch {
-      toast.error('Error al activar la suscripción');
+      const result = await createCheckoutSession({ planId: planId as any });
+      if (result?.url) {
+        router.push(result.url);
+      } else {
+        toast.error('Error al crear la sesión de pago');
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error al procesar el pago';
+      toast.error(message);
     }
   };
 

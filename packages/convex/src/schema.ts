@@ -31,6 +31,7 @@ export default defineSchema({
     icon: v.string(),
     months: v.number(),
     recommended: v.optional(v.boolean()),
+    stripePriceId: v.optional(v.string()),
   }),
 
   subscriptions: defineTable({
@@ -44,9 +45,12 @@ export default defineSchema({
       v.literal('expired')
     ),
     stripeSubscriptionId: v.optional(v.string()),
+    stripeCustomerId: v.optional(v.string()),
+    stripePriceId: v.optional(v.string()),
   })
     .index('by_user', ['userId'])
-    .index('by_plan', ['planId']),
+    .index('by_plan', ['planId'])
+    .index('by_stripeSubscriptionId', ['stripeSubscriptionId']),
 
   series: defineTable({
     name: v.string(),
@@ -64,6 +68,40 @@ export default defineSchema({
     .index('by_genre', ['genre'])
     .index('by_name', ['name'])
     .index('by_classification', ['classification']),
+
+  tvChannels: defineTable({
+    name: v.string(),
+    logo: v.string(),
+    category: v.string(),
+    streamUrl: v.string(),
+    source: v.string(),
+    language: v.string(),
+    isActive: v.boolean(),
+  })
+    .index('by_category', ['category'])
+    .index('by_source', ['source']),
+
+  anime: defineTable({
+    title: v.string(),
+    alternativeTitle: v.optional(v.string()),
+    image: v.string(),
+    synopsis: v.string(),
+    genre: v.array(v.string()),
+    episodes: v.number(),
+    status: v.union(v.literal('ongoing'), v.literal('completed')),
+    year: v.number(),
+    rating: v.optional(v.number()),
+    providers: v.array(
+      v.object({
+        name: v.string(),
+        url: v.string(),
+        language: v.union(v.literal('sub'), v.literal('dub'), v.literal('esp')),
+        isActive: v.boolean(),
+      })
+    ),
+  })
+    .index('by_title', ['title'])
+    .index('by_status', ['status']),
 
   favorites: defineTable({
     userId: v.string(),
