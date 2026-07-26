@@ -26,7 +26,10 @@ export default function AnimeWatchPage() {
   const searchParams = useSearchParams();
   const { user } = useUser();
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [videoData, setVideoData] = useState<{ sources: VideoSource[]; subtitles: Subtitle[] } | null>(null);
+  const [videoData, setVideoData] = useState<{
+    sources: VideoSource[];
+    subtitles: Subtitle[];
+  } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,7 +38,8 @@ export default function AnimeWatchPage() {
   const provider = searchParams.get('provider') || 'gogoanime';
 
   const getVideoUrl = useAction(api.anime.getVideoUrl);
-  const providers = useQuery(api.anime.getProviders, {}) as Array<{ id: string; name: string }> | undefined;
+  const providers = useQuery(api.anime.getProviders, {}) as
+    Array<{ id: string; name: string }> | undefined;
   const providerName = providers?.find((p) => p.id === provider)?.name || provider;
 
   const hasActivePlan = !!(user?.planExpiresAt && user.planExpiresAt > Date.now());
@@ -71,7 +75,9 @@ export default function AnimeWatchPage() {
     };
 
     loadVideo();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [episodeId, provider, getVideoUrl, user, hasActivePlan]);
 
   useEffect(() => {
@@ -105,7 +111,11 @@ export default function AnimeWatchPage() {
 
   if (user === undefined) {
     return (
-      <div className="page-shell min-h-[60vh] flex items-center justify-center" role="status" aria-label="Cargando">
+      <div
+        className="page-shell min-h-[60vh] flex items-center justify-center"
+        role="status"
+        aria-label="Cargando"
+      >
         <Spinner size="lg" />
       </div>
     );
@@ -198,7 +208,9 @@ export default function AnimeWatchPage() {
             <div className="flex items-center gap-2">
               <Monitor className="w-4 h-4 text-cinema-ash" />
               <span className="text-xs text-cinema-muted">
-                {videoData?.sources?.length ? `${videoData.sources.length} fuente(s)` : 'Sin fuentes'}
+                {videoData?.sources?.length
+                  ? `${videoData.sources.length} fuente(s)`
+                  : 'Sin fuentes'}
               </span>
             </div>
           </div>

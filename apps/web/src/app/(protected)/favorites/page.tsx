@@ -21,10 +21,8 @@ export default function FavoritesPage() {
   const [tab, setTab] = useState<Tab>('all');
   const removeFavorite = useMutation(api.favorites.remove);
 
-  const movies = useQuery(
-    api.favorites.listByUser,
-    user ? { userId: user._id as any } : 'skip'
-  ) as MediaItem[] | undefined;
+  const movies = useQuery(api.favorites.listByUser, user ? { userId: user._id as any } : 'skip') as
+    MediaItem[] | undefined;
 
   const filtered = useMemo(() => {
     const list = movies ?? [];

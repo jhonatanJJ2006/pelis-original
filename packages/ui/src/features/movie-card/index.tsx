@@ -63,7 +63,12 @@ export function MovieCard({ movie, showFavorite = true, variant = 'poster' }: Mo
           '[@media(hover:hover)_and_(pointer:fine)]:group-hover:-translate-y-1'
         )}
       >
-        <div className={cn('relative overflow-hidden', variant === 'poster' ? 'aspect-[2/3]' : 'aspect-video')}>
+        <div
+          className={cn(
+            'relative overflow-hidden',
+            variant === 'poster' ? 'aspect-[2/3]' : 'aspect-video'
+          )}
+        >
           <MoviePoster
             src={movie.image}
             alt={movie.name}

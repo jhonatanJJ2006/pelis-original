@@ -10,14 +10,14 @@ import { Spinner } from '@pelis/ui/components';
 import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';
 import dynamic from 'next/dynamic';
 
-const TVPlayer = dynamic(
-  () => import('./tv-player'),
-  { ssr: false, loading: () => (
+const TVPlayer = dynamic(() => import('./tv-player'), {
+  ssr: false,
+  loading: () => (
     <div className="aspect-video bg-cinema-elevated rounded-2xl flex items-center justify-center">
       <Loader2 className="w-8 h-8 text-cinema-silver animate-spin" />
     </div>
-  )}
-);
+  ),
+});
 
 interface TVChannel {
   _id: string;
@@ -41,7 +41,11 @@ export default function TVChannelPage() {
 
   if (isLoading) {
     return (
-      <div className="page-shell min-h-[60vh] flex items-center justify-center" role="status" aria-label="Cargando">
+      <div
+        className="page-shell min-h-[60vh] flex items-center justify-center"
+        role="status"
+        aria-label="Cargando"
+      >
         <Spinner size="lg" />
       </div>
     );
@@ -125,11 +129,9 @@ export default function TVChannelPage() {
 
       <div className="mt-6 p-4 rounded-xl bg-cinema-surface border border-cinema-border">
         <p className="text-sm text-cinema-muted">
-          <span className="text-cinema-silver font-medium">Categoría:</span>{' '}
-          {channel.category}
+          <span className="text-cinema-silver font-medium">Categoría:</span> {channel.category}
           <span className="mx-3">·</span>
-          <span className="text-cinema-silver font-medium">Fuente:</span>{' '}
-          {channel.source}
+          <span className="text-cinema-silver font-medium">Fuente:</span> {channel.source}
           <span className="mx-3">·</span>
           <span className="text-cinema-silver font-medium">Idioma:</span>{' '}
           {channel.language === 'es' ? 'Español' : channel.language}

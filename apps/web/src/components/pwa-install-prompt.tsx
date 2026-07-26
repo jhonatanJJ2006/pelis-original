@@ -43,8 +43,8 @@ function ApkInstallSteps() {
         Descargas
       </li>
       <li>
-        Si Android lo pide, permite <strong className="text-white">Instalar apps desconocidas</strong>{' '}
-        para tu navegador
+        Si Android lo pide, permite{' '}
+        <strong className="text-white">Instalar apps desconocidas</strong> para tu navegador
       </li>
       <li>Confirma la instalación y abre Pelis desde el inicio</li>
     </ol>
@@ -145,8 +145,8 @@ export function PwaInstallPrompt({ variant = 'card', className }: PwaInstallProm
     mode === 'ios' ? (
       <ol className="text-cinema-silver text-sm space-y-2 list-decimal list-inside">
         <li>
-          Toca <Share className="inline w-4 h-4 mx-0.5 text-cinema-gold" aria-hidden /> Compartir
-          en Safari
+          Toca <Share className="inline w-4 h-4 mx-0.5 text-cinema-gold" aria-hidden /> Compartir en
+          Safari
         </li>
         <li>
           Elige <strong className="text-white">Añadir a inicio</strong>
@@ -167,7 +167,8 @@ export function PwaInstallPrompt({ variant = 'card', className }: PwaInstallProm
     !apkAvailable && 'opacity-50 pointer-events-none cursor-not-allowed'
   );
 
-  const apkButton = showApkCta &&
+  const apkButton =
+    showApkCta &&
     (apkAvailable ? (
       <a href={APK_DOWNLOAD_PATH} download="pelis.apk" className={apkButtonClasses}>
         <Download className={variant === 'inline' ? 'w-4 h-4 mr-2' : 'w-5 h-5 mr-2'} aria-hidden />
@@ -200,7 +201,14 @@ export function PwaInstallPrompt({ variant = 'card', className }: PwaInstallProm
         )}
         {instructions}
         {canInstall && (
-          <Button type="button" size="sm" variant="outline" className="w-full" onClick={install} disabled={installing}>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="w-full"
+            onClick={install}
+            disabled={installing}
+          >
             {installing ? 'Instalando…' : 'O instalar desde Chrome (PWA)'}
           </Button>
         )}

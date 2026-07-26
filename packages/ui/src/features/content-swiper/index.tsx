@@ -64,7 +64,10 @@ export function ContentSwiper({ children, slideClassName, className }: ContentSw
         className="movie-row-swiper"
       >
         {children.map((child, i) => (
-          <SwiperSlide key={i} className={cn('!w-[300px] sm:!w-[340px] md:!w-[380px] h-auto', slideClassName)}>
+          <SwiperSlide
+            key={i}
+            className={cn('!w-[300px] sm:!w-[340px] md:!w-[380px] h-auto', slideClassName)}
+          >
             {child}
           </SwiperSlide>
         ))}

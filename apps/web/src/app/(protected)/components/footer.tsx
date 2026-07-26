@@ -25,8 +25,8 @@ export function Footer() {
               </span>
             </Link>
             <p className="text-cinema-silver text-sm leading-relaxed max-w-xs">
-              Tu sala de cine en casa. Películas, series y estrenos con una experiencia pensada
-              para disfrutar sin distracciones.
+              Tu sala de cine en casa. Películas, series y estrenos con una experiencia pensada para
+              disfrutar sin distracciones.
             </p>
           </div>
 

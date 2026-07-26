@@ -82,9 +82,7 @@ export default function ProfilePage() {
         <div className="w-16 h-16 rounded-2xl bg-cinema-elevated border border-cinema-border flex items-center justify-center mb-5">
           <User className="w-8 h-8 text-cinema-silver" aria-hidden />
         </div>
-        <h1 className="font-display text-3xl tracking-wide text-white uppercase mb-3">
-          Mi perfil
-        </h1>
+        <h1 className="font-display text-3xl tracking-wide text-white uppercase mb-3">Mi perfil</h1>
         <p className="text-cinema-muted mb-6 max-w-md">
           Inicia sesión para ver tus favoritos, historial y suscripción.
         </p>
@@ -140,7 +138,9 @@ export default function ProfilePage() {
               <div
                 className={cn(
                   'w-11 h-11 rounded-xl flex items-center justify-center shrink-0',
-                  hasActivePlan ? 'bg-emerald-500/20 text-emerald-400' : 'bg-cinema-gold/15 text-cinema-gold'
+                  hasActivePlan
+                    ? 'bg-emerald-500/20 text-emerald-400'
+                    : 'bg-cinema-gold/15 text-cinema-gold'
                 )}
               >
                 <Crown className="w-5 h-5" aria-hidden />
@@ -155,8 +155,7 @@ export default function ProfilePage() {
                   {hasActivePlan ? (
                     <span className="inline-flex items-center gap-1.5 text-emerald-400">
                       <Check className="w-3.5 h-3.5" aria-hidden />
-                      Activa hasta{' '}
-                      {new Date(user.planExpiresAt!).toLocaleDateString('es-ES')}
+                      Activa hasta {new Date(user.planExpiresAt!).toLocaleDateString('es-ES')}
                     </span>
                   ) : (
                     'Elige un plan para desbloquear todo el catálogo'

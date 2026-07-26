@@ -74,7 +74,9 @@ export function StaggerReveal({
           key={i}
           className={cn(
             'motion-safe transition-[opacity,transform] duration-500 ease-out-expo',
-            isVisible ? 'opacity-100 translate-x-0 translate-y-0 scale-100' : variantHidden[variant],
+            isVisible
+              ? 'opacity-100 translate-x-0 translate-y-0 scale-100'
+              : variantHidden[variant],
             itemClassName
           )}
           style={{ transitionDelay: isVisible ? `${i * staggerMs}ms` : '0ms' }}

@@ -76,10 +76,7 @@ export function Header({ sticky = true }: HeaderProps) {
 
   return (
     <header
-      className={cn(
-        sticky && 'sticky top-0 z-50',
-        'glass-strong border-b border-cinema-border/50'
-      )}
+      className={cn(sticky && 'sticky top-0 z-50', 'glass-strong border-b border-cinema-border/50')}
     >
       <nav className="container mx-auto px-4" aria-label="Principal">
         <div className="flex items-center justify-between h-16">
@@ -198,13 +195,13 @@ export function Header({ sticky = true }: HeaderProps) {
               </Link>
             )}
             {user && (
-              <Link
-                href="/profile"
-                className="rounded-full"
-                aria-label="Mi perfil"
-              >
+              <Link href="/profile" className="rounded-full" aria-label="Mi perfil">
                 {user.image ? (
-                  <img src={user.image} alt="" className="w-8 h-8 rounded-full ring-2 ring-cinema-violet/40" />
+                  <img
+                    src={user.image}
+                    alt=""
+                    className="w-8 h-8 rounded-full ring-2 ring-cinema-violet/40"
+                  />
                 ) : (
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cinema-accent to-cinema-violet flex items-center justify-center">
                     <User className="w-4 h-4 text-white" aria-hidden />

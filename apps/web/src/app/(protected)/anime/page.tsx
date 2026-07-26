@@ -69,15 +69,15 @@ export default function AnimePage() {
           Anime
         </h1>
         <p className="text-cinema-muted mt-3 max-w-2xl">
-          {anime.length > 0
-            ? `${anime.length} animes disponibles`
-            : 'Cargando catálogo...'}
+          {anime.length > 0 ? `${anime.length} animes disponibles` : 'Cargando catálogo...'}
         </p>
       </ScrollReveal>
 
       <div className="flex flex-col lg:flex-row gap-4 mb-10">
         <div className="flex-1 relative">
-          <label htmlFor="anime-search" className="sr-only">Buscar anime</label>
+          <label htmlFor="anime-search" className="sr-only">
+            Buscar anime
+          </label>
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-cinema-ash" />
           <input
             id="anime-search"
@@ -89,7 +89,9 @@ export default function AnimePage() {
           />
         </div>
         <div className="flex flex-wrap gap-3">
-          <label htmlFor="genre-filter" className="sr-only">Filtrar por género</label>
+          <label htmlFor="genre-filter" className="sr-only">
+            Filtrar por género
+          </label>
           <select
             id="genre-filter"
             value={selectedGenre}
@@ -98,11 +100,15 @@ export default function AnimePage() {
           >
             <option value="">Todos los géneros</option>
             {genres.map((g) => (
-              <option key={g} value={g}>{g}</option>
+              <option key={g} value={g}>
+                {g}
+              </option>
             ))}
           </select>
 
-          <label htmlFor="status-filter" className="sr-only">Filtrar por estado</label>
+          <label htmlFor="status-filter" className="sr-only">
+            Filtrar por estado
+          </label>
           <select
             id="status-filter"
             value={selectedStatus}
@@ -117,7 +123,11 @@ export default function AnimePage() {
           {(selectedGenre || selectedStatus || search) && (
             <button
               type="button"
-              onClick={() => { setSelectedGenre(''); setSelectedStatus(''); setSearch(''); }}
+              onClick={() => {
+                setSelectedGenre('');
+                setSelectedStatus('');
+                setSearch('');
+              }}
               className="px-4 py-2 text-sm text-cinema-gold hover:text-cinema-gold-light transition-colors"
             >
               Limpiar filtros
@@ -166,12 +176,14 @@ export default function AnimePage() {
                     </span>
                   )}
                   <span>{a.episodes} eps</span>
-                  <span className={cn(
-                    'px-1 py-0.5 rounded text-[10px] font-medium uppercase',
-                    a.status === 'ongoing'
-                      ? 'bg-emerald-500/20 text-emerald-400'
-                      : 'bg-cinema-elevated text-cinema-silver'
-                  )}>
+                  <span
+                    className={cn(
+                      'px-1 py-0.5 rounded text-[10px] font-medium uppercase',
+                      a.status === 'ongoing'
+                        ? 'bg-emerald-500/20 text-emerald-400'
+                        : 'bg-cinema-elevated text-cinema-silver'
+                    )}
+                  >
                     {a.status === 'ongoing' ? 'En emisión' : 'Finalizado'}
                   </span>
                 </div>

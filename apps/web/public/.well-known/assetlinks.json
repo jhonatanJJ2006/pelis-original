@@ -4,9 +4,7 @@
     "target": {
       "namespace": "android_app",
       "package_name": "com.pelis.app",
-      "sha256_cert_fingerprints": [
-        "REEMPLAZAR_CON_SHA256_DEL_KEYSTORE"
-      ]
+      "sha256_cert_fingerprints": ["REEMPLAZAR_CON_SHA256_DEL_KEYSTORE"]
     }
   }
 ]

@@ -112,11 +112,7 @@ export default function AnimeDetailPage() {
       <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-8 mb-12">
         <div className="relative">
           <div className="aspect-[3/4] rounded-2xl overflow-hidden bg-cinema-elevated border border-cinema-border">
-            <img
-              src={anime.image}
-              alt={anime.title}
-              className="w-full h-full object-cover"
-            />
+            <img src={anime.image} alt={anime.title} className="w-full h-full object-cover" />
           </div>
         </div>
 
@@ -142,12 +138,14 @@ export default function AnimeDetailPage() {
               <span className="px-3 py-1.5 rounded-lg bg-cinema-elevated text-cinema-silver text-sm border border-cinema-border">
                 {anime.episodes} episodios
               </span>
-              <span className={cn(
-                'px-3 py-1.5 rounded-lg text-sm font-medium border',
-                anime.status === 'ongoing'
-                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                  : 'bg-cinema-elevated border-cinema-border text-cinema-silver'
-              )}>
+              <span
+                className={cn(
+                  'px-3 py-1.5 rounded-lg text-sm font-medium border',
+                  anime.status === 'ongoing'
+                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                    : 'bg-cinema-elevated border-cinema-border text-cinema-silver'
+                )}
+              >
                 {anime.status === 'ongoing' ? 'En emisión' : 'Finalizado'}
               </span>
             </div>
@@ -163,9 +161,7 @@ export default function AnimeDetailPage() {
               ))}
             </div>
 
-            <p className="text-cinema-muted leading-relaxed mb-8">
-              {anime.synopsis}
-            </p>
+            <p className="text-cinema-muted leading-relaxed mb-8">{anime.synopsis}</p>
 
             {providers && providers.length > 0 && (
               <div className="p-4 rounded-xl bg-cinema-surface border border-cinema-border">
@@ -196,9 +192,7 @@ export default function AnimeDetailPage() {
       </div>
 
       <ScrollReveal>
-        <h2 className="font-display text-2xl tracking-wide text-white uppercase mb-6">
-          Episodios
-        </h2>
+        <h2 className="font-display text-2xl tracking-wide text-white uppercase mb-6">Episodios</h2>
 
         {loadingEpisodes ? (
           <div className="flex items-center justify-center py-12">
@@ -222,12 +216,8 @@ export default function AnimeDetailPage() {
                   )}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-white truncate">
-                    Episodio {ep.number}
-                  </p>
-                  {ep.title && (
-                    <p className="text-xs text-cinema-muted truncate">{ep.title}</p>
-                  )}
+                  <p className="text-sm font-medium text-white truncate">Episodio {ep.number}</p>
+                  {ep.title && <p className="text-xs text-cinema-muted truncate">{ep.title}</p>}
                 </div>
                 <Play className="w-4 h-4 text-cinema-ash ml-auto shrink-0 group-hover:text-cinema-violet-light transition-colors" />
               </Link>

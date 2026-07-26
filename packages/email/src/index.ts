@@ -25,7 +25,7 @@ export async function sendEmail({ to, subject, html }: SendEmailOptions) {
 
 export async function sendVerificationEmail(to: string, token: string) {
   const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/verify?token=${token}`;
-  
+
   return sendEmail({
     to,
     subject: 'Verifica tu cuenta de Pelis',
@@ -39,7 +39,7 @@ export async function sendVerificationEmail(to: string, token: string) {
 
 export async function sendPasswordResetEmail(to: string, token: string) {
   const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset?token=${token}`;
-  
+
   return sendEmail({
     to,
     subject: 'Restablece tu contraseña de Pelis',

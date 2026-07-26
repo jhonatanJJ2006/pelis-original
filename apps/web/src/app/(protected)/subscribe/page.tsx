@@ -82,10 +82,7 @@ export default function SubscribePage() {
   const isLoading = plans === undefined;
   const hasActivePlan = !!(user?.planExpiresAt && user.planExpiresAt > Date.now());
 
-  const sortedPlans = useMemo(
-    () => [...plans].sort((a, b) => a.price - b.price),
-    [plans]
-  );
+  const sortedPlans = useMemo(() => [...plans].sort((a, b) => a.price - b.price), [plans]);
 
   const currentPlan = useMemo(
     () => sortedPlans.find((p) => p._id === user?.planId),
@@ -246,7 +243,10 @@ export default function SubscribePage() {
               const isCurrent = action === 'current';
 
               return (
-                <SwiperSlide key={plan._id} className="!w-[280px] sm:!w-[300px] md:!w-[320px] h-auto">
+                <SwiperSlide
+                  key={plan._id}
+                  className="!w-[280px] sm:!w-[300px] md:!w-[320px] h-auto"
+                >
                   <div className="relative h-full pt-4">
                     {isCurrent ? (
                       <span className="absolute top-0 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap px-4 py-1 bg-emerald-500 text-white text-xs font-bold rounded-full uppercase tracking-wide shadow-[0_2px_12px_rgba(16,185,129,0.4)]">
@@ -268,62 +268,65 @@ export default function SubscribePage() {
                             : 'bg-cinema-surface border-cinema-border [@media(hover:hover)_and_(pointer:fine)]:hover:border-cinema-violet/40'
                       )}
                     >
-                    <div
-                      className={cn(
-                        'w-12 h-12 rounded-xl flex items-center justify-center mb-5',
-                        isCurrent
-                          ? 'bg-emerald-500 text-white'
-                          : plan.recommended
-                            ? 'bg-cinema-gold text-black'
-                            : 'bg-gradient-to-br from-cinema-violet to-cinema-teal text-white'
-                      )}
-                    >
-                      <Icon className="w-6 h-6" aria-hidden />
-                    </div>
-                    <h3 className="font-display text-2xl tracking-wide text-white uppercase mb-1">
-                      {plan.name}
-                    </h3>
-                    <p className="text-cinema-silver text-sm mb-5">{plan.description}</p>
-
-                    <div className="mb-6">
-                      <span className="text-4xl font-bold text-white">${plan.price}</span>
-                      <span className="text-cinema-silver">
-                        /{plan.months} {plan.months === 1 ? 'mes' : 'meses'}
-                      </span>
-                    </div>
-
-                    <ul className="flex-1 space-y-3 mb-8">
-                      {plan.features.map((feature, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm">
-                          <Check className="w-4 h-4 text-cinema-teal mt-0.5 shrink-0" aria-hidden />
-                          <span className="text-cinema-muted">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-
-                    {action === 'unavailable' && (
-                      <p className="text-xs text-amber-400/90 mb-3 text-center">
-                        Plan no configurado para pagos
-                      </p>
-                    )}
-
-                    <button
-                      type="button"
-                      onClick={() => handleSubscribe(plan, action)}
-                      disabled={!canSelect || isPlanLoading}
-                      className={cn(
-                        'w-full py-3.5 rounded font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed',
-                        action === 'upgrade'
-                          ? 'bg-gradient-to-r from-cinema-gold to-cinema-gold-light text-black hover:brightness-110'
-                          : action === 'current'
-                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                      <div
+                        className={cn(
+                          'w-12 h-12 rounded-xl flex items-center justify-center mb-5',
+                          isCurrent
+                            ? 'bg-emerald-500 text-white'
                             : plan.recommended
-                              ? 'bg-gradient-to-r from-cinema-gold to-cinema-gold-light text-black hover:brightness-110'
-                              : 'bg-cinema-elevated hover:bg-cinema-violet/30 text-white border border-cinema-border'
+                              ? 'bg-cinema-gold text-black'
+                              : 'bg-gradient-to-br from-cinema-violet to-cinema-teal text-white'
+                        )}
+                      >
+                        <Icon className="w-6 h-6" aria-hidden />
+                      </div>
+                      <h3 className="font-display text-2xl tracking-wide text-white uppercase mb-1">
+                        {plan.name}
+                      </h3>
+                      <p className="text-cinema-silver text-sm mb-5">{plan.description}</p>
+
+                      <div className="mb-6">
+                        <span className="text-4xl font-bold text-white">${plan.price}</span>
+                        <span className="text-cinema-silver">
+                          /{plan.months} {plan.months === 1 ? 'mes' : 'meses'}
+                        </span>
+                      </div>
+
+                      <ul className="flex-1 space-y-3 mb-8">
+                        {plan.features.map((feature, i) => (
+                          <li key={i} className="flex items-start gap-2 text-sm">
+                            <Check
+                              className="w-4 h-4 text-cinema-teal mt-0.5 shrink-0"
+                              aria-hidden
+                            />
+                            <span className="text-cinema-muted">{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+
+                      {action === 'unavailable' && (
+                        <p className="text-xs text-amber-400/90 mb-3 text-center">
+                          Plan no configurado para pagos
+                        </p>
                       )}
-                    >
-                      {planButtonLabel(action, isPlanLoading)}
-                    </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleSubscribe(plan, action)}
+                        disabled={!canSelect || isPlanLoading}
+                        className={cn(
+                          'w-full py-3.5 rounded font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed',
+                          action === 'upgrade'
+                            ? 'bg-gradient-to-r from-cinema-gold to-cinema-gold-light text-black hover:brightness-110'
+                            : action === 'current'
+                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                              : plan.recommended
+                                ? 'bg-gradient-to-r from-cinema-gold to-cinema-gold-light text-black hover:brightness-110'
+                                : 'bg-cinema-elevated hover:bg-cinema-violet/30 text-white border border-cinema-border'
+                        )}
+                      >
+                        {planButtonLabel(action, isPlanLoading)}
+                      </button>
                     </div>
                   </div>
                 </SwiperSlide>

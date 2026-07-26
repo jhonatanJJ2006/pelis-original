@@ -55,7 +55,11 @@ export default function MovieDetailPageClient() {
 
   if (movie === undefined) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]" role="status" aria-label="Cargando">
+      <div
+        className="flex items-center justify-center min-h-[60vh]"
+        role="status"
+        aria-label="Cargando"
+      >
         <Spinner size="lg" />
       </div>
     );
@@ -112,7 +116,9 @@ export default function MovieDetailPageClient() {
             <h1 className="font-display text-4xl md:text-6xl tracking-wide text-white uppercase max-w-3xl mb-4">
               {movie.name}
             </h1>
-            <p className="text-cinema-muted text-lg mb-6 max-w-2xl line-clamp-2">{movie.synopsis}</p>
+            <p className="text-cinema-muted text-lg mb-6 max-w-2xl line-clamp-2">
+              {movie.synopsis}
+            </p>
 
             <div className="flex flex-wrap gap-4 md:gap-6 text-sm text-cinema-silver mb-8">
               <div className="flex items-center gap-1.5">
@@ -135,7 +141,10 @@ export default function MovieDetailPageClient() {
                 onClick={() => {
                   if (!hasActivePlan) {
                     toast.error('Necesitas un plan para reproducir', {
-                      action: { label: 'Ver planes', onClick: () => window.location.href = '/subscribe' },
+                      action: {
+                        label: 'Ver planes',
+                        onClick: () => (window.location.href = '/subscribe'),
+                      },
                     });
                   } else {
                     document.getElementById('player')?.scrollIntoView({ behavior: 'smooth' });

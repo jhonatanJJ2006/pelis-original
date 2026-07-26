@@ -19,7 +19,8 @@ export default function SubscribeCancelPage() {
           Pago cancelado
         </h1>
         <p className="text-cinema-muted text-lg mb-8">
-          El proceso de pago fue cancelado. No se ha realizado ningún cargo. Puedes intentarlo de nuevo cuando quieras.
+          El proceso de pago fue cancelado. No se ha realizado ningún cargo. Puedes intentarlo de
+          nuevo cuando quieras.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
