@@ -20,6 +20,7 @@ import type * as seed_sql from "../seed_sql.js";
 import type * as seed_update_images from "../seed_update_images.js";
 import type * as stripe from "../stripe.js";
 import type * as stripeQueries from "../stripeQueries.js";
+import type * as stripeSetup from "../stripeSetup.js";
 import type * as stripeWebhook from "../stripeWebhook.js";
 import type * as stripeWebhookAction from "../stripeWebhookAction.js";
 import type * as subscriptions from "../subscriptions.js";
@@ -45,6 +46,7 @@ declare const fullApi: ApiFromModules<{
   seed_update_images: typeof seed_update_images;
   stripe: typeof stripe;
   stripeQueries: typeof stripeQueries;
+  stripeSetup: typeof stripeSetup;
   stripeWebhook: typeof stripeWebhook;
   stripeWebhookAction: typeof stripeWebhookAction;
   subscriptions: typeof subscriptions;
