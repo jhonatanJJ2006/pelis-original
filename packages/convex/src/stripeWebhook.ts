@@ -1,7 +1,7 @@
 import { v } from 'convex/values';
-import { mutation } from './_generated/server';
+import { internalMutation } from './_generated/server';
 
-export const handleSubscriptionCreated = mutation({
+export const handleSubscriptionCreated = internalMutation({
   args: {
     subscriptionId: v.string(),
     stripeCustomerId: v.string(),
@@ -39,7 +39,7 @@ export const handleSubscriptionCreated = mutation({
   },
 });
 
-export const handleSubscriptionUpdated = mutation({
+export const handleSubscriptionUpdated = internalMutation({
   args: {
     subscriptionId: v.string(),
     status: v.union(
@@ -50,7 +50,6 @@ export const handleSubscriptionUpdated = mutation({
       v.literal('incomplete')
     ),
     endDate: v.optional(v.number()),
-    cancelAtPeriodEnd: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const subscription = await ctx.db
@@ -62,22 +61,26 @@ export const handleSubscriptionUpdated = mutation({
 
     if (!subscription) throw new Error('Subscription not found');
 
-    const updates: Record<string, any> = {};
+    const updates: {
+      status?: 'active' | 'cancelled' | 'expired';
+      endDate?: number;
+    } = {};
 
     switch (args.status) {
       case 'active':
-        updates.status = 'active';
-        break;
-      case 'cancelled':
-      case 'expired':
-        updates.status = 'expired';
-        break;
       case 'past_due':
         updates.status = 'active';
         break;
+      case 'cancelled':
+        updates.status = 'cancelled';
+        break;
+      case 'expired':
+      case 'incomplete':
+        updates.status = 'expired';
+        break;
     }
 
-    if (args.endDate) {
+    if (args.endDate !== undefined) {
       updates.endDate = args.endDate;
     }
 
@@ -85,7 +88,7 @@ export const handleSubscriptionUpdated = mutation({
   },
 });
 
-export const handleSubscriptionDeleted = mutation({
+export const handleSubscriptionDeleted = internalMutation({
   args: {
     subscriptionId: v.string(),
   },

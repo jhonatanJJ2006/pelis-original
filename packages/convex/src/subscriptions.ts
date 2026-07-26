@@ -24,6 +24,7 @@ export const create = mutation({
     icon: v.string(),
     months: v.number(),
     recommended: v.optional(v.boolean()),
+    stripePriceId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const id = await ctx.db.insert('plans', args);
@@ -41,11 +42,29 @@ export const update = mutation({
     icon: v.string(),
     months: v.number(),
     recommended: v.optional(v.boolean()),
+    stripePriceId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const { id, ...updates } = args;
     await ctx.db.patch(id, updates);
     return id;
+  },
+});
+
+export const setStripePriceId = mutation({
+  args: {
+    planId: v.id('plans'),
+    stripePriceId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error('Not authenticated');
+
+    const plan = await ctx.db.get(args.planId);
+    if (!plan) throw new Error('Plan not found');
+
+    await ctx.db.patch(args.planId, { stripePriceId: args.stripePriceId });
+    return args.planId;
   },
 });
 
@@ -61,44 +80,14 @@ export const subscribe = mutation({
     planId: v.id('plans'),
     stripeSubscriptionId: v.optional(v.string()),
   },
-  handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error('Not authenticated');
-
-    const plan = await ctx.db.get(args.planId);
-    if (!plan) throw new Error('Plan not found');
-
-    const now = Date.now();
-    const endDate = now + plan.months * 30 * 24 * 60 * 60 * 1000;
-
-    const subscriptionId = await ctx.db.insert('subscriptions', {
-      userId: identity.subject,
-      planId: args.planId,
-      startDate: now,
-      endDate,
-      status: 'active',
-      stripeSubscriptionId: args.stripeSubscriptionId,
-    });
-
-    return subscriptionId;
+  handler: async () => {
+    throw new Error('Use Stripe checkout to subscribe. Go to /subscribe.');
   },
 });
 
 export const cancel = mutation({
   args: {},
-  handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error('Not authenticated');
-
-    const subscription = await ctx.db
-      .query('subscriptions')
-      .withIndex('by_user', (q) => q.eq('userId', identity.subject))
-      .first();
-
-    if (subscription) {
-      await ctx.db.patch(subscription._id, { status: 'cancelled' });
-    }
-
-    return true;
+  handler: async () => {
+    throw new Error('Use the billing portal to manage or cancel your subscription.');
   },
 });

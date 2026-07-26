@@ -3,8 +3,9 @@
 import { useQuery } from 'convex/react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Tv, Loader2, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Tv, Loader2, AlertCircle, Crown } from 'lucide-react';
 import { api } from '@pelis/convex';
+import { useUser } from '@pelis/auth/hooks';
 import { Spinner } from '@pelis/ui/components';
 import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';
 import dynamic from 'next/dynamic';
@@ -31,10 +32,12 @@ interface TVChannel {
 
 export default function TVChannelPage() {
   const params = useParams();
+  const { user } = useUser();
   const id = params.id as string;
   const channel = useQuery(api.tv.getById, { id: id as any }) as TVChannel | null | undefined;
 
   const isLoading = channel === undefined;
+  const hasActivePlan = !!(user?.planExpiresAt && user.planExpiresAt > Date.now());
 
   if (isLoading) {
     return (
@@ -94,7 +97,30 @@ export default function TVChannelPage() {
       </ScrollReveal>
 
       <div className="rounded-2xl overflow-hidden bg-black border border-cinema-border">
-        <TVPlayer streamUrl={channel.streamUrl} channelName={channel.name} />
+        {!user ? (
+          <div className="aspect-video flex flex-col items-center justify-center gap-4 p-8">
+            <Tv className="w-12 h-12 text-cinema-muted/40" aria-hidden />
+            <p className="text-cinema-muted text-center max-w-md">
+              Inicia sesión para ver este canal en vivo
+            </p>
+            <Link href="/login" className="btn-primary">
+              Iniciar sesión
+            </Link>
+          </div>
+        ) : !hasActivePlan ? (
+          <div className="aspect-video flex flex-col items-center justify-center gap-4 p-8">
+            <Crown className="w-12 h-12 text-cinema-gold/40" aria-hidden />
+            <p className="text-cinema-muted text-center max-w-md">
+              Necesitas un plan activo para ver TV en vivo
+            </p>
+            <Link href="/subscribe" className="btn-primary-glow inline-flex items-center gap-2">
+              <Crown className="w-4 h-4" aria-hidden />
+              Ver planes
+            </Link>
+          </div>
+        ) : (
+          <TVPlayer streamUrl={channel.streamUrl} channelName={channel.name} />
+        )}
       </div>
 
       <div className="mt-6 p-4 rounded-xl bg-cinema-surface border border-cinema-border">

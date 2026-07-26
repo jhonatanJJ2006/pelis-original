@@ -1,12 +1,11 @@
 'use client';
 
-import { useQuery, useMutation } from 'convex/react';
+import { useQuery, useAction } from 'convex/react';
 import Link from 'next/link';
-import { useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRef, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, FreeMode } from 'swiper/modules';
-import { Crown, Check, Zap, Star, Rocket, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Crown, Check, Zap, Star, Rocket, ChevronLeft, ChevronRight, Settings } from 'lucide-react';
 import { api } from '@pelis/convex';
 import { useUser } from '@pelis/auth/hooks';
 import { Spinner, Button } from '@pelis/ui/components';
@@ -28,6 +27,7 @@ interface Plan {
   icon: string;
   months: number;
   recommended?: boolean;
+  stripePriceId?: string;
 }
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -39,33 +39,60 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 
 export default function SubscribePage() {
   const { user } = useUser();
-  const router = useRouter();
   const prevRef = useRef<HTMLButtonElement>(null);
   const nextRef = useRef<HTMLButtonElement>(null);
+  const [loadingPlanId, setLoadingPlanId] = useState<string | null>(null);
+  const [loadingPortal, setLoadingPortal] = useState(false);
   const plans = (useQuery(api.subscriptions.list, {}) as Plan[] | undefined) ?? [];
-  const createCheckoutSession = useMutation(api.stripe.createCheckoutSession);
+  const createCheckoutSession = useAction(api.stripe.createCheckoutSession);
+  const createPortalSession = useAction(api.stripe.createPortalSession);
 
   const isLoading = plans === undefined;
+  const hasActivePlan = !!(user?.planExpiresAt && user.planExpiresAt > Date.now());
 
-  const handleSubscribe = async (planId: string) => {
+  const handleSubscribe = async (plan: Plan) => {
     if (!user) {
       toast.error('Debes iniciar sesión para suscribirte');
       return;
     }
+
+    if (!plan.stripePriceId) {
+      toast.error('Plan no configurado para pagos. Contacta al administrador.');
+      return;
+    }
+
+    setLoadingPlanId(plan._id);
     try {
-      const result = await createCheckoutSession({ planId: planId as any });
+      const result = await createCheckoutSession({ planId: plan._id as any });
       if (result?.url) {
-        router.push(result.url);
+        window.location.href = result.url;
       } else {
         toast.error('Error al crear la sesión de pago');
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error al procesar el pago';
       toast.error(message);
+    } finally {
+      setLoadingPlanId(null);
     }
   };
 
-  const hasActivePlan = !!(user?.planExpiresAt && user.planExpiresAt > Date.now());
+  const handleManageSubscription = async () => {
+    setLoadingPortal(true);
+    try {
+      const result = await createPortalSession({});
+      if (result?.url) {
+        window.location.href = result.url;
+      } else {
+        toast.error('Error al abrir el portal de facturación');
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error al abrir el portal';
+      toast.error(message);
+    } finally {
+      setLoadingPortal(false);
+    }
+  };
 
   return (
     <div className="page-shell">
@@ -83,10 +110,21 @@ export default function SubscribePage() {
           Desliza los planes y elige el que mejor se adapte a ti.
         </p>
         {hasActivePlan && (
-          <div className="mt-6 inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-full text-sm">
-            <Check className="w-4 h-4" aria-hidden />
-            Suscripción activa hasta{' '}
-            {new Date(user!.planExpiresAt!).toLocaleDateString('es-ES')}
+          <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-full text-sm">
+              <Check className="w-4 h-4" aria-hidden />
+              Suscripción activa hasta{' '}
+              {new Date(user!.planExpiresAt!).toLocaleDateString('es-ES')}
+            </div>
+            <button
+              type="button"
+              onClick={handleManageSubscription}
+              disabled={loadingPortal}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-cinema-elevated border border-cinema-border text-cinema-silver hover:text-white rounded-full text-sm transition-colors disabled:opacity-50"
+            >
+              <Settings className="w-4 h-4" aria-hidden />
+              {loadingPortal ? 'Abriendo...' : 'Gestionar suscripción'}
+            </button>
           </div>
         )}
       </ScrollReveal>
@@ -146,6 +184,9 @@ export default function SubscribePage() {
           >
             {plans.map((plan) => {
               const Icon = iconMap[plan.icon] || Star;
+              const isPlanLoading = loadingPlanId === plan._id;
+              const planNotConfigured = !plan.stripePriceId;
+
               return (
                 <SwiperSlide key={plan._id} className="!w-[280px] sm:!w-[300px] md:!w-[320px] h-auto">
                   <div className="relative h-full pt-4">
@@ -194,10 +235,16 @@ export default function SubscribePage() {
                       ))}
                     </ul>
 
+                    {planNotConfigured && !hasActivePlan && (
+                      <p className="text-xs text-amber-400/90 mb-3 text-center">
+                        Plan no configurado para pagos
+                      </p>
+                    )}
+
                     <button
                       type="button"
-                      onClick={() => handleSubscribe(plan._id)}
-                      disabled={hasActivePlan}
+                      onClick={() => handleSubscribe(plan)}
+                      disabled={hasActivePlan || isPlanLoading || planNotConfigured}
                       className={cn(
                         'w-full py-3.5 rounded font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed',
                         plan.recommended
@@ -205,7 +252,13 @@ export default function SubscribePage() {
                           : 'bg-cinema-elevated hover:bg-cinema-violet/30 text-white border border-cinema-border'
                       )}
                     >
-                      {hasActivePlan ? 'Ya tienes un plan' : 'Suscribirse'}
+                      {hasActivePlan
+                        ? 'Ya tienes un plan'
+                        : isPlanLoading
+                          ? 'Redirigiendo...'
+                          : planNotConfigured
+                            ? 'No disponible'
+                            : 'Suscribirse'}
                     </button>
                     </div>
                   </div>

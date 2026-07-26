@@ -35,6 +35,7 @@ export const planSchema = z.object({
   icon: z.string(),
   months: z.number().int().positive(),
   recommended: z.boolean().optional(),
+  stripePriceId: z.string().optional(),
 });
 
 export type LoginInput = z.infer<typeof loginSchema>;

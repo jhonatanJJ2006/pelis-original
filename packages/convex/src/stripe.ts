@@ -1,43 +1,53 @@
+'use node';
+
 import Stripe from 'stripe';
 import { v } from 'convex/values';
-import { mutation } from './_generated/server';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-09-30' as any,
-});
+import { action } from './_generated/server';
+import { api } from './_generated/api';
 
 const SITE_URL = process.env.SITE_URL || 'http://localhost:3000';
 
-export const createCheckoutSession = mutation({
+function getStripe() {
+  const secretKey = process.env.STRIPE_SECRET_KEY;
+  if (!secretKey) {
+    throw new Error('STRIPE_SECRET_KEY is not configured');
+  }
+
+  return new Stripe(secretKey, {
+    apiVersion: '2025-09-30' as Stripe.LatestApiVersion,
+  });
+}
+
+export const createCheckoutSession = action({
   args: { planId: v.id('plans') },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error('Not authenticated');
+    const context = await ctx.runQuery(api.stripeQueries.getCheckoutContext, {
+      planId: args.planId,
+    });
 
-    const plan = await ctx.db.get(args.planId);
-    if (!plan) throw new Error('Plan not found');
-    if (!plan.stripePriceId) throw new Error('Plan not configured for Stripe');
+    if (!context) {
+      throw new Error('Not authenticated');
+    }
 
-    const email = identity.email ?? '';
-    const name = identity.name ?? 'User';
+    const { plan, user, stripeCustomerId: existingCustomerId } = context;
 
-    const existingSubscription = await ctx.db
-      .query('subscriptions')
-      .withIndex('by_user', (q) => q.eq('userId', identity.subject))
-      .filter((q) => q.eq(q.field('status'), 'active'))
-      .first();
+    if (!plan.stripePriceId) {
+      throw new Error('Plan not configured for Stripe');
+    }
 
-    let stripeCustomerId = existingSubscription?.stripeCustomerId;
+    let stripeCustomerId = existingCustomerId;
+
+    const stripe = getStripe();
 
     if (!stripeCustomerId) {
-      const customers = await stripe.customers.list({ email, limit: 1 });
+      const customers = await stripe.customers.list({ email: user.email, limit: 1 });
       stripeCustomerId = customers.data[0]?.id;
 
       if (!stripeCustomerId) {
         const customer = await stripe.customers.create({
-          email,
-          name,
-          metadata: { convexUserId: identity.subject },
+          email: user.email,
+          name: user.name,
+          metadata: { convexUserId: user.subject },
         });
         stripeCustomerId = customer.id;
       }
@@ -50,39 +60,43 @@ export const createCheckoutSession = mutation({
       success_url: `${SITE_URL}/subscribe/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${SITE_URL}/subscribe/cancel`,
       metadata: {
-        convexUserId: identity.subject,
+        convexUserId: user.subject,
         planId: args.planId,
       },
       subscription_data: {
         metadata: {
-          convexUserId: identity.subject,
+          convexUserId: user.subject,
           planId: args.planId,
         },
       },
     });
 
+    if (!session.url) {
+      throw new Error('Failed to create checkout session');
+    }
+
     return { url: session.url };
   },
 });
 
-export const createPortalSession = mutation({
+export const createPortalSession = action({
   args: {},
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error('Not authenticated');
+    const context = await ctx.runQuery(api.stripeQueries.getPortalContext, {});
 
-    const subscription = await ctx.db
-      .query('subscriptions')
-      .withIndex('by_user', (q) => q.eq('userId', identity.subject))
-      .filter((q) => q.eq(q.field('status'), 'active'))
-      .first();
+    if (!context) {
+      throw new Error('No active subscription');
+    }
 
-    if (!subscription?.stripeCustomerId) throw new Error('No active subscription');
-
+    const stripe = getStripe();
     const portal = await stripe.billingPortal.sessions.create({
-      customer: subscription.stripeCustomerId,
+      customer: context.stripeCustomerId,
       return_url: `${SITE_URL}/subscribe`,
     });
+
+    if (!portal.url) {
+      throw new Error('Failed to create portal session');
+    }
 
     return { url: portal.url };
   },
