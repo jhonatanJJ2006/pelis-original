@@ -39,7 +39,10 @@ export function HeroCarousel({ movies }: HeroCarouselProps) {
   if (movies.length === 0) return null;
 
   return (
-    <section className="relative h-[75vh] min-h-[400px] sm:min-h-[500px] max-h-[900px] overflow-hidden" aria-label="Destacados">
+    <section
+      className="relative h-[75vh] min-h-[400px] sm:min-h-[500px] max-h-[900px] overflow-hidden"
+      aria-label="Destacados"
+    >
       <Swiper
         modules={[Autoplay, EffectCreative, Pagination]}
         effect="creative"

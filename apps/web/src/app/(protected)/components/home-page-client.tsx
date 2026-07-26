@@ -28,9 +28,11 @@ const genreColors: Record<string, string> = {
 
 export function HomePageClient() {
   const { user } = useUser();
-  const movies = (useQuery(api.movies.list, { mediaType: 'movie' }) as MediaItem[] | undefined) ?? [];
+  const movies =
+    (useQuery(api.movies.list, { mediaType: 'movie' }) as MediaItem[] | undefined) ?? [];
   const featuredMovies = (useQuery(api.movies.getFeatured, {}) as MediaItem[] | undefined) ?? [];
-  const trending = (useQuery(api.movies.getTrending, { limit: 12 }) as MediaItem[] | undefined) ?? [];
+  const trending =
+    (useQuery(api.movies.getTrending, { limit: 12 }) as MediaItem[] | undefined) ?? [];
   const series = (useQuery(api.movies.listSeries, {}) as MediaItem[] | undefined) ?? [];
   const genres = (useQuery(api.movies.getGenres, {}) as string[] | undefined) ?? [];
   const continueWatching = useQuery(

@@ -130,7 +130,8 @@ export function VideoPlayer({
           onKeyDown={(e) => {
             const video = videoRef.current;
             if (!video || !duration) return;
-            if (e.key === 'ArrowRight') video.currentTime = Math.min(video.currentTime + 10, duration);
+            if (e.key === 'ArrowRight')
+              video.currentTime = Math.min(video.currentTime + 10, duration);
             if (e.key === 'ArrowLeft') video.currentTime = Math.max(video.currentTime - 10, 0);
           }}
         >

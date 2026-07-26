@@ -1,4 +1,4 @@
-import { installSerwist } from "@serwist/sw";
+import { installSerwist } from '@serwist/sw';
 
 installSerwist({
   precacheEntries: self.__SW_MANIFEST ?? [],
@@ -9,29 +9,29 @@ installSerwist({
   runtimeCaching: [
     {
       urlPattern: /\.(?:png|jpg|jpeg|gif|svg|webp|ico)$/,
-      handler: "CacheFirst",
+      handler: 'CacheFirst',
       options: {
-        cacheName: "images",
+        cacheName: 'images',
         expiration: { maxEntries: 200, maxAgeSeconds: 30 * 24 * 60 * 60 },
       },
     },
     {
       urlPattern: /\.(?:js|css|woff2?)$/,
-      handler: "StaleWhileRevalidate",
+      handler: 'StaleWhileRevalidate',
       options: {
-        cacheName: "static-assets",
+        cacheName: 'static-assets',
         expiration: { maxEntries: 100, maxAgeSeconds: 7 * 24 * 60 * 60 },
       },
     },
     {
       urlPattern: /\/api\/.*/,
-      handler: "NetworkOnly",
+      handler: 'NetworkOnly',
     },
     {
       urlPattern: /\/peliculas\/.*/,
-      handler: "CacheFirst",
+      handler: 'CacheFirst',
       options: {
-        cacheName: "posters",
+        cacheName: 'posters',
         expiration: { maxEntries: 500, maxAgeSeconds: 60 * 24 * 60 * 60 },
       },
     },

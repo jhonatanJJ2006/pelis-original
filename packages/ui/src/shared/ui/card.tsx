@@ -14,8 +14,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
           'rounded-2xl border overflow-hidden transition-all duration-300',
           variant === 'default' &&
             'bg-cinema-surface border-cinema-border hover:border-cinema-violet/40',
-          variant === 'feature' &&
-            'card-feature border-cinema-violet/20',
+          variant === 'feature' && 'card-feature border-cinema-violet/20',
           variant === 'glow' &&
             'bg-cinema-surface border-cinema-border hover:border-cinema-accent/40 hover:-translate-y-0.5 shadow-[0_4px_24px_rgba(139,92,246,0.08)]',
           className
@@ -28,10 +27,8 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
 
 Card.displayName = 'Card';
 
-export const CardContent = forwardRef<HTMLDivElement, CardProps>(
-  ({ className, ...props }, ref) => {
-    return <div ref={ref} className={cn('p-6', className)} {...props} />;
-  }
-);
+export const CardContent = forwardRef<HTMLDivElement, CardProps>(({ className, ...props }, ref) => {
+  return <div ref={ref} className={cn('p-6', className)} {...props} />;
+});
 
 CardContent.displayName = 'CardContent';

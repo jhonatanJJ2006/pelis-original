@@ -12,11 +12,7 @@ interface ContinueWatchingCardProps {
   duration: number;
 }
 
-export function ContinueWatchingCard({
-  movie,
-  progress,
-  duration,
-}: ContinueWatchingCardProps) {
+export function ContinueWatchingCard({ movie, progress, duration }: ContinueWatchingCardProps) {
   const pct = getProgressPercentage(progress, duration);
 
   return (
@@ -33,7 +29,10 @@ export function ContinueWatchingCard({
         <div className="absolute inset-0 bg-gradient-to-t from-cinema-bg via-cinema-bg/50 to-transparent z-[1]" />
         <div className="card-media-scrim absolute inset-0 z-[2]" aria-hidden />
         <div className="card-actions-layer absolute inset-0 z-[3] flex items-center justify-center">
-          <div className="card-action-btn card-action-btn--play p-4 rounded-full bg-cinema-accent text-white shadow-glow" aria-hidden>
+          <div
+            className="card-action-btn card-action-btn--play p-4 rounded-full bg-cinema-accent text-white shadow-glow"
+            aria-hidden
+          >
             <Play className="w-6 h-6" fill="currentColor" />
           </div>
         </div>

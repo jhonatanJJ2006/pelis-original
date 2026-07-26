@@ -26,9 +26,7 @@ export function SectionHeader({
             {title}
           </h2>
         </div>
-        {subtitle && (
-          <p className="text-sm text-cinema-silver mt-1 ml-0 sm:ml-4">{subtitle}</p>
-        )}
+        {subtitle && <p className="text-sm text-cinema-silver mt-1 ml-0 sm:ml-4">{subtitle}</p>}
       </div>
       {href && (
         <Link

@@ -34,10 +34,8 @@ export default function HistoryPage() {
   const removeHistory = useMutation(api.history.remove);
   const clearAll = useMutation(api.history.clearAll);
 
-  const history = useQuery(
-    api.history.listByUser,
-    user ? { userId: user._id as any } : 'skip'
-  ) as HistoryItem[] | undefined;
+  const history = useQuery(api.history.listByUser, user ? { userId: user._id as any } : 'skip') as
+    HistoryItem[] | undefined;
 
   const continueItems = (history ?? []).filter(
     (h) => h.duration > 0 && h.progress > 0 && h.progress < h.duration * 0.95
@@ -83,11 +81,9 @@ export default function HistoryPage() {
   const recentItems =
     continueItems.length > 0
       ? completedItems.concat(
-          (history ?? []).filter(
-            (h) => !continueItems.includes(h) && !completedItems.includes(h)
-          )
+          (history ?? []).filter((h) => !continueItems.includes(h) && !completedItems.includes(h))
         )
-      : history ?? [];
+      : (history ?? []);
 
   return (
     <div className="page-shell">

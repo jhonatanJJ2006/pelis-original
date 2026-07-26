@@ -74,9 +74,7 @@ export function MovieSwiper({
           }
         }}
         autoplay={
-          autoplay
-            ? { delay: 5000, disableOnInteraction: false, pauseOnMouseEnter: true }
-            : false
+          autoplay ? { delay: 5000, disableOnInteraction: false, pauseOnMouseEnter: true } : false
         }
         freeMode={{
           enabled: true,

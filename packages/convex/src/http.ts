@@ -5,7 +5,8 @@ import { convex } from '@convex-dev/better-auth/plugins';
 import { getAuthConfigProvider } from '@convex-dev/better-auth/auth-config';
 import { emailOTP } from 'better-auth/plugins';
 import { Resend } from 'resend';
-import { components } from './_generated/api';
+import { httpAction } from './_generated/server';
+import { components, internal } from './_generated/api';
 
 const http = httpRouter();
 
@@ -244,6 +245,32 @@ authClient.registerRoutes(http, (ctx) => {
       updateAge: 60 * 60 * 24,
     },
   });
+});
+
+http.route({
+  path: '/stripe/webhook',
+  method: 'POST',
+  handler: httpAction(async (ctx, request) => {
+    const body = await request.text();
+    const signature = request.headers.get('stripe-signature');
+
+    if (!signature) {
+      return new Response('Missing stripe-signature header', { status: 400 });
+    }
+
+    const result = await ctx.runAction(internal.stripeWebhookAction.processWebhook, {
+      body,
+      signature,
+    });
+
+    if (!result.ok) {
+      return new Response(result.message ?? 'Webhook error', { status: result.status });
+    }
+
+    return new Response(JSON.stringify({ received: true }), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }),
 });
 
 export default http;

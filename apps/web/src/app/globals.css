@@ -69,21 +69,10 @@
   body {
     @apply bg-cinema-bg text-white antialiased;
     font-family: var(--font-body), system-ui, sans-serif;
-    background-image: radial-gradient(
-        ellipse 80% 50% at 50% -20%,
-        rgba(59, 130, 246, 0.1),
-        transparent
-      ),
-      radial-gradient(
-        ellipse 60% 40% at 100% 100%,
-        rgba(34, 211, 238, 0.05),
-        transparent
-      ),
-      radial-gradient(
-        ellipse 50% 30% at 0% 80%,
-        rgba(6, 20, 40, 0.2),
-        transparent
-      );
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(59, 130, 246, 0.1), transparent),
+      radial-gradient(ellipse 60% 40% at 100% 100%, rgba(34, 211, 238, 0.05), transparent),
+      radial-gradient(ellipse 50% 30% at 0% 80%, rgba(6, 20, 40, 0.2), transparent);
     background-attachment: fixed;
   }
 
@@ -534,7 +523,8 @@
   }
 
   .hero-nav {
-    transition: opacity var(--duration-fast) var(--ease-out-expo),
+    transition:
+      opacity var(--duration-fast) var(--ease-out-expo),
       background-color var(--duration-fast) var(--ease-out-expo);
     z-index: 20;
   }
@@ -616,23 +606,23 @@
 }
 
 /* Color del botón cerrar según tipo de toast */
-[data-sonner-toaster] [data-type="error"] [data-close-button] svg {
+[data-sonner-toaster] [data-type='error'] [data-close-button] svg {
   color: #ef4444;
 }
 
-[data-sonner-toaster] [data-type="success"] [data-close-button] svg {
+[data-sonner-toaster] [data-type='success'] [data-close-button] svg {
   color: #22c55e;
 }
 
-[data-sonner-toaster] [data-type="warning"] [data-close-button] svg {
+[data-sonner-toaster] [data-type='warning'] [data-close-button] svg {
   color: #eab308;
 }
 
-[data-sonner-toaster] [data-type="info"] [data-close-button] svg {
+[data-sonner-toaster] [data-type='info'] [data-close-button] svg {
   color: #3b82f6;
 }
 
-[data-sonner-toaster] [data-type="default"] [data-close-button] svg {
+[data-sonner-toaster] [data-type='default'] [data-close-button] svg {
   color: #b8d4f0;
 }
 

@@ -764,6 +764,7 @@ const PLANS = [
     icon: 'Zap',
     months: 1,
     recommended: false,
+    stripePriceId: 'price_1TxJEPRH7vBwdsStZkFI4UX3',
   },
   {
     name: 'Estándar',
@@ -779,6 +780,7 @@ const PLANS = [
     icon: 'Star',
     months: 1,
     recommended: true,
+    stripePriceId: 'price_1TxJFgRH7vBwdsStIrjaogIR',
   },
   {
     name: 'Premium',
@@ -795,6 +797,7 @@ const PLANS = [
     icon: 'Crown',
     months: 1,
     recommended: false,
+    stripePriceId: 'price_1TxJGJRH7vBwdsSth19z54OX',
   },
 ];
 

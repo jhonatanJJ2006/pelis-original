@@ -21,13 +21,7 @@ interface MoviePosterProps {
   style?: CSSProperties;
 }
 
-export function MoviePoster({
-  src,
-  alt,
-  className,
-  loading = 'lazy',
-  style,
-}: MoviePosterProps) {
+export function MoviePoster({ src, alt, className, loading = 'lazy', style }: MoviePosterProps) {
   const [stage, setStage] = useState(0);
   const currentSrc = getFallbackSrc(src, stage);
 

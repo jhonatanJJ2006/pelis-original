@@ -24,9 +24,14 @@ function VerifyForm() {
     return (
       <div className="w-full max-w-md">
         <div className="card-glow p-6 md:p-8 shadow-[0_8px_40px_rgba(59,130,246,0.15)] text-center">
-          <h1 className="font-display text-2xl tracking-wide text-white uppercase mb-4">Enlace inválido</h1>
+          <h1 className="font-display text-2xl tracking-wide text-white uppercase mb-4">
+            Enlace inválido
+          </h1>
           <p className="text-cinema-muted mb-6">No se ha proporcionado un correo electrónico.</p>
-          <Link href="/register" className="text-cinema-gold hover:text-cinema-gold-light font-medium">
+          <Link
+            href="/register"
+            className="text-cinema-gold hover:text-cinema-gold-light font-medium"
+          >
             Volver al registro
           </Link>
         </div>
@@ -103,8 +108,9 @@ function VerifyForm() {
     }
   };
 
-  const maskedEmail = emailFromUrl.replace(/(.{2})(.*)(@.*)/, (_, a, b, c) =>
-    a + '*'.repeat(Math.min(b.length, 4)) + c
+  const maskedEmail = emailFromUrl.replace(
+    /(.{2})(.*)(@.*)/,
+    (_, a, b, c) => a + '*'.repeat(Math.min(b.length, 4)) + c
   );
 
   if (success) {
@@ -112,11 +118,24 @@ function VerifyForm() {
       <div className="w-full max-w-md">
         <div className="card-glow p-6 md:p-8 shadow-[0_8px_40px_rgba(59,130,246,0.15)] text-center">
           <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            <svg
+              className="w-8 h-8 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              aria-hidden
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
             </svg>
           </div>
-          <h1 className="font-display text-2xl md:text-3xl tracking-wide text-white uppercase mb-2">¡Cuenta verificada!</h1>
+          <h1 className="font-display text-2xl md:text-3xl tracking-wide text-white uppercase mb-2">
+            ¡Cuenta verificada!
+          </h1>
           <p className="text-cinema-muted">Te estamos redirigiendo...</p>
         </div>
       </div>
@@ -130,7 +149,9 @@ function VerifyForm() {
           <div className="w-14 h-14 bg-gradient-to-br from-cinema-violet to-cinema-teal rounded-xl flex items-center justify-center mx-auto mb-4 shadow-glow-violet">
             <Film className="w-8 h-8 text-white" aria-hidden />
           </div>
-          <h1 className="font-display text-2xl md:text-3xl tracking-wide text-white uppercase">Verifica tu email</h1>
+          <h1 className="font-display text-2xl md:text-3xl tracking-wide text-white uppercase">
+            Verifica tu email
+          </h1>
           <p className="text-cinema-muted mt-2">
             Hemos enviado un código de verificación a<br />
             <span className="text-white font-medium">{maskedEmail}</span>
@@ -138,7 +159,10 @@ function VerifyForm() {
         </div>
 
         {error && (
-          <div className="mb-4 p-3 rounded bg-red-500/10 border border-red-500/30 text-red-400 text-sm text-center" role="alert">
+          <div
+            className="mb-4 p-3 rounded bg-red-500/10 border border-red-500/30 text-red-400 text-sm text-center"
+            role="alert"
+          >
             {error}
           </div>
         )}
@@ -162,22 +186,37 @@ function VerifyForm() {
             />
           </div>
 
-          <Button type="submit" className="w-full" size="lg" disabled={loading || otp.length !== OTP_LENGTH}>
+          <Button
+            type="submit"
+            className="w-full"
+            size="lg"
+            disabled={loading || otp.length !== OTP_LENGTH}
+          >
             {loading ? 'Verificando…' : 'Verificar cuenta'}
           </Button>
         </form>
 
         <div className="text-center mt-6">
-          <p className="text-cinema-muted text-sm mb-3">
-            ¿No recibiste el código?
-          </p>
+          <p className="text-cinema-muted text-sm mb-3">¿No recibiste el código?</p>
           <div className="relative inline-flex items-center justify-center">
             {resendCooldown > 0 && (
               <svg className="absolute w-20 h-20 -rotate-90" viewBox="0 0 64 64">
-                <circle cx="32" cy="32" r="28" fill="none" stroke="rgba(139,92,246,0.15)" strokeWidth="3" />
                 <circle
-                  cx="32" cy="32" r="28" fill="none" stroke="url(#timerGradient)"
-                  strokeWidth="3" strokeLinecap="round"
+                  cx="32"
+                  cy="32"
+                  r="28"
+                  fill="none"
+                  stroke="rgba(139,92,246,0.15)"
+                  strokeWidth="3"
+                />
+                <circle
+                  cx="32"
+                  cy="32"
+                  r="28"
+                  fill="none"
+                  stroke="url(#timerGradient)"
+                  strokeWidth="3"
+                  strokeLinecap="round"
                   strokeDasharray={2 * Math.PI * 28}
                   strokeDashoffset={2 * Math.PI * 28 * (1 - resendCooldown / 30)}
                   className="transition-all duration-1000 ease-linear"

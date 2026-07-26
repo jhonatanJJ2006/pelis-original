@@ -21,6 +21,7 @@
     "@pelis/validators": "workspace:*",
     "better-auth": "1.4.9",
     "convex": "^1.42.1",
+    "stripe": "^22.3.2",
     "zod": "catalog:"
   },
   "devDependencies": {
