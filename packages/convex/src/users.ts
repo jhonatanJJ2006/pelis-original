@@ -12,13 +12,18 @@ export const me = query({
       .filter((q) => q.eq(q.field('status'), 'active'))
       .first();
 
+    const endDate = subscription?.endDate;
+    const hasValidExpiry =
+      typeof endDate === 'number' && Number.isFinite(endDate) && endDate > 0;
+
     return {
       _id: identity.subject,
       name: identity.name ?? 'User',
       email: identity.email ?? '',
       image: identity.pictureUrl ?? undefined,
       planId: subscription?.planId,
-      planExpiresAt: subscription?.endDate,
+      // Solo exponer fecha si es válida; UI usa planExpiresAt > now()
+      planExpiresAt: hasValidExpiry ? endDate : undefined,
     };
   },
 });

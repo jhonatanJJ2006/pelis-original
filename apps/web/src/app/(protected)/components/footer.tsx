@@ -6,8 +6,8 @@ const exploreLinks = [
   { href: '/', label: 'Inicio' },
   { href: '/movies', label: 'Películas' },
   { href: '/series', label: 'Series' },
-  { href: '/favorites', label: 'Favoritos' },
-  { href: '/history', label: 'Historial' },
+  { href: '/tv', label: 'TV' },
+  { href: '/anime', label: 'Anime' },
 ];
 
 export function Footer() {
@@ -55,10 +55,26 @@ export function Footer() {
             <ul className="space-y-2.5">
               <li>
                 <Link
-                  href="/login"
+                  href="/profile"
                   className="text-cinema-silver hover:text-white text-sm transition-colors"
                 >
-                  Iniciar sesión
+                  Mi perfil
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/favorites"
+                  className="text-cinema-silver hover:text-white text-sm transition-colors"
+                >
+                  Favoritos
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/history"
+                  className="text-cinema-silver hover:text-white text-sm transition-colors"
+                >
+                  Historial
                 </Link>
               </li>
               <li>
@@ -66,7 +82,7 @@ export function Footer() {
                   href="/subscribe"
                   className="text-cinema-silver hover:text-cinema-gold text-sm transition-colors"
                 >
-                  Suscripción Premium
+                  Suscripción
                 </Link>
               </li>
             </ul>

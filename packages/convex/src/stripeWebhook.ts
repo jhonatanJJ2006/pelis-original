@@ -19,7 +19,26 @@ export const handleSubscriptionCreated = internalMutation({
       )
       .first();
 
-    if (existing) return existing._id;
+    if (existing) {
+      // Repara fechas inválidas (API Stripe Basil+ ya no envía period en el root)
+      const badEnd =
+        !Number.isFinite(existing.endDate) ||
+        existing.endDate <= 0 ||
+        existing.endDate < existing.startDate;
+
+      if (badEnd || existing.status !== 'active') {
+        await ctx.db.patch(existing._id, {
+          startDate: args.startDate,
+          endDate: args.endDate,
+          status: 'active',
+          userId: args.convexUserId,
+          planId: args.planId,
+          stripeCustomerId: args.stripeCustomerId,
+          stripePriceId: args.stripePriceId,
+        });
+      }
+      return existing._id;
+    }
 
     const plan = await ctx.db.get(args.planId);
     if (!plan) throw new Error('Plan not found');
@@ -50,6 +69,7 @@ export const handleSubscriptionUpdated = internalMutation({
       v.literal('incomplete')
     ),
     endDate: v.optional(v.number()),
+    stripePriceId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const subscription = await ctx.db
@@ -64,6 +84,8 @@ export const handleSubscriptionUpdated = internalMutation({
     const updates: {
       status?: 'active' | 'cancelled' | 'expired';
       endDate?: number;
+      stripePriceId?: string;
+      planId?: typeof subscription.planId;
     } = {};
 
     switch (args.status) {
@@ -84,7 +106,45 @@ export const handleSubscriptionUpdated = internalMutation({
       updates.endDate = args.endDate;
     }
 
+    if (args.stripePriceId) {
+      updates.stripePriceId = args.stripePriceId;
+      const plans = await ctx.db.query('plans').collect();
+      const matched = plans.find((p) => p.stripePriceId === args.stripePriceId);
+      if (matched) {
+        updates.planId = matched._id;
+      }
+    }
+
     await ctx.db.patch(subscription._id, updates);
+  },
+});
+
+/** Upgrade inmediato desde la action (antes del webhook). */
+export const applyPlanUpgrade = internalMutation({
+  args: {
+    subscriptionId: v.string(),
+    planId: v.id('plans'),
+    stripePriceId: v.string(),
+    startDate: v.number(),
+    endDate: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const subscription = await ctx.db
+      .query('subscriptions')
+      .withIndex('by_stripeSubscriptionId', (q) =>
+        q.eq('stripeSubscriptionId', args.subscriptionId)
+      )
+      .first();
+
+    if (!subscription) throw new Error('Subscription not found');
+
+    await ctx.db.patch(subscription._id, {
+      planId: args.planId,
+      stripePriceId: args.stripePriceId,
+      startDate: args.startDate,
+      endDate: args.endDate,
+      status: 'active',
+    });
   },
 });
 

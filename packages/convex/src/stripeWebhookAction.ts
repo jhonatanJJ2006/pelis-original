@@ -12,9 +12,7 @@ function getStripe() {
     throw new Error('STRIPE_SECRET_KEY is not configured');
   }
 
-  return new Stripe(secretKey, {
-    apiVersion: '2025-09-30' as Stripe.LatestApiVersion,
-  });
+  return new Stripe(secretKey);
 }
 
 function mapStripeStatus(
@@ -36,6 +34,36 @@ function mapStripeStatus(
     default:
       return 'expired';
   }
+}
+
+/** Stripe Basil+ movió current_period_* a subscription items. */
+function getSubscriptionPeriod(subscription: Stripe.Subscription): {
+  startDate: number;
+  endDate: number;
+} {
+  const item = subscription.items?.data?.[0] as
+    | (Stripe.SubscriptionItem & {
+        current_period_start?: number;
+        current_period_end?: number;
+      })
+    | undefined;
+
+  const legacy = subscription as Stripe.Subscription & {
+    current_period_start?: number;
+    current_period_end?: number;
+  };
+
+  const startSec =
+    item?.current_period_start ?? legacy.current_period_start ?? subscription.created;
+  const endSec = item?.current_period_end ?? legacy.current_period_end;
+
+  const startDate = startSec * 1000;
+  // Fallback 30 días si Stripe no envía periodo (no debería pasar en items)
+  const endDate = endSec
+    ? endSec * 1000
+    : startDate + 30 * 24 * 60 * 60 * 1000;
+
+  return { startDate, endDate };
 }
 
 export const processWebhook = internalAction({
@@ -65,6 +93,51 @@ export const processWebhook = internalAction({
       switch (event.type) {
         case 'checkout.session.completed': {
           const session = event.data.object as Stripe.Checkout.Session;
+          const stripe = getStripe();
+
+          // Upgrade: solo tras pagar en Checkout se cambia el plan
+          if (session.metadata?.type === 'plan_upgrade') {
+            if (session.payment_status !== 'paid') {
+              break;
+            }
+
+            const subscriptionId = session.metadata.stripeSubscriptionId;
+            const stripePriceId = session.metadata.stripePriceId;
+            const itemId = session.metadata.stripeSubscriptionItemId;
+            const planId = session.metadata.planId;
+            const convexUserId = session.metadata.convexUserId;
+
+            if (!subscriptionId || !stripePriceId || !itemId || !planId) {
+              break;
+            }
+
+            const current = await stripe.subscriptions.retrieve(subscriptionId);
+            const alreadyOnPrice =
+              current.items.data[0]?.price.id === stripePriceId;
+
+            const updated = alreadyOnPrice
+              ? current
+              : await stripe.subscriptions.update(subscriptionId, {
+                  items: [{ id: itemId, price: stripePriceId }],
+                  proration_behavior: 'none',
+                  metadata: {
+                    convexUserId: convexUserId ?? '',
+                    planId,
+                  },
+                });
+
+            const { startDate, endDate } = getSubscriptionPeriod(updated);
+            await ctx.runMutation(internal.stripeWebhook.applyPlanUpgrade, {
+              subscriptionId: updated.id,
+              planId: planId as Id<'plans'>,
+              stripePriceId,
+              startDate,
+              endDate,
+            });
+            break;
+          }
+
+          // Nueva suscripción
           const convexUserId = session.metadata?.convexUserId;
           const planId = session.metadata?.planId;
 
@@ -72,10 +145,10 @@ export const processWebhook = internalAction({
             break;
           }
 
-          const stripe = getStripe();
           const subscription = await stripe.subscriptions.retrieve(
             session.subscription as string
           );
+          const { startDate, endDate } = getSubscriptionPeriod(subscription);
 
           await ctx.runMutation(internal.stripeWebhook.handleSubscriptionCreated, {
             subscriptionId: subscription.id,
@@ -83,19 +156,21 @@ export const processWebhook = internalAction({
             stripePriceId: subscription.items.data[0]?.price.id ?? '',
             convexUserId,
             planId: planId as Id<'plans'>,
-            startDate: subscription.current_period_start * 1000,
-            endDate: subscription.current_period_end * 1000,
+            startDate,
+            endDate,
           });
           break;
         }
 
         case 'customer.subscription.updated': {
           const subscription = event.data.object as Stripe.Subscription;
+          const { endDate } = getSubscriptionPeriod(subscription);
 
           await ctx.runMutation(internal.stripeWebhook.handleSubscriptionUpdated, {
             subscriptionId: subscription.id,
             status: mapStripeStatus(subscription.status),
-            endDate: subscription.current_period_end * 1000,
+            endDate,
+            stripePriceId: subscription.items.data[0]?.price.id,
           });
           break;
         }

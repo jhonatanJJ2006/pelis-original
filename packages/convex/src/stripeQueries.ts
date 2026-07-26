@@ -16,14 +16,28 @@ export const getCheckoutContext = query({
       .filter((q) => q.eq(q.field('status'), 'active'))
       .first();
 
+    let currentPlan = null;
+    if (existingSubscription) {
+      currentPlan = await ctx.db.get(existingSubscription.planId);
+    }
+
     return {
       plan,
+      currentPlan,
       user: {
         subject: identity.subject,
         email: identity.email ?? '',
         name: identity.name ?? 'User',
       },
-      stripeCustomerId: existingSubscription?.stripeCustomerId,
+      existingSubscription: existingSubscription
+        ? {
+            _id: existingSubscription._id,
+            stripeSubscriptionId: existingSubscription.stripeSubscriptionId,
+            stripeCustomerId: existingSubscription.stripeCustomerId,
+            planId: existingSubscription.planId,
+            stripePriceId: existingSubscription.stripePriceId,
+          }
+        : null,
     };
   },
 });

@@ -5,8 +5,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import {
   Home,
   Film,
-  Heart,
-  History,
   User,
   Menu,
   X,
@@ -29,8 +27,6 @@ const navItems = [
   { href: '/series', label: 'Series', icon: Tv },
   { href: '/tv', label: 'TV', icon: Radio },
   { href: '/anime', label: 'Anime', icon: Clapperboard },
-  { href: '/favorites', label: 'Favoritos', icon: Heart },
-  { href: '/history', label: 'Historial', icon: History },
 ];
 
 interface HeaderProps {
@@ -46,7 +42,7 @@ export function Header({ sticky = true }: HeaderProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const searchRef = useRef<HTMLInputElement>(null);
 
-  const hasActivePlan = user?.planExpiresAt && user.planExpiresAt > Date.now();
+  const hasActivePlan = !!(user?.planExpiresAt && user.planExpiresAt > Date.now());
 
   const handleLogout = () => {
     logout();
@@ -135,45 +131,50 @@ export function Header({ sticky = true }: HeaderProps) {
           </div>
 
           <div className="hidden md:flex items-center gap-3">
-            {!hasActivePlan && user && (
+            {user && (
               <Link href="/subscribe">
                 <button
                   type="button"
-                  className="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-cinema-gold to-cinema-gold-light text-black rounded text-sm font-bold transition-all duration-200 hover:brightness-110 shadow-[0_4px_16px_rgba(245,200,66,0.25)]"
+                  className={cn(
+                    'flex items-center gap-1.5 px-3 py-2 rounded text-sm font-bold transition-all duration-200',
+                    hasActivePlan
+                      ? 'bg-cinema-elevated border border-cinema-gold/40 text-cinema-gold hover:bg-cinema-gold/10'
+                      : 'bg-gradient-to-r from-cinema-gold to-cinema-gold-light text-black hover:brightness-110 shadow-[0_4px_16px_rgba(245,200,66,0.25)]'
+                  )}
                 >
                   <Crown className="w-4 h-4" aria-hidden />
-                  <span className="hidden lg:inline">Premium</span>
+                  <span className="hidden lg:inline">
+                    {hasActivePlan ? 'Suscripción' : 'Premium'}
+                  </span>
                 </button>
               </Link>
             )}
 
             {user ? (
-              <div className="flex items-center gap-2">
-                <div className="flex items-center gap-2">
-                  {user.image ? (
-                    <img
-                      src={user.image}
-                      alt=""
-                      className="w-8 h-8 rounded-full ring-2 ring-cinema-violet/50"
-                    />
-                  ) : (
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cinema-accent to-cinema-violet flex items-center justify-center">
-                      <User className="w-4 h-4 text-white" aria-hidden />
-                    </div>
-                  )}
-                  <span className="text-sm text-cinema-muted hidden lg:inline max-w-[120px] truncate">
-                    {user.name}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="p-2 text-cinema-silver hover:text-cinema-accent transition-colors rounded hover:bg-cinema-elevated/50"
-                  aria-label="Cerrar sesión"
-                >
-                  <LogOut className="w-4 h-4" />
-                </button>
-              </div>
+              <Link
+                href="/profile"
+                className={cn(
+                  'flex items-center gap-2 rounded-full p-0.5 transition-all',
+                  'hover:ring-2 hover:ring-cinema-violet/50',
+                  isActive('/profile') && 'ring-2 ring-cinema-violet/60'
+                )}
+                aria-label="Ir a mi perfil"
+              >
+                {user.image ? (
+                  <img
+                    src={user.image}
+                    alt=""
+                    className="w-9 h-9 rounded-full ring-2 ring-cinema-violet/50"
+                  />
+                ) : (
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cinema-accent to-cinema-violet flex items-center justify-center ring-2 ring-cinema-violet/50">
+                    <User className="w-4 h-4 text-white" aria-hidden />
+                  </div>
+                )}
+                <span className="text-sm text-cinema-muted hidden lg:inline max-w-[120px] truncate pr-1">
+                  {user.name}
+                </span>
+              </Link>
             ) : (
               <Link href="/login">
                 <Button size="sm">Iniciar sesión</Button>
@@ -182,6 +183,35 @@ export function Header({ sticky = true }: HeaderProps) {
           </div>
 
           <div className="flex md:hidden items-center gap-2">
+            {user && (
+              <Link
+                href="/subscribe"
+                className={cn(
+                  'p-2 rounded transition-colors',
+                  hasActivePlan
+                    ? 'text-cinema-gold hover:bg-cinema-gold/10'
+                    : 'text-cinema-gold hover:bg-cinema-elevated/50'
+                )}
+                aria-label="Suscripciones"
+              >
+                <Crown className="w-5 h-5" />
+              </Link>
+            )}
+            {user && (
+              <Link
+                href="/profile"
+                className="rounded-full"
+                aria-label="Mi perfil"
+              >
+                {user.image ? (
+                  <img src={user.image} alt="" className="w-8 h-8 rounded-full ring-2 ring-cinema-violet/40" />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cinema-accent to-cinema-violet flex items-center justify-center">
+                    <User className="w-4 h-4 text-white" aria-hidden />
+                  </div>
+                )}
+              </Link>
+            )}
             <button
               type="button"
               onClick={() => setSearchOpen(!searchOpen)}
@@ -241,20 +271,23 @@ export function Header({ sticky = true }: HeaderProps) {
                 </Link>
               ))}
 
-              {!hasActivePlan && user && (
+              {user && (
                 <Link
                   href="/subscribe"
                   className="flex items-center gap-3 px-4 py-3 text-cinema-gold font-semibold"
                 >
                   <Crown className="w-5 h-5" aria-hidden />
-                  Premium
+                  {hasActivePlan ? 'Mi suscripción' : 'Premium'}
                 </Link>
               )}
 
               <div className="border-t border-cinema-border mt-2 pt-2">
                 {user ? (
-                  <div className="px-4 py-3">
-                    <div className="flex items-center gap-3 mb-2">
+                  <div className="px-4 py-3 space-y-1">
+                    <Link
+                      href="/profile"
+                      className="flex items-center gap-3 px-4 py-3 rounded-lg text-cinema-silver hover:text-white hover:bg-cinema-elevated/50"
+                    >
                       {user.image ? (
                         <img src={user.image} alt="" className="w-8 h-8 rounded-full" />
                       ) : (
@@ -262,8 +295,8 @@ export function Header({ sticky = true }: HeaderProps) {
                           <User className="w-4 h-4 text-white" aria-hidden />
                         </div>
                       )}
-                      <span className="text-sm text-cinema-muted">{user.name}</span>
-                    </div>
+                      <span className="text-sm">Mi perfil</span>
+                    </Link>
                     <button
                       type="button"
                       onClick={() => {
