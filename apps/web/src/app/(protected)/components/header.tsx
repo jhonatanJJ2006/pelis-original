@@ -20,6 +20,7 @@ import { toast } from 'sonner';
 import { useUser } from '@pelis/auth/hooks';
 import { Button } from '@pelis/ui/components';
 import { cn } from '@pelis/ui/utils';
+import { SearchDropdown } from './search-dropdown';
 
 const navItems = [
   { href: '/', label: 'Inicio', icon: Home, exact: true },
@@ -90,23 +91,12 @@ export function Header({ sticky = true }: HeaderProps) {
           </Link>
 
           <div className="hidden lg:flex items-center gap-1 flex-1 max-w-md mx-8">
-            <form onSubmit={handleSearch} className="w-full relative" role="search">
-              <label htmlFor="header-search" className="sr-only">
-                Buscar películas y series
-              </label>
-              <Search
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cinema-ash"
-                aria-hidden
-              />
-              <input
-                id="header-search"
-                type="search"
-                placeholder="Buscar películas y series..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-cinema-surface/80 border border-cinema-border rounded py-2.5 pl-10 pr-4 text-sm text-white placeholder-cinema-ash focus:outline-none focus:ring-2 focus:ring-cinema-accent/50 focus:border-cinema-accent/40 transition-all"
-              />
-            </form>
+            <SearchDropdown
+              value={searchQuery}
+              onChange={setSearchQuery}
+              onSubmit={handleSearch}
+              id="header-search"
+            />
           </div>
 
           <div className="hidden md:flex items-center gap-0.5">
@@ -232,20 +222,13 @@ export function Header({ sticky = true }: HeaderProps) {
 
         {searchOpen && (
           <div className="lg:hidden pb-4 animate-slide-down">
-            <form onSubmit={handleSearch} role="search">
-              <label htmlFor="mobile-search" className="sr-only">
-                Buscar
-              </label>
-              <input
-                ref={searchRef}
-                id="mobile-search"
-                type="search"
-                placeholder="Buscar películas y series..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="input-field"
-              />
-            </form>
+            <SearchDropdown
+              value={searchQuery}
+              onChange={setSearchQuery}
+              onSubmit={handleSearch}
+              inputRef={searchRef}
+              id="mobile-search"
+            />
           </div>
         )}
 

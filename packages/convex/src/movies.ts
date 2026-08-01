@@ -50,6 +50,25 @@ export const list = query({
   },
 });
 
+export const search = query({
+  args: {
+    q: v.string(),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const all = await ctx.db.query('movies').collect();
+    const q = args.q.toLowerCase();
+    const results = all
+      .filter(
+        (m) =>
+          m.name.toLowerCase().includes(q) ||
+          m.actors.toLowerCase().includes(q)
+      )
+      .slice(0, args.limit ?? 8);
+    return enrichMovies(ctx, results);
+  },
+});
+
 export const getById = query({
   args: { id: v.id('movies') },
   handler: async (ctx, args) => {

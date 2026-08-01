@@ -61,7 +61,7 @@ async function start() {
   console.log(`Starting dev server on port ${port}`);
   console.log(`Convex URL: ${convexUrl}`);
 
-  const dev = spawn('npx', ['next', 'dev', '-p', String(port)], {
+  const dev = spawn('npx', ['next', 'dev', '-p', String(port), '-H', '0.0.0.0'], {
     stdio: 'inherit',
     shell: true,
     env: {
