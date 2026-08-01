@@ -1,3 +1,5 @@
+'use client';
+
 import { InputHTMLAttributes, forwardRef, useId, useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { cn } from '../utils';
