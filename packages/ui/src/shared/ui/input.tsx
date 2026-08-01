@@ -32,7 +32,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             className={cn(
               'w-full bg-cinema-surface border border-cinema-border rounded py-2.5 px-4 text-white placeholder-cinema-ash',
               'hover:border-cinema-silver/40 hover:bg-cinema-elevated/60',
-              'focus:outline-none focus:ring-2 focus:ring-cinema-accent/50 focus:border-cinema-accent/40 focus:hover:bg-cinema-surface focus:hover:border-cinema-accent/40',
+              'focus:outline-none focus:ring-2 focus:ring-cinema-silver/30 focus:border-cinema-silver/50 focus:hover:bg-cinema-surface focus:hover:border-cinema-silver/50',
               'transition-all duration-200',
               isPassword && 'pr-11',
               error && 'border-red-500 focus:ring-red-500/50 hover:border-red-500/70',
