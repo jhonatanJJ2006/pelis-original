@@ -16,6 +16,19 @@ export default function RegisterPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const translateError = (message: string): string => {
+    const translations: Record<string, string> = {
+      'User already exists. Use another email.': 'El usuario ya existe. Usa otro correo electrónico.',
+      'User already exists.': 'El usuario ya existe.',
+      'Invalid email': 'El email no es válido',
+      'Password too short': 'La contraseña es demasiado corta',
+      'Password too long': 'La contraseña es demasiado larga',
+      'Email and password sign up is not enabled':
+        'El registro con email no está habilitado en este momento',
+    };
+    return translations[message] ?? message;
+  };
+
   const handleGoogleLogin = () => {
     window.location.href = `${getAuthApiBase()}/signin/google`;
   };
@@ -43,7 +56,7 @@ export default function RegisterPage() {
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data?.message || 'Error al crear la cuenta');
+        setError(translateError(data?.message || 'Error al crear la cuenta'));
         return;
       }
       router.push(`/verify-email?email=${encodeURIComponent(email)}`);
