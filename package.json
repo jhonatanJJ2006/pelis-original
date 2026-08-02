@@ -33,6 +33,7 @@
   },
   "devDependencies": {
     "@pelis/prettier-config": "workspace:*",
+    "@playwright/test": "^1.62.1",
     "@turbo/gen": "^2.1.3",
     "prettier": "catalog:",
     "sharp": "^0.35.3",
