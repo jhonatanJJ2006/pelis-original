@@ -109,6 +109,23 @@ async function sendVerificationEmail(email: string, otp: string) {
                   </td>
                 </tr>
                 <tr>
+                  <td style="padding: 28px 48px 0;">
+                    <table cellpadding="0" cellspacing="0" width="100%">
+                      <tr>
+                        <td align="center">
+                          <a href="${siteUrl}/verify-email?email=${encodeURIComponent(email)}" style="display: inline-block; background: linear-gradient(135deg, #8b5cf6, #14b8a6); color: #ffffff; font-size: 15px; font-weight: 700; text-decoration: none; padding: 14px 36px; border-radius: 12px;">
+                            Verificar mi cuenta
+                          </a>
+                          <p style="color: #9a9ab0; font-size: 13px; line-height: 1.6; margin: 14px 0 0;">
+                            O ingresa el código de verificación en{' '}
+                            <a href="${siteUrl}/verify-email?email=${encodeURIComponent(email)}" style="color: #8b5cf6; text-decoration: underline;">verpelis.pro/verify-email</a>
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
                   <td style="padding: 32px 48px 0;">
                     <table cellpadding="0" cellspacing="0" width="100%">
                       <tr>

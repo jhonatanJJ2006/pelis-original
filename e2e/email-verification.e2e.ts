@@ -41,13 +41,24 @@ async function assertEmailSentToResend(email: string) {
   });
   expect(res.ok).toBeTruthy();
   const data = (await res.json()) as {
-    data?: Array<{ subject?: string; last_event?: string; to?: string[] }>;
+    data?: Array<{ id?: string; subject?: string; last_event?: string; to?: string[] }>;
   };
   const sent = (data.data ?? []).find(
     (e) => e.subject === 'Verifica tu cuenta de Pelis'
   );
   expect(sent, 'Debe existir un email OTP enviado vía Resend para el usuario').toBeDefined();
   expect(sent?.last_event).toBe('delivered');
+
+  if (sent?.id) {
+    const detail = await fetch(`https://api.resend.com/emails/${sent.id}`, {
+      headers: { Authorization: `Bearer ${apiKey}` },
+    });
+    expect(detail.ok).toBeTruthy();
+    const emailDetail = (await detail.json()) as { html?: string };
+    const html = emailDetail?.html ?? '';
+    expect(html).toContain('/verify-email?email=');
+    expect(html).toContain('Verificar mi cuenta');
+  }
 }
 
 test.describe.configure({ mode: 'serial' });

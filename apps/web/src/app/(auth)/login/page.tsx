@@ -161,6 +161,15 @@ function LoginForm() {
                   ? `Vuelve a intentarlo en ${resendCooldown}s`
                   : 'Reenviar código de verificación'}
             </button>
+            <p className="mt-3 pt-3 border-t border-yellow-500/20">
+              ¿Ya tienes tu código?{' '}
+              <Link
+                href={`/verify-email?email=${encodeURIComponent(email)}`}
+                className="text-yellow-200 hover:text-yellow-100 underline font-medium"
+              >
+                Ingresa tu código de verificación
+              </Link>
+            </p>
           </div>
         )}
 
