@@ -59,6 +59,15 @@ export default function RegisterPage() {
         setError(translateError(data?.message || 'Error al crear la cuenta'));
         return;
       }
+      try {
+        await fetch(`${getAuthApiBase()}/email-otp/send-verification-otp`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, type: 'email-verification' }),
+        });
+      } catch {
+        // El usuario puede reenviar el código desde la página de verificación.
+      }
       router.push(`/verify-email?email=${encodeURIComponent(email)}`);
       router.refresh();
     } catch {

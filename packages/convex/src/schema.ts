@@ -2,6 +2,25 @@ import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
 
 export default defineSchema({
+  users: defineTable({
+    userId: v.string(),
+    email: v.string(),
+    name: v.string(),
+    role: v.union(v.literal('user'), v.literal('admin')),
+    emailVerified: v.boolean(),
+    verifiedAt: v.optional(v.number()),
+    otp: v.optional(v.string()),
+    otpExpiresAt: v.optional(v.number()),
+    otpAttempts: v.optional(v.number()),
+    otpLastSentAt: v.optional(v.number()),
+    lastLoginAt: v.optional(v.number()),
+    lastSessionExpiresAt: v.optional(v.number()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index('by_userId', ['userId'])
+    .index('by_email', ['email']),
+
   movies: defineTable({
     name: v.string(),
     image: v.string(),

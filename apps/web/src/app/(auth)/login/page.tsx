@@ -6,7 +6,7 @@ import { Film } from 'lucide-react';
 import { Button, Input } from '@pelis/ui/components';
 import { getAuthApiBase } from '@pelis/auth/convex-site';
 import { authClient } from '@/lib/auth-client';
-import { useState, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 
 function LoginForm() {
   const router = useRouter();
@@ -19,19 +19,39 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [showVerifyMessage, setShowVerifyMessage] = useState(false);
   const [resending, setResending] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [resendMessage, setResendMessage] = useState('');
+
+  useEffect(() => {
+    if (resendCooldown > 0) {
+      const timer = setTimeout(() => setResendCooldown((c) => c - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendCooldown]);
 
   const handleGoogleLogin = () => {
     window.location.href = `${getAuthApiBase()}/signin/google`;
   };
 
   const handleResendVerification = async () => {
+    if (resendCooldown > 0) return;
     setResending(true);
+    setResendMessage('');
     try {
-      await fetch(`${getAuthApiBase()}/email-otp/send-verification-otp`, {
+      const res = await fetch(`${getAuthApiBase()}/email-otp/send-verification-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, type: 'email-verification' }),
       });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setResendMessage(data?.message || 'Error al reenviar el código');
+        return;
+      }
+      setResendMessage('Código enviado. Revisa tu bandeja de entrada.');
+      setResendCooldown(30);
+    } catch {
+      setResendMessage('Error de conexión. Intenta de nuevo.');
     } finally {
       setResending(false);
     }
@@ -124,13 +144,22 @@ function LoginForm() {
         {showVerifyMessage && (
           <div className="mb-4 p-3 rounded bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 text-sm text-center">
             <p className="mb-2">Debes verificar tu email antes de iniciar sesión.</p>
+            {resendMessage && (
+              <p className={`mb-2 ${resendCooldown > 0 ? 'text-yellow-300' : 'text-red-400'}`}>
+                {resendMessage}
+              </p>
+            )}
             <button
               type="button"
               onClick={handleResendVerification}
-              disabled={resending}
-              className="text-yellow-300 hover:text-yellow-200 underline font-medium disabled:opacity-50"
+              disabled={resending || resendCooldown > 0}
+              className="text-yellow-300 hover:text-yellow-200 underline font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {resending ? 'Reenviando…' : 'Reenviar código de verificación'}
+              {resending
+                ? 'Reenviando…'
+                : resendCooldown > 0
+                  ? `Vuelve a intentarlo en ${resendCooldown}s`
+                  : 'Reenviar código de verificación'}
             </button>
           </div>
         )}

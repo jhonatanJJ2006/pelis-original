@@ -95,6 +95,14 @@ function VerifyForm() {
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
+        if (res.status === 429) {
+          const match = String(data?.message ?? '').match(/(\d+)\s*segundos/);
+          if (match) {
+            setResendCooldown(Math.max(1, Math.min(30, parseInt(match[1], 10))));
+            setError('');
+            return;
+          }
+        }
         setError(data?.message || 'Error al reenviar el código');
         return;
       }

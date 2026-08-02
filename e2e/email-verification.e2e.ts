@@ -7,22 +7,17 @@ const CONVEX_DIR = resolve(__dirname, '../packages/convex');
 const ROOT_ENV = resolve(__dirname, '../.env');
 
 function getOtpFromConvex(email: string): string {
-  const out = execSync('npx convex data verification --component betterAuth --limit 20', {
+  const out = execSync('npx convex data users --format json', {
     cwd: CONVEX_DIR,
     encoding: 'utf-8',
     timeout: 30000,
   });
-  const line = out
-    .split('\n')
-    .find((l) => l.includes(`email-verification-otp-${email.toLowerCase()}`));
-  if (!line) {
+  const rows = JSON.parse(out) as Array<{ email?: string; otp?: string }>;
+  const row = rows.find((r) => r.email?.toLowerCase() === email.toLowerCase());
+  if (!row?.otp) {
     throw new Error(`OTP not found for ${email}\n${out}`);
   }
-  const match = line.match(/"(\d+):\d+"/);
-  if (!match) {
-    throw new Error(`Could not parse OTP from line: ${line}`);
-  }
-  return match[1];
+  return row.otp;
 }
 
 function getResendApiKey(): string | null {
@@ -58,7 +53,7 @@ async function assertEmailSentToResend(email: string) {
 test.describe.configure({ mode: 'serial' });
 
 test.describe('Email verification (OTP + Resend)', () => {
-  const email = `e2e-otp-${Date.now()}@example.com`;
+  const email = `2jhonatanjara2+otp-e2e-${Date.now()}@gmail.com`;
   const password = 'Test123456';
 
   test('registers, receives OTP via Resend, verifies email and logs in', async ({ page }) => {
