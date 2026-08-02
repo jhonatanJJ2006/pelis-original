@@ -62,3 +62,6 @@ apps/web/public/peliculas/peliculas/*
 apps/web/public/peliculas/placeholder.webp
 
 .vercel
+
+test-results/
+playwright-report/
