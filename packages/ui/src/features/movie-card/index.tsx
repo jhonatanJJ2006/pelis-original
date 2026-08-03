@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import Link from 'next/link';
 import { Heart, Play, Tv, Film, TrendingUp } from 'lucide-react';
 import { useMutation, useQuery } from 'convex/react';
@@ -17,7 +18,7 @@ interface MovieCardProps {
   variant?: 'poster' | 'compact';
 }
 
-export function MovieCard({ movie, showFavorite = true, variant = 'poster' }: MovieCardProps) {
+function MovieCardBase({ movie, showFavorite = true, variant = 'poster' }: MovieCardProps) {
   const { user } = useUser();
   const addFavorite = useMutation(api.favorites.add);
   const removeFavorite = useMutation(api.favorites.remove);
@@ -25,7 +26,7 @@ export function MovieCard({ movie, showFavorite = true, variant = 'poster' }: Mo
 
   const isFavorited = useQuery(
     api.favorites.check,
-    user ? { userId: user._id as any, movieId: movie._id as any } : 'skip'
+    showFavorite && user ? { userId: user._id as any, movieId: movie._id as any } : 'skip'
   );
 
   const handleFavorite = async (e: React.MouseEvent) => {
@@ -51,6 +52,8 @@ export function MovieCard({ movie, showFavorite = true, variant = 'poster' }: Mo
   return (
     <Link
       href={`/movies/${movie._id}`}
+      prefetch={false}
+      draggable={false}
       className="card-container block group active:scale-[0.97] motion-safe:transition-transform motion-safe:duration-fast motion-safe:ease-out-expo"
     >
       <div
@@ -116,12 +119,12 @@ export function MovieCard({ movie, showFavorite = true, variant = 'poster' }: Mo
             )}
           </div>
           <div className="absolute top-2 right-2 z-[5]">
-            <Badge variant="violet" className="text-[10px] bg-cinema-elevated/80 backdrop-blur-sm">
+            <Badge variant="violet" className="text-[10px] bg-cinema-elevated/80">
               {movie.classification}
             </Badge>
           </div>
           <div className="card-meta-reveal absolute bottom-2 left-2 right-2 flex items-center gap-2 z-[4]">
-            <div className="flex items-center gap-1.5 text-[10px] text-cinema-muted bg-cinema-elevated/90 backdrop-blur-sm px-2.5 py-1.5 rounded-full">
+            <div className="flex items-center gap-1.5 text-[10px] text-cinema-muted bg-cinema-elevated/90 px-2.5 py-1.5 rounded-full">
               <TrendingUp className="w-3 h-3 text-cinema-accent" />
               <span>{movie.releaseYear}</span>
             </div>
@@ -139,10 +142,12 @@ export function MovieCard({ movie, showFavorite = true, variant = 'poster' }: Mo
             </span>
           </div>
           {isSeries && movie.episodes && (
-            <p className="text-[11px] text-cinema-ash mt-1">{movie.episodes} episodios</p>
+            <p className="text-[11px] text-cinema-silver mt-1">{movie.episodes} episodios</p>
           )}
         </div>
       </div>
     </Link>
   );
 }
+
+export const MovieCard = memo(MovieCardBase);

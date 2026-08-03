@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useMutation } from 'convex/react';
+import Hls from 'hls.js';
 import { Maximize, Pause, Play, Volume2, VolumeX } from 'lucide-react';
 import { api } from '@pelis/convex';
 import { cn } from '../../shared/utils';
@@ -36,6 +37,23 @@ export function VideoPlayer({
   const lastSaved = useRef(0);
 
   const src = videoUrl || DEMO_VIDEO;
+  const isHls = src.includes('.m3u8');
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !isHls) return;
+    let hls: Hls | null = null;
+    if (Hls.isSupported()) {
+      hls = new Hls();
+      hls.loadSource(src);
+      hls.attachMedia(video);
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = src;
+    }
+    return () => {
+      if (hls) hls.destroy();
+    };
+  }, [src, isHls]);
 
   const saveProgress = async (current: number, total: number) => {
     if (!userId || total <= 0) return;

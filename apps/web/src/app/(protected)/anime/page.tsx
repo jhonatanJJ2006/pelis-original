@@ -168,7 +168,7 @@ export default function AnimePage() {
                 <h3 className="text-sm font-medium text-white line-clamp-2 leading-tight">
                   {a.title}
                 </h3>
-                <div className="flex items-center gap-2 text-[11px] text-cinema-ash">
+                <div className="flex items-center gap-2 text-[11px] text-cinema-silver">
                   {a.rating && (
                     <span className="flex items-center gap-0.5 text-cinema-gold">
                       <Star className="w-3 h-3" />

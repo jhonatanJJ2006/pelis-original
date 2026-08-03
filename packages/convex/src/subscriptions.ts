@@ -91,3 +91,39 @@ export const cancel = mutation({
     throw new Error('Use the billing portal to manage or cancel your subscription.');
   },
 });
+
+export const adminCreateSubscription = mutation({
+  args: {
+    userId: v.string(),
+    planId: v.id('plans'),
+    months: v.number(),
+    status: v.optional(
+      v.union(v.literal('active'), v.literal('cancelled'), v.literal('expired'))
+    ),
+  },
+  handler: async (ctx, args) => {
+    const plan = await ctx.db.get(args.planId);
+    if (!plan) throw new Error('Plan not found');
+
+    const now = Date.now();
+    const id = await ctx.db.insert('subscriptions', {
+      userId: args.userId,
+      planId: args.planId,
+      startDate: now,
+      endDate: now + args.months * 30 * 24 * 60 * 60 * 1000,
+      status: args.status ?? 'active',
+      stripePriceId: plan.stripePriceId,
+    });
+    return id;
+  },
+});
+
+export const getByUser = query({
+  args: { userId: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query('subscriptions')
+      .withIndex('by_user', (q) => q.eq('userId', args.userId))
+      .collect();
+  },
+});

@@ -18,6 +18,7 @@ export function ContinueWatchingCard({ movie, progress, duration }: ContinueWatc
   return (
     <Link
       href={`/movies/${movie._id}?play=true`}
+      prefetch={false}
       className="card-container group relative shrink-0 w-[260px] sm:w-[280px] md:w-[320px] snap-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cinema-accent/60 rounded-2xl active:scale-[0.97] motion-safe:transition-transform motion-safe:duration-fast motion-safe:ease-out-expo"
     >
       <div className="relative aspect-video rounded-2xl overflow-hidden border border-cinema-border bg-cinema-surface motion-safe:transition-[border-color,box-shadow] motion-safe:duration-normal [@media(hover:hover)_and_(pointer:fine)]:group-hover:border-cinema-violet/50 [@media(hover:hover)_and_(pointer:fine)]:group-hover:shadow-[0_8px_32px_rgba(59,130,246,0.2)]">

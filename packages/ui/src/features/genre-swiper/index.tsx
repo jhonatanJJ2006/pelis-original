@@ -2,12 +2,8 @@
 
 import Link from 'next/link';
 import { useRef, type ReactNode } from 'react';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { FreeMode } from 'swiper/modules';
 import { cn } from '../../shared/utils';
-
-import 'swiper/css';
-import 'swiper/css/free-mode';
+import { useDragScroll } from '../../shared/hooks/use-drag-scroll';
 
 interface GenreSwiperProps {
   children: ReactNode[];
@@ -15,26 +11,23 @@ interface GenreSwiperProps {
 }
 
 export function GenreSwiper({ children, className }: GenreSwiperProps) {
-  const swiperRef = useRef(null);
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  useDragScroll(scrollerRef);
 
   if (children.length === 0) return null;
 
   return (
-    <div className={cn('relative', className)} ref={swiperRef}>
-      <Swiper
-        modules={[FreeMode]}
-        freeMode={{ enabled: true, momentum: true }}
-        slidesPerView="auto"
-        spaceBetween={10}
-        grabCursor
-        className="genre-swiper"
+    <div className={cn('relative', className)}>
+      <div
+        ref={scrollerRef}
+        className="no-scrollbar flex gap-2.5 overflow-x-auto cursor-grab active:cursor-grabbing select-none"
       >
         {children.map((child, i) => (
-          <SwiperSlide key={i} className="!w-auto">
+          <div key={i} className="shrink-0">
             {child}
-          </SwiperSlide>
+          </div>
         ))}
-      </Swiper>
+      </div>
     </div>
   );
 }

@@ -31,9 +31,9 @@ export function Footer() {
           </div>
 
           <div>
-            <h4 className="font-display text-sm tracking-widest text-cinema-muted uppercase mb-4">
+            <h3 className="font-display text-sm tracking-widest text-cinema-muted uppercase mb-4">
               Explorar
-            </h4>
+            </h3>
             <ul className="space-y-2.5">
               {exploreLinks.map((link) => (
                 <li key={link.href}>
@@ -49,9 +49,9 @@ export function Footer() {
           </div>
 
           <div>
-            <h4 className="font-display text-sm tracking-widest text-cinema-muted uppercase mb-4">
+            <h3 className="font-display text-sm tracking-widest text-cinema-muted uppercase mb-4">
               Cuenta
-            </h4>
+            </h3>
             <ul className="space-y-2.5">
               <li>
                 <Link

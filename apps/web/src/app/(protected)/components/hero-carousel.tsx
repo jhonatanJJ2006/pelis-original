@@ -36,19 +36,27 @@ interface HeroCarouselProps {
 }
 
 export function HeroCarousel({ movies }: HeroCarouselProps) {
-  if (movies.length === 0) return null;
+  if (movies.length === 0) {
+    return (
+      <section
+        className="relative h-[75vh] min-h-[400px] sm:min-h-[500px] max-h-[900px] overflow-hidden bg-cinema-surface animate-pulse"
+        aria-label="Destacados"
+        aria-busy="true"
+      />
+    );
+  }
 
   return (
     <section
       className="relative h-[75vh] min-h-[400px] sm:min-h-[500px] max-h-[900px] overflow-hidden"
       aria-label="Destacados"
     >
+      <h1 className="sr-only">Películas y series destacadas</h1>
       <Swiper
         modules={[Autoplay, EffectCreative, Pagination]}
         effect="creative"
         creativeEffect={{
-          limitProgress: 2,
-          shadowPerProgress: true,
+          limitProgress: 1,
           progressMultiplier: 1.2,
           prev: {
             translate: [0, 0, -500],
@@ -76,7 +84,7 @@ export function HeroCarousel({ movies }: HeroCarouselProps) {
         watchSlidesProgress
         className="hero-swiper h-full"
       >
-        {movies.map((movie) => {
+        {movies.map((movie, movieIndex) => {
           const genreGrad = getGenreGradient(movie.genre);
           return (
             <SwiperSlide key={movie._id}>
@@ -88,6 +96,7 @@ export function HeroCarousel({ movies }: HeroCarouselProps) {
                       alt=""
                       className="w-full h-full object-cover"
                       loading="eager"
+                      fetchPriority={movieIndex === 0 ? 'high' : undefined}
                     />
                   </div>
                   <div
@@ -112,13 +121,13 @@ export function HeroCarousel({ movies }: HeroCarouselProps) {
                             {movie.genre} &middot; {movie.releaseYear}
                           </span>
                         </div>
-                        <h1
+                        <h2
                           className={`font-display text-3xl sm:text-5xl md:text-7xl lg:text-8xl tracking-wide text-white uppercase leading-[0.95] mb-5 transition-all duration-500 ease-out delay-75 break-words ${
                             isActive ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
                           }`}
                         >
                           {movie.name}
-                        </h1>
+                        </h2>
                         <p
                           className={`text-cinema-muted text-base md:text-lg mb-8 max-w-xl line-clamp-3 leading-relaxed transition-all duration-500 ease-out delay-150 ${
                             isActive ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'

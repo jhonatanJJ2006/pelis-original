@@ -146,7 +146,7 @@ export function SearchDropdown({
           )}
           autoComplete="off"
           aria-autocomplete="list"
-          aria-controls="search-results"
+          aria-controls={showDropdown ? 'search-results' : undefined}
         />
       </form>
 

@@ -26,6 +26,7 @@ installSerwist({
     {
       urlPattern: /\/api\/.*/,
       handler: 'NetworkOnly',
+      options: { cacheName: 'api' },
     },
     {
       urlPattern: /\/peliculas\/.*/,

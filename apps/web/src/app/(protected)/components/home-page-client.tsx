@@ -7,9 +7,7 @@ import { MovieRow } from '@pelis/ui/features/movie-row';
 import { ContinueWatchingRow } from '@pelis/ui/features/continue-watching-row';
 import { SectionHeader } from '@pelis/ui/features/section-header';
 import { GenreSwiper, GenreChip } from '@pelis/ui/features/genre-swiper';
-import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';
 import { HeroCarousel } from './hero-carousel';
-import { PwaInstallPrompt } from '@/components/pwa-install-prompt';
 import { api } from '@pelis/convex';
 import type { MediaItem } from '@pelis/ui/types';
 import { cn } from '@pelis/ui/utils';
@@ -57,8 +55,6 @@ export function HomePageClient() {
       <HeroCarousel movies={featuredMovies} />
 
       <div className="container mx-auto px-4 py-10 space-y-12 md:space-y-16">
-        <PwaInstallPrompt />
-
         {user && continueItems.length > 0 && (
           <ContinueWatchingRow
             items={continueItems}
@@ -98,7 +94,7 @@ export function HomePageClient() {
           );
         })}
 
-        <ScrollReveal as="section">
+        <section className="space-y-4">
           <SectionHeader
             title="Explorar por género"
             subtitle="Desliza y descubre por tu género favorito"
@@ -113,7 +109,7 @@ export function HomePageClient() {
               />
             ))}
           </GenreSwiper>
-        </ScrollReveal>
+        </section>
       </div>
     </div>
   );

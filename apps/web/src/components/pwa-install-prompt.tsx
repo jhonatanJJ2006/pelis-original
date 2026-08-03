@@ -13,6 +13,17 @@ interface BeforeInstallPromptEvent extends Event {
 
 type InstallMode = 'hidden' | 'prompt' | 'ios' | 'android-apk' | 'manual';
 
+let apkCheckPromise: Promise<boolean> | null = null;
+
+function checkApkAvailability(): Promise<boolean> {
+  if (!apkCheckPromise) {
+    apkCheckPromise = fetch(APK_DOWNLOAD_PATH, { method: 'HEAD' })
+      .then((res) => res.ok)
+      .catch(() => false);
+  }
+  return apkCheckPromise;
+}
+
 function isStandalone(): boolean {
   if (typeof window === 'undefined') return false;
   return (
@@ -70,9 +81,7 @@ function usePwaInstall() {
   useEffect(() => {
     if (isStandalone()) return;
 
-    fetch(APK_DOWNLOAD_PATH, { method: 'HEAD' })
-      .then((res) => setApkAvailable(res.ok))
-      .catch(() => setApkAvailable(false));
+    checkApkAvailability().then(setApkAvailable);
 
     const onBeforeInstall = (event: Event) => {
       event.preventDefault();
