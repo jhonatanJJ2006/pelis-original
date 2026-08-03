@@ -1,7 +1,7 @@
 'use client';
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { useCallback, useRef } from 'react';
+import { useCallback } from 'react';
 import { ContinueWatchingCard } from '../continue-watching-card';
 import { SectionHeader } from '../section-header';
 import { useDragScroll } from '../../shared/hooks/use-drag-scroll';
@@ -21,14 +21,13 @@ interface ContinueWatchingRowProps {
 }
 
 export function ContinueWatchingRow({ items, className }: ContinueWatchingRowProps) {
-  const scrollerRef = useRef<HTMLDivElement>(null);
-  useDragScroll(scrollerRef);
+  const { setRef, getEl } = useDragScroll();
 
   const scrollBy = useCallback((dir: 1 | -1) => {
-    const el = scrollerRef.current;
+    const el = getEl();
     if (!el) return;
     el.scrollBy({ left: dir * el.clientWidth * 0.8 });
-  }, []);
+  }, [getEl]);
 
   if (items.length === 0) {
     return (
@@ -67,7 +66,7 @@ export function ContinueWatchingRow({ items, className }: ContinueWatchingRowPro
         </button>
 
         <div
-          ref={scrollerRef}
+          ref={setRef}
           className="no-scrollbar flex gap-4 overflow-x-auto px-1 py-1 cursor-grab active:cursor-grabbing select-none"
         >
           {items.map((item) => (

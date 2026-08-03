@@ -77,7 +77,7 @@ export function Header({ sticky = true }: HeaderProps) {
 
   return (
     <header
-      className={cn(sticky && 'sticky top-0 z-50', 'glass-strong border-b border-cinema-border/50')}
+      className={cn(sticky ? 'sticky top-0 z-50' : 'relative z-50', 'glass-strong border-b border-cinema-border/50')}
     >
       <nav className="container mx-auto px-4" aria-label="Principal">
         <div className="flex items-center justify-between h-16">

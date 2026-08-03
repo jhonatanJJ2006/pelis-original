@@ -1,7 +1,7 @@
 'use client';
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { useCallback, useRef } from 'react';
+import { useCallback } from 'react';
 import { MovieCard } from '../movie-card';
 import { SectionHeader } from '../section-header';
 import { useDragScroll } from '../../shared/hooks/use-drag-scroll';
@@ -18,14 +18,13 @@ interface MovieRowProps {
 }
 
 export function MovieRow({ title, subtitle, movies, href, linkLabel, className }: MovieRowProps) {
-  const scrollerRef = useRef<HTMLDivElement>(null);
-  useDragScroll(scrollerRef);
+  const { setRef, getEl } = useDragScroll();
 
   const scrollBy = useCallback((dir: 1 | -1) => {
-    const el = scrollerRef.current;
+    const el = getEl();
     if (!el) return;
     el.scrollBy({ left: dir * el.clientWidth * 0.8 });
-  }, []);
+  }, [getEl]);
 
   if (movies.length === 0) {
     return (
@@ -64,7 +63,7 @@ export function MovieRow({ title, subtitle, movies, href, linkLabel, className }
         </button>
 
         <div
-          ref={scrollerRef}
+          ref={setRef}
           className="no-scrollbar flex gap-3 overflow-x-auto px-1 py-1 cursor-grab active:cursor-grabbing select-none"
         >
           {movies.map((movie) => (

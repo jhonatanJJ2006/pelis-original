@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useRef, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { cn } from '../../shared/utils';
 import { useDragScroll } from '../../shared/hooks/use-drag-scroll';
 
@@ -11,15 +11,14 @@ interface GenreSwiperProps {
 }
 
 export function GenreSwiper({ children, className }: GenreSwiperProps) {
-  const scrollerRef = useRef<HTMLDivElement>(null);
-  useDragScroll(scrollerRef);
+  const { setRef } = useDragScroll();
 
   if (children.length === 0) return null;
 
   return (
     <div className={cn('relative', className)}>
       <div
-        ref={scrollerRef}
+        ref={setRef}
         className="no-scrollbar flex gap-2.5 overflow-x-auto cursor-grab active:cursor-grabbing select-none"
       >
         {children.map((child, i) => (
