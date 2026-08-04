@@ -17,11 +17,22 @@ let apkCheckPromise: Promise<boolean> | null = null;
 
 function checkApkAvailability(): Promise<boolean> {
   if (!apkCheckPromise) {
-    apkCheckPromise = fetch(APK_DOWNLOAD_PATH, { method: 'HEAD' })
-      .then((res) => res.ok)
+    apkCheckPromise = fetch('/api/app/availability')
+      .then((res) => (res.ok ? res.json() : { apkAvailable: false }))
+      .then((data: { apkAvailable?: boolean }) => !!data.apkAvailable)
       .catch(() => false);
   }
   return apkCheckPromise;
+}
+
+function deferIdle(fn: () => void): void {
+  if (typeof window === 'undefined') return;
+  const w = window as Window & { requestIdleCallback?: (cb: () => void) => void };
+  if (typeof w.requestIdleCallback === 'function') {
+    w.requestIdleCallback(fn);
+  } else {
+    w.setTimeout(fn, 1000);
+  }
 }
 
 function isStandalone(): boolean {
@@ -81,7 +92,11 @@ function usePwaInstall() {
   useEffect(() => {
     if (isStandalone()) return;
 
-    checkApkAvailability().then(setApkAvailable);
+    if (isAndroid()) {
+      deferIdle(() => {
+        checkApkAvailability().then(setApkAvailable);
+      });
+    }
 
     const onBeforeInstall = (event: Event) => {
       event.preventDefault();
