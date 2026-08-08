@@ -13,16 +13,68 @@ interface BeforeInstallPromptEvent extends Event {
 
 type InstallMode = 'hidden' | 'prompt' | 'ios' | 'android-apk' | 'manual';
 
-let apkCheckPromise: Promise<boolean> | null = null;
+interface AppAvailability {
+  apkAvailable?: boolean;
+  apkVersionCode?: number;
+  apkVersionName?: string;
+}
 
-function checkApkAvailability(): Promise<boolean> {
-  if (!apkCheckPromise) {
-    apkCheckPromise = fetch('/api/app/availability')
-      .then((res) => (res.ok ? res.json() : { apkAvailable: false }))
-      .then((data: { apkAvailable?: boolean }) => !!data.apkAvailable)
-      .catch(() => false);
+const APK_VERSION_KEY = 'pelis_apk_version';
+
+const INSTALL_COPY = {
+  ios: {
+    title: 'Lleva Pelis contigo',
+    subtitle: 'Tu cine en el bolsillo. Abre Pelis con un toque desde tu pantalla de inicio.',
+    steps: [
+      'En Safari, toca Compartir (el icono de compartir)',
+      'Elige «En pantalla de inicio»',
+      '¡Listo! Abre Pelis como cualquier otra app',
+    ],
+  },
+  'android-apk': {
+    title: 'Lleva Pelis contigo',
+    subtitle:
+      'Instala Pelis en tu celular y mira películas sin volver a abrir el navegador cada vez.',
+    steps: [
+      'Pulsa «Descargar app» y espera a que termine',
+      'Abre el archivo descargado y confirma la instalación',
+      '¡A disfrutar! Abre Pelis desde tu inicio',
+    ],
+    apkNote: 'Si tu teléfono lo pide, permite instalar desde este navegador.',
+    apkPending: 'Muy pronto podrás descargar la app.',
+    downloadLabel: 'Descargar app',
+  },
+  prompt: {
+    title: 'Tu cine, siempre a mano',
+    subtitle: 'Instala Pelis en un segundo y accede directo desde tu pantalla de inicio.',
+    installLabel: 'Instalar con un toque',
+  },
+  manual: {
+    title: 'Pelis en tu móvil',
+    subtitle: 'Descarga la app en Android o añádela a inicio en iPhone.',
+    steps: [
+      'Descarga la app y ábrela en tu Android',
+      'En iPhone: Safari → Compartir → «En pantalla de inicio»',
+    ],
+    downloadLabel: 'Descargar app',
+    apkPending: 'Muy pronto podrás descargar la app.',
+  },
+  update: {
+    title: 'Hay novedades en Pelis',
+    subtitle: 'Descarga la última versión para disfrutar de lo nuevo.',
+    downloadLabel: 'Actualizar app',
+  },
+} as const;
+
+let availabilityPromise: Promise<AppAvailability> | null = null;
+
+function fetchAvailability(): Promise<AppAvailability> {
+  if (!availabilityPromise) {
+    availabilityPromise = fetch('/api/app/availability')
+      .then((res) => (res.ok ? res.json() : {}))
+      .catch(() => ({}));
   }
-  return apkCheckPromise;
+  return availabilityPromise;
 }
 
 function deferIdle(fn: () => void): void {
@@ -53,32 +105,12 @@ function isAndroid(): boolean {
   return /android/i.test(navigator.userAgent);
 }
 
-function ApkInstallSteps() {
+function StepsList({ steps }: { steps: readonly string[] }) {
   return (
     <ol className="text-cinema-silver text-sm space-y-2 list-decimal list-inside">
-      <li>
-        Pulsa <strong className="text-white">Descargar APK</strong> y espera a que termine la
-        descarga
-      </li>
-      <li>
-        Abre el archivo <strong className="text-white">pelis.apk</strong> desde Notificaciones o
-        Descargas
-      </li>
-      <li>
-        Si Android lo pide, permite{' '}
-        <strong className="text-white">Instalar apps desconocidas</strong> para tu navegador
-      </li>
-      <li>Confirma la instalación y abre Pelis desde el inicio</li>
-    </ol>
-  );
-}
-
-function getDesktopInstructions() {
-  return (
-    <ol className="text-cinema-silver text-sm space-y-2 list-decimal list-inside">
-      <li>Descarga el APK y transfiérelo a tu Android (USB, Drive, etc.)</li>
-      <li>Abre el archivo en el teléfono y confirma la instalación</li>
-      <li>En iPhone usa Safari → Compartir → Añadir a inicio (no hay APK en iOS)</li>
+      {steps.map((step) => (
+        <li key={step}>{step}</li>
+      ))}
     </ol>
   );
 }
@@ -88,15 +120,24 @@ function usePwaInstall() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [installing, setInstalling] = useState(false);
   const [apkAvailable, setApkAvailable] = useState(false);
+  const [needsApkUpdate, setNeedsApkUpdate] = useState(false);
+  const [latestApkVersion, setLatestApkVersion] = useState<number | null>(null);
 
   useEffect(() => {
-    if (isStandalone()) return;
-
-    if (isAndroid()) {
-      deferIdle(() => {
-        checkApkAvailability().then(setApkAvailable);
+    deferIdle(() => {
+      fetchAvailability().then((data) => {
+        setApkAvailable(!!data.apkAvailable);
+        if (data.apkVersionCode) {
+          setLatestApkVersion(data.apkVersionCode);
+          const stored = Number(localStorage.getItem(APK_VERSION_KEY) ?? '0');
+          if (isStandalone() && isAndroid() && stored > 0 && data.apkVersionCode > stored) {
+            setNeedsApkUpdate(true);
+          }
+        }
       });
-    }
+    });
+
+    if (isStandalone()) return;
 
     const onBeforeInstall = (event: Event) => {
       event.preventDefault();
@@ -112,14 +153,12 @@ function usePwaInstall() {
     window.addEventListener('beforeinstallprompt', onBeforeInstall);
     window.addEventListener('appinstalled', onAppInstalled);
 
-    if (!isStandalone()) {
-      if (isIos()) {
-        setMode('ios');
-      } else if (isAndroid()) {
-        setMode('android-apk');
-      } else {
-        setMode('manual');
-      }
+    if (isIos()) {
+      setMode('ios');
+    } else if (isAndroid()) {
+      setMode('android-apk');
+    } else {
+      setMode('manual');
     }
 
     return () => {
@@ -143,12 +182,21 @@ function usePwaInstall() {
     }
   }, [deferredPrompt]);
 
+  const markApkUpdated = useCallback(() => {
+    if (latestApkVersion) {
+      localStorage.setItem(APK_VERSION_KEY, String(latestApkVersion));
+      setNeedsApkUpdate(false);
+    }
+  }, [latestApkVersion]);
+
   return {
     mode,
     install,
     installing,
     canInstall: mode === 'prompt' && deferredPrompt !== null,
     apkAvailable,
+    needsApkUpdate,
+    markApkUpdated,
   };
 }
 
@@ -158,71 +206,85 @@ interface PwaInstallPromptProps {
 }
 
 export function PwaInstallPrompt({ variant = 'card', className }: PwaInstallPromptProps) {
-  const { mode, install, installing, canInstall, apkAvailable } = usePwaInstall();
+  const {
+    mode,
+    install,
+    installing,
+    canInstall,
+    apkAvailable,
+    needsApkUpdate,
+    markApkUpdated,
+  } = usePwaInstall();
   const [dismissed, setDismissed] = useState(false);
 
-  if (mode === 'hidden' || dismissed) return null;
+  if ((mode === 'hidden' && !needsApkUpdate) || dismissed) return null;
 
-  const showApkCta = mode === 'android-apk' || mode === 'manual';
+  const copy = needsApkUpdate
+    ? INSTALL_COPY.update
+    : mode === 'ios'
+      ? INSTALL_COPY.ios
+      : mode === 'android-apk'
+        ? INSTALL_COPY['android-apk']
+        : mode === 'prompt'
+          ? INSTALL_COPY.prompt
+          : INSTALL_COPY.manual;
 
-  const instructions =
-    mode === 'ios' ? (
-      <ol className="text-cinema-silver text-sm space-y-2 list-decimal list-inside">
-        <li>
-          Toca <Share className="inline w-4 h-4 mx-0.5 text-cinema-gold" aria-hidden /> Compartir en
-          Safari
-        </li>
-        <li>
-          Elige <strong className="text-white">Añadir a inicio</strong>
-        </li>
-        <li>Confirma y abre Pelis desde tu pantalla de inicio</li>
-      </ol>
-    ) : showApkCta ? (
-      <ApkInstallSteps />
-    ) : (
-      getDesktopInstructions()
-    );
+  const showApkCta = needsApkUpdate || mode === 'android-apk' || mode === 'manual';
 
   const apkButtonClasses = cn(
     'inline-flex items-center justify-center font-semibold transition-all duration-200',
     'bg-gradient-to-r from-cinema-gold to-cinema-gold-light text-black hover:brightness-110',
     'rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cinema-accent/60',
     variant === 'inline' ? 'py-1.5 px-3 text-sm w-full' : 'py-3 px-6 text-base w-full md:w-auto',
-    !apkAvailable && 'opacity-50 pointer-events-none cursor-not-allowed'
+    !apkAvailable && showApkCta && 'opacity-50 pointer-events-none cursor-not-allowed'
   );
+
+  const downloadLabel =
+    'downloadLabel' in copy ? copy.downloadLabel : INSTALL_COPY['android-apk'].downloadLabel;
 
   const apkButton =
     showApkCta &&
     (apkAvailable ? (
-      <a href={APK_DOWNLOAD_PATH} download="pelis.apk" className={apkButtonClasses}>
+      <a
+        href={APK_DOWNLOAD_PATH}
+        download="pelis.apk"
+        className={apkButtonClasses}
+        onClick={markApkUpdated}
+      >
         <Download className={variant === 'inline' ? 'w-4 h-4 mr-2' : 'w-5 h-5 mr-2'} aria-hidden />
-        Descargar APK
+        {downloadLabel}
       </a>
     ) : (
       <span className={apkButtonClasses} aria-disabled="true">
         <Download className={variant === 'inline' ? 'w-4 h-4 mr-2' : 'w-5 h-5 mr-2'} aria-hidden />
-        APK en preparación
+        {'apkPending' in copy ? copy.apkPending : INSTALL_COPY['android-apk'].apkPending}
       </span>
     ));
+
+  const instructions =
+    mode === 'ios' ? (
+      <StepsList steps={INSTALL_COPY.ios.steps} />
+    ) : showApkCta && 'steps' in copy ? (
+      <div>
+        <StepsList steps={copy.steps} />
+        {'apkNote' in INSTALL_COPY['android-apk'] && mode === 'android-apk' && (
+          <p className="text-cinema-ash text-xs mt-3">{INSTALL_COPY['android-apk'].apkNote}</p>
+        )}
+      </div>
+    ) : 'steps' in INSTALL_COPY.manual ? (
+      <StepsList steps={INSTALL_COPY.manual.steps} />
+    ) : null;
 
   if (variant === 'inline') {
     return (
       <div className={cn('space-y-3', className)}>
         <div className="flex items-center gap-2 text-cinema-gold">
           <Smartphone className="w-4 h-4 shrink-0" aria-hidden />
-          <span className="font-display text-sm tracking-widest uppercase">App Android</span>
+          <span className="font-display text-sm tracking-widest uppercase">App Pelis</span>
         </div>
-        <p className="text-cinema-silver text-sm leading-relaxed">
-          {mode === 'android-apk'
-            ? 'Descarga e instala Pelis como app en tu celular Android.'
-            : 'Instala Pelis en tu dispositivo móvil.'}
-        </p>
+        <p className="text-white font-medium">{copy.title}</p>
+        <p className="text-cinema-silver text-sm leading-relaxed">{copy.subtitle}</p>
         {apkButton}
-        {!apkAvailable && showApkCta && (
-          <p className="text-cinema-ash text-xs">
-            El APK se publicará en esta URL tras el primer build de Android.
-          </p>
-        )}
         {instructions}
         {canInstall && (
           <Button
@@ -233,7 +295,7 @@ export function PwaInstallPrompt({ variant = 'card', className }: PwaInstallProm
             onClick={install}
             disabled={installing}
           >
-            {installing ? 'Instalando…' : 'O instalar desde Chrome (PWA)'}
+            {installing ? 'Instalando…' : INSTALL_COPY.prompt.installLabel}
           </Button>
         )}
       </div>
@@ -266,21 +328,10 @@ export function PwaInstallPrompt({ variant = 'card', className }: PwaInstallProm
           </div>
           <div className="min-w-0">
             <h2 className="font-display text-xl md:text-2xl tracking-wide text-white uppercase">
-              {mode === 'android-apk' ? 'Descarga Pelis para Android' : 'Instala Pelis en tu móvil'}
+              {copy.title}
             </h2>
-            <p className="text-cinema-silver text-sm mt-2 max-w-xl">
-              {mode === 'android-apk'
-                ? 'Obtén la app Android (APK) e instálala directamente en tu celular. Requiere permitir instalación desde fuentes conocidas.'
-                : mode === 'ios'
-                  ? 'En iPhone no hay APK; añade Pelis a tu pantalla de inicio desde Safari.'
-                  : 'Descarga el APK para Android o añade Pelis a inicio en iPhone.'}
-            </p>
+            <p className="text-cinema-silver text-sm mt-2 max-w-xl">{copy.subtitle}</p>
             <div className="mt-4 max-w-md">{instructions}</div>
-            {!apkAvailable && showApkCta && (
-              <p className="text-cinema-ash text-xs mt-3">
-                El botón se activará cuando publiques el APK en /downloads/pelis.apk.
-              </p>
-            )}
           </div>
         </div>
 
@@ -288,7 +339,7 @@ export function PwaInstallPrompt({ variant = 'card', className }: PwaInstallProm
           {apkButton}
           {canInstall && (
             <Button type="button" variant="outline" onClick={install} disabled={installing}>
-              {installing ? 'Instalando…' : 'Instalar desde navegador'}
+              {installing ? 'Instalando…' : INSTALL_COPY.prompt.installLabel}
             </Button>
           )}
         </div>

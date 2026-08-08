@@ -1,8 +1,18 @@
 import { installSerwist } from '@serwist/sw';
 
+declare const self: ServiceWorkerGlobalScope & {
+  __SW_MANIFEST: unknown;
+};
+
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
 installSerwist({
   precacheEntries: self.__SW_MANIFEST ?? [],
-  skipWaiting: true,
+  skipWaiting: false,
   clientsClaim: true,
   navigationPreload: true,
   disableDevLogs: true,

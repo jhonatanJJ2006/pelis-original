@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "prebuild": "node ../../scripts/write-version.mjs",
     "build": "pnpm with-env next build",
     "build:vercel": "next build",
     "clean": "git clean -xdf .cache .next .turbo node_modules",

@@ -339,3 +339,33 @@ En el navegador: **Ctrl+Shift+R** por si el service worker (`sw.js`) cachea asse
 3. `./scripts/deploy-prod.sh`
 4. Abrir `https://verpelis.pro` con hard refresh
 
+---
+
+## 11. Versionado PWA y APK
+
+### Web (PWA)
+
+Cada `pnpm build` en `apps/web` ejecuta `scripts/write-version.mjs` y genera
+`public/version.json` con el SHA de git y la fecha de build.
+
+- El service worker (`apps/web/sw.ts`) usa `skipWaiting: false` y espera el mensaje
+  `SKIP_WAITING` desde `PwaUpdateBanner`.
+- Si hay una versión nueva, el usuario ve: *"Hay novedades en Pelis — actualiza para ver lo último"*.
+
+### APK (Android TWA)
+
+Al publicar un APK nuevo:
+
+1. Incrementar `appVersionCode` en `apps/android/twa-manifest.json`.
+2. Actualizar `apps/web/public/downloads/app-version.json`:
+   ```json
+   { "apkVersionCode": 2, "apkVersionName": "1.0.1" }
+   ```
+3. Copiar el APK a `apps/web/public/downloads/pelis.apk`.
+4. Rebuild y deploy: `./scripts/deploy-prod.sh --web`.
+
+La API `/api/app/availability` expone `webVersion`, `apkVersionCode` y `apkVersionName`.
+Usuarios con la app instalada (standalone/Android) verán un aviso si su versión local
+(`localStorage.pelis_apk_version`) es menor que `apkVersionCode`.
+
+Tras instalar la nueva APK, el usuario debe pulsar **Actualizar app** para registrar la versión.

@@ -8,10 +8,13 @@
  * @module
  */
 
+import type * as adminMovies from "../adminMovies.js";
 import type * as anime from "../anime.js";
 import type * as favorites from "../favorites.js";
 import type * as history from "../history.js";
 import type * as http from "../http.js";
+import type * as lib_movieQuality from "../lib/movieQuality.js";
+import type * as lib_requireAdmin from "../lib/requireAdmin.js";
 import type * as lib_resolveMovieImage from "../lib/resolveMovieImage.js";
 import type * as movies from "../movies.js";
 import type * as seed from "../seed.js";
@@ -34,10 +37,13 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  adminMovies: typeof adminMovies;
   anime: typeof anime;
   favorites: typeof favorites;
   history: typeof history;
   http: typeof http;
+  "lib/movieQuality": typeof lib_movieQuality;
+  "lib/requireAdmin": typeof lib_requireAdmin;
   "lib/resolveMovieImage": typeof lib_resolveMovieImage;
   movies: typeof movies;
   seed: typeof seed;

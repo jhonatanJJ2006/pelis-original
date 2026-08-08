@@ -32,9 +32,10 @@ const navItems = [
 
 interface HeaderProps {
   sticky?: boolean;
+  minimalNav?: boolean;
 }
 
-export function Header({ sticky = true }: HeaderProps) {
+export function Header({ sticky = true, minimalNav = false }: HeaderProps) {
   const { user, logout } = useUser();
   const router = useRouter();
   const pathname = usePathname();
@@ -90,7 +91,7 @@ export function Header({ sticky = true }: HeaderProps) {
             </span>
           </Link>
 
-          <div className="hidden lg:flex items-center gap-1 flex-1 max-w-md mx-8">
+          <div className={cn('hidden lg:flex items-center gap-1 flex-1 max-w-md mx-8', minimalNav && 'lg:hidden')}>
             <SearchDropdown
               value={searchQuery}
               onChange={setSearchQuery}
@@ -99,6 +100,18 @@ export function Header({ sticky = true }: HeaderProps) {
             />
           </div>
 
+          {minimalNav && (
+            <div className="flex-1 max-w-md mx-3 lg:hidden">
+              <SearchDropdown
+                value={searchQuery}
+                onChange={setSearchQuery}
+                onSubmit={handleSearch}
+                id="header-search-mobile-pwa"
+              />
+            </div>
+          )}
+
+          {!minimalNav && (
           <div className="hidden md:flex items-center gap-0.5">
             {navItems.map((item) => (
               <Link
@@ -116,8 +129,9 @@ export function Header({ sticky = true }: HeaderProps) {
               </Link>
             ))}
           </div>
+          )}
 
-          <div className="hidden md:flex items-center gap-3">
+          <div className={cn('hidden md:flex items-center gap-3', minimalNav && 'hidden')}>
             {user && (
               <Link href="/subscribe">
                 <button
@@ -169,7 +183,7 @@ export function Header({ sticky = true }: HeaderProps) {
             )}
           </div>
 
-          <div className="flex md:hidden items-center gap-2">
+          <div className={cn('flex items-center gap-2 shrink-0', !minimalNav && 'md:hidden')}>
             {user && (
               <Link
                 href="/subscribe"
@@ -184,7 +198,7 @@ export function Header({ sticky = true }: HeaderProps) {
                 <Crown className="w-5 h-5" />
               </Link>
             )}
-            {user && (
+            {!minimalNav && user && (
               <Link href="/profile" className="rounded-full" aria-label="Mi perfil">
                 {user.image ? (
                   <img
@@ -199,28 +213,32 @@ export function Header({ sticky = true }: HeaderProps) {
                 )}
               </Link>
             )}
-            <button
-              type="button"
-              onClick={() => setSearchOpen(!searchOpen)}
-              className="p-2 text-cinema-silver hover:text-white transition-colors rounded"
-              aria-label="Buscar"
-              aria-expanded={searchOpen}
-            >
-              <Search className="w-5 h-5" />
-            </button>
-            <button
-              type="button"
-              className="p-2 text-cinema-silver hover:text-white rounded"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label={mobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
-              aria-expanded={mobileMenuOpen}
-            >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
+            {!minimalNav && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setSearchOpen(!searchOpen)}
+                  className="p-2 text-cinema-silver hover:text-white transition-colors rounded"
+                  aria-label="Buscar"
+                  aria-expanded={searchOpen}
+                >
+                  <Search className="w-5 h-5" />
+                </button>
+                <button
+                  type="button"
+                  className="p-2 text-cinema-silver hover:text-white rounded"
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  aria-label={mobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
+                  aria-expanded={mobileMenuOpen}
+                >
+                  {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                </button>
+              </>
+            )}
           </div>
         </div>
 
-        {searchOpen && (
+        {searchOpen && !minimalNav && (
           <div className="lg:hidden pb-4 animate-slide-down">
             <SearchDropdown
               value={searchQuery}
@@ -232,7 +250,7 @@ export function Header({ sticky = true }: HeaderProps) {
           </div>
         )}
 
-        {mobileMenuOpen && (
+        {mobileMenuOpen && !minimalNav && (
           <div className="md:hidden py-4 border-t border-cinema-border animate-slide-up">
             <div className="flex flex-col gap-1">
               {navItems.map((item) => (

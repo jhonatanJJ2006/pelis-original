@@ -4,12 +4,13 @@ import { useMutation, useQuery } from 'convex/react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Plus, Pencil, Trash2, Link2, Search } from 'lucide-react';
+import { Plus, Pencil, Trash2, Link2, Search, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@pelis/convex';
 import { Button, Input, Spinner } from '@pelis/ui/components';
 import { MoviePoster } from '@pelis/ui/features/movie-poster';
 import { MergeMovieModal } from '../components/merge-movie-modal';
+import { PreviewMovieModal } from '../components/preview-movie-modal';
 import { cn } from '@pelis/ui/utils';
 
 type QualityFilter = 'all' | 'orphan_ids' | 'missing_image' | 'missing_video' | 'incomplete';
@@ -29,6 +30,8 @@ interface AdminMovie {
   token: string;
   genre: string;
   releaseYear: string;
+  actors?: string;
+  synopsis?: string;
   videoUrl?: string;
   quality: {
     isOrphanId: boolean;
@@ -45,6 +48,7 @@ export default function AdminMoviesPageClient() {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [qualityFilter, setQualityFilter] = useState<QualityFilter>('all');
   const [mergeSource, setMergeSource] = useState<AdminMovie | null>(null);
+  const [previewMovie, setPreviewMovie] = useState<AdminMovie | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const removeMovie = useMutation(api.movies.remove);
@@ -163,7 +167,16 @@ export default function AdminMoviesPageClient() {
               {movies.map((movie) => (
                 <tr
                   key={movie._id}
-                  className="border-b border-cinema-border/60 hover:bg-cinema-elevated/30 transition-colors"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setPreviewMovie(movie)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setPreviewMovie(movie);
+                    }
+                  }}
+                  className="border-b border-cinema-border/60 hover:bg-cinema-elevated/30 transition-colors cursor-pointer"
                 >
                   <td className="px-4 py-3">
                     <div className="w-10 h-14 rounded overflow-hidden bg-cinema-elevated">
@@ -204,8 +217,16 @@ export default function AdminMoviesPageClient() {
                       )}
                     </div>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center justify-end gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        aria-label="Ver película"
+                        onClick={() => setPreviewMovie(movie)}
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Button>
                       <Link href={`/admin/movies/${movie._id}/edit`}>
                         <Button variant="ghost" size="sm" aria-label="Editar">
                           <Pencil className="w-4 h-4" />
@@ -235,6 +256,10 @@ export default function AdminMoviesPageClient() {
             </tbody>
           </table>
         </div>
+      )}
+
+      {previewMovie && (
+        <PreviewMovieModal movie={previewMovie} onClose={() => setPreviewMovie(null)} />
       )}
 
       {mergeSource && (
