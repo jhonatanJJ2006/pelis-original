@@ -3,24 +3,24 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../utils';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center font-medium transition-[transform,background-color,border-color,color,box-shadow,opacity] duration-fast ease-out-expo active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cinema-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-cinema-bg',
+  'btn-base',
   {
     variants: {
       variant: {
         primary:
-          'bg-cinema-accent hover:bg-cinema-accent-light text-white shadow-[0_4px_16px_rgba(229,9,20,0.25)]',
+          'bg-cinema-accent hover:bg-cinema-accent-light text-white shadow-[0_6px_20px_rgba(229,9,20,0.3)] hover:shadow-[0_8px_28px_rgba(229,9,20,0.4)]',
         secondary:
-          'bg-cinema-elevated hover:bg-cinema-elevated/90 text-white border border-cinema-border',
+          'bg-cinema-elevated hover:bg-cinema-elevated/90 text-white border border-cinema-border hover:border-cinema-silver/40 shadow-[0_2px_10px_rgba(1,8,16,0.25)]',
         outline:
-          'bg-transparent hover:bg-cinema-elevated/50 text-cinema-muted border border-cinema-border hover:border-cinema-violet/50',
+          'bg-transparent hover:bg-cinema-elevated/60 text-cinema-muted hover:text-white border border-cinema-border hover:border-cinema-violet/50',
         ghost: 'hover:bg-cinema-elevated/60 text-cinema-muted hover:text-white',
-        danger: 'bg-red-600 hover:bg-red-500 text-white',
-        gold: 'bg-gradient-to-r from-cinema-gold to-cinema-gold-light text-black font-semibold hover:brightness-110',
+        danger: 'bg-red-600 hover:bg-red-500 text-white shadow-[0_6px_20px_rgba(220,38,38,0.3)]',
+        gold: 'bg-gradient-to-r from-cinema-gold to-cinema-gold-light text-black font-semibold hover:brightness-110 shadow-[0_6px_20px_rgba(245,200,66,0.25)]',
       },
       size: {
-        sm: 'py-1.5 px-3 text-sm rounded',
-        md: 'py-2.5 px-4 text-sm rounded',
-        lg: 'py-3 px-6 text-base rounded',
+        sm: 'h-9 px-4 text-sm',
+        md: 'h-11 px-6 text-sm',
+        lg: 'h-12 px-8 text-base',
       },
     },
     defaultVariants: {

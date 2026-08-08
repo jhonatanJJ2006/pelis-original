@@ -8,7 +8,7 @@ import { MovieCard } from '@pelis/ui/features/movie-card';
 import { EmptyState } from '@pelis/ui/features/empty-state';
 import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';
 import { api } from '@pelis/convex';
-import { Spinner } from '@pelis/ui/components';
+import { Spinner, Select } from '@pelis/ui/components';
 import type { MediaItem } from '@pelis/ui/types';
 
 const classificationOrder = ['G', 'PG', 'PG-13', 'R', 'NC-17'];
@@ -98,11 +98,11 @@ export default function MoviesPageClient() {
             <label htmlFor="genre-filter" className="sr-only">
               Filtrar por género
             </label>
-            <select
+            <Select
               id="genre-filter"
               value={selectedGenre}
               onChange={(e) => setSelectedGenre(e.target.value)}
-              className="input-field w-auto min-w-[160px] cursor-pointer"
+              className="w-auto min-w-[160px]"
             >
               <option value="">Todos los géneros</option>
               {genres.map((g) => (
@@ -110,16 +110,16 @@ export default function MoviesPageClient() {
                   {g}
                 </option>
               ))}
-            </select>
+            </Select>
 
             <label htmlFor="year-filter" className="sr-only">
               Filtrar por año
             </label>
-            <select
+            <Select
               id="year-filter"
               value={selectedYear}
               onChange={(e) => setSelectedYear(e.target.value)}
-              className="input-field w-auto min-w-[140px] cursor-pointer"
+              className="w-auto min-w-[140px]"
             >
               <option value="">Todos los años</option>
               {years.map((y) => (
@@ -127,7 +127,7 @@ export default function MoviesPageClient() {
                   {y}
                 </option>
               ))}
-            </select>
+            </Select>
 
             {(selectedGenre || selectedYear || search) && (
               <button

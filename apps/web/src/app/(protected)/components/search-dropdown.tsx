@@ -3,7 +3,7 @@
 import { useQuery } from 'convex/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { Search, Film, Tv, TrendingUp, Loader2 } from 'lucide-react';
+import { Search, Film, Tv, TrendingUp, Loader2, X } from 'lucide-react';
 import { api } from '@pelis/convex';
 import { cn } from '@pelis/ui/utils';
 import { MoviePoster } from '@pelis/ui/features/movie-poster';
@@ -141,13 +141,31 @@ export function SearchDropdown({
           onFocus={() => { if (value.trim()) setIsOpen(true); }}
           onKeyDown={handleKeyDown}
           className={cn(
-            'w-full bg-cinema-surface/80 border border-cinema-border rounded py-2.5 pl-10 pr-4 text-sm text-white placeholder-cinema-ash focus:outline-none focus:ring-2 focus:ring-cinema-accent/50 focus:border-cinema-accent/40 transition-all',
+            'w-full h-10 bg-cinema-surface/80 border border-cinema-border rounded-[10px] pl-10 text-sm text-white placeholder-cinema-ash',
+            value ? 'pr-10' : 'pr-4',
+            'hover:border-cinema-silver/40 hover:bg-cinema-elevated/60',
+            'focus:outline-none focus:ring-2 focus:ring-cinema-accent/50 focus:border-cinema-accent/60 focus:hover:bg-cinema-surface/80 focus:hover:border-cinema-accent/60',
+            'transition-all duration-200',
             showDropdown && 'rounded-b-none border-b-transparent'
           )}
           autoComplete="off"
           aria-autocomplete="list"
           aria-controls={showDropdown ? 'search-results' : undefined}
         />
+        {value && (
+          <button
+            type="button"
+            onClick={() => {
+              onChange('');
+              setIsOpen(false);
+              inputRef?.current?.focus();
+            }}
+            aria-label="Limpiar búsqueda"
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6 rounded-md text-cinema-ash hover:text-white hover:bg-cinema-elevated transition-colors duration-150 cursor-pointer"
+          >
+            <X className="w-3.5 h-3.5" aria-hidden />
+          </button>
+        )}
       </form>
 
       {showDropdown && (
@@ -158,8 +176,8 @@ export function SearchDropdown({
           aria-label="Resultados de búsqueda"
           className={cn(
             'absolute top-full left-0 right-0 z-50',
-            'bg-cinema-surface border border-cinema-border border-t-0 rounded-b',
-            'shadow-[0_8px_32px_rgba(0,0,0,0.5)]',
+            'bg-cinema-elevated border border-cinema-border border-t-0 rounded-b-[10px]',
+            'shadow-[0_16px_40px_rgba(0,0,0,0.55)]',
             'overflow-hidden animate-slide-down'
           )}
         >

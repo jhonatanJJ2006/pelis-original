@@ -93,7 +93,7 @@ export default function RegisterPage() {
         <button
           type="button"
           onClick={handleGoogleLogin}
-          className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-cinema-elevated hover:bg-cinema-elevated/80 text-white border border-cinema-border rounded font-medium transition-colors mb-6"
+          className="w-full inline-flex items-center justify-center gap-3 h-11 px-4 bg-cinema-elevated hover:bg-cinema-elevated/90 text-white font-semibold border border-cinema-border hover:border-cinema-silver/40 rounded-[10px] transition-all duration-200 active:scale-[0.97] cursor-pointer"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24" aria-hidden>
             <path
@@ -118,10 +118,12 @@ export default function RegisterPage() {
 
         <div className="relative mb-6">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-cinema-border" />
+            <div className="w-full border-t border-cinema-border/70" />
           </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="bg-cinema-surface px-3 text-cinema-ash">o con email</span>
+          <div className="relative flex justify-center">
+            <span className="bg-cinema-surface px-3 text-[11px] text-cinema-ash uppercase tracking-widest">
+              o con email
+            </span>
           </div>
         </div>
 

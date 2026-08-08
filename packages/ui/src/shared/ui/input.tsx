@@ -30,11 +30,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             id={id}
             type={inputType}
             className={cn(
-              'w-full bg-cinema-surface border border-cinema-border rounded py-2.5 px-4 text-white placeholder-cinema-ash',
+              'w-full h-11 bg-cinema-surface border border-cinema-border rounded-[10px] px-4 text-white placeholder-cinema-ash',
               'hover:border-cinema-silver/40 hover:bg-cinema-elevated/60',
-              'focus:outline-none focus:ring-2 focus:ring-cinema-silver/30 focus:border-cinema-silver/50 focus:hover:bg-cinema-surface focus:hover:border-cinema-silver/50',
+              'focus:outline-none focus:ring-2 focus:ring-cinema-accent/50 focus:border-cinema-accent/60 focus:hover:bg-cinema-surface focus:hover:border-cinema-accent/60',
               'transition-all duration-200',
-              isPassword && 'pr-11',
+              isPassword && 'pr-12',
               error && 'border-red-500 focus:ring-red-500/50 hover:border-red-500/70',
               className
             )}
@@ -49,7 +49,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
               aria-pressed={showPassword}
               className={cn(
-                'absolute inset-y-0 right-0 flex items-center pr-3.5 pl-2 text-cinema-ash',
+                'absolute inset-y-0 right-0 flex items-center pr-4 pl-2 text-cinema-ash',
                 'hover:text-cinema-muted focus:outline-none focus-visible:text-cinema-accent',
                 'transition-colors duration-200 cursor-pointer'
               )}

@@ -3,9 +3,9 @@
 import { useQuery, useMutation } from 'convex/react';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Clapperboard, Star, Film, Search, ChevronDown } from 'lucide-react';
+import { Clapperboard, Star, Film, Search } from 'lucide-react';
 import { api } from '@pelis/convex';
-import { Spinner, Button } from '@pelis/ui/components';
+import { Spinner, Button, Select } from '@pelis/ui/components';
 import { EmptyState } from '@pelis/ui/features/empty-state';
 import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';
 import { cn } from '@pelis/ui/utils';
@@ -92,11 +92,11 @@ export default function AnimePage() {
           <label htmlFor="genre-filter" className="sr-only">
             Filtrar por género
           </label>
-          <select
+          <Select
             id="genre-filter"
             value={selectedGenre}
             onChange={(e) => setSelectedGenre(e.target.value)}
-            className="input-field w-auto min-w-[160px] cursor-pointer"
+            className="w-auto min-w-[160px]"
           >
             <option value="">Todos los géneros</option>
             {genres.map((g) => (
@@ -104,21 +104,21 @@ export default function AnimePage() {
                 {g}
               </option>
             ))}
-          </select>
+          </Select>
 
           <label htmlFor="status-filter" className="sr-only">
             Filtrar por estado
           </label>
-          <select
+          <Select
             id="status-filter"
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            className="input-field w-auto min-w-[160px] cursor-pointer"
+            className="w-auto min-w-[160px]"
           >
             <option value="">Todos</option>
             <option value="ongoing">En emisión</option>
             <option value="completed">Finalizado</option>
-          </select>
+          </Select>
 
           {(selectedGenre || selectedStatus || search) && (
             <button

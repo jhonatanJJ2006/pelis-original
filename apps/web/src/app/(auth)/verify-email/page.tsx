@@ -188,7 +188,7 @@ function VerifyForm() {
               placeholder="000000"
               value={otp}
               onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, OTP_LENGTH))}
-              className="w-full bg-cinema-surface border border-cinema-border rounded-lg py-4 px-4 text-white text-center text-2xl sm:text-3xl font-mono tracking-[0.3em] sm:tracking-[0.5em] focus:outline-none focus:ring-2 focus:ring-cinema-accent/50 focus:border-cinema-accent/40 transition-all duration-200 placeholder-cinema-ash/40"
+              className="w-full bg-cinema-surface border border-cinema-border rounded-[10px] py-4 px-4 text-white text-center text-2xl sm:text-3xl font-mono tracking-[0.3em] sm:tracking-[0.5em] focus:outline-none focus:ring-2 focus:ring-cinema-accent/50 focus:border-cinema-accent/60 transition-all duration-200 placeholder-cinema-ash/40"
               required
               autoFocus
             />
