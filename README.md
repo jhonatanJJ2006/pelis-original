@@ -78,16 +78,21 @@ pnpm typecheck    # TypeScript check
 
 ## Deployment
 
-### Convex
+Producción en **verpelis.pro** (servidor local + Cloudflare Tunnel + Convex).  
+`git push` **no** actualiza el sitio: hay que rebuildar y reiniciar el servicio.
 
 ```bash
-cd packages/convex && npx convex deploy
+./scripts/deploy-prod.sh          # frontend + Convex (recomendado)
+./scripts/deploy-prod.sh --web    # solo Next.js
+./scripts/deploy-prod.sh --convex # solo Convex
 ```
 
-### Vercel
+Guía completa: [DEPLOY.md](./DEPLOY.md) (sección 10: deploy rápido).
+
+### Convex (referencia)
 
 ```bash
-pnpm build:vercel
+cd packages/convex && npx convex dev --once
 ```
 
 ## Licencia

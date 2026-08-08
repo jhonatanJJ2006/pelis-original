@@ -7,7 +7,7 @@ import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@pelis/convex';
 import { Spinner } from '@pelis/ui/components';
-import { MovieForm, type MovieFormValues } from '../../components/movie-form';
+import { MovieForm, type MovieFormValues } from '../../../components/movie-form';
 import type { MediaItem } from '@pelis/ui/types';
 
 export default function EditMoviePage() {

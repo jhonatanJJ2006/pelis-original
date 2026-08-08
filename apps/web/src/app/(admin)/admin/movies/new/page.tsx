@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@pelis/convex';
-import { MovieForm, type MovieFormValues } from '../components/movie-form';
+import { MovieForm, type MovieFormValues } from '../../components/movie-form';
 
 export default function NewMoviePage() {
   const router = useRouter();

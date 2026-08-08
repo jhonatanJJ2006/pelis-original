@@ -284,3 +284,58 @@ git add -A && git commit -m "mensaje" && git push origin main
 - Stripe: `.env` y deployment con claves placeholder — se requieren claves reales (test) para suscripciones.
 - Google login: placeholders `AUTH_GOOGLE_ID/SECRET` — no configurados en Convex.
 - El deployment prod `flexible-lobster-410` existe pero no se usa (la app apunta al dev).
+
+---
+
+## 10. Deploy rápido tras cambios de código
+
+> **Importante:** `git push` solo sube el código a GitHub. **No actualiza** lo que sirve
+> `https://verpelis.pro`. Hay que rebuildar Next.js y/o desplegar Convex en el servidor.
+
+### Qué ejecutar según el tipo de cambio
+
+| Cambios en… | Comando |
+|-------------|---------|
+| `apps/web`, `packages/ui` (solo frontend) | `./scripts/deploy-prod.sh --web` |
+| `packages/convex` (solo backend) | `./scripts/deploy-prod.sh --convex` |
+| Frontend + backend (lo habitual) | `./scripts/deploy-prod.sh` |
+| Solo backup en GitHub | `git push origin main` (no afecta producción) |
+
+### Script automatizado
+
+Desde la raíz del repo:
+
+```bash
+chmod +x scripts/deploy-prod.sh   # solo la primera vez
+./scripts/deploy-prod.sh            # web + convex
+./scripts/deploy-prod.sh --web      # solo frontend
+./scripts/deploy-prod.sh --convex   # solo Convex
+```
+
+Equivale manualmente a:
+
+```bash
+# Frontend
+cd apps/web && pnpm build
+sudo systemctl restart pelis-web
+
+# Backend
+cd packages/convex && npx convex dev --once
+```
+
+### Verificación
+
+```bash
+systemctl is-active pelis-web cloudflared   # active active
+curl -sI https://verpelis.pro/movies | head -3
+```
+
+En el navegador: **Ctrl+Shift+R** por si el service worker (`sw.js`) cachea assets viejos.
+
+### Flujo típico después de desarrollar
+
+1. `git add … && git commit -m "…"`
+2. `git push origin main`
+3. `./scripts/deploy-prod.sh`
+4. Abrir `https://verpelis.pro` con hard refresh
+
