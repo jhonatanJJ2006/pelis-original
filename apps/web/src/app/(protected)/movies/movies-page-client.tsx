@@ -3,12 +3,13 @@
 import { useQuery } from 'convex/react';
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Search, SlidersHorizontal } from 'lucide-react';
+import { SlidersHorizontal } from 'lucide-react';
 import { MovieCard } from '@pelis/ui/features/movie-card';
 import { EmptyState } from '@pelis/ui/features/empty-state';
 import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';
+import { CatalogFilterBar } from '@pelis/ui/features/catalog-filter-bar';
 import { api } from '@pelis/convex';
-import { Spinner, Select } from '@pelis/ui/components';
+import { Spinner } from '@pelis/ui/components';
 import type { MediaItem } from '@pelis/ui/types';
 
 const classificationOrder = ['G', 'PG', 'PG-13', 'R', 'NC-17'];
@@ -60,6 +61,8 @@ export default function MoviesPageClient() {
     });
   }, [movies]);
 
+  const hasFilters = Boolean(selectedGenre || selectedYear || search);
+
   return (
     <div className="page-shell">
       <div className="mb-10">
@@ -75,75 +78,38 @@ export default function MoviesPageClient() {
           </p>
         </ScrollReveal>
 
-        <div className="flex flex-col lg:flex-row gap-4">
-          <div className="flex-1 relative">
-            <label htmlFor="movies-search" className="sr-only">
-              Buscar películas
-            </label>
-            <Search
-              className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-cinema-ash"
-              aria-hidden
-            />
-            <input
-              id="movies-search"
-              type="search"
-              placeholder="Buscar por título, actor o género..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="input-field pl-12"
-            />
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-            <label htmlFor="genre-filter" className="sr-only">
-              Filtrar por género
-            </label>
-            <Select
-              id="genre-filter"
-              value={selectedGenre}
-              onChange={(e) => setSelectedGenre(e.target.value)}
-              className="w-auto min-w-[160px]"
-            >
-              <option value="">Todos los géneros</option>
-              {genres.map((g) => (
-                <option key={g} value={g}>
-                  {g}
-                </option>
-              ))}
-            </Select>
-
-            <label htmlFor="year-filter" className="sr-only">
-              Filtrar por año
-            </label>
-            <Select
-              id="year-filter"
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(e.target.value)}
-              className="w-auto min-w-[140px]"
-            >
-              <option value="">Todos los años</option>
-              {years.map((y) => (
-                <option key={y} value={y}>
-                  {y}
-                </option>
-              ))}
-            </Select>
-
-            {(selectedGenre || selectedYear || search) && (
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedGenre('');
-                  setSelectedYear('');
-                  setSearch('');
-                }}
-                className="px-4 py-2 text-sm text-cinema-gold hover:text-cinema-gold-light transition-colors"
-              >
-                Limpiar filtros
-              </button>
-            )}
-          </div>
-        </div>
+        <CatalogFilterBar
+          searchId="movies-search"
+          searchLabel="Buscar películas"
+          searchPlaceholder="Buscar por título, actor o género..."
+          search={search}
+          onSearchChange={setSearch}
+          showClear={hasFilters}
+          onClear={() => {
+            setSelectedGenre('');
+            setSelectedYear('');
+            setSearch('');
+          }}
+          selects={[
+            {
+              id: 'genre-filter',
+              label: 'Filtrar por género',
+              placeholder: 'Todos los géneros',
+              value: selectedGenre,
+              onChange: setSelectedGenre,
+              options: genres.map((genre) => ({ value: genre, label: genre })),
+            },
+            {
+              id: 'year-filter',
+              label: 'Filtrar por año',
+              placeholder: 'Todos los años',
+              value: selectedYear,
+              onChange: setSelectedYear,
+              minWidth: 'min-w-[140px]',
+              options: years.map((year) => ({ value: year, label: year })),
+            },
+          ]}
+        />
       </div>
 
       {isLoading ? (
@@ -158,7 +124,7 @@ export default function MoviesPageClient() {
           actionLabel="Ver todo el catálogo"
           actionHref="/movies"
         />
-      ) : search || selectedGenre || selectedYear ? (
+      ) : hasFilters ? (
         <ScrollReveal>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
             {movies.map((movie) => (

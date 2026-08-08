@@ -13,6 +13,7 @@ import {
   Mail,
   Check,
   Settings,
+  Shield,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@pelis/convex';
@@ -221,6 +222,32 @@ export default function ProfilePage() {
           ))}
         </ul>
       </ScrollReveal>
+
+      {user.role === 'admin' && (
+        <ScrollReveal className="mt-8">
+          <h2 className="font-display text-sm tracking-widest text-cinema-muted uppercase mb-3 px-1">
+            Administración
+          </h2>
+          <Link
+            href="/admin"
+            className="group flex items-center gap-4 rounded-2xl border border-cinema-violet/30 bg-cinema-violet/10 p-4 sm:p-5 transition-colors hover:border-cinema-violet/50 hover:bg-cinema-violet/15"
+          >
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-cinema-violet/20 text-cinema-violet-light">
+              <Shield className="w-5 h-5" aria-hidden />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-white font-semibold group-hover:text-cinema-violet-light transition-colors">
+                Panel de admin
+              </p>
+              <p className="text-cinema-muted text-sm">Gestionar películas y catálogo</p>
+            </div>
+            <ChevronRight
+              className="w-5 h-5 text-cinema-ash group-hover:text-cinema-silver shrink-0 transition-colors"
+              aria-hidden
+            />
+          </Link>
+        </ScrollReveal>
+      )}
 
       <ScrollReveal className="mt-10">
         <button

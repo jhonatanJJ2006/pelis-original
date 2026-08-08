@@ -19,14 +19,30 @@ export const registerSchema = z
 
 export const movieSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
-  image: z.string().url('URL de imagen inválida'),
+  image: z
+    .string()
+    .min(1, 'La imagen es requerida')
+    .refine(
+      (value) =>
+        value.startsWith('/') ||
+        value.startsWith('http://') ||
+        value.startsWith('https://'),
+      'URL o ruta de imagen inválida'
+    ),
   synopsis: z.string().min(10, 'La sinopsis debe tener al menos 10 caracteres'),
   genre: z.string().min(1, 'El género es requerido'),
-  token: z.string(),
-  actors: z.string(),
-  classification: z.string(),
+  token: z.string().min(1, 'El token es requerido'),
+  actors: z.string().min(1, 'Los actores son requeridos'),
+  classification: z.string().min(1, 'La clasificación es requerida'),
   releaseYear: z.string().regex(/^\d{4}$/, 'Año inválido'),
-  videoUrl: z.string().url().optional(),
+  videoUrl: z
+    .string()
+    .url('URL de video inválida')
+    .optional()
+    .or(z.literal('')),
+  mediaType: z.enum(['movie', 'series']).optional(),
+  episodes: z.number().int().positive().optional(),
+  featured: z.boolean().optional(),
 });
 
 export const planSchema = z.object({

@@ -7,26 +7,28 @@ import { cn } from '../utils';
 interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   label?: string;
   error?: string;
+  wrapperClassName?: string;
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ className, label, error, id: idProp, children, ...props }, ref) => {
+  ({ className, wrapperClassName, label, error, id: idProp, children, ...props }, ref) => {
     const generatedId = useId();
     const id = idProp ?? generatedId;
 
     return (
-      <div className="w-full">
+      <div className={cn(wrapperClassName)}>
         {label && (
           <label htmlFor={id} className="block text-sm font-medium text-cinema-muted mb-1.5">
             {label}
           </label>
         )}
-        <div className="relative">
+        <div className="relative w-full overflow-hidden rounded-[10px]">
           <select
             ref={ref}
             id={id}
             className={cn(
-              'w-full h-11 appearance-none bg-cinema-surface border border-cinema-border rounded-[10px] pl-4 pr-10 text-white cursor-pointer',
+              'w-full h-11 appearance-none bg-cinema-surface border border-cinema-border rounded-[10px] pl-4 pr-9 text-sm text-white cursor-pointer',
+              'shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]',
               'hover:border-cinema-silver/40 hover:bg-cinema-elevated/60',
               'focus:outline-none focus:ring-2 focus:ring-cinema-accent/50 focus:border-cinema-accent/60 focus:hover:bg-cinema-surface focus:hover:border-cinema-accent/60',
               'transition-all duration-200',
@@ -39,10 +41,12 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           >
             {children}
           </select>
-          <ChevronDown
-            className="pointer-events-none absolute inset-y-0 right-0 my-auto mr-3.5 w-4 h-4 text-cinema-ash"
+          <div
+            className="pointer-events-none absolute inset-y-0 right-0 flex w-9 items-center justify-center border-l border-cinema-border/40 bg-cinema-elevated/40"
             aria-hidden
-          />
+          >
+            <ChevronDown className="w-4 h-4 text-cinema-ash" />
+          </div>
         </div>
         {error && (
           <p id={`${id}-error`} className="mt-1 text-sm text-red-400" role="alert">

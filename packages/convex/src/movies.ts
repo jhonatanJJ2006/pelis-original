@@ -5,6 +5,7 @@ import {
   enrichMovies,
   resolveImageFromStorage,
 } from './lib/resolveMovieImage';
+import { requireAdmin } from './lib/requireAdmin';
 
 export const list = query({
   args: {
@@ -176,6 +177,7 @@ export const create = mutation({
     featured: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     const image = await resolveImageFromStorage(ctx, args.image, args.imageId);
     const id = await ctx.db.insert('movies', { ...args, image });
     return id;
@@ -200,6 +202,7 @@ export const update = mutation({
     featured: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     const { id, ...updates } = args;
     const image = await resolveImageFromStorage(
       ctx,
@@ -214,6 +217,7 @@ export const update = mutation({
 export const remove = mutation({
   args: { id: v.id('movies') },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     await ctx.db.delete(args.id);
   },
 });
@@ -221,6 +225,7 @@ export const remove = mutation({
 export const generateUploadUrl = mutation({
   args: {},
   handler: async (ctx) => {
+    await requireAdmin(ctx);
     return await ctx.storage.generateUploadUrl();
   },
 });

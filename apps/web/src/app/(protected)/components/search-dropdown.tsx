@@ -141,10 +141,11 @@ export function SearchDropdown({
           onFocus={() => { if (value.trim()) setIsOpen(true); }}
           onKeyDown={handleKeyDown}
           className={cn(
-            'w-full h-10 bg-cinema-surface/80 border border-cinema-border rounded-[10px] pl-10 text-sm text-white placeholder-cinema-ash',
+            'w-full h-11 bg-cinema-surface border border-cinema-border rounded-[10px] pl-10 text-sm text-white placeholder-cinema-ash',
+            'shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]',
             value ? 'pr-10' : 'pr-4',
             'hover:border-cinema-silver/40 hover:bg-cinema-elevated/60',
-            'focus:outline-none focus:ring-2 focus:ring-cinema-accent/50 focus:border-cinema-accent/60 focus:hover:bg-cinema-surface/80 focus:hover:border-cinema-accent/60',
+            'focus:outline-none focus:ring-2 focus:ring-cinema-accent/50 focus:border-cinema-accent/60 focus:hover:bg-cinema-surface focus:hover:border-cinema-accent/60',
             'transition-all duration-200',
             showDropdown && 'rounded-b-none border-b-transparent'
           )}

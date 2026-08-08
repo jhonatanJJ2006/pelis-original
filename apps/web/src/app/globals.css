@@ -159,8 +159,9 @@
   }
 
   .input-field {
-    @apply w-full bg-cinema-surface border border-cinema-border rounded-[10px] py-3 px-4 text-white placeholder-cinema-ash transition-all duration-200;
-    @apply hover:border-cinema-silver/40 hover:bg-cinema-elevated/50;
+    @apply w-full h-11 bg-cinema-surface border border-cinema-border rounded-[10px] px-4 text-white placeholder-cinema-ash transition-all duration-200;
+    @apply shadow-[inset_0_1px_0_rgba(255,255,255,0.04)];
+    @apply hover:border-cinema-silver/40 hover:bg-cinema-elevated/60;
     @apply focus:outline-none focus:ring-2 focus:ring-cinema-accent/50 focus:border-cinema-accent/60 focus:hover:bg-cinema-surface focus:hover:border-cinema-accent/60;
   }
 

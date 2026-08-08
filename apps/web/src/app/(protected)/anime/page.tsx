@@ -3,11 +3,12 @@
 import { useQuery, useMutation } from 'convex/react';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Clapperboard, Star, Film, Search } from 'lucide-react';
+import { Clapperboard, Star } from 'lucide-react';
 import { api } from '@pelis/convex';
-import { Spinner, Button, Select } from '@pelis/ui/components';
+import { Spinner } from '@pelis/ui/components';
 import { EmptyState } from '@pelis/ui/features/empty-state';
 import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';
+import { CatalogFilterBar } from '@pelis/ui/features/catalog-filter-bar';
 import { cn } from '@pelis/ui/utils';
 
 interface AnimeItem {
@@ -31,7 +32,7 @@ export default function AnimePage() {
   const animeList = useQuery(api.anime.list, {
     search: search || undefined,
     genre: selectedGenre || undefined,
-    status: (selectedStatus as any) || undefined,
+    status: (selectedStatus as 'ongoing' | 'completed' | undefined) || undefined,
   }) as AnimeItem[] | undefined;
   const genres = (useQuery(api.anime.getGenres, {}) as string[] | undefined) ?? [];
   const seedAnime = useMutation(api.anime.seed);
@@ -47,17 +48,7 @@ export default function AnimePage() {
   }, [animeList, seedAnime, seeding]);
 
   const anime = animeList ?? [];
-
-  const filteredBySearch = search
-    ? anime.filter((a) => {
-        const q = search.toLowerCase();
-        return (
-          a.title.toLowerCase().includes(q) ||
-          a.alternativeTitle?.toLowerCase().includes(q) ||
-          a.genre.some((g) => g.toLowerCase().includes(q))
-        );
-      })
-    : anime;
+  const hasFilters = Boolean(selectedGenre || selectedStatus || search);
 
   return (
     <div className="page-shell">
@@ -73,74 +64,47 @@ export default function AnimePage() {
         </p>
       </ScrollReveal>
 
-      <div className="flex flex-col lg:flex-row gap-4 mb-10">
-        <div className="flex-1 relative">
-          <label htmlFor="anime-search" className="sr-only">
-            Buscar anime
-          </label>
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-cinema-ash" />
-          <input
-            id="anime-search"
-            type="search"
-            placeholder="Buscar por título o género..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="input-field pl-12"
-          />
-        </div>
-        <div className="flex flex-wrap gap-3">
-          <label htmlFor="genre-filter" className="sr-only">
-            Filtrar por género
-          </label>
-          <Select
-            id="genre-filter"
-            value={selectedGenre}
-            onChange={(e) => setSelectedGenre(e.target.value)}
-            className="w-auto min-w-[160px]"
-          >
-            <option value="">Todos los géneros</option>
-            {genres.map((g) => (
-              <option key={g} value={g}>
-                {g}
-              </option>
-            ))}
-          </Select>
-
-          <label htmlFor="status-filter" className="sr-only">
-            Filtrar por estado
-          </label>
-          <Select
-            id="status-filter"
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            className="w-auto min-w-[160px]"
-          >
-            <option value="">Todos</option>
-            <option value="ongoing">En emisión</option>
-            <option value="completed">Finalizado</option>
-          </Select>
-
-          {(selectedGenre || selectedStatus || search) && (
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedGenre('');
-                setSelectedStatus('');
-                setSearch('');
-              }}
-              className="px-4 py-2 text-sm text-cinema-gold hover:text-cinema-gold-light transition-colors"
-            >
-              Limpiar filtros
-            </button>
-          )}
-        </div>
-      </div>
+      <CatalogFilterBar
+        className="mb-10"
+        searchId="anime-search"
+        searchLabel="Buscar anime"
+        searchPlaceholder="Buscar por título o género..."
+        search={search}
+        onSearchChange={setSearch}
+        showClear={hasFilters}
+        onClear={() => {
+          setSelectedGenre('');
+          setSelectedStatus('');
+          setSearch('');
+        }}
+        selects={[
+          {
+            id: 'genre-filter',
+            label: 'Filtrar por género',
+            placeholder: 'Todos los géneros',
+            value: selectedGenre,
+            onChange: setSelectedGenre,
+            options: genres.map((genre) => ({ value: genre, label: genre })),
+          },
+          {
+            id: 'status-filter',
+            label: 'Filtrar por estado',
+            placeholder: 'Todos',
+            value: selectedStatus,
+            onChange: setSelectedStatus,
+            options: [
+              { value: 'ongoing', label: 'En emisión' },
+              { value: 'completed', label: 'Finalizado' },
+            ],
+          },
+        ]}
+      />
 
       {isLoading ? (
         <div className="flex items-center justify-center py-24" role="status" aria-label="Cargando">
           <Spinner size="lg" />
         </div>
-      ) : filteredBySearch.length === 0 ? (
+      ) : anime.length === 0 ? (
         <EmptyState
           icon={Clapperboard}
           title="Sin resultados"
@@ -150,7 +114,7 @@ export default function AnimePage() {
         />
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
-          {filteredBySearch.map((a) => (
+          {anime.map((a) => (
             <Link
               key={a._id}
               href={`/anime/${a._id}`}

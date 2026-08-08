@@ -29,6 +29,7 @@ export function useUser(): UseUserReturn {
         name: convexUser.name ?? 'User',
         email: convexUser.email ?? '',
         image: convexUser.image ?? undefined,
+        role: convexUser.role ?? 'user',
         planId: convexUser.planId ?? undefined,
         planExpiresAt: convexUser.planExpiresAt ?? undefined,
       });

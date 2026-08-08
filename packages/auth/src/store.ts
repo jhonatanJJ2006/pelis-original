@@ -8,6 +8,7 @@ export interface User {
   name: string;
   email: string;
   image?: string;
+  role?: 'user' | 'admin';
   planId?: string;
   planExpiresAt?: number;
 }
