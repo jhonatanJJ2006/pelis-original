@@ -1,0 +1,141 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { ConvexHttpClient } from 'convex/browser';
+import { api } from '@pelis/convex';
+import {
+  fetchUpstream,
+  getMimeForUrl,
+  isSafeUpstreamUrl,
+  rewriteTvManifest,
+} from '@/lib/tv-stream-proxy';
+
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
+function convexClient() {
+  const url = process.env.NEXT_PUBLIC_CONVEX_URL;
+  if (!url) throw new Error('NEXT_PUBLIC_CONVEX_URL is not configured');
+  return new ConvexHttpClient(url);
+}
+
+async function getChannelStreamUrl(channelId: string): Promise<string | null> {
+  const client = convexClient();
+  const channel = await client.query(api.tv.getById, {
+    id: channelId as any,
+  });
+  if (!channel?.isActive || channel.streamStatus !== 'online') return null;
+  const streamUrl = channel.streamUrl?.trim();
+  if (!streamUrl || !isSafeUpstreamUrl(streamUrl)) return null;
+  return streamUrl;
+}
+
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { channelId: string } }
+) {
+  const channelId = params.channelId;
+  if (!channelId) {
+    return NextResponse.json({ error: 'missing channel id' }, { status: 400 });
+  }
+
+  const upstreamParam = req.nextUrl.searchParams.get('u');
+  let upstreamUrl: string;
+
+  try {
+    const root = await getChannelStreamUrl(channelId);
+    if (!root) {
+      return NextResponse.json({ error: 'channel not found' }, { status: 404 });
+    }
+
+    if (upstreamParam) {
+      upstreamUrl = decodeURIComponent(upstreamParam);
+      if (!isSafeUpstreamUrl(upstreamUrl)) {
+        return NextResponse.json({ error: 'invalid upstream url' }, { status: 400 });
+      }
+    } else {
+      upstreamUrl = root;
+    }
+  } catch {
+    return NextResponse.json({ error: 'channel lookup failed' }, { status: 500 });
+  }
+
+  const range = req.headers.get('range');
+
+  let upstreamResp: Response;
+  try {
+    upstreamResp = await fetchUpstream(upstreamUrl, { range });
+  } catch {
+    return NextResponse.json(
+      { error: 'upstream unreachable', upstream: upstreamUrl },
+      { status: 502 }
+    );
+  }
+
+  if (!upstreamResp.ok) {
+    let errorMessage = `upstream error (${upstreamResp.status})`;
+    try {
+      const text = await upstreamResp.text();
+      const json = JSON.parse(text) as { message?: string };
+      if (json.message) errorMessage = json.message;
+      else if (text.length < 300) errorMessage = text;
+    } catch {
+      // keep default message
+    }
+
+    const status =
+      upstreamResp.status >= 400 && upstreamResp.status < 600
+        ? upstreamResp.status
+        : 502;
+
+    return NextResponse.json(
+      {
+        error: errorMessage,
+        status: upstreamResp.status,
+        upstream: upstreamUrl,
+      },
+      { status }
+    );
+  }
+
+  const finalUrl = upstreamResp.url || upstreamUrl;
+  const contentType =
+    upstreamResp.headers.get('content-type') ??
+    getMimeForUrl(finalUrl) ??
+    'application/octet-stream';
+
+  const isManifest =
+    contentType.includes('mpegurl') ||
+    contentType.includes('x-mpegURL') ||
+    finalUrl.toLowerCase().includes('.m3u8');
+
+  if (isManifest) {
+    const text = await upstreamResp.text();
+    const rewritten = rewriteTvManifest(text, finalUrl, channelId);
+    return new NextResponse(rewritten, {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/vnd.apple.mpegurl',
+        'Cache-Control': 'no-store',
+        'Access-Control-Allow-Origin': '*',
+      },
+    });
+  }
+
+  const headers = new Headers();
+  headers.set('Content-Type', contentType);
+  headers.set('Cache-Control', 'no-store');
+  headers.set('Access-Control-Allow-Origin', '*');
+
+  const contentLength = upstreamResp.headers.get('content-length');
+  if (contentLength) headers.set('Content-Length', contentLength);
+
+  const contentRange = upstreamResp.headers.get('content-range');
+  if (contentRange) headers.set('Content-Range', contentRange);
+
+  const acceptRanges = upstreamResp.headers.get('accept-ranges');
+  if (acceptRanges) headers.set('Accept-Ranges', acceptRanges);
+
+  return new NextResponse(upstreamResp.body, {
+    status: upstreamResp.status,
+    headers,
+  });
+}

@@ -77,6 +77,9 @@ export default defineSchema({
   series: defineTable({
     name: v.string(),
     image: v.string(),
+    imageId: v.optional(v.id('_storage')),
+    backdropImage: v.optional(v.string()),
+    backdropImageId: v.optional(v.id('_storage')),
     synopsis: v.string(),
     genre: v.string(),
     token: v.string(),
@@ -103,11 +106,17 @@ export default defineSchema({
     tvgId: v.optional(v.string()),
     isActive: v.boolean(),
     sortOrder: v.optional(v.number()),
+    streamStatus: v.optional(
+      v.union(v.literal('unknown'), v.literal('online'), v.literal('offline'))
+    ),
+    lastCheckedAt: v.optional(v.number()),
+    lastStreamError: v.optional(v.string()),
   })
     .index('by_category', ['category'])
     .index('by_source', ['source'])
     .index('by_country', ['country'])
-    .index('by_playlist', ['sourcePlaylistId']),
+    .index('by_playlist', ['sourcePlaylistId'])
+    .index('by_streamStatus', ['streamStatus']),
 
   tvPlaylists: defineTable({
     name: v.string(),
@@ -124,6 +133,9 @@ export default defineSchema({
     title: v.string(),
     alternativeTitle: v.optional(v.string()),
     image: v.string(),
+    imageId: v.optional(v.id('_storage')),
+    backdropImage: v.optional(v.string()),
+    backdropImageId: v.optional(v.id('_storage')),
     synopsis: v.string(),
     genre: v.array(v.string()),
     episodes: v.number(),

@@ -3,18 +3,21 @@
 import { useQuery, useMutation } from 'convex/react';
 import Link from 'next/link';
 import { useState } from 'react';
-import { Plus, Search, Pencil, Trash2, Tv, Sparkles, AlertTriangle } from 'lucide-react';
+import { AlertTriangle, ImageIcon, Monitor, Pencil, Plus, Search, Sparkles, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@pelis/convex';
 import { Button, Input, Spinner } from '@pelis/ui/components';
 import { AdminTableSkeleton } from '@pelis/ui/features/admin-table-skeleton';
 import { MoviePoster } from '@pelis/ui/features/movie-poster';
 import { cn } from '@pelis/ui/utils';
+import { EnrichSeriesModal } from '../components/enrich-series-modal';
+import { BackdropSeriesModal } from '../components/backdrop-series-modal';
 
 interface SeriesRow {
   _id: string;
   name: string;
   image: string;
+  backdropImage?: string;
   genre: string;
   classification: string;
   releaseYear: string;
@@ -22,11 +25,15 @@ interface SeriesRow {
   season?: number;
   featured?: boolean;
   isOrphanId: boolean;
+  isMissingImage?: boolean;
+  isMissingBackdrop?: boolean;
 }
 
 export default function AdminSeriesPage() {
   const [search, setSearch] = useState('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [enrichTarget, setEnrichTarget] = useState<SeriesRow | null>(null);
+  const [backdropTarget, setBackdropTarget] = useState<SeriesRow | null>(null);
   const series = useQuery(api.adminSeries.adminList, {
     search: search || undefined,
     limit: 500,
@@ -45,6 +52,8 @@ export default function AdminSeriesPage() {
       setDeletingId(null);
     }
   };
+
+  const canEdit = (s: SeriesRow) => !s.isOrphanId;
 
   return (
     <div>
@@ -105,7 +114,34 @@ export default function AdminSeriesPage() {
                     </p>
                   </div>
                 </div>
-                <div className="mt-3 pt-3 border-t border-cinema-border/60 flex justify-end gap-1">
+                <div className="mt-3 pt-3 border-t border-cinema-border/60 flex flex-wrap justify-end gap-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    aria-label="Poster TMDB"
+                    disabled={!canEdit(s)}
+                    onClick={() => setEnrichTarget(s)}
+                  >
+                    <ImageIcon className="w-4 h-4 text-cinema-violet-light" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    aria-label="Backdrop TMDB"
+                    disabled={!canEdit(s)}
+                    onClick={() => setBackdropTarget(s)}
+                  >
+                    <Monitor className="w-4 h-4 text-cyan-400" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    aria-label="Completar desde TMDB"
+                    disabled={!canEdit(s)}
+                    onClick={() => setEnrichTarget(s)}
+                  >
+                    <Sparkles className="w-4 h-4 text-cinema-gold" />
+                  </Button>
                   <Link href={`/admin/series/${s._id}/edit`}>
                     <Button variant="ghost" size="sm" aria-label="Editar">
                       <Pencil className="w-4 h-4" />
@@ -174,6 +210,33 @@ export default function AdminSeriesPage() {
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          aria-label="Poster TMDB"
+                          disabled={!canEdit(s)}
+                          onClick={() => setEnrichTarget(s)}
+                        >
+                          <ImageIcon className="w-4 h-4 text-cinema-violet-light" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          aria-label="Backdrop TMDB"
+                          disabled={!canEdit(s)}
+                          onClick={() => setBackdropTarget(s)}
+                        >
+                          <Monitor className="w-4 h-4 text-cyan-400" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          aria-label="Completar desde TMDB"
+                          disabled={!canEdit(s)}
+                          onClick={() => setEnrichTarget(s)}
+                        >
+                          <Sparkles className="w-4 h-4 text-cinema-gold" />
+                        </Button>
                         <Link href={`/admin/series/${s._id}/edit`}>
                           <Button variant="ghost" size="sm" aria-label="Editar">
                             <Pencil className="w-4 h-4" />
@@ -200,6 +263,22 @@ export default function AdminSeriesPage() {
             </table>
           </div>
         </>
+      )}
+
+      {enrichTarget && (
+        <EnrichSeriesModal
+          series={enrichTarget}
+          onClose={() => setEnrichTarget(null)}
+          onEnriched={() => setEnrichTarget(null)}
+        />
+      )}
+
+      {backdropTarget && (
+        <BackdropSeriesModal
+          series={backdropTarget}
+          onClose={() => setBackdropTarget(null)}
+          onApplied={() => setBackdropTarget(null)}
+        />
       )}
     </div>
   );

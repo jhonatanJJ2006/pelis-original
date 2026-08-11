@@ -3,6 +3,24 @@ import { query, mutation, action } from './_generated/server';
 import { internal } from './_generated/api';
 import { requireAdmin } from './lib/requireAdmin';
 
+type StreamStatus = 'unknown' | 'online' | 'offline';
+
+function sortChannels<T extends { sortOrder?: number; name: string }>(channels: T[]): T[] {
+  return channels.sort((a, b) => {
+    const sa = a.sortOrder ?? 1000;
+    const sb = b.sortOrder ?? 1000;
+    if (sa !== sb) return sa - sb;
+    return a.name.localeCompare(b.name);
+  });
+}
+
+function isPublicChannel(channel: {
+  isActive: boolean;
+  streamStatus?: StreamStatus;
+}): boolean {
+  return channel.isActive && channel.streamStatus === 'online';
+}
+
 export const list = query({
   args: {
     category: v.optional(v.string()),
@@ -16,6 +34,8 @@ export const list = query({
       .query('tvChannels')
       .filter((q) => q.eq(q.field('isActive'), true))
       .collect();
+
+    channels = channels.filter((c) => c.streamStatus === 'online');
 
     if (args.category) {
       channels = channels.filter((c) => c.category === args.category);
@@ -38,12 +58,54 @@ export const list = query({
       channels = channels.filter((c) => c.name.toLowerCase().includes(search));
     }
 
-    return channels.sort((a, b) => {
-      const sa = a.sortOrder ?? 1000;
-      const sb = b.sortOrder ?? 1000;
-      if (sa !== sb) return sa - sb;
-      return a.name.localeCompare(b.name);
-    });
+    return sortChannels(channels);
+  },
+});
+
+export const listAdmin = query({
+  args: {
+    category: v.optional(v.string()),
+    country: v.optional(v.string()),
+    language: v.optional(v.string()),
+    search: v.optional(v.string()),
+    streamStatus: v.optional(
+      v.union(v.literal('unknown'), v.literal('online'), v.literal('offline'))
+    ),
+    isActive: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+
+    let channels = await ctx.db.query('tvChannels').collect();
+
+    if (args.category) {
+      channels = channels.filter((c) => c.category === args.category);
+    }
+
+    if (args.country) {
+      channels = channels.filter((c) => c.country === args.country);
+    }
+
+    if (args.language) {
+      channels = channels.filter((c) => c.language === args.language);
+    }
+
+    if (args.search) {
+      const search = args.search.toLowerCase();
+      channels = channels.filter((c) => c.name.toLowerCase().includes(search));
+    }
+
+    if (args.streamStatus) {
+      channels = channels.filter(
+        (c) => (c.streamStatus ?? 'unknown') === args.streamStatus
+      );
+    }
+
+    if (args.isActive !== undefined) {
+      channels = channels.filter((c) => c.isActive === args.isActive);
+    }
+
+    return sortChannels(channels);
   },
 });
 
@@ -61,7 +123,9 @@ export const getCategories = query({
       .query('tvChannels')
       .filter((q) => q.eq(q.field('isActive'), true))
       .collect();
-    const categories = [...new Set(channels.map((c) => c.category))];
+    const categories = [
+      ...new Set(channels.filter(isPublicChannel).map((c) => c.category)),
+    ];
     return categories.sort();
   },
 });
@@ -74,7 +138,9 @@ export const getCountries = query({
       .filter((q) => q.eq(q.field('isActive'), true))
       .collect();
     const countries = [
-      ...new Set(channels.map((c) => c.country).filter(Boolean)),
+      ...new Set(
+        channels.filter(isPublicChannel).map((c) => c.country).filter(Boolean)
+      ),
     ];
     return countries.sort();
   },
@@ -88,7 +154,9 @@ export const getLanguages = query({
       .filter((q) => q.eq(q.field('isActive'), true))
       .collect();
     const languages = [
-      ...new Set(channels.map((c) => c.language).filter(Boolean)),
+      ...new Set(
+        channels.filter(isPublicChannel).map((c) => c.language).filter(Boolean)
+      ),
     ];
     return languages.sort();
   },
@@ -236,7 +304,10 @@ export const addChannel = mutation({
   },
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
-    return await ctx.db.insert('tvChannels', args);
+    return await ctx.db.insert('tvChannels', {
+      ...args,
+      streamStatus: 'unknown',
+    });
   },
 });
 
@@ -258,7 +329,14 @@ export const updateChannel = mutation({
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
     const { id, ...rest } = args;
-    await ctx.db.patch(id, rest);
+    const existing = await ctx.db.get(id);
+    const patch: Record<string, unknown> = { ...rest };
+    if (existing && existing.streamUrl !== rest.streamUrl) {
+      patch.streamStatus = 'unknown';
+      patch.lastCheckedAt = undefined;
+      patch.lastStreamError = undefined;
+    }
+    await ctx.db.patch(id, patch);
     return id;
   },
 });

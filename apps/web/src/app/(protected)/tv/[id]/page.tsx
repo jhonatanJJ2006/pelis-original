@@ -28,6 +28,7 @@ interface TVChannel {
   source: string;
   language: string;
   isActive: boolean;
+  streamStatus?: 'unknown' | 'online' | 'offline';
 }
 
 export default function TVChannelPage() {
@@ -56,6 +57,34 @@ export default function TVChannelPage() {
           <AlertCircle className="w-12 h-12 text-cinema-muted mx-auto mb-4" />
           <h1 className="font-display text-3xl text-white uppercase mb-2">Canal no encontrado</h1>
           <p className="text-cinema-muted mb-6">El canal que buscas no está disponible.</p>
+          <Link
+            href="/tv"
+            className="inline-flex items-center gap-2 text-cinema-violet-light hover:text-cinema-violet transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Volver a TV
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const isPlayable =
+    channel.isActive && channel.streamStatus === 'online';
+
+  if (!isPlayable) {
+    return (
+      <div className="page-shell min-h-[60vh] flex items-center justify-center">
+        <div className="text-center max-w-md">
+          <AlertCircle className="w-12 h-12 text-cinema-muted mx-auto mb-4" />
+          <h1 className="font-display text-3xl text-white uppercase mb-2">Canal no disponible</h1>
+          <p className="text-cinema-muted mb-6">
+            {channel.streamStatus === 'offline'
+              ? 'Este canal no está en línea en este momento. El proveedor del stream no responde.'
+              : !channel.isActive
+                ? 'Este canal está desactivado.'
+                : 'Este canal aún no ha sido verificado. Vuelve más tarde.'}
+          </p>
           <Link
             href="/tv"
             className="inline-flex items-center gap-2 text-cinema-violet-light hover:text-cinema-violet transition-colors"
@@ -121,7 +150,7 @@ export default function TVChannelPage() {
             </Link>
           </div>
         ) : (
-          <TVPlayer streamUrl={channel.streamUrl} channelName={channel.name} />
+          <TVPlayer channelId={channel._id} channelName={channel.name} />
         )}
       </div>
 

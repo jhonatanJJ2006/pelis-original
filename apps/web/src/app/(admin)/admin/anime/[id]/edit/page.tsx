@@ -3,11 +3,14 @@
 import { useMutation, useQuery } from 'convex/react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowLeft, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@pelis/convex';
+import { Button } from '@pelis/ui/components';
 import { AdminFormSkeleton } from '@pelis/ui/features/admin-form-skeleton';
 import { AnimeForm, type AnimeFormValues } from '../../anime-form';
+import { EnrichAnimeModal } from '../../../components/enrich-anime-modal';
 
 function providersToText(providers: { name: string; url: string; language: string }[]) {
   return providers.map((p) => `${p.name} | ${p.url} | ${p.language}`).join('\n');
@@ -56,6 +59,7 @@ export default function EditAnimePage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const id = params.id;
+  const [showEnrich, setShowEnrich] = useState(false);
 
   const anime = useQuery(api.adminAnime.getById, { id: id as any });
   const update = useMutation(api.adminAnime.update);
@@ -95,9 +99,19 @@ export default function EditAnimePage() {
         Volver al listado
       </Link>
 
-      <h1 className="font-display text-2xl sm:text-3xl tracking-wide text-white uppercase mb-6 sm:mb-8">
-        Editar anime
-      </h1>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+        <h1 className="font-display text-2xl sm:text-3xl tracking-wide text-white uppercase">
+          Editar anime
+        </h1>
+        <Button
+          variant="secondary"
+          className="w-full sm:w-auto"
+          onClick={() => setShowEnrich(true)}
+        >
+          <Sparkles className="w-4 h-4" />
+          Completar desde TMDB
+        </Button>
+      </div>
 
       <AnimeForm
         initialValues={{
@@ -115,6 +129,19 @@ export default function EditAnimePage() {
         onSubmit={handleSubmit}
         submitLabel="Guardar cambios"
       />
+
+      {showEnrich && (
+        <EnrichAnimeModal
+          anime={{
+            _id: anime._id,
+            title: anime.title,
+            image: anime.image,
+            backdropImage: anime.backdropImage,
+          }}
+          onClose={() => setShowEnrich(false)}
+          onEnriched={() => setShowEnrich(false)}
+        />
+      )}
     </div>
   );
 }

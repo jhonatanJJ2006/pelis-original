@@ -1,5 +1,21 @@
 import { v } from 'convex/values';
 import { internalMutation, internalQuery } from './_generated/server';
+import { requireAdmin } from './lib/requireAdmin';
+
+export const assertAdmin = internalQuery({
+  args: {},
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+    return true;
+  },
+});
+
+export const getChannelById = internalQuery({
+  args: { channelId: v.id('tvChannels') },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.channelId);
+  },
+});
 
 export const listAllActiveUrls = internalQuery({
   args: {},
@@ -57,8 +73,40 @@ export const upsertChannel = internalMutation({
       sourcePlaylistId: args.playlistId,
       tvgId: args.tvgId || undefined,
       isActive: args.isActive,
+      streamStatus: 'unknown',
     });
     return 'inserted' as const;
+  },
+});
+
+export const updateStreamStatus = internalMutation({
+  args: {
+    channelId: v.id('tvChannels'),
+    streamStatus: v.union(
+      v.literal('unknown'),
+      v.literal('online'),
+      v.literal('offline')
+    ),
+    lastStreamError: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.channelId, {
+      streamStatus: args.streamStatus,
+      lastCheckedAt: Date.now(),
+      lastStreamError: args.lastStreamError,
+    });
+  },
+});
+
+export const listAllChannelIds = internalQuery({
+  args: {},
+  handler: async (ctx) => {
+    const channels = await ctx.db.query('tvChannels').collect();
+    return channels.map((c) => ({
+      _id: c._id,
+      name: c.name,
+      streamUrl: c.streamUrl,
+    }));
   },
 });
 

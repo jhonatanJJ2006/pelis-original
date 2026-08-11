@@ -3,16 +3,19 @@
 import { useEffect, useRef, useState } from 'react';
 import Hls from 'hls.js';
 import { AlertCircle, Loader2 } from 'lucide-react';
+import { buildTvProxyUrl } from '@/lib/tv-stream-proxy';
 
 interface TVPlayerProps {
-  streamUrl: string;
+  channelId: string;
   channelName: string;
 }
 
-export default function TVPlayer({ streamUrl, channelName }: TVPlayerProps) {
+export default function TVPlayer({ channelId, channelName }: TVPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const streamUrl = buildTvProxyUrl(channelId);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -21,7 +24,12 @@ export default function TVPlayer({ streamUrl, channelName }: TVPlayerProps) {
     setError(null);
     setLoading(true);
 
-    const isHls = streamUrl.includes('.m3u8');
+    const isHls = streamUrl.includes('.m3u8') || streamUrl.includes('/api/tv/stream/');
+
+    const onFatalError = (message: string) => {
+      setError(message);
+      setLoading(false);
+    };
 
     if (isHls && Hls.isSupported()) {
       const hls = new Hls({
@@ -37,41 +45,57 @@ export default function TVPlayer({ streamUrl, channelName }: TVPlayerProps) {
       });
 
       hls.on(Hls.Events.ERROR, (_, data) => {
-        if (data.fatal) {
-          setError('Error al cargar el stream. Intenta con otro canal.');
+        if (!data.fatal) return;
+
+        if (data.response?.code === 504 || data.response?.code === 502) {
+          onFatalError(
+            'Este canal no está disponible en este momento. El proveedor del stream no responde. Prueba otro canal o vuelve más tarde.'
+          );
+          return;
         }
+
+        onFatalError('Error al cargar el stream. Intenta con otro canal.');
       });
 
       return () => {
         hls.destroy();
       };
-    } else if (isHls) {
+    }
+
+    if (isHls) {
       const canPlay = video.canPlayType('application/vnd.apple.mpegurl');
       if (canPlay) {
         video.src = streamUrl;
-        video.addEventListener('loadedmetadata', () => {
+        const onLoaded = () => {
           setLoading(false);
           video.play().catch(() => {});
-        });
+        };
+        video.addEventListener('loadedmetadata', onLoaded);
         video.addEventListener('error', () => {
-          setError('Error al reproducir el stream.');
+          onFatalError('Error al reproducir el stream.');
         });
-      } else {
-        setError('Tu navegador no soporta este tipo de stream.');
-        setLoading(false);
+        return () => {
+          video.removeEventListener('loadedmetadata', onLoaded);
+          video.src = '';
+          video.load();
+        };
       }
-    } else {
-      video.src = streamUrl;
-      video.addEventListener('loadedmetadata', () => {
-        setLoading(false);
-        video.play().catch(() => {});
-      });
-      video.addEventListener('error', () => {
-        setError('Error al reproducir el stream.');
-      });
+      onFatalError('Tu navegador no soporta este tipo de stream.');
+      return;
     }
 
+    video.src = streamUrl;
+    const onLoaded = () => {
+      setLoading(false);
+      video.play().catch(() => {});
+    };
+    video.addEventListener('loadedmetadata', onLoaded);
+    video.addEventListener('error', () => {
+      onFatalError('Error al reproducir el stream.');
+    });
+
     return () => {
+      video.removeEventListener('loadedmetadata', onLoaded);
       video.src = '';
       video.load();
     };

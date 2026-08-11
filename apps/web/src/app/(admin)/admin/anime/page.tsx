@@ -3,30 +3,37 @@
 import { useQuery, useMutation } from 'convex/react';
 import Link from 'next/link';
 import { useState } from 'react';
-import { Plus, Search, Pencil, Trash2, Clapperboard, Star } from 'lucide-react';
+import { ImageIcon, Monitor, Pencil, Plus, Search, Sparkles, Star, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@pelis/convex';
 import { Button, Input, Spinner } from '@pelis/ui/components';
 import { AdminTableSkeleton } from '@pelis/ui/features/admin-table-skeleton';
 import { MoviePoster } from '@pelis/ui/features/movie-poster';
 import { cn } from '@pelis/ui/utils';
+import { EnrichAnimeModal } from '../components/enrich-anime-modal';
+import { BackdropAnimeModal } from '../components/backdrop-anime-modal';
 
 interface AnimeRow {
   _id: string;
   title: string;
   alternativeTitle?: string;
   image: string;
+  backdropImage?: string;
   episodes: number;
   status: 'ongoing' | 'completed';
   year: number;
   rating?: number;
   genre: string[];
+  isMissingBackdrop?: boolean;
+  isMissingImage?: boolean;
 }
 
 export default function AdminAnimePage() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'' | 'ongoing' | 'completed'>('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [enrichTarget, setEnrichTarget] = useState<AnimeRow | null>(null);
+  const [backdropTarget, setBackdropTarget] = useState<AnimeRow | null>(null);
 
   const anime = useQuery(api.adminAnime.adminList, {
     search: search || undefined,
@@ -130,7 +137,31 @@ export default function AdminAnimePage() {
                     </p>
                   </div>
                 </div>
-                <div className="mt-3 pt-3 border-t border-cinema-border/60 flex justify-end gap-1">
+                <div className="mt-3 pt-3 border-t border-cinema-border/60 flex flex-wrap justify-end gap-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    aria-label="Poster TMDB"
+                    onClick={() => setEnrichTarget(a)}
+                  >
+                    <ImageIcon className="w-4 h-4 text-cinema-violet-light" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    aria-label="Backdrop TMDB"
+                    onClick={() => setBackdropTarget(a)}
+                  >
+                    <Monitor className="w-4 h-4 text-cyan-400" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    aria-label="Completar desde TMDB"
+                    onClick={() => setEnrichTarget(a)}
+                  >
+                    <Sparkles className="w-4 h-4 text-cinema-gold" />
+                  </Button>
                   <Link href={`/admin/anime/${a._id}/edit`}>
                     <Button variant="ghost" size="sm" aria-label="Editar">
                       <Pencil className="w-4 h-4" />
@@ -205,6 +236,30 @@ export default function AdminAnimePage() {
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          aria-label="Poster TMDB"
+                          onClick={() => setEnrichTarget(a)}
+                        >
+                          <ImageIcon className="w-4 h-4 text-cinema-violet-light" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          aria-label="Backdrop TMDB"
+                          onClick={() => setBackdropTarget(a)}
+                        >
+                          <Monitor className="w-4 h-4 text-cyan-400" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          aria-label="Completar desde TMDB"
+                          onClick={() => setEnrichTarget(a)}
+                        >
+                          <Sparkles className="w-4 h-4 text-cinema-gold" />
+                        </Button>
                         <Link href={`/admin/anime/${a._id}/edit`}>
                           <Button variant="ghost" size="sm" aria-label="Editar">
                             <Pencil className="w-4 h-4" />
@@ -231,6 +286,22 @@ export default function AdminAnimePage() {
             </table>
           </div>
         </>
+      )}
+
+      {enrichTarget && (
+        <EnrichAnimeModal
+          anime={enrichTarget}
+          onClose={() => setEnrichTarget(null)}
+          onEnriched={() => setEnrichTarget(null)}
+        />
+      )}
+
+      {backdropTarget && (
+        <BackdropAnimeModal
+          anime={backdropTarget}
+          onClose={() => setBackdropTarget(null)}
+          onApplied={() => setBackdropTarget(null)}
+        />
       )}
     </div>
   );

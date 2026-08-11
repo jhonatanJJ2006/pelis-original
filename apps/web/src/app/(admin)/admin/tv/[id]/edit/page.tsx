@@ -1,21 +1,34 @@
 'use client';
 
-import { useMutation, useQuery } from 'convex/react';
+import { useAction, useMutation, useQuery } from 'convex/react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Activity } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@pelis/convex';
+import { Button, Spinner } from '@pelis/ui/components';
 import { AdminFormSkeleton } from '@pelis/ui/features/admin-form-skeleton';
+import { cn } from '@pelis/ui/utils';
 import { ChannelForm, type ChannelFormValues } from '../../channel-form';
+import { useState } from 'react';
+
+function formatDate(ts?: number) {
+  if (!ts) return 'Sin verificar';
+  return new Date(ts).toLocaleString('es', {
+    dateStyle: 'short',
+    timeStyle: 'short',
+  });
+}
 
 export default function EditTVChannelPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const id = params.id;
+  const [checking, setChecking] = useState(false);
 
   const channel = useQuery(api.tv.getById, { id: id as any });
   const update = useMutation(api.tv.updateChannel);
+  const checkChannel = useAction(api.tvHealth.checkChannelStream);
 
   const handleSubmit = async (values: ChannelFormValues) => {
     try {
@@ -36,6 +49,22 @@ export default function EditTVChannelPage() {
       router.push('/admin/tv');
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Error al actualizar');
+    }
+  };
+
+  const handleCheck = async () => {
+    setChecking(true);
+    try {
+      const result = await checkChannel({ channelId: id as any });
+      if (result.streamStatus === 'online') {
+        toast.success('Stream online');
+      } else {
+        toast.error(result.lastStreamError ?? 'Stream caído');
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Error al verificar');
+    } finally {
+      setChecking(false);
     }
   };
 
@@ -64,9 +93,49 @@ export default function EditTVChannelPage() {
         Volver a canales
       </Link>
 
-      <h1 className="font-display text-2xl sm:text-3xl tracking-wide text-white uppercase mb-6 sm:mb-8">
+      <h1 className="font-display text-2xl sm:text-3xl tracking-wide text-white uppercase mb-4 sm:mb-6">
         Editar canal
       </h1>
+
+      <div className="mb-6 rounded-xl border border-cinema-border bg-cinema-surface p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <p className="text-xs text-cinema-muted uppercase tracking-wider mb-1">Estado del stream</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className={cn(
+                'inline-flex items-center text-xs px-2.5 py-1 rounded-full font-medium',
+                channel.streamStatus === 'online' && 'bg-emerald-500/20 text-emerald-300',
+                channel.streamStatus === 'offline' && 'bg-red-500/20 text-red-300',
+                (!channel.streamStatus || channel.streamStatus === 'unknown') &&
+                  'bg-cinema-elevated text-cinema-muted'
+              )}
+            >
+              {channel.streamStatus === 'online'
+                ? 'Online'
+                : channel.streamStatus === 'offline'
+                  ? 'Caído'
+                  : 'Sin verificar'}
+            </span>
+            <span className="text-xs text-cinema-muted">Última verificación: {formatDate(channel.lastCheckedAt)}</span>
+          </div>
+          {channel.lastStreamError && (
+            <p className="text-xs text-red-300/80 mt-2">{channel.lastStreamError}</p>
+          )}
+        </div>
+        <Button variant="secondary" size="sm" onClick={handleCheck} disabled={checking}>
+          {checking ? (
+            <>
+              <Spinner className="w-4 h-4" />
+              Verificando...
+            </>
+          ) : (
+            <>
+              <Activity className="w-4 h-4" />
+              Probar stream
+            </>
+          )}
+        </Button>
+      </div>
 
       <ChannelForm
         initialValues={{

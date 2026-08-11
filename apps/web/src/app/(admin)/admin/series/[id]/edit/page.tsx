@@ -3,16 +3,20 @@
 import { useMutation, useQuery } from 'convex/react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowLeft, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@pelis/convex';
+import { Button } from '@pelis/ui/components';
 import { AdminFormSkeleton } from '@pelis/ui/features/admin-form-skeleton';
 import { SeriesForm, type SeriesFormValues } from '../../series-form';
+import { EnrichSeriesModal } from '../../../components/enrich-series-modal';
 
 export default function EditSeriesPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const id = params.id;
+  const [showEnrich, setShowEnrich] = useState(false);
 
   const series = useQuery(api.adminSeries.getById, { id: id as any });
   const update = useMutation(api.adminSeries.update);
@@ -75,9 +79,19 @@ export default function EditSeriesPage() {
         Volver al listado
       </Link>
 
-      <h1 className="font-display text-2xl sm:text-3xl tracking-wide text-white uppercase mb-6 sm:mb-8">
-        Editar serie
-      </h1>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+        <h1 className="font-display text-2xl sm:text-3xl tracking-wide text-white uppercase">
+          Editar serie
+        </h1>
+        <Button
+          variant="secondary"
+          className="w-full sm:w-auto"
+          onClick={() => setShowEnrich(true)}
+        >
+          <Sparkles className="w-4 h-4" />
+          Completar desde TMDB
+        </Button>
+      </div>
 
       <SeriesForm
         initialValues={{
@@ -102,6 +116,19 @@ export default function EditSeriesPage() {
         onSubmit={handleSubmit}
         submitLabel="Guardar cambios"
       />
+
+      {showEnrich && (
+        <EnrichSeriesModal
+          series={{
+            _id: series._id,
+            name: series.name,
+            image: series.image,
+            backdropImage: series.backdropImage,
+          }}
+          onClose={() => setShowEnrich(false)}
+          onEnriched={() => setShowEnrich(false)}
+        />
+      )}
     </div>
   );
 }

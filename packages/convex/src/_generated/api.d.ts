@@ -9,10 +9,12 @@
  */
 
 import type * as adminAnime from "../adminAnime.js";
+import type * as adminAnimeEnrichment from "../adminAnimeEnrichment.js";
 import type * as adminEnrichment from "../adminEnrichment.js";
 import type * as adminMovies from "../adminMovies.js";
 import type * as adminPlans from "../adminPlans.js";
 import type * as adminSeries from "../adminSeries.js";
+import type * as adminSeriesEnrichment from "../adminSeriesEnrichment.js";
 import type * as adminUsers from "../adminUsers.js";
 import type * as anime from "../anime.js";
 import type * as favorites from "../favorites.js";
@@ -35,6 +37,7 @@ import type * as stripeWebhook from "../stripeWebhook.js";
 import type * as stripeWebhookAction from "../stripeWebhookAction.js";
 import type * as subscriptions from "../subscriptions.js";
 import type * as tv from "../tv.js";
+import type * as tvHealth from "../tvHealth.js";
 import type * as tvHelpers from "../tvHelpers.js";
 import type * as users from "../users.js";
 
@@ -46,10 +49,12 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   adminAnime: typeof adminAnime;
+  adminAnimeEnrichment: typeof adminAnimeEnrichment;
   adminEnrichment: typeof adminEnrichment;
   adminMovies: typeof adminMovies;
   adminPlans: typeof adminPlans;
   adminSeries: typeof adminSeries;
+  adminSeriesEnrichment: typeof adminSeriesEnrichment;
   adminUsers: typeof adminUsers;
   anime: typeof anime;
   favorites: typeof favorites;
@@ -72,6 +77,7 @@ declare const fullApi: ApiFromModules<{
   stripeWebhookAction: typeof stripeWebhookAction;
   subscriptions: typeof subscriptions;
   tv: typeof tv;
+  tvHealth: typeof tvHealth;
   tvHelpers: typeof tvHelpers;
   users: typeof users;
 }>;
