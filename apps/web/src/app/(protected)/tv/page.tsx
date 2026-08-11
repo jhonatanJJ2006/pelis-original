@@ -1,31 +1,37 @@
 'use client';
 
 import { useQuery } from 'convex/react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { Tv, Monitor, Radio, Globe, Gamepad, Music, Loader2 } from 'lucide-react';
+import { Tv, Monitor, Radio, Globe, Gamepad, Music, Loader2, Search, X } from 'lucide-react';
 import { api } from '@pelis/convex';
-import { Spinner } from '@pelis/ui/components';
+import { TvChannelGridSkeleton } from '@pelis/ui/features/tv-channel-grid-skeleton';
 import { EmptyState } from '@pelis/ui/features/empty-state';
 import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';
+import { Input } from '@pelis/ui/components';
 import { cn } from '@pelis/ui/utils';
 
 const categoryIcons: Record<string, React.ComponentType<{ className?: string }>> = {
   General: Tv,
-  Entertainment: Monitor,
-  News: Radio,
-  Sports: Globe,
-  Kids: Gamepad,
-  Music: Music,
+  Entretenimiento: Monitor,
+  Noticias: Radio,
+  Deportes: Globe,
+  Infantil: Gamepad,
+  Música: Music,
 };
 
 const categoryLabels: Record<string, string> = {
   General: 'General',
-  Entertainment: 'Entretenimiento',
-  News: 'Noticias',
-  Sports: 'Deportes',
-  Kids: 'Infantil',
-  Music: 'Música',
+  Entretenimiento: 'Entretenimiento',
+  Noticias: 'Noticias',
+  Deportes: 'Deportes',
+  Infantil: 'Infantil',
+  Música: 'Música',
+  Películas: 'Películas',
+  Series: 'Series',
+  Documentales: 'Documentales',
+  Cultura: 'Cultura',
+  Religión: 'Religión',
 };
 
 interface TVChannel {
@@ -33,35 +39,49 @@ interface TVChannel {
   name: string;
   logo: string;
   category: string;
+  country?: string;
+  language?: string;
   streamUrl: string;
   source: string;
-  language: string;
   isActive: boolean;
+  sortOrder?: number;
 }
 
 export default function TVPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [selectedCountry, setSelectedCountry] = useState<string>('');
+  const [selectedLanguage, setSelectedLanguage] = useState<string>('');
+  const [search, setSearch] = useState('');
+
   const channels = useQuery(api.tv.list, {
     category: selectedCategory || undefined,
+    country: selectedCountry || undefined,
+    language: selectedLanguage || undefined,
+    search: search.trim() || undefined,
   }) as TVChannel[] | undefined;
+
   const categories = (useQuery(api.tv.getCategories, {}) as string[] | undefined) ?? [];
+  const countries = (useQuery(api.tv.getCountries, {}) as string[] | undefined) ?? [];
+  const languages = (useQuery(api.tv.getLanguages, {}) as string[] | undefined) ?? [];
 
   const isLoading = channels === undefined;
 
-  const grouped = channels
-    ? channels.reduce<Record<string, TVChannel[]>>((acc, ch) => {
-        const key = ch.category || 'General';
-        if (!acc[key]) acc[key] = [];
-        acc[key].push(ch);
-        return acc;
-      }, {})
-    : {};
+  const grouped = useMemo(() => {
+    if (!channels) return {};
+    return channels.reduce<Record<string, TVChannel[]>>((acc, ch) => {
+      const key = ch.category || 'General';
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(ch);
+      return acc;
+    }, {});
+  }, [channels]);
 
   const sortedCategories = Object.keys(grouped).sort();
+  const hasFilters = Boolean(selectedCategory || selectedCountry || selectedLanguage || search);
 
   return (
     <div className="page-shell">
-      <ScrollReveal className="mb-10">
+      <ScrollReveal className="mb-8">
         <p className="text-cinema-violet-light text-sm font-medium uppercase tracking-widest mb-2">
           Canales
         </p>
@@ -73,51 +93,119 @@ export default function TVPage() {
         </p>
       </ScrollReveal>
 
-      {categories.length > 0 && (
-        <ScrollReveal className="mb-8">
-          <div className="flex flex-wrap gap-2">
+      <ScrollReveal className="mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-3 max-w-3xl">
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar canal por nombre..."
+            iconLeft={<Search className="w-4 h-4" />}
+            clearable={Boolean(search)}
+            onClear={() => setSearch('')}
+          />
+          {hasFilters && (
             <button
               type="button"
-              onClick={() => setSelectedCategory('')}
-              className={cn(
-                'px-4 py-2 rounded-full text-sm font-medium transition-all',
-                !selectedCategory
-                  ? 'bg-cinema-violet text-white'
-                  : 'bg-cinema-elevated text-cinema-silver hover:text-white border border-cinema-border'
-              )}
+              onClick={() => {
+                setSelectedCategory('');
+                setSelectedCountry('');
+                setSelectedLanguage('');
+                setSearch('');
+              }}
+              className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm text-cinema-silver border border-cinema-border hover:text-white hover:border-cinema-violet/40 transition-colors"
             >
-              Todas
+              <X className="w-4 h-4" />
+              Limpiar filtros
             </button>
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                type="button"
-                onClick={() => setSelectedCategory(cat)}
-                className={cn(
-                  'px-4 py-2 rounded-full text-sm font-medium transition-all',
-                  selectedCategory === cat
-                    ? 'bg-cinema-violet text-white'
-                    : 'bg-cinema-elevated text-cinema-silver hover:text-white border border-cinema-border'
-                )}
-              >
-                {categoryLabels[cat] || cat}
-              </button>
-            ))}
-          </div>
+          )}
+        </div>
+      </ScrollReveal>
+
+      {(categories.length > 0 || countries.length > 0 || languages.length > 0) && (
+        <ScrollReveal className="mb-8 space-y-4">
+          {categories.length > 0 && (
+            <div>
+              <p className="text-xs text-cinema-ash uppercase tracking-wider mb-2">Categoría</p>
+              <div className="flex flex-wrap gap-2">
+                <FilterPill
+                  active={!selectedCategory}
+                  onClick={() => setSelectedCategory('')}
+                >
+                  Todas
+                </FilterPill>
+                {categories.map((cat) => (
+                  <FilterPill
+                    key={cat}
+                    active={selectedCategory === cat}
+                    onClick={() => setSelectedCategory(cat)}
+                  >
+                    {categoryLabels[cat] || cat}
+                  </FilterPill>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {(countries.length > 0 || languages.length > 0) && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {countries.length > 0 && (
+                <div>
+                  <p className="text-xs text-cinema-ash uppercase tracking-wider mb-2">País</p>
+                  <div className="flex flex-wrap gap-2">
+                    <FilterPill active={!selectedCountry} onClick={() => setSelectedCountry('')} small>
+                      Todos
+                    </FilterPill>
+                    {countries.map((c) => (
+                      <FilterPill
+                        key={c}
+                        active={selectedCountry === c}
+                        onClick={() => setSelectedCountry(c)}
+                        small
+                      >
+                        {c}
+                      </FilterPill>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {languages.length > 0 && (
+                <div>
+                  <p className="text-xs text-cinema-ash uppercase tracking-wider mb-2">Idioma</p>
+                  <div className="flex flex-wrap gap-2">
+                    <FilterPill active={!selectedLanguage} onClick={() => setSelectedLanguage('')} small>
+                      Todos
+                    </FilterPill>
+                    {languages.map((l) => (
+                      <FilterPill
+                        key={l}
+                        active={selectedLanguage === l}
+                        onClick={() => setSelectedLanguage(l)}
+                        small
+                      >
+                        {l === 'es' ? 'Español' : l === 'en' ? 'Inglés' : l === 'pt' ? 'Portugués' : l}
+                      </FilterPill>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </ScrollReveal>
       )}
 
       {isLoading ? (
-        <div className="flex items-center justify-center py-24" role="status" aria-label="Cargando">
-          <Spinner size="lg" />
-        </div>
+        <TvChannelGridSkeleton />
       ) : channels?.length === 0 ? (
         <EmptyState
           icon={Tv}
           title="Sin canales disponibles"
-          description="Pronto añadiremos canales de TV en vivo."
-          actionLabel="Ver películas"
-          actionHref="/movies"
+          description={
+            hasFilters
+              ? 'Probá quitar algunos filtros.'
+              : 'Pronto añadiremos canales de TV en vivo.'
+          }
+          actionLabel={hasFilters ? undefined : 'Ver películas'}
+          actionHref={hasFilters ? undefined : '/movies'}
         />
       ) : (
         <div className="space-y-10">
@@ -155,10 +243,17 @@ export default function TVPage() {
                       <span className="text-sm text-center text-cinema-silver group-hover:text-white transition-colors line-clamp-2">
                         {channel.name}
                       </span>
-                      <span className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-red-400 font-semibold">
-                        <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
-                        EN VIVO
-                      </span>
+                      <div className="flex items-center gap-1.5 flex-wrap justify-center">
+                        <span className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-red-400 font-semibold">
+                          <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
+                          EN VIVO
+                        </span>
+                        {channel.country ? (
+                          <span className="text-[9px] uppercase tracking-wider text-cinema-ash bg-cinema-elevated px-1.5 py-0.5 rounded">
+                            {channel.country}
+                          </span>
+                        ) : null}
+                      </div>
                     </Link>
                   );
                 })}
@@ -168,5 +263,33 @@ export default function TVPage() {
         </div>
       )}
     </div>
+  );
+}
+
+function FilterPill({
+  active,
+  onClick,
+  children,
+  small = false,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+  small?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        'rounded-full font-medium transition-all',
+        small ? 'px-3 py-1.5 text-xs' : 'px-4 py-2 text-sm',
+        active
+          ? 'bg-cinema-violet text-white'
+          : 'bg-cinema-elevated text-cinema-silver hover:text-white border border-cinema-border'
+      )}
+    >
+      {children}
+    </button>
   );
 }

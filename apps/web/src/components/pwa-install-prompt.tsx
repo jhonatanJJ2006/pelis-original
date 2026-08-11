@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Download, Share, Smartphone, X } from 'lucide-react';
+import { Download, RefreshCw, Share, Smartphone, X } from 'lucide-react';
 import { Button } from '@pelis/ui/components';
 import { cn } from '@pelis/ui/utils';
 import { APK_DOWNLOAD_PATH } from '@/lib/app-download';
@@ -20,6 +20,7 @@ interface AppAvailability {
 }
 
 const APK_VERSION_KEY = 'pelis_apk_version';
+const APK_UPDATE_DISMISSED_KEY = 'pelis_apk_update_dismissed';
 
 const INSTALL_COPY = {
   ios: {
@@ -41,13 +42,30 @@ const INSTALL_COPY = {
       '¡A disfrutar! Abre Pelis desde tu inicio',
     ],
     apkNote: 'Si tu teléfono lo pide, permite instalar desde este navegador.',
-    apkPending: 'Muy pronto podrás descargar la app.',
     downloadLabel: 'Descargar app',
   },
   prompt: {
     title: 'Tu cine, siempre a mano',
     subtitle: 'Instala Pelis en un segundo y accede directo desde tu pantalla de inicio.',
     installLabel: 'Instalar con un toque',
+  },
+  'pwa-android': {
+    title: 'Lleva Pelis contigo',
+    subtitle: 'Instala la app en tu Android desde Chrome, sin descargar archivos.',
+    steps: [
+      'Abre Pelis en Chrome',
+      'Toca el menú ⋮ (arriba a la derecha)',
+      'Elige «Instalar app» o «Añadir a pantalla de inicio»',
+    ],
+  },
+  'pwa-desktop': {
+    title: 'Pelis en tu equipo',
+    subtitle: 'Instálala como app desde Chrome o Edge y ábrela como cualquier programa.',
+    steps: [
+      'En Chrome o Edge, busca el icono de instalar (⊕) en la barra de direcciones',
+      'Si no aparece: menú ⋮ → «Instalar Pelis» o «Aplicaciones» → «Instalar»',
+      'Confirma y ábrela desde tu escritorio o menú inicio',
+    ],
   },
   manual: {
     title: 'Pelis en tu móvil',
@@ -57,12 +75,13 @@ const INSTALL_COPY = {
       'En iPhone: Safari → Compartir → «En pantalla de inicio»',
     ],
     downloadLabel: 'Descargar app',
-    apkPending: 'Muy pronto podrás descargar la app.',
   },
   update: {
-    title: 'Hay novedades en Pelis',
-    subtitle: 'Descarga la última versión para disfrutar de lo nuevo.',
-    downloadLabel: 'Actualizar app',
+    title: 'Hay una nueva versión de Pelis',
+    subtitle:
+      'Hay novedades y mejoras listas para vos. Actualizá la app para seguir disfrutando todo sin interrupciones.',
+    downloadLabel: 'Actualizar ahora',
+    versionLabel: 'Nueva versión',
   },
 } as const;
 
@@ -115,6 +134,12 @@ function StepsList({ steps }: { steps: readonly string[] }) {
   );
 }
 
+function getPlatformMode(apkAvailable: boolean): InstallMode {
+  if (isIos()) return 'ios';
+  if (isAndroid()) return apkAvailable ? 'android-apk' : 'prompt';
+  return apkAvailable ? 'manual' : 'prompt';
+}
+
 function usePwaInstall() {
   const [mode, setMode] = useState<InstallMode>('hidden');
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
@@ -122,17 +147,27 @@ function usePwaInstall() {
   const [apkAvailable, setApkAvailable] = useState(false);
   const [needsApkUpdate, setNeedsApkUpdate] = useState(false);
   const [latestApkVersion, setLatestApkVersion] = useState<number | null>(null);
+  const [latestApkName, setLatestApkName] = useState<string | null>(null);
 
   useEffect(() => {
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    }
+
     deferIdle(() => {
       fetchAvailability().then((data) => {
-        setApkAvailable(!!data.apkAvailable);
+        const hasApk = !!data.apkAvailable;
+        setApkAvailable(hasApk);
         if (data.apkVersionCode) {
           setLatestApkVersion(data.apkVersionCode);
+          setLatestApkName(data.apkVersionName ?? null);
           const stored = Number(localStorage.getItem(APK_VERSION_KEY) ?? '0');
           if (isStandalone() && isAndroid() && stored > 0 && data.apkVersionCode > stored) {
             setNeedsApkUpdate(true);
           }
+        }
+        if (!isStandalone()) {
+          setMode((current) => (current === 'prompt' ? current : getPlatformMode(hasApk)));
         }
       });
     });
@@ -153,13 +188,7 @@ function usePwaInstall() {
     window.addEventListener('beforeinstallprompt', onBeforeInstall);
     window.addEventListener('appinstalled', onAppInstalled);
 
-    if (isIos()) {
-      setMode('ios');
-    } else if (isAndroid()) {
-      setMode('android-apk');
-    } else {
-      setMode('manual');
-    }
+    setMode(getPlatformMode(false));
 
     return () => {
       window.removeEventListener('beforeinstallprompt', onBeforeInstall);
@@ -185,8 +214,16 @@ function usePwaInstall() {
   const markApkUpdated = useCallback(() => {
     if (latestApkVersion) {
       localStorage.setItem(APK_VERSION_KEY, String(latestApkVersion));
+      localStorage.removeItem(APK_UPDATE_DISMISSED_KEY);
       setNeedsApkUpdate(false);
     }
+  }, [latestApkVersion]);
+
+  const dismissApkUpdate = useCallback(() => {
+    if (latestApkVersion) {
+      localStorage.setItem(APK_UPDATE_DISMISSED_KEY, String(latestApkVersion));
+    }
+    setNeedsApkUpdate(false);
   }, [latestApkVersion]);
 
   return {
@@ -196,7 +233,10 @@ function usePwaInstall() {
     canInstall: mode === 'prompt' && deferredPrompt !== null,
     apkAvailable,
     needsApkUpdate,
+    latestApkVersion,
+    latestApkName,
     markApkUpdated,
+    dismissApkUpdate,
   };
 }
 
@@ -213,53 +253,62 @@ export function PwaInstallPrompt({ variant = 'card', className }: PwaInstallProm
     canInstall,
     apkAvailable,
     needsApkUpdate,
+    latestApkVersion,
+    latestApkName,
     markApkUpdated,
+    dismissApkUpdate,
   } = usePwaInstall();
   const [dismissed, setDismissed] = useState(false);
 
-  if ((mode === 'hidden' && !needsApkUpdate) || dismissed) return null;
+  // Si hay actualización de APK pendiente, renderizamos un modal
+  if (needsApkUpdate) {
+    return (
+      <ApkUpdateModal
+        versionName={latestApkName}
+        versionCode={latestApkVersion}
+        onUpdate={markApkUpdated}
+        onDismiss={dismissApkUpdate}
+      />
+    );
+  }
 
-  const copy = needsApkUpdate
-    ? INSTALL_COPY.update
-    : mode === 'ios'
+  if (mode === 'hidden' || dismissed) return null;
+
+  const copy =
+    mode === 'ios'
       ? INSTALL_COPY.ios
       : mode === 'android-apk'
         ? INSTALL_COPY['android-apk']
-        : mode === 'prompt'
-          ? INSTALL_COPY.prompt
-          : INSTALL_COPY.manual;
+        : mode === 'manual'
+          ? INSTALL_COPY.manual
+          : mode === 'prompt' && !canInstall
+            ? isAndroid()
+              ? INSTALL_COPY['pwa-android']
+              : INSTALL_COPY['pwa-desktop']
+            : INSTALL_COPY.prompt;
 
-  const showApkCta = needsApkUpdate || mode === 'android-apk' || mode === 'manual';
+  const showApkCta = apkAvailable && (mode === 'android-apk' || mode === 'manual');
 
   const apkButtonClasses = cn(
     'inline-flex items-center justify-center font-semibold transition-all duration-200',
     'bg-gradient-to-r from-cinema-gold to-cinema-gold-light text-black hover:brightness-110',
     'rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cinema-accent/60',
-    variant === 'inline' ? 'py-1.5 px-3 text-sm w-full' : 'py-3 px-6 text-base w-full md:w-auto',
-    !apkAvailable && showApkCta && 'opacity-50 pointer-events-none cursor-not-allowed'
+    variant === 'inline' ? 'py-1.5 px-3 text-sm w-full' : 'py-3 px-6 text-base w-full md:w-auto'
   );
 
   const downloadLabel =
     'downloadLabel' in copy ? copy.downloadLabel : INSTALL_COPY['android-apk'].downloadLabel;
 
-  const apkButton =
-    showApkCta &&
-    (apkAvailable ? (
-      <a
-        href={APK_DOWNLOAD_PATH}
-        download="pelis.apk"
-        className={apkButtonClasses}
-        onClick={markApkUpdated}
-      >
-        <Download className={variant === 'inline' ? 'w-4 h-4 mr-2' : 'w-5 h-5 mr-2'} aria-hidden />
-        {downloadLabel}
-      </a>
-    ) : (
-      <span className={apkButtonClasses} aria-disabled="true">
-        <Download className={variant === 'inline' ? 'w-4 h-4 mr-2' : 'w-5 h-5 mr-2'} aria-hidden />
-        {'apkPending' in copy ? copy.apkPending : INSTALL_COPY['android-apk'].apkPending}
-      </span>
-    ));
+  const apkButton = showApkCta && (
+    <a
+      href={APK_DOWNLOAD_PATH}
+      download="pelis.apk"
+      className={apkButtonClasses}
+    >
+      <Download className={variant === 'inline' ? 'w-4 h-4 mr-2' : 'w-5 h-5 mr-2'} aria-hidden />
+      {downloadLabel}
+    </a>
+  );
 
   const instructions =
     mode === 'ios' ? (
@@ -271,8 +320,10 @@ export function PwaInstallPrompt({ variant = 'card', className }: PwaInstallProm
           <p className="text-cinema-ash text-xs mt-3">{INSTALL_COPY['android-apk'].apkNote}</p>
         )}
       </div>
-    ) : 'steps' in INSTALL_COPY.manual ? (
-      <StepsList steps={INSTALL_COPY.manual.steps} />
+    ) : mode === 'prompt' && !canInstall ? (
+      <StepsList steps={isAndroid() ? INSTALL_COPY['pwa-android'].steps : INSTALL_COPY['pwa-desktop'].steps} />
+    ) : 'steps' in copy ? (
+      <StepsList steps={copy.steps} />
     ) : null;
 
   if (variant === 'inline') {
@@ -345,5 +396,114 @@ export function PwaInstallPrompt({ variant = 'card', className }: PwaInstallProm
         </div>
       </div>
     </section>
+  );
+}
+
+interface ApkUpdateModalProps {
+  versionName: string | null;
+  versionCode: number | null;
+  onUpdate: () => void;
+  onDismiss: () => void;
+}
+
+function ApkUpdateModal({ versionName, versionCode, onUpdate, onDismiss }: ApkUpdateModalProps) {
+  const copy = INSTALL_COPY.update;
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onDismiss();
+    };
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = '';
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [onDismiss]);
+
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="apk-update-title"
+    >
+      <div
+        className="relative w-full max-w-md bg-cinema-elevated rounded-2xl border border-cinema-violet/30 shadow-[0_24px_64px_rgba(0,0,0,0.6)] overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          type="button"
+          onClick={onDismiss}
+          className="absolute top-3 right-3 p-2 rounded-lg text-cinema-ash hover:text-white hover:bg-cinema-elevated/80 transition-colors"
+          aria-label="Cerrar"
+        >
+          <X className="w-4 h-4" aria-hidden />
+        </button>
+
+        <div className="p-6 md:p-8">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cinema-violet to-cinema-teal flex items-center justify-center shadow-glow-violet shrink-0">
+              <RefreshCw className="w-6 h-6 text-white" aria-hidden />
+            </div>
+            <div className="min-w-0 pr-8">
+              <h2
+                id="apk-update-title"
+                className="font-display text-xl md:text-2xl tracking-wide text-white uppercase leading-tight"
+              >
+                {copy.title}
+              </h2>
+              {versionName ? (
+                <span className="inline-flex items-center gap-1.5 mt-1.5 text-[10px] uppercase tracking-wider text-cinema-gold bg-cinema-gold/10 px-2 py-0.5 rounded">
+                  {copy.versionLabel} {versionName}
+                </span>
+              ) : null}
+            </div>
+          </div>
+
+          <p className="text-cinema-silver text-sm leading-relaxed mb-6">{copy.subtitle}</p>
+
+          {versionCode ? (
+            <div className="rounded-xl bg-cinema-surface border border-cinema-border p-3 mb-6">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-cinema-ash">Versión disponible</span>
+                <span className="text-cinema-gold font-medium">v{versionName ?? versionCode}</span>
+              </div>
+              {versionCode ? (
+                <div className="flex items-center justify-between text-xs mt-1.5">
+                  <span className="text-cinema-ash">Código</span>
+                  <span className="text-cinema-silver font-mono">{versionCode}</span>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+
+          <div className="flex flex-col-reverse sm:flex-row gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onDismiss}
+              className="w-full sm:flex-1"
+            >
+              Más tarde
+            </Button>
+            <a
+              href={APK_DOWNLOAD_PATH}
+              download="pelis.apk"
+              onClick={onUpdate}
+              className={cn(
+                'inline-flex items-center justify-center gap-2 font-semibold transition-all duration-200',
+                'bg-gradient-to-r from-cinema-gold to-cinema-gold-light text-black hover:brightness-110',
+                'rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cinema-accent/60',
+                'py-3 px-6 text-base w-full sm:flex-1'
+              )}
+            >
+              <Share className="w-4 h-4" aria-hidden />
+              {copy.downloadLabel}
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

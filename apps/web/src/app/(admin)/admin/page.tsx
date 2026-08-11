@@ -2,9 +2,9 @@
 
 import Link from 'next/link';
 import { useQuery } from 'convex/react';
-import { Film, AlertTriangle, ImageOff, VideoOff, FileWarning } from 'lucide-react';
+import { Film, AlertTriangle, ImageOff, VideoOff, FileWarning, Monitor } from 'lucide-react';
 import { api } from '@pelis/convex';
-import { Spinner } from '@pelis/ui/components';
+import { AdminDashboardSkeleton } from '@pelis/ui/features/admin-dashboard-skeleton';
 
 const statCards = [
   {
@@ -35,6 +35,24 @@ const statCards = [
     bg: 'bg-red-500/15',
   },
   {
+    key: 'missingImageTitled',
+    label: 'Sin poster (con título)',
+    href: '/admin/movies?filter=missing_image_titled',
+    filter: 'missing_image_titled',
+    icon: ImageOff,
+    color: 'text-rose-300',
+    bg: 'bg-rose-500/15',
+  },
+  {
+    key: 'missingBackdrop',
+    label: 'Sin backdrop',
+    href: '/admin/movies?filter=missing_backdrop',
+    filter: 'missing_backdrop',
+    icon: Monitor,
+    color: 'text-cyan-300',
+    bg: 'bg-cyan-500/15',
+  },
+  {
     key: 'missingVideo',
     label: 'Sin video',
     href: '/admin/movies?filter=missing_video',
@@ -58,21 +76,21 @@ export default function AdminDashboardPage() {
   const stats = useQuery(api.adminMovies.adminStats, {});
 
   if (stats === undefined) {
-    return (
-      <div className="flex items-center justify-center min-h-[40vh]" role="status">
-        <Spinner size="lg" />
-      </div>
-    );
+    return <AdminDashboardSkeleton />;
   }
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="font-display text-3xl tracking-wide text-white uppercase">Dashboard</h1>
-        <p className="text-cinema-muted mt-2">Resumen del catálogo de películas</p>
+      <div className="mb-6 sm:mb-8">
+        <h1 className="font-display text-2xl sm:text-3xl tracking-wide text-white uppercase">
+          Dashboard
+        </h1>
+        <p className="text-cinema-muted mt-1 sm:mt-2 text-sm sm:text-base">
+          Resumen del catálogo de películas
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
         {statCards.map((card) => {
           const Icon = card.icon;
           const value = stats[card.key as keyof typeof stats];
@@ -97,7 +115,7 @@ export default function AdminDashboardPage() {
         })}
       </div>
 
-      <div className="mt-8 p-6 rounded-2xl bg-cinema-surface border border-cinema-border">
+      <div className="mt-6 sm:mt-8 p-4 sm:p-6 rounded-2xl bg-cinema-surface border border-cinema-border">
         <h2 className="text-lg font-semibold text-white mb-2">Acciones rápidas</h2>
         <p className="text-sm text-cinema-muted mb-4">
           Gestiona el catálogo, corrige registros huérfanos y fusiona duplicados.

@@ -28,7 +28,15 @@ export async function enrichMovieImage<T extends MovieDoc | null>(
     if (url) image = url;
   }
 
-  return { ...movie, image };
+  let backdropImage = movie.backdropImage
+    ? resolveMovieImagePath(movie.backdropImage)
+    : undefined;
+  if (movie.backdropImageId) {
+    const url = await ctx.storage.getUrl(movie.backdropImageId);
+    if (url) backdropImage = url;
+  }
+
+  return { ...movie, image, backdropImage };
 }
 
 export async function enrichMovies(
@@ -48,4 +56,11 @@ export async function resolveImageFromStorage(
     if (url) return url;
   }
   return resolveMovieImagePath(image);
+}
+
+export function getHeroImage(movie: {
+  backdropImage?: string;
+  image: string;
+}): string {
+  return movie.backdropImage?.trim() || movie.image;
 }

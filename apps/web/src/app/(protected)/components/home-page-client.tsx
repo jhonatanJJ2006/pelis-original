@@ -8,6 +8,7 @@ import { ContinueWatchingRow } from '@pelis/ui/features/continue-watching-row';
 import { SectionHeader } from '@pelis/ui/features/section-header';
 import { GenreSwiper, GenreChip } from '@pelis/ui/features/genre-swiper';
 import { HeroCarousel } from './hero-carousel';
+import { HeroSkeleton } from '@pelis/ui/features/hero-skeleton';
 import { api } from '@pelis/convex';
 import type { MediaItem } from '@pelis/ui/types';
 import { cn } from '@pelis/ui/utils';
@@ -36,22 +37,17 @@ interface HomePageClientProps {
 
 export function HomePageClient({ preloaded }: HomePageClientProps) {
   const { user } = useUser();
-  const movies =
-    (usePreloadedQuery(preloaded.movies) as MediaItem[] | undefined) ?? [];
-  const featuredMovies =
-    (usePreloadedQuery(preloaded.featured) as MediaItem[] | undefined) ?? [];
-  const trending =
-    (usePreloadedQuery(preloaded.trending) as MediaItem[] | undefined) ?? [];
-  const series =
-    (usePreloadedQuery(preloaded.series) as MediaItem[] | undefined) ?? [];
-  const genres =
-    (usePreloadedQuery(preloaded.genres) as string[] | undefined) ?? [];
+  const movies = usePreloadedQuery(preloaded.movies) as MediaItem[] | undefined;
+  const featuredMovies = usePreloadedQuery(preloaded.featured) as MediaItem[] | undefined;
+  const trending = usePreloadedQuery(preloaded.trending) as MediaItem[] | undefined;
+  const series = usePreloadedQuery(preloaded.series) as MediaItem[] | undefined;
+  const genres = usePreloadedQuery(preloaded.genres) as string[] | undefined;
   const continueWatching = useQuery(
     api.history.getContinueWatching,
     user ? { userId: user._id as any, limit: 10 } : 'skip'
   );
 
-  const topGenres = genres.slice(0, 4);
+  const topGenres = (genres ?? []).slice(0, 4);
 
   const continueItems =
     continueWatching
@@ -65,7 +61,11 @@ export function HomePageClient({ preloaded }: HomePageClientProps) {
 
   return (
     <div className="pb-12">
-      <HeroCarousel movies={featuredMovies} />
+      {featuredMovies === undefined ? (
+        <HeroSkeleton />
+      ) : (
+        <HeroCarousel movies={featuredMovies} />
+      )}
 
       <div className="container mx-auto px-4 py-10 space-y-12 md:space-y-16">
         {user && continueItems.length > 0 && (
@@ -79,6 +79,7 @@ export function HomePageClient({ preloaded }: HomePageClientProps) {
           title="Tendencias"
           subtitle="Lo más popular ahora"
           movies={trending}
+          isLoading={trending === undefined}
           href="/movies"
         />
 
@@ -86,13 +87,14 @@ export function HomePageClient({ preloaded }: HomePageClientProps) {
           title="Series"
           subtitle="Maratón garantizado"
           movies={series}
+          isLoading={series === undefined}
           href="/series"
           linkLabel="Ver series"
         />
 
         {topGenres.map((genre, idx) => {
-          const genreMovies = movies.filter((m) => m.genre === genre).slice(0, 12);
-          if (genreMovies.length === 0) return null;
+          const genreMovies = (movies ?? []).filter((m) => m.genre === genre).slice(0, 12);
+          if (genreMovies.length === 0 && movies !== undefined) return null;
           return (
             <div
               key={genre}
@@ -101,6 +103,7 @@ export function HomePageClient({ preloaded }: HomePageClientProps) {
               <MovieRow
                 title={genre}
                 movies={genreMovies}
+                isLoading={movies === undefined}
                 href={`/movies?genre=${encodeURIComponent(genre)}`}
               />
             </div>
@@ -113,7 +116,7 @@ export function HomePageClient({ preloaded }: HomePageClientProps) {
             subtitle="Desliza y descubre por tu género favorito"
           />
           <GenreSwiper>
-            {genres.map((genre) => (
+            {(genres ?? []).map((genre) => (
               <GenreChip
                 key={genre}
                 href={`/movies?genre=${encodeURIComponent(genre)}`}

@@ -1,10 +1,14 @@
 [
   {
-    "relation": ["delegate_permission/common.handle_all_urls"],
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
     "target": {
       "namespace": "android_app",
-      "package_name": "com.pelis.app",
-      "sha256_cert_fingerprints": ["REEMPLAZAR_CON_SHA256_DEL_KEYSTORE"]
+      "package_name": "pro.verpelis.twa",
+      "sha256_cert_fingerprints": [
+        "0A:25:7C:B4:13:6D:EB:21:73:1D:92:2B:20:3E:0B:C6:5E:EB:1A:2C:E8:14:57:23:1C:A9:38:92:3F:85:41:D3"
+      ]
     }
   }
 ]

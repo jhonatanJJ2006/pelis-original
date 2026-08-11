@@ -14,14 +14,17 @@ if (!fs.existsSync(keystore)) {
   process.exit(1);
 }
 
-const storePass = process.env.ANDROID_KEYSTORE_PASSWORD;
-const keyPass = process.env.ANDROID_KEY_PASSWORD || storePass;
-const alias = process.env.ANDROID_KEY_ALIAS || 'pelis';
+const storePass = process.env.ANDROID_KEYSTORE_PASSWORD || process.env.BUBBLEWRAP_KEYSTORE_PASSWORD;
+const keyPass =
+  process.env.ANDROID_KEY_PASSWORD ||
+  process.env.BUBBLEWRAP_KEY_PASSWORD ||
+  storePass;
+const alias = process.env.ANDROID_KEY_ALIAS || 'android';
 
 if (!storePass) {
   console.error('Define la contraseña del keystore antes de ejecutar este script:');
-  console.error('  Windows: $env:ANDROID_KEYSTORE_PASSWORD="tu-contraseña"');
-  console.error('  macOS/Linux: export ANDROID_KEYSTORE_PASSWORD="tu-contraseña"');
+  console.error('  export ANDROID_KEYSTORE_PASSWORD="tu-contraseña"');
+  console.error('  (también acepta BUBBLEWRAP_KEYSTORE_PASSWORD)');
   process.exit(1);
 }
 
@@ -43,4 +46,4 @@ fs.writeFileSync(assetlinks, `${JSON.stringify(json, null, 2)}\n`);
 
 console.log('SHA256 actualizado en apps/web/public/.well-known/assetlinks.json');
 console.log(fingerprint);
-console.log('Despliega a Vercel para que TWA verifique el dominio.');
+console.log('Despliega el frontend para que TWA verifique verpelis.pro.');

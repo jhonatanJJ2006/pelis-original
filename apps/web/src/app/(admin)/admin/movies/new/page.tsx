@@ -68,7 +68,7 @@ export default function NewMoviePage() {
         Volver al listado
       </Link>
 
-      <h1 className="font-display text-3xl tracking-wide text-white uppercase mb-8">
+      <h1 className="font-display text-2xl sm:text-3xl tracking-wide text-white uppercase mb-6 sm:mb-8">
         Nueva película
       </h1>
 

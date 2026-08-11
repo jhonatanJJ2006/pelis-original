@@ -1,15 +1,14 @@
 'use client';
 
-import { useQuery } from 'convex/react';
+import { useQuery, usePreloadedQuery, type Preloaded } from 'convex/react';
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { SlidersHorizontal } from 'lucide-react';
-import { MovieCard } from '@pelis/ui/features/movie-card';
+import { MovieRow } from '@pelis/ui/features/movie-row';
 import { EmptyState } from '@pelis/ui/features/empty-state';
-import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';
 import { CatalogFilterBar } from '@pelis/ui/features/catalog-filter-bar';
+import { CatalogPageSkeleton } from '@pelis/ui/features/catalog-page-skeleton';
 import { api } from '@pelis/convex';
-import { Spinner } from '@pelis/ui/components';
 import type { MediaItem } from '@pelis/ui/types';
 
 const classificationOrder = ['G', 'PG', 'PG-13', 'R', 'NC-17'];
@@ -22,7 +21,15 @@ const classificationLabels: Record<string, string> = {
   'NC-17': 'Solo adultos',
 };
 
-export default function MoviesPageClient() {
+interface MoviesPageClientProps {
+  preloaded: {
+    movies: Preloaded<typeof api.movies.list>;
+    genres: Preloaded<typeof api.movies.getGenres>;
+    years: Preloaded<typeof api.movies.getYears>;
+  };
+}
+
+export default function MoviesPageClient({ preloaded }: MoviesPageClientProps) {
   const searchParams = useSearchParams();
   const [search, setSearch] = useState('');
   const [selectedGenre, setSelectedGenre] = useState('');
@@ -34,15 +41,27 @@ export default function MoviesPageClient() {
     setSelectedYear(searchParams.get('year') ?? '');
   }, [searchParams]);
 
-  const movies = useQuery(api.movies.list, {
-    genre: selectedGenre || undefined,
-    year: selectedYear || undefined,
-    search: search || undefined,
-    mediaType: 'movie',
-  }) as MediaItem[] | undefined;
+  const hasFilters = Boolean(selectedGenre || selectedYear || search);
 
-  const genres = (useQuery(api.movies.getGenres, {}) as string[] | undefined) ?? [];
-  const years = (useQuery(api.movies.getYears, {}) as string[] | undefined) ?? [];
+  const preloadedMovies = usePreloadedQuery(preloaded.movies) as MediaItem[] | undefined;
+  const preloadedGenres = usePreloadedQuery(preloaded.genres) as string[] | undefined;
+  const preloadedYears = usePreloadedQuery(preloaded.years) as string[] | undefined;
+
+  const filteredMovies = useQuery(
+    api.movies.list,
+    hasFilters
+      ? {
+          genre: selectedGenre || undefined,
+          year: selectedYear || undefined,
+          search: search || undefined,
+          mediaType: 'movie' as const,
+        }
+      : 'skip'
+  ) as MediaItem[] | undefined;
+
+  const movies = hasFilters ? filteredMovies : preloadedMovies;
+  const genres = preloadedGenres ?? [];
+  const years = preloadedYears ?? [];
 
   const isLoading = movies === undefined;
 
@@ -61,22 +80,20 @@ export default function MoviesPageClient() {
     });
   }, [movies]);
 
-  const hasFilters = Boolean(selectedGenre || selectedYear || search);
+  if (isLoading) {
+    return <CatalogPageSkeleton />;
+  }
 
   return (
     <div className="page-shell">
       <div className="mb-10">
-        <ScrollReveal>
-          <p className="text-cinema-violet-light text-sm font-medium uppercase tracking-widest mb-2">
-            Catálogo
-          </p>
-          <h1 className="font-display text-4xl md:text-5xl tracking-wide text-white uppercase mb-2">
-            Películas
-          </h1>
-          <p className="text-cinema-muted mb-8">
-            {movies ? `${movies.length} películas disponibles` : 'Cargando...'}
-          </p>
-        </ScrollReveal>
+        <p className="text-cinema-violet-light text-sm font-medium uppercase tracking-widest mb-2">
+          Catálogo
+        </p>
+        <h1 className="font-display text-4xl md:text-5xl tracking-wide text-white uppercase mb-2">
+          Películas
+        </h1>
+        <p className="text-cinema-muted mb-8">{movies.length} películas disponibles</p>
 
         <CatalogFilterBar
           searchId="movies-search"
@@ -112,11 +129,7 @@ export default function MoviesPageClient() {
         />
       </div>
 
-      {isLoading ? (
-        <div className="flex items-center justify-center py-24" role="status" aria-label="Cargando">
-          <Spinner size="lg" />
-        </div>
-      ) : movies.length === 0 ? (
+      {movies.length === 0 ? (
         <EmptyState
           icon={SlidersHorizontal}
           title="Sin resultados"
@@ -125,34 +138,20 @@ export default function MoviesPageClient() {
           actionHref="/movies"
         />
       ) : hasFilters ? (
-        <ScrollReveal>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
-            {movies.map((movie) => (
-              <MovieCard key={movie._id} movie={movie} />
-            ))}
-          </div>
-        </ScrollReveal>
+        <MovieRow
+          title="Resultados"
+          subtitle={`${movies.length} ${movies.length === 1 ? 'título' : 'títulos'}`}
+          movies={movies}
+        />
       ) : (
         <div className="space-y-10">
           {grouped.map(([classification, items]) => (
-            <ScrollReveal key={classification}>
-              <div className="flex items-baseline gap-3 mb-5">
-                <h2 className="font-display text-2xl tracking-wide text-white uppercase">
-                  {classification}
-                </h2>
-                <span className="text-sm text-cinema-muted hidden sm:inline">
-                  {classificationLabels[classification] || ''}
-                </span>
-                <span className="text-xs text-cinema-ash ml-auto">
-                  {items.length} {items.length === 1 ? 'título' : 'títulos'}
-                </span>
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
-                {items.map((movie) => (
-                  <MovieCard key={movie._id} movie={movie} />
-                ))}
-              </div>
-            </ScrollReveal>
+            <MovieRow
+              key={classification}
+              title={classification}
+              subtitle={`${classificationLabels[classification] ?? ''} · ${items.length} ${items.length === 1 ? 'título' : 'títulos'}`.trim()}
+              movies={items}
+            />
           ))}
         </div>
       )}

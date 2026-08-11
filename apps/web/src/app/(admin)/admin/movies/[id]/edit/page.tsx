@@ -3,10 +3,13 @@
 import { useMutation, useQuery } from 'convex/react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowLeft, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@pelis/convex';
-import { Spinner } from '@pelis/ui/components';
+import { Button } from '@pelis/ui/components';
+import { AdminFormSkeleton } from '@pelis/ui/features/admin-form-skeleton';
+import { EnrichMovieModal } from '../../../components/enrich-movie-modal';
 import { MovieForm, type MovieFormValues } from '../../../components/movie-form';
 import type { MediaItem } from '@pelis/ui/types';
 
@@ -14,6 +17,7 @@ export default function EditMoviePage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const movieId = params.id;
+  const [showEnrich, setShowEnrich] = useState(false);
 
   const movie = useQuery(api.movies.getById, { id: movieId as any }) as MediaItem | null | undefined;
   const updateMovie = useMutation(api.movies.update);
@@ -40,7 +44,7 @@ export default function EditMoviePage() {
     return { image: URL.createObjectURL(file), imageId: storageId };
   };
 
-  const handleSubmit = async (values: MovieFormValues) => {
+  const handleSubmit = async (values: MovieFormValues, intent?: 'save' | 'continue') => {
     try {
       await updateMovie({
         id: movieId as any,
@@ -59,18 +63,16 @@ export default function EditMoviePage() {
         featured: values.featured,
       });
       toast.success('Película actualizada');
-      router.push('/admin/movies');
+      if (intent !== 'continue') {
+        router.push('/admin/movies');
+      }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Error al actualizar');
     }
   };
 
   if (movie === undefined) {
-    return (
-      <div className="flex items-center justify-center min-h-[40vh]" role="status">
-        <Spinner size="lg" />
-      </div>
-    );
+    return <AdminFormSkeleton />;
   }
 
   if (!movie) {
@@ -94,9 +96,15 @@ export default function EditMoviePage() {
         Volver al listado
       </Link>
 
-      <h1 className="font-display text-3xl tracking-wide text-white uppercase mb-8">
-        Editar película
-      </h1>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+        <h1 className="font-display text-2xl sm:text-3xl tracking-wide text-white uppercase">
+          Editar película
+        </h1>
+        <Button variant="secondary" className="w-full sm:w-auto" onClick={() => setShowEnrich(true)}>
+          <Sparkles className="w-4 h-4" />
+          Completar desde TMDB
+        </Button>
+      </div>
 
       <MovieForm
         initialValues={{
@@ -122,7 +130,22 @@ export default function EditMoviePage() {
         onSubmit={handleSubmit}
         onUploadImage={handleUploadImage}
         submitLabel="Guardar cambios"
+        mode="edit"
       />
+
+      {showEnrich && (
+        <EnrichMovieModal
+          movie={{
+            _id: movie._id,
+            name: movie.name,
+            token: movie.token,
+            image: movie.image,
+            backdropImage: movie.backdropImage,
+          }}
+          onClose={() => setShowEnrich(false)}
+          onEnriched={() => setShowEnrich(false)}
+        />
+      )}
     </div>
   );
 }

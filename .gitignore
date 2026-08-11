@@ -55,6 +55,7 @@ apps/android/store_icon.png
 
 # Cursor (clones temporales al instalar skills)
 .cursor/tmp-skills/
+.tools/
 
 # Media assets locales (copiar desde pelis/public/peliculas/peliculas)
 apps/web/public/peliculas/peliculas/*
@@ -71,3 +72,6 @@ playwright-report/
 images/
 apps/web/public/images/
 apps/web/public/peliculas/
+
+# Frames temporales para identificación de películas huérfanas
+tmp/movie-frames/

@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { ArrowLeft, Star, Play, Tv, Loader2, AlertCircle } from 'lucide-react';
 import { api } from '@pelis/convex';
-import { Spinner } from '@pelis/ui/components';
+import { MovieDetailSkeleton } from '@pelis/ui/features/movie-detail-skeleton';
 import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';
 import { cn } from '@pelis/ui/utils';
 
@@ -73,11 +73,7 @@ export default function AnimeDetailPage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="page-shell min-h-[60vh] flex items-center justify-center">
-        <Spinner size="lg" />
-      </div>
-    );
+    return <MovieDetailSkeleton />;
   }
 
   if (!anime) {

@@ -1,8 +1,6 @@
 import { preloadQuery } from 'convex/nextjs';
 import { api } from '@pelis/convex';
-import { HomePageClient } from './(protected)/components/home-page-client';
-import { Header } from './(protected)/components/header';
-import { Footer } from './(protected)/components/footer';
+import { HomePageClient } from './components/home-page-client';
 
 export const revalidate = 3600;
 
@@ -16,12 +14,6 @@ export default async function HomePage() {
   ]);
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header sticky={false} />
-      <main className="flex-1">
-        <HomePageClient preloaded={{ featured, trending, movies, series, genres }} />
-      </main>
-      <Footer />
-    </div>
+    <HomePageClient preloaded={{ featured, trending, movies, series, genres }} />
   );
 }

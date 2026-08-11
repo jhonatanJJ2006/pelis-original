@@ -35,11 +35,7 @@ export const movieSchema = z.object({
   actors: z.string().min(1, 'Los actores son requeridos'),
   classification: z.string().min(1, 'La clasificación es requerida'),
   releaseYear: z.string().regex(/^\d{4}$/, 'Año inválido'),
-  videoUrl: z
-    .string()
-    .url('URL de video inválida')
-    .optional()
-    .or(z.literal('')),
+  videoUrl: z.string().optional().or(z.literal('')),
   mediaType: z.enum(['movie', 'series']).optional(),
   episodes: z.number().int().positive().optional(),
   featured: z.boolean().optional(),

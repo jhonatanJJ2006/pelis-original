@@ -19,6 +19,7 @@ export function useDragScroll() {
     }
     scrollerRef.current = el;
     if (!el) return;
+    el.setAttribute('data-horizontal-scroll', '');
 
     const onDown = (e: PointerEvent) => {
       if (e.pointerType === 'mouse' && e.button !== 0) return;

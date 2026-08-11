@@ -23,9 +23,11 @@ interface MovieFormProps {
   initialValues?: Partial<MovieFormValues>;
   genres: string[];
   classifications: string[];
-  onSubmit: (values: MovieFormValues) => Promise<void>;
+  onSubmit: (values: MovieFormValues, intent?: 'save' | 'continue') => Promise<void>;
   onUploadImage?: (file: File) => Promise<{ image: string; imageId?: string }>;
   submitLabel?: string;
+  /** En edición solo se validan formatos; no se exigen metadata completa. */
+  mode?: 'create' | 'edit';
 }
 
 const defaultValues: MovieFormValues = {
@@ -50,6 +52,7 @@ export function MovieForm({
   onSubmit,
   onUploadImage,
   submitLabel = 'Guardar',
+  mode = 'create',
 }: MovieFormProps) {
   const [values, setValues] = useState<MovieFormValues>({
     ...defaultValues,
@@ -70,37 +73,49 @@ export function MovieForm({
 
   const validate = () => {
     const nextErrors: Record<string, string> = {};
+    const isEdit = mode === 'edit';
 
     if (!values.name.trim()) nextErrors.name = 'El nombre es requerido';
-    if (!values.image.trim()) nextErrors.image = 'La imagen es requerida';
-    if (values.synopsis.trim().length < 10) {
-      nextErrors.synopsis = 'La sinopsis debe tener al menos 10 caracteres';
-    }
-    if (!values.genre.trim()) nextErrors.genre = 'El género es requerido';
     if (!values.token.trim()) nextErrors.token = 'El token es requerido';
-    if (!values.actors.trim()) nextErrors.actors = 'Los actores son requeridos';
-    if (!values.classification.trim()) {
-      nextErrors.classification = 'La clasificación es requerida';
-    }
-    if (!/^\d{4}$/.test(values.releaseYear)) nextErrors.releaseYear = 'Año inválido';
-    if (values.videoUrl && !/^https?:\/\//.test(values.videoUrl)) {
-      nextErrors.videoUrl = 'URL de video inválida';
+
+    if (!isEdit) {
+      if (!values.image.trim()) nextErrors.image = 'La imagen es requerida';
+      if (values.synopsis.trim().length < 10) {
+        nextErrors.synopsis = 'La sinopsis debe tener al menos 10 caracteres';
+      }
+      if (!values.genre.trim()) nextErrors.genre = 'El género es requerido';
+      if (!values.actors.trim()) nextErrors.actors = 'Los actores son requeridos';
+      if (!values.classification.trim()) {
+        nextErrors.classification = 'La clasificación es requerida';
+      }
+      if (!/^\d{4}$/.test(values.releaseYear)) {
+        nextErrors.releaseYear = 'Año inválido';
+      }
+    } else {
+      const year = values.releaseYear.trim();
+      if (year && !/^\d{4}$/.test(year)) {
+        nextErrors.releaseYear = 'Año inválido (use 4 dígitos o déjelo vacío)';
+      }
     }
 
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const submit = async (intent: 'save' | 'continue') => {
     if (!validate()) return;
 
     setIsSubmitting(true);
     try {
-      await onSubmit(values);
+      await onSubmit(values, intent);
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    void submit('save');
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -241,7 +256,7 @@ export function MovieForm({
         value={values.videoUrl}
         onChange={(e) => setField('videoUrl', e.target.value)}
         error={errors.videoUrl}
-        placeholder="https://..."
+        placeholder="/api/stream/{token}/{token}/playlist.m3u8 o https://..."
       />
 
       <label className="inline-flex items-center gap-2 text-sm text-cinema-muted cursor-pointer">
@@ -254,9 +269,21 @@ export function MovieForm({
         Destacada en inicio
       </label>
 
-      <Button type="submit" disabled={isSubmitting || isUploading}>
-        {isSubmitting ? 'Guardando...' : submitLabel}
-      </Button>
+      <div className="flex flex-wrap items-center gap-3">
+        <Button type="submit" disabled={isSubmitting || isUploading}>
+          {isSubmitting ? 'Guardando...' : submitLabel}
+        </Button>
+        {mode === 'edit' && (
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={isSubmitting || isUploading}
+            onClick={() => void submit('continue')}
+          >
+            {isSubmitting ? 'Guardando...' : 'Guardar y seguir editando'}
+          </Button>
+        )}
+      </div>
     </form>
   );
 }

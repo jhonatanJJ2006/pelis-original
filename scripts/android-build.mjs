@@ -9,9 +9,66 @@ const androidDir = path.join(root, 'apps/android');
 const apkOut = path.join(root, 'apps/web/public/downloads/pelis.apk');
 const bubblewrap = path.join(androidDir, 'node_modules/.bin/bubblewrap');
 
+function findBundledJdkHome() {
+  const toolsDir = path.join(root, '.tools');
+  if (!fs.existsSync(toolsDir)) return null;
+  const match = fs
+    .readdirSync(toolsDir)
+    .map((name) => path.join(toolsDir, name))
+    .find((dir) => fs.existsSync(path.join(dir, 'bin', 'java')));
+  return match ?? null;
+}
+
+function ensureJava() {
+  try {
+    execSync('java -version', { stdio: 'ignore' });
+    return process.env;
+  } catch {
+    const jdkHome = findBundledJdkHome();
+    if (!jdkHome) {
+      console.error('Java JDK 17+ es obligatorio.');
+      console.error('Opciones:');
+      console.error('  1. sudo apt install openjdk-17-jdk-headless');
+      console.error('  2. Descargar JDK en .tools/ (ver DEPLOY.md)');
+      process.exit(1);
+    }
+    console.log(`Usando JDK incluido: ${jdkHome}\n`);
+    return {
+      ...process.env,
+      JAVA_HOME: jdkHome,
+      PATH: `${path.join(jdkHome, 'bin')}${path.delimiter}${process.env.PATH ?? ''}`,
+    };
+  }
+}
+
+const buildEnv = ensureJava();
+const jdkHome = buildEnv.JAVA_HOME ?? findBundledJdkHome();
+const toolsDir = path.join(root, '.tools');
+const androidSdkPath = path.join(toolsDir, 'android-sdk');
+
+function ensureBubblewrapConfig() {
+  const configDir = path.join(process.env.HOME ?? '', '.bubblewrap');
+  const configPath = path.join(configDir, 'config.json');
+  if (!jdkHome || !fs.existsSync(androidSdkPath)) return;
+
+  const binPath = path.join(androidSdkPath, 'bin');
+  const cmdlineBin = path.join(androidSdkPath, 'cmdline-tools', 'latest', 'bin');
+  if (!fs.existsSync(binPath) && fs.existsSync(cmdlineBin)) {
+    fs.symlinkSync(path.join('cmdline-tools', 'latest', 'bin'), binPath);
+  }
+
+  fs.mkdirSync(configDir, { recursive: true });
+  fs.writeFileSync(
+    configPath,
+    JSON.stringify({ jdkPath: jdkHome, androidSdkPath }, null, 2)
+  );
+}
+
+ensureBubblewrapConfig();
+
 function run(cmd, args, cwd = androidDir) {
   const bin = process.platform === 'win32' && !cmd.endsWith('.cmd') ? `${cmd}.cmd` : cmd;
-  const result = spawnSync(bin, args, { cwd, stdio: 'inherit', shell: process.platform === 'win32' });
+  const result = spawnSync(bin, args, { cwd, stdio: 'inherit', shell: process.platform === 'win32', env: buildEnv });
   if (result.status !== 0) {
     process.exit(result.status ?? 1);
   }
@@ -23,26 +80,24 @@ function hasAndroidProject() {
 
 console.log('=== Pelis Android APK (TWA) ===\n');
 
-try {
-  execSync('java -version', { stdio: 'ignore' });
-} catch {
-  console.error('Java JDK 17+ es obligatorio. Instala Android Studio o JDK 17.');
-  process.exit(1);
-}
-
 if (!fs.existsSync(bubblewrap)) {
   console.log('Instalando @bubblewrap/cli en apps/android...');
-  execSync('pnpm install', { cwd: androidDir, stdio: 'inherit' });
+  execSync('pnpm install', { cwd: androidDir, stdio: 'inherit', env: buildEnv });
 }
 
 if (!hasAndroidProject()) {
-  console.log('\nPrimera vez: inicializando proyecto TWA...');
-  console.log('Usa estos valores si te los pide:');
-  console.log('  - Domain: pelis-original.vercel.app');
-  console.log('  - Package: com.pelis.app');
-  console.log('  - App name: Pelis');
-  console.log('  - Keystore: crear nuevo (guarda la contraseña)\n');
-  run('npx', ['@bubblewrap/cli', 'init', '--manifest=https://pelis-original.vercel.app/manifest.json']);
+  console.error('\nPrimera vez: debes inicializar el proyecto TWA en tu terminal (es interactivo).\n');
+  console.error('Ejecuta estos comandos:\n');
+  console.error('  cd apps/android');
+  console.error('  npx @bubblewrap/cli init --manifest=https://verpelis.pro/manifest.json\n');
+  console.error('Cuando pregunte, usa estos valores:');
+  console.error('  - ¿Instalar JDK? → No (ya está en .tools/)');
+  console.error('  - Domain: verpelis.pro');
+  console.error('  - Package: com.pelis.app');
+  console.error('  - App name: Pelis');
+  console.error('  - Keystore: crear uno nuevo y guarda la contraseña\n');
+  console.error('Luego vuelve a ejecutar: pnpm android:build\n');
+  process.exit(1);
 }
 
 console.log('\nCompilando APK firmado...');
@@ -63,5 +118,5 @@ if (!built) {
 fs.mkdirSync(path.dirname(apkOut), { recursive: true });
 fs.copyFileSync(built, apkOut);
 console.log(`\nAPK copiado a: ${apkOut}`);
-console.log('Descarga pública: https://pelis-original.vercel.app/downloads/pelis.apk');
+console.log('Descarga pública: https://verpelis.pro/downloads/pelis.apk');
 console.log('\nSiguiente paso: pnpm android:fingerprint (actualiza assetlinks.json) y vuelve a desplegar.');

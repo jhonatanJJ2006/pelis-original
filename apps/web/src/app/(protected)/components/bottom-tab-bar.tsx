@@ -20,10 +20,10 @@ export function BottomTabBar() {
 
   return (
     <nav
-      className="fixed bottom-0 inset-x-0 z-50 border-t border-cinema-border bg-cinema-surface/95 backdrop-blur-md pb-[env(safe-area-inset-bottom)]"
+      className="fixed bottom-0 inset-x-0 z-50 md:hidden border-t border-cinema-border/80 bg-cinema-surface/95 backdrop-blur-xl pb-[env(safe-area-inset-bottom)]"
       aria-label="Navegación principal"
     >
-      <div className="flex items-stretch justify-around h-16 max-w-lg mx-auto">
+      <div className="flex items-center justify-around h-[4.25rem] max-w-lg mx-auto px-1">
         {tabs.map((tab, index) => {
           const Icon = tab.icon;
           const isActive = activeIndex === index;
@@ -33,13 +33,21 @@ export function BottomTabBar() {
               key={tab.href}
               href={tab.href}
               className={cn(
-                'flex flex-1 flex-col items-center justify-center gap-1 min-w-0 px-1 transition-colors',
-                isActive ? 'text-cinema-violet-light' : 'text-cinema-ash hover:text-cinema-muted'
+                'relative flex flex-1 items-center justify-center h-12 rounded-2xl transition-all duration-200',
+                isActive
+                  ? 'text-cinema-violet-light'
+                  : 'text-cinema-ash active:scale-95 hover:text-cinema-muted'
               )}
+              aria-label={tab.label}
               aria-current={isActive ? 'page' : undefined}
             >
-              <Icon className={cn('w-5 h-5', isActive && 'scale-110')} aria-hidden />
-              <span className="text-[10px] font-medium truncate w-full text-center">{tab.label}</span>
+              {isActive && (
+                <span
+                  className="absolute inset-x-2 inset-y-1.5 rounded-xl bg-cinema-violet/15"
+                  aria-hidden
+                />
+              )}
+              <Icon className={cn('relative w-6 h-6', isActive && 'scale-105')} aria-hidden />
             </Link>
           );
         })}

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useMutation } from 'convex/react';
 import Hls from 'hls.js';
-import { Maximize, Pause, Play, Volume2, VolumeX } from 'lucide-react';
+import { AlertCircle, Maximize, Pause, Play, Volume2, VolumeX } from 'lucide-react';
 import { api } from '@pelis/convex';
 import { cn } from '../../shared/utils';
 
@@ -34,26 +34,43 @@ export function VideoPlayer({
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [showControls, setShowControls] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const lastSaved = useRef(0);
 
   const src = videoUrl || DEMO_VIDEO;
   const isHls = src.includes('.m3u8');
+  const useHlsJs = isHls && Hls.isSupported();
 
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || !isHls) return;
-    let hls: Hls | null = null;
-    if (Hls.isSupported()) {
-      hls = new Hls();
+    if (!video) return;
+
+    setError(null);
+
+    if (!isHls) {
+      video.src = src;
+      return;
+    }
+
+    if (useHlsJs) {
+      const hls = new Hls({ enableWorker: true });
       hls.loadSource(src);
       hls.attachMedia(video);
-    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+
+      hls.on(Hls.Events.ERROR, (_, data) => {
+        if (data.fatal) {
+          setError('No se pudo cargar el video. Intenta de nuevo más tarde.');
+          setPlaying(false);
+        }
+      });
+
+      return () => hls.destroy();
+    }
+
+    if (video.canPlayType('application/vnd.apple.mpegurl')) {
       video.src = src;
     }
-    return () => {
-      if (hls) hls.destroy();
-    };
-  }, [src, isHls]);
+  }, [src, isHls, useHlsJs]);
 
   const saveProgress = async (current: number, total: number) => {
     if (!userId || total <= 0) return;
@@ -70,13 +87,13 @@ export function VideoPlayer({
 
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || !autoPlay) return;
+    if (!video || !autoPlay || error) return;
     video.play().catch(() => setPlaying(false));
-  }, [autoPlay]);
+  }, [autoPlay, error]);
 
   const togglePlay = () => {
     const video = videoRef.current;
-    if (!video) return;
+    if (!video || error) return;
     if (video.paused) {
       video.play();
       setPlaying(true);
@@ -105,7 +122,7 @@ export function VideoPlayer({
     >
       <video
         ref={videoRef}
-        src={src}
+        src={useHlsJs ? undefined : src}
         poster={poster}
         className="w-full h-full object-contain"
         playsInline
@@ -120,9 +137,21 @@ export function VideoPlayer({
           setPlaying(false);
           void saveProgress(e.currentTarget.duration, e.currentTarget.duration);
         }}
+        onError={() => {
+          if (!useHlsJs) {
+            setError('No se pudo reproducir el video.');
+            setPlaying(false);
+          }
+        }}
         onClick={togglePlay}
         aria-label={`Reproducir ${title}`}
       />
+      {error && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-cinema-bg/90 p-6 text-center">
+          <AlertCircle className="w-10 h-10 text-red-400 mb-3" aria-hidden />
+          <p className="text-white text-sm">{error}</p>
+        </div>
+      )}
       <div
         className={cn(
           'absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-cinema-bg/95 to-transparent transition-opacity duration-200',
@@ -201,7 +230,7 @@ export function VideoPlayer({
           </button>
         </div>
       </div>
-      {!playing && (
+      {!playing && !error && (
         <button
           type="button"
           onClick={togglePlay}

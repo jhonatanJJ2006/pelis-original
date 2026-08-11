@@ -6,9 +6,6 @@ import {
   Home,
   Film,
   User,
-  Menu,
-  X,
-  LogOut,
   Crown,
   Search,
   Tv,
@@ -16,7 +13,6 @@ import {
   Clapperboard,
 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
-import { toast } from 'sonner';
 import { useUser } from '@pelis/auth/hooks';
 import { Button } from '@pelis/ui/components';
 import { cn } from '@pelis/ui/utils';
@@ -36,31 +32,20 @@ interface HeaderProps {
 }
 
 export function Header({ sticky = true, minimalNav = false }: HeaderProps) {
-  const { user, logout } = useUser();
+  const { user } = useUser();
   const router = useRouter();
   const pathname = usePathname();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const searchRef = useRef<HTMLInputElement>(null);
 
   const hasActivePlan = !!(user?.planExpiresAt && user.planExpiresAt > Date.now());
 
-  const handleLogout = () => {
-    logout();
-    toast.success('Sesión cerrada correctamente');
-    router.push('/login');
-  };
-
   useEffect(() => {
     if (searchOpen && searchRef.current) {
       searchRef.current.focus();
     }
   }, [searchOpen]);
-
-  useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [pathname]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,7 +86,7 @@ export function Header({ sticky = true, minimalNav = false }: HeaderProps) {
           </div>
 
           {minimalNav && (
-            <div className="flex-1 max-w-md mx-3 lg:hidden">
+            <div className="hidden md:flex flex-1 max-w-md mx-3">
               <SearchDropdown
                 value={searchQuery}
                 onChange={setSearchQuery}
@@ -183,12 +168,12 @@ export function Header({ sticky = true, minimalNav = false }: HeaderProps) {
             )}
           </div>
 
-          <div className={cn('flex items-center gap-2 shrink-0', !minimalNav && 'md:hidden')}>
+          <div className="flex md:hidden items-center gap-1 shrink-0">
             {user && (
               <Link
                 href="/subscribe"
                 className={cn(
-                  'p-2 rounded transition-colors',
+                  'p-2.5 rounded-xl transition-colors',
                   hasActivePlan
                     ? 'text-cinema-gold hover:bg-cinema-gold/10'
                     : 'text-cinema-gold hover:bg-cinema-elevated/50'
@@ -198,48 +183,20 @@ export function Header({ sticky = true, minimalNav = false }: HeaderProps) {
                 <Crown className="w-5 h-5" />
               </Link>
             )}
-            {!minimalNav && user && (
-              <Link href="/profile" className="rounded-full" aria-label="Mi perfil">
-                {user.image ? (
-                  <img
-                    src={user.image}
-                    alt=""
-                    className="w-8 h-8 rounded-full ring-2 ring-cinema-violet/40"
-                  />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cinema-accent to-cinema-violet flex items-center justify-center">
-                    <User className="w-4 h-4 text-white" aria-hidden />
-                  </div>
-                )}
-              </Link>
-            )}
-            {!minimalNav && (
-              <>
-                <button
-                  type="button"
-                  onClick={() => setSearchOpen(!searchOpen)}
-                  className="p-2 text-cinema-silver hover:text-white transition-colors rounded"
-                  aria-label="Buscar"
-                  aria-expanded={searchOpen}
-                >
-                  <Search className="w-5 h-5" />
-                </button>
-                <button
-                  type="button"
-                  className="p-2 text-cinema-silver hover:text-white rounded"
-                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  aria-label={mobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
-                  aria-expanded={mobileMenuOpen}
-                >
-                  {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-                </button>
-              </>
-            )}
+            <button
+              type="button"
+              onClick={() => setSearchOpen(!searchOpen)}
+              className="p-2.5 text-cinema-silver hover:text-white transition-colors rounded-xl"
+              aria-label="Buscar"
+              aria-expanded={searchOpen}
+            >
+              <Search className="w-5 h-5" />
+            </button>
           </div>
         </div>
 
-        {searchOpen && !minimalNav && (
-          <div className="lg:hidden pb-4 animate-slide-down">
+        {searchOpen && (
+          <div className="md:hidden pb-4 animate-slide-down px-1">
             <SearchDropdown
               value={searchQuery}
               onChange={setSearchQuery}
@@ -250,73 +207,15 @@ export function Header({ sticky = true, minimalNav = false }: HeaderProps) {
           </div>
         )}
 
-        {mobileMenuOpen && !minimalNav && (
-          <div className="md:hidden py-4 border-t border-cinema-border animate-slide-up">
-            <div className="flex flex-col gap-1">
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    'flex items-center gap-3 px-4 py-3 rounded-xl transition-colors',
-                    isActive(item.href, item.exact)
-                      ? 'bg-cinema-accent/15 text-cinema-accent-light'
-                      : 'text-cinema-silver hover:text-white hover:bg-cinema-elevated/50'
-                  )}
-                >
-                  <item.icon className="w-5 h-5" aria-hidden />
-                  {item.label}
-                </Link>
-              ))}
-
-              {user && (
-                <Link
-                  href="/subscribe"
-                  className="flex items-center gap-3 px-4 py-3 text-cinema-gold font-semibold"
-                >
-                  <Crown className="w-5 h-5" aria-hidden />
-                  {hasActivePlan ? 'Mi suscripción' : 'Premium'}
-                </Link>
-              )}
-
-              <div className="border-t border-cinema-border mt-2 pt-2">
-                {user ? (
-                  <div className="px-4 py-3 space-y-1">
-                    <Link
-                      href="/profile"
-                      className="flex items-center gap-3 px-4 py-3 rounded-lg text-cinema-silver hover:text-white hover:bg-cinema-elevated/50"
-                    >
-                      {user.image ? (
-                        <img src={user.image} alt="" className="w-8 h-8 rounded-full" />
-                      ) : (
-                        <div className="w-8 h-8 rounded-full bg-cinema-accent flex items-center justify-center">
-                          <User className="w-4 h-4 text-white" aria-hidden />
-                        </div>
-                      )}
-                      <span className="text-sm">Mi perfil</span>
-                    </Link>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        handleLogout();
-                        setMobileMenuOpen(false);
-                      }}
-                      className="flex items-center gap-3 px-4 py-3 text-cinema-silver hover:text-red-400 w-full text-left rounded-lg hover:bg-cinema-elevated/50"
-                    >
-                      <LogOut className="w-5 h-5" aria-hidden />
-                      Cerrar sesión
-                    </button>
-                  </div>
-                ) : (
-                  <Link
-                    href="/login"
-                    className="flex items-center justify-center gap-3 px-4 py-3 bg-cinema-accent text-white rounded-xl mx-4 font-medium"
-                  >
-                    Iniciar sesión
-                  </Link>
-                )}
-              </div>
-            </div>
+        {searchOpen && !minimalNav && (
+          <div className="hidden md:block lg:hidden pb-4 animate-slide-down">
+            <SearchDropdown
+              value={searchQuery}
+              onChange={setSearchQuery}
+              onSubmit={handleSearch}
+              inputRef={searchRef}
+              id="tablet-search"
+            />
           </div>
         )}
       </nav>

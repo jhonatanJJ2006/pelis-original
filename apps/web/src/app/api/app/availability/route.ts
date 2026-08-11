@@ -1,6 +1,6 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
 function readJsonFile<T>(relativePath: string, fallback: T): T {
   try {
@@ -11,19 +11,8 @@ function readJsonFile<T>(relativePath: string, fallback: T): T {
   }
 }
 
-export async function GET(request: NextRequest) {
-  const origin = request.nextUrl.origin;
-
-  let apkAvailable = false;
-  try {
-    const res = await fetch(`${origin}/downloads/pelis.apk`, {
-      method: 'HEAD',
-      cache: 'no-store',
-    });
-    apkAvailable = res.ok;
-  } catch {
-    apkAvailable = false;
-  }
+export async function GET() {
+  const apkAvailable = existsSync(join(process.cwd(), 'public', 'downloads', 'pelis.apk'));
 
   const webVersion = readJsonFile('version.json', { version: 'unknown', builtAt: null });
   const apkVersion = readJsonFile('downloads/app-version.json', {

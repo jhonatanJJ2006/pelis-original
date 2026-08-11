@@ -5,11 +5,11 @@ import { useMemo, useState } from 'react';
 import { Heart, Film, Tv } from 'lucide-react';
 import { api } from '@pelis/convex';
 import { useUser } from '@pelis/auth/hooks';
+import { MovieGridSkeleton } from '@pelis/ui/features/movie-card';
 import { MovieSwiper } from '@pelis/ui/features/movie-swiper';
 import { MovieCard } from '@pelis/ui/features/movie-card';
 import { EmptyState } from '@pelis/ui/features/empty-state';
 import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';
-import { Spinner } from '@pelis/ui/components';
 import { cn } from '@pelis/ui/utils';
 import { toast } from 'sonner';
 import type { MediaItem } from '@pelis/ui/types';
@@ -103,9 +103,7 @@ export default function FavoritesPage() {
       </ScrollReveal>
 
       {isLoading ? (
-        <div className="flex items-center justify-center py-24" role="status" aria-label="Cargando">
-          <Spinner size="lg" />
-        </div>
+        <MovieGridSkeleton />
       ) : filtered.length === 0 ? (
         <EmptyState
           icon={tab === 'series' ? Tv : tab === 'movies' ? Film : Heart}

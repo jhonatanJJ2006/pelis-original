@@ -7,17 +7,27 @@ import { SectionHeader } from '../section-header';
 import { useDragScroll } from '../../shared/hooks/use-drag-scroll';
 import type { MediaItem } from '../../shared/types';
 import { cn } from '../../shared/utils';
+import { MovieRowSkeleton } from './movie-row-skeleton';
 
 interface MovieRowProps {
   title: string;
   subtitle?: string;
-  movies: MediaItem[];
+  movies: MediaItem[] | undefined;
   href?: string;
   linkLabel?: string;
   className?: string;
+  isLoading?: boolean;
 }
 
-export function MovieRow({ title, subtitle, movies, href, linkLabel, className }: MovieRowProps) {
+export function MovieRow({
+  title,
+  subtitle,
+  movies,
+  href,
+  linkLabel,
+  className,
+  isLoading = false,
+}: MovieRowProps) {
   const { setRef, getEl } = useDragScroll();
 
   const scrollBy = useCallback((dir: 1 | -1) => {
@@ -26,19 +36,17 @@ export function MovieRow({ title, subtitle, movies, href, linkLabel, className }
     el.scrollBy({ left: dir * el.clientWidth * 0.8 });
   }, [getEl]);
 
-  if (movies.length === 0) {
+  if (isLoading || movies === undefined) {
     return (
-      <section className={cn('relative', className)} aria-busy="true">
-        <SectionHeader title={title} subtitle={subtitle} href={href} linkLabel={linkLabel} />
-        <div className="no-scrollbar flex gap-3 overflow-x-auto px-1 py-1">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="w-[150px] sm:w-[160px] md:w-[180px] shrink-0">
-              <div className="aspect-[2/3] rounded-2xl bg-cinema-elevated animate-pulse" />
-            </div>
-          ))}
-        </div>
-      </section>
+      <MovieRowSkeleton
+        className={className}
+        showHeader={Boolean(title)}
+      />
     );
+  }
+
+  if (movies.length === 0) {
+    return null;
   }
 
   return (
@@ -66,12 +74,17 @@ export function MovieRow({ title, subtitle, movies, href, linkLabel, className }
           ref={setRef}
           className="no-scrollbar flex gap-3 overflow-x-auto px-1 py-1 cursor-grab active:cursor-grabbing select-none"
         >
-          {movies.map((movie) => (
+          {movies.map((movie, index) => (
             <div
               key={movie._id}
               className="w-[150px] sm:w-[160px] md:w-[180px] shrink-0"
             >
-              <MovieCard movie={movie} showFavorite={false} />
+              <MovieCard
+                movie={movie}
+                showFavorite={false}
+                posterLoading={index === 0 ? 'eager' : 'lazy'}
+                posterFetchPriority={index === 0 ? 'high' : 'auto'}
+              />
             </div>
           ))}
         </div>
@@ -79,3 +92,5 @@ export function MovieRow({ title, subtitle, movies, href, linkLabel, className }
     </section>
   );
 }
+
+export { MovieRowSkeleton } from './movie-row-skeleton';

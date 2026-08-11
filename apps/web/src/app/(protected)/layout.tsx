@@ -1,24 +1,26 @@
 'use client';
 
+import { usePathname } from 'next/navigation';
 import { Header } from './components/header';
 import { Footer } from './components/footer';
 import { BottomTabBar } from './components/bottom-tab-bar';
-import { PwaUpdateBanner } from '@/components/pwa-update-banner';
 import { useIsMobilePwa } from '@/hooks/use-is-mobile-pwa';
 import { useTabSwipe } from '@/hooks/use-tab-swipe';
-import { cn } from '@pelis/ui/utils';
 
 function ProtectedLayoutClient({ children }: { children: React.ReactNode }) {
   const isMobilePwa = useIsMobilePwa();
-  useTabSwipe(isMobilePwa);
+  const pathname = usePathname();
+  const isHome = pathname === '/';
+  useTabSwipe();
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header minimalNav={isMobilePwa} />
-      <PwaUpdateBanner />
-      <main className={cn('flex-1', isMobilePwa && 'pb-20')}>{children}</main>
-      {!isMobilePwa && <Footer />}
-      {isMobilePwa && <BottomTabBar />}
+      <Header minimalNav={isMobilePwa} sticky={!isHome} />
+      <main className="flex-1 pb-[calc(4.25rem+env(safe-area-inset-bottom))] md:pb-0">
+        {children}
+      </main>
+      {!isHome && <Footer className="hidden md:block" />}
+      <BottomTabBar />
     </div>
   );
 }

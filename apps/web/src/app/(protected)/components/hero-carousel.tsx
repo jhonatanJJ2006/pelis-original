@@ -1,11 +1,33 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState, useCallback } from 'react';
+import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import { Play, Info, Sparkles } from 'lucide-react';
-import { MoviePoster } from '@pelis/ui/features/movie-poster';
 import type { MediaItem } from '@pelis/ui/types';
 import { cn } from '@pelis/ui/utils';
+
+const HERO_PLACEHOLDER = '/peliculas/placeholder.webp';
+
+function HeroImage({ movie, eager }: { movie: MediaItem; eager: boolean }) {
+  const [failed, setFailed] = useState(false);
+  const poster = movie.image;
+  const source = failed ? HERO_PLACEHOLDER : poster;
+  return (
+    <picture className="absolute inset-0">
+      <source media="(max-width: 767px)" srcSet={source} />
+      <source media="(min-width: 768px)" srcSet={failed ? HERO_PLACEHOLDER : movie.backdropImage || poster} />
+      <img
+        src={source}
+        alt=""
+        loading={eager ? 'eager' : 'lazy'}
+        fetchPriority={eager ? 'high' : undefined}
+        decoding="async"
+        className="w-full h-full object-contain object-center md:object-cover"
+        onError={() => setFailed(true)}
+      />
+    </picture>
+  );
+}
 
 const genreColors: Record<string, string> = {
   Acción: 'from-red-500/25 to-transparent',
@@ -28,6 +50,7 @@ function getGenreGradient(genre?: string): string {
 }
 
 const AUTOPLAY_DELAY_MS = 7000;
+const SWIPE_THRESHOLD = 48;
 
 interface HeroCarouselProps {
   movies: MediaItem[];
@@ -36,6 +59,7 @@ interface HeroCarouselProps {
 export function HeroCarousel({ movies }: HeroCarouselProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [paused, setPaused] = useState(false);
+  const touchStartX = useRef<number | null>(null);
 
   const slideCount = movies.length;
   const hasMultiple = slideCount > 1;
@@ -45,6 +69,35 @@ export function HeroCarousel({ movies }: HeroCarouselProps) {
       setActiveIndex(((index % slideCount) + slideCount) % slideCount);
     },
     [slideCount]
+  );
+
+  const goNext = useCallback(() => goTo(activeIndex + 1), [activeIndex, goTo]);
+  const goPrev = useCallback(() => goTo(activeIndex - 1), [activeIndex, goTo]);
+
+  const handleTouchStart = useCallback((event: React.TouchEvent) => {
+    touchStartX.current = event.touches[0]?.clientX ?? null;
+    setPaused(true);
+    event.stopPropagation();
+  }, []);
+
+  const handleTouchEnd = useCallback(
+    (event: React.TouchEvent) => {
+      event.stopPropagation();
+      const startX = touchStartX.current;
+      touchStartX.current = null;
+      setPaused(false);
+
+      if (startX === null || !hasMultiple) return;
+      const endX = event.changedTouches[0]?.clientX;
+      if (endX === undefined) return;
+
+      const dx = endX - startX;
+      if (Math.abs(dx) < SWIPE_THRESHOLD) return;
+
+      if (dx < 0) goNext();
+      else goPrev();
+    },
+    [goNext, goPrev, hasMultiple]
   );
 
   useEffect(() => {
@@ -83,9 +136,12 @@ export function HeroCarousel({ movies }: HeroCarouselProps) {
 
   return (
     <section
-      className="relative h-[75vh] min-h-[400px] sm:min-h-[500px] max-h-[900px] overflow-hidden"
+      data-hero-carousel
+      className="relative h-[75vh] min-h-[400px] sm:min-h-[500px] max-h-[900px] overflow-hidden touch-pan-y"
       aria-label="Destacados"
       aria-roledescription="carrusel"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
     >
       <h1 className="sr-only">Películas y series destacadas</h1>
 
@@ -104,13 +160,7 @@ export function HeroCarousel({ movies }: HeroCarouselProps) {
             >
               <div className="relative h-full overflow-hidden">
                 <div className="absolute inset-0">
-                  <MoviePoster
-                    src={movie.image}
-                    alt=""
-                    className="w-full h-full object-cover"
-                    loading={movieIndex === 0 ? 'eager' : 'lazy'}
-                    fetchPriority={movieIndex === 0 ? 'high' : undefined}
-                  />
+                  <HeroImage movie={movie} eager={movieIndex === 0} />
                 </div>
                 <div
                   className={`absolute inset-0 hero-gradient-right bg-gradient-to-r ${genreGrad}`}
@@ -184,7 +234,7 @@ export function HeroCarousel({ movies }: HeroCarouselProps) {
       </div>
 
       {hasMultiple && (
-        <div className="absolute bottom-4 inset-x-0 z-30 flex justify-center gap-1.5">
+        <div className="absolute bottom-20 md:bottom-4 inset-x-0 z-30 flex justify-center gap-1.5">
           {movies.map((movie, index) => (
             <button
               key={movie._id}

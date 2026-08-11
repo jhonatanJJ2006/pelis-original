@@ -6,7 +6,8 @@ import Link from 'next/link';
 import { ArrowLeft, Calendar, Crown, Heart, Play, Tag, User } from 'lucide-react';
 import { api } from '@pelis/convex';
 import { useUser } from '@pelis/auth/hooks';
-import { Badge, Spinner } from '@pelis/ui/components';
+import { MovieDetailSkeleton } from '@pelis/ui/features/movie-detail-skeleton';
+import { Badge, Skeleton } from '@pelis/ui/components';
 import { VideoPlayer } from '@pelis/ui/features/video-player';
 import { MoviePoster } from '@pelis/ui/features/movie-poster';
 import { MovieRow } from '@pelis/ui/features/movie-row';
@@ -15,6 +16,7 @@ import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';
 import { toast } from 'sonner';
 import { cn } from '@pelis/ui/utils';
 import type { MediaItem } from '@pelis/ui/types';
+import { useResolvedVideoUrl } from '@/hooks/use-resolved-video-url';
 
 export default function MovieDetailPageClient() {
   const params = useParams();
@@ -33,6 +35,11 @@ export default function MovieDetailPageClient() {
   const isFavorited = useQuery(
     api.favorites.check,
     user && movie ? { userId: user._id as any, movieId: movie._id as any } : 'skip'
+  );
+
+  const { resolvedUrl, loading: resolvingVideo } = useResolvedVideoUrl(
+    movie?.videoUrl,
+    movie?.token
   );
 
   const handleFavorite = async () => {
@@ -54,15 +61,7 @@ export default function MovieDetailPageClient() {
   };
 
   if (movie === undefined) {
-    return (
-      <div
-        className="flex items-center justify-center min-h-[60vh]"
-        role="status"
-        aria-label="Cargando"
-      >
-        <Spinner size="lg" />
-      </div>
-    );
+    return <MovieDetailSkeleton />;
   }
 
   if (movie === null) {
@@ -80,12 +79,13 @@ export default function MovieDetailPageClient() {
   const isSeries = movie.mediaType === 'series';
   const relatedFiltered = (related ?? []).filter((m) => m._id !== movie._id);
   const hasActivePlan = !!(user?.planExpiresAt && user.planExpiresAt > Date.now());
+  const heroImage = movie.backdropImage ?? movie.image;
 
   return (
     <div className="pb-12">
       <div className="relative h-[420px] md:h-[520px] overflow-hidden">
         <MoviePoster
-          src={movie.image}
+          src={heroImage}
           alt=""
           className="w-full h-full object-cover"
           loading="eager"
@@ -94,14 +94,15 @@ export default function MovieDetailPageClient() {
         <div className="absolute inset-0 hero-gradient-bottom" />
         <div className="absolute inset-0 hero-gradient-accent" />
 
+        <Link
+          href={isSeries ? '/series' : '/movies'}
+          className="absolute top-4 left-4 md:top-6 md:left-6 z-10 inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-white bg-black/40 hover:bg-black/60 backdrop-blur-sm border border-white/10 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" aria-hidden />
+          Volver
+        </Link>
+
         <div className="absolute bottom-0 left-0 right-0 p-8 md:p-14">
-          <Link
-            href={isSeries ? '/series' : '/movies'}
-            className="inline-flex items-center gap-2 text-cinema-silver hover:text-white mb-6 transition-colors text-sm"
-          >
-            <ArrowLeft className="w-4 h-4" aria-hidden />
-            Volver
-          </Link>
           <div className="container mx-auto">
             <div className="flex flex-wrap gap-2 mb-4">
               <Badge variant="primary">{movie.classification}</Badge>
@@ -198,15 +199,23 @@ export default function MovieDetailPageClient() {
                 Ver planes
               </Link>
             </div>
-          ) : (
+          ) : resolvingVideo ? (
+            <Skeleton className="aspect-video w-full rounded-2xl" />
+          ) : resolvedUrl ? (
             <VideoPlayer
-              videoUrl={movie.videoUrl}
-              poster={movie.image}
+              videoUrl={resolvedUrl}
+              poster={heroImage}
               title={movie.name}
               userId={user._id}
               movieId={movie._id}
               autoPlay={shouldPlay}
             />
+          ) : (
+            <div className="aspect-video rounded-2xl card-feature border border-cinema-border flex items-center justify-center p-8">
+              <p className="text-cinema-muted text-center">
+                No hay video disponible para esta película en el servidor.
+              </p>
+            </div>
           )}
         </ScrollReveal>
 

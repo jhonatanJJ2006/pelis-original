@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { ArrowLeft, Tv, Loader2, AlertCircle, Crown } from 'lucide-react';
 import { api } from '@pelis/convex';
 import { useUser } from '@pelis/auth/hooks';
-import { Spinner } from '@pelis/ui/components';
+import { Skeleton } from '@pelis/ui/components';
 import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';
 import dynamic from 'next/dynamic';
 
@@ -41,12 +41,10 @@ export default function TVChannelPage() {
 
   if (isLoading) {
     return (
-      <div
-        className="page-shell min-h-[60vh] flex items-center justify-center"
-        role="status"
-        aria-label="Cargando"
-      >
-        <Spinner size="lg" />
+      <div className="page-shell space-y-6" aria-busy="true" aria-label="Cargando">
+        <Skeleton className="h-8 w-32" />
+        <Skeleton className="aspect-video w-full rounded-2xl" />
+        <Skeleton className="h-6 w-64" />
       </div>
     );
   }

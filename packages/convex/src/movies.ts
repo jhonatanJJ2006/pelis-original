@@ -165,6 +165,8 @@ export const create = mutation({
     name: v.string(),
     image: v.string(),
     imageId: v.optional(v.id('_storage')),
+    backdropImage: v.optional(v.string()),
+    backdropImageId: v.optional(v.id('_storage')),
     synopsis: v.string(),
     genre: v.string(),
     token: v.string(),
@@ -179,7 +181,18 @@ export const create = mutation({
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
     const image = await resolveImageFromStorage(ctx, args.image, args.imageId);
-    const id = await ctx.db.insert('movies', { ...args, image });
+    const backdropImage = args.backdropImage
+      ? await resolveImageFromStorage(
+          ctx,
+          args.backdropImage,
+          args.backdropImageId
+        )
+      : undefined;
+    const id = await ctx.db.insert('movies', {
+      ...args,
+      image,
+      ...(backdropImage !== undefined ? { backdropImage } : {}),
+    });
     return id;
   },
 });
@@ -190,6 +203,8 @@ export const update = mutation({
     name: v.string(),
     image: v.string(),
     imageId: v.optional(v.id('_storage')),
+    backdropImage: v.optional(v.string()),
+    backdropImageId: v.optional(v.id('_storage')),
     synopsis: v.string(),
     genre: v.string(),
     token: v.string(),
@@ -209,7 +224,15 @@ export const update = mutation({
       updates.image,
       updates.imageId
     );
-    await ctx.db.patch(id, { ...updates, image });
+    const patch: typeof updates & { image: string } = { ...updates, image };
+    if (updates.backdropImage !== undefined) {
+      patch.backdropImage = await resolveImageFromStorage(
+        ctx,
+        updates.backdropImage,
+        updates.backdropImageId
+      );
+    }
+    await ctx.db.patch(id, patch);
     return id;
   },
 });

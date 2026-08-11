@@ -1,17 +1,20 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import Hls from 'hls.js';
-import { Film, X } from 'lucide-react';
+import { AlertCircle, Film, Loader2, Monitor, X } from 'lucide-react';
 import { Button } from '@pelis/ui/components';
 import { MoviePoster } from '@pelis/ui/features/movie-poster';
+import { getAdminMovieDisplayName } from '../lib/movie-display';
+import { resolveVideoUrl } from '@/hooks/use-resolved-video-url';
 
 interface PreviewMovie {
   _id: string;
   name: string;
   image: string;
+  backdropImage?: string;
   token: string;
   genre?: string;
   releaseYear?: string;
@@ -23,53 +26,133 @@ interface PreviewMovie {
     isMissingImage: boolean;
     isMissingVideo: boolean;
     isIncomplete: boolean;
+    isMissingBackdrop?: boolean;
   };
 }
 
 interface PreviewMovieModalProps {
   movie: PreviewMovie;
   onClose: () => void;
+  onBackdrop?: () => void;
+}
+
+async function resolveEffectiveVideoUrl(movie: PreviewMovie): Promise<string | null> {
+  return resolveVideoUrl(movie.videoUrl, movie.token);
 }
 
 function AdminPreviewVideo({ src, poster, title }: { src: string; poster: string; title: string }) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const isHls = src.includes('.m3u8');
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
+    setLoading(true);
+    setError(null);
+
+    const onVideoError = () => {
+      setError('No se pudo reproducir el video.');
+      setLoading(false);
+    };
+
     if (!isHls) {
       video.src = src;
-      return;
+      video.addEventListener('loadedmetadata', () => setLoading(false));
+      video.addEventListener('error', onVideoError);
+      return () => {
+        video.removeEventListener('error', onVideoError);
+        video.src = '';
+      };
     }
 
     if (Hls.isSupported()) {
-      const hls = new Hls();
+      const hls = new Hls({ enableWorker: true });
+
+      hls.on(Hls.Events.MANIFEST_PARSED, () => setLoading(false));
+
+      hls.on(Hls.Events.ERROR, (_, data) => {
+        if (data.fatal) {
+          const detail = data.details ? `: ${data.details}` : '';
+          setError(`No se pudo cargar el video (HLS ${data.type}${detail}).`);
+          setLoading(false);
+        }
+      });
+
       hls.loadSource(src);
       hls.attachMedia(video);
-      return () => hls.destroy();
+
+      return () => {
+        hls.destroy();
+        video.src = '';
+      };
     }
 
     if (video.canPlayType('application/vnd.apple.mpegurl')) {
       video.src = src;
+      video.addEventListener('loadedmetadata', () => setLoading(false));
+      video.addEventListener('error', onVideoError);
+      return () => {
+        video.removeEventListener('error', onVideoError);
+        video.src = '';
+      };
     }
+
+    setError('Tu navegador no soporta este formato de video.');
+    setLoading(false);
   }, [src, isHls]);
 
   return (
-    <video
-      ref={videoRef}
-      controls
-      playsInline
-      poster={poster}
-      className="w-full aspect-video bg-black rounded-xl"
-      aria-label={`Reproducir ${title}`}
-    />
+    <div className="relative w-full" data-testid="admin-preview-video" data-video-url={src}>
+      <video
+        ref={videoRef}
+        controls
+        playsInline
+        poster={poster}
+        className="w-full aspect-video bg-black rounded-xl"
+        aria-label={`Reproducir ${title}`}
+      />
+      {loading && !error && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-xl">
+          <Loader2 className="w-8 h-8 text-white animate-spin" aria-hidden />
+        </div>
+      )}
+      {error && (
+        <div
+          className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 rounded-xl p-4 text-center"
+          data-testid="admin-preview-video-error"
+        >
+          <AlertCircle className="w-8 h-8 text-red-400 mb-2" aria-hidden />
+          <p className="text-white text-sm font-medium">{error}</p>
+          <p className="text-cinema-ash text-xs mt-2 break-all max-w-full">{src}</p>
+        </div>
+      )}
+    </div>
   );
 }
 
-export function PreviewMovieModal({ movie, onClose }: PreviewMovieModalProps) {
-  const hasVideo = Boolean(movie.videoUrl?.trim());
+export function PreviewMovieModal({ movie, onClose, onBackdrop }: PreviewMovieModalProps) {
+  const [effectiveVideoUrl, setEffectiveVideoUrl] = useState<string | null>(null);
+  const [resolving, setResolving] = useState(true);
+  const displayName = getAdminMovieDisplayName(movie);
+  const usingFallback = !movie.videoUrl?.trim() && Boolean(movie.token);
+
+  useEffect(() => {
+    let cancelled = false;
+    setResolving(true);
+    resolveEffectiveVideoUrl(movie)
+      .then((url) => {
+        if (!cancelled) setEffectiveVideoUrl(url);
+      })
+      .finally(() => {
+        if (!cancelled) setResolving(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [movie]);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -89,7 +172,7 @@ export function PreviewMovieModal({ movie, onClose }: PreviewMovieModalProps) {
       onClick={onClose}
     >
       <div
-        className="w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-cinema-surface border border-cinema-border rounded-2xl shadow-2xl"
+        className="w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-cinema-surface border border-cinema-border rounded-2xl shadow-2xl mx-auto"
         role="dialog"
         aria-modal="true"
         aria-labelledby="preview-movie-title"
@@ -97,7 +180,7 @@ export function PreviewMovieModal({ movie, onClose }: PreviewMovieModalProps) {
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-cinema-border sticky top-0 bg-cinema-surface z-10">
           <h2 id="preview-movie-title" className="text-lg font-semibold text-white truncate pr-4">
-            {movie.name}
+            {displayName}
           </h2>
           <button
             type="button"
@@ -114,7 +197,7 @@ export function PreviewMovieModal({ movie, onClose }: PreviewMovieModalProps) {
             <div className="w-24 h-36 shrink-0 rounded-lg overflow-hidden bg-cinema-elevated">
               <MoviePoster
                 src={movie.image}
-                alt={movie.name}
+                alt={displayName}
                 className="w-full h-full object-cover"
               />
             </div>
@@ -135,6 +218,15 @@ export function PreviewMovieModal({ movie, onClose }: PreviewMovieModalProps) {
                 <span className="text-cinema-muted">Token: </span>
                 <span className="text-cinema-silver font-mono text-xs break-all">{movie.token}</span>
               </p>
+              {effectiveVideoUrl && (
+                <p>
+                  <span className="text-cinema-muted">Video: </span>
+                  <span className="text-cinema-silver font-mono text-xs break-all">
+                    {effectiveVideoUrl}
+                    {usingFallback && ' (desde token)'}
+                  </span>
+                </p>
+              )}
               {movie.actors && (
                 <p>
                   <span className="text-cinema-muted">Actores: </span>
@@ -172,16 +264,77 @@ export function PreviewMovieModal({ movie, onClose }: PreviewMovieModalProps) {
             <p className="text-sm text-cinema-silver leading-relaxed">{movie.synopsis}</p>
           )}
 
-          {hasVideo ? (
-            <AdminPreviewVideo src={movie.videoUrl!} poster={movie.image} title={movie.name} />
+          <div className="space-y-2">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-xs uppercase tracking-wide text-cinema-muted">
+                Backdrop (hero / reproductor)
+              </p>
+              {onBackdrop && !movie.quality?.isOrphanId && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={onBackdrop}
+                  data-testid="admin-preview-backdrop-button"
+                >
+                  <Monitor className="w-4 h-4 text-cyan-400" />
+                  {movie.backdropImage ? 'Cambiar backdrop' : 'Agregar backdrop'}
+                </Button>
+              )}
+            </div>
+            <div
+              className={`relative w-full aspect-video rounded-xl overflow-hidden border bg-cinema-elevated ${
+                movie.backdropImage
+                  ? 'border-cinema-border'
+                  : 'border-dashed border-cinema-border'
+              }`}
+              data-testid="admin-preview-backdrop"
+            >
+              {movie.backdropImage ? (
+                <MoviePoster
+                  src={movie.backdropImage}
+                  alt={`Backdrop de ${displayName}`}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center text-center px-4 gap-1">
+                  <Monitor className="w-6 h-6 text-cinema-ash" aria-hidden />
+                  <p className="text-sm text-cinema-muted">
+                    Esta película aún no tiene imagen ancha.
+                  </p>
+                  {onBackdrop && !movie.quality?.isOrphanId && (
+                    <p className="text-xs text-cinema-ash">
+                      Usa “Agregar backdrop” para buscar una en TMDB.
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {resolving ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 text-cinema-muted animate-spin" aria-hidden />
+            </div>
+          ) : effectiveVideoUrl ? (
+            <AdminPreviewVideo
+              src={effectiveVideoUrl}
+              poster={movie.image}
+              title={displayName}
+            />
           ) : (
-            <div className="flex flex-col items-center text-center py-8 px-4 rounded-xl bg-cinema-elevated/40 border border-cinema-border">
+            <div
+              className="flex flex-col items-center text-center py-8 px-4 rounded-xl bg-cinema-elevated/40 border border-cinema-border"
+              data-testid="admin-preview-no-video"
+            >
               <div className="w-14 h-14 rounded-2xl bg-cinema-elevated flex items-center justify-center mb-3">
                 <Film className="w-7 h-7 text-cinema-ash" aria-hidden />
               </div>
               <h3 className="text-white font-semibold mb-1">Sin video disponible</h3>
               <p className="text-cinema-muted text-sm max-w-sm">
-                Esta película no tiene enlace de video. Edítala o enlázala con otra que sí lo tenga.
+                No hay stream disponible para esta película. Comprueba que exista en{' '}
+                <span className="font-mono">MOVIE_OUTPUT_ROOT</span> o añade un{' '}
+                <span className="font-mono">videoUrl</span> válido en la ficha de edición.
               </p>
             </div>
           )}

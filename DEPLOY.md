@@ -369,3 +369,43 @@ Usuarios con la app instalada (standalone/Android) verán un aviso si su versió
 (`localStorage.pelis_apk_version`) es menor que `apkVersionCode`.
 
 Tras instalar la nueva APK, el usuario debe pulsar **Actualizar app** para registrar la versión.
+
+---
+
+## 12. Streaming multi-disco (Pelis-A / Pelis-B)
+
+Los videos HLS están repartidos en dos discos montados:
+
+| Disco | Ruta | Películas (~) |
+|-------|------|---------------|
+| Pelis-A | `/run/media/det/Pelis-A/output` | 76 |
+| Pelis-B | `/run/media/det/Pelis-B/output` | 72 |
+
+Estructura en disco por película:
+
+```
+{disco}/output/{token}/{token}/playlist.m3u8
+{disco}/output/{token}/{token}/000.ts
+{disco}/output/{token}/{token}/001.ts
+...
+```
+
+### Variable de entorno
+
+En `pelis-web.service`:
+
+```ini
+Environment=MOVIE_OUTPUT_ROOTS=/run/media/det/Pelis-A/output:/run/media/det/Pelis-B/output
+```
+
+La app busca el manifest en ambos discos vía `/api/stream/resolve?token=...`.
+
+### Verificación
+
+```bash
+curl -s "https://verpelis.pro/api/stream/resolve?token=661a0c94d7722"
+curl -sI "https://verpelis.pro/api/stream/661a0c94d7722/661a0c94d7722/playlist.m3u8"
+curl -sI "https://verpelis.pro/api/stream/661a0c94d7722/661a0c94d7722/000.ts"
+```
+
+Tras cambiar la variable: `sudo systemctl daemon-reload && sudo systemctl restart pelis-web`

@@ -16,9 +16,17 @@ interface MovieCardProps {
   movie: MediaItem;
   showFavorite?: boolean;
   variant?: 'poster' | 'compact';
+  posterLoading?: 'lazy' | 'eager';
+  posterFetchPriority?: 'high' | 'low' | 'auto';
 }
 
-function MovieCardBase({ movie, showFavorite = true, variant = 'poster' }: MovieCardProps) {
+function MovieCardBase({
+  movie,
+  showFavorite = true,
+  variant = 'poster',
+  posterLoading = 'lazy',
+  posterFetchPriority,
+}: MovieCardProps) {
   const { user } = useUser();
   const addFavorite = useMutation(api.favorites.add);
   const removeFavorite = useMutation(api.favorites.remove);
@@ -76,6 +84,8 @@ function MovieCardBase({ movie, showFavorite = true, variant = 'poster' }: Movie
             src={movie.image}
             alt={movie.name}
             className="w-full h-full object-cover motion-safe:transition-transform motion-safe:duration-slow motion-safe:ease-out-expo [@media(hover:hover)_and_(pointer:fine)]:group-hover:scale-[1.05]"
+            loading={posterLoading}
+            fetchPriority={posterFetchPriority}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-cinema-bg/95 via-cinema-bg/30 to-transparent opacity-70 [@media(hover:hover)_and_(pointer:fine)]:group-hover:opacity-90 motion-safe:transition-opacity motion-safe:duration-normal z-[1]" />
           <div className="card-media-scrim absolute inset-0 z-[2]" aria-hidden />
@@ -151,3 +161,4 @@ function MovieCardBase({ movie, showFavorite = true, variant = 'poster' }: Movie
 }
 
 export const MovieCard = memo(MovieCardBase);
+export { MovieGridSkeleton } from './movie-grid-skeleton';

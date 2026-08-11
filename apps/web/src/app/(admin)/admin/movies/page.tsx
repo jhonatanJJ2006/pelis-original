@@ -1,16 +1,10 @@
 import { Suspense } from 'react';
-import { Spinner } from '@pelis/ui/components';
+import { AdminTableSkeleton } from '@pelis/ui/features/admin-table-skeleton';
 import AdminMoviesPageClient from './movies-page-client';
 
 export default function AdminMoviesPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex items-center justify-center py-24" role="status">
-          <Spinner size="lg" />
-        </div>
-      }
-    >
+    <Suspense fallback={<AdminTableSkeleton />}>
       <AdminMoviesPageClient />
     </Suspense>
   );

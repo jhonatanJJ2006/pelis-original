@@ -83,3 +83,5 @@ export function ContinueWatchingRow({ items, className }: ContinueWatchingRowPro
     </section>
   );
 }
+
+export { ContinueWatchingRowSkeleton } from './continue-watching-row-skeleton';

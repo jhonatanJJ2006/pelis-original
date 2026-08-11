@@ -2,6 +2,7 @@ export interface MediaItem {
   _id: string;
   name: string;
   image: string;
+  backdropImage?: string;
   synopsis: string;
   genre: string;
   token: string;

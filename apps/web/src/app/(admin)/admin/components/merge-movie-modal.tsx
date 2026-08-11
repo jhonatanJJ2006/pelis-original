@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { api } from '@pelis/convex';
 import { Button, Input, Spinner } from '@pelis/ui/components';
 import { MoviePoster } from '@pelis/ui/features/movie-poster';
+import { getAdminMovieDisplayName } from '../lib/movie-display';
 import type { MediaItem } from '@pelis/ui/types';
 
 interface MergeMovieModalProps {
@@ -66,7 +67,7 @@ export function MergeMovieModal({ source, onClose, onMerged }: MergeMovieModalPr
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
       <div
-        className="w-full max-w-2xl bg-cinema-surface border border-cinema-border rounded-2xl shadow-2xl overflow-hidden"
+        className="w-full max-w-2xl bg-cinema-surface border border-cinema-border rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col mx-auto"
         role="dialog"
         aria-modal="true"
         aria-labelledby="merge-modal-title"
@@ -92,11 +93,14 @@ export function MergeMovieModal({ source, onClose, onMerged }: MergeMovieModalPr
             </p>
             <div className="flex gap-4 p-4 rounded-xl bg-cinema-elevated/60 border border-cinema-border">
               <div className="w-16 h-24 shrink-0 rounded overflow-hidden">
-                <MoviePoster src={source.image} alt={source.name} className="w-full h-full object-cover" />
+                <MoviePoster src={source.image} alt={getAdminMovieDisplayName(source)} className="w-full h-full object-cover" />
               </div>
               <div className="min-w-0">
-                <p className="font-medium text-white truncate">{source.name}</p>
-                <p className="text-xs text-cinema-ash mt-1">Token: {source.token}</p>
+                <p className="font-medium text-white truncate">{getAdminMovieDisplayName(source)}</p>
+                <p className="text-xs text-cinema-ash mt-1">
+                  {source.genre}
+                  {source.releaseYear ? ` · ${source.releaseYear}` : ''}
+                </p>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {source.quality?.isOrphanId && (
                     <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300">
@@ -154,12 +158,14 @@ export function MergeMovieModal({ source, onClose, onMerged }: MergeMovieModalPr
                     <div className="w-10 h-14 shrink-0 rounded overflow-hidden">
                       <MoviePoster
                         src={movie.image}
-                        alt={movie.name}
+                        alt={getAdminMovieDisplayName(movie)}
                         className="w-full h-full object-cover"
                       />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-white truncate">{movie.name}</p>
+                      <p className="text-sm font-medium text-white truncate">
+                        {getAdminMovieDisplayName(movie)}
+                      </p>
                       <p className="text-xs text-cinema-ash">{movie.releaseYear} · {movie.genre}</p>
                     </div>
                   </button>
@@ -171,7 +177,7 @@ export function MergeMovieModal({ source, onClose, onMerged }: MergeMovieModalPr
           {selectedTarget && (
             <div className="p-4 rounded-xl border border-cinema-violet/30 bg-cinema-violet/10">
               <p className="text-xs text-cinema-violet-light mb-2">Destino seleccionado</p>
-              <p className="font-medium text-white">{selectedTarget.name}</p>
+              <p className="font-medium text-white">{getAdminMovieDisplayName(selectedTarget)}</p>
             </div>
           )}
         </div>

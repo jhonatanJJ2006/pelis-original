@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Clapperboard, Star } from 'lucide-react';
 import { api } from '@pelis/convex';
-import { Spinner } from '@pelis/ui/components';
+import { CatalogPageSkeleton } from '@pelis/ui/features/catalog-page-skeleton';
 import { EmptyState } from '@pelis/ui/features/empty-state';
 import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';
 import { CatalogFilterBar } from '@pelis/ui/features/catalog-filter-bar';
@@ -101,9 +101,7 @@ export default function AnimePage() {
       />
 
       {isLoading ? (
-        <div className="flex items-center justify-center py-24" role="status" aria-label="Cargando">
-          <Spinner size="lg" />
-        </div>
+        <CatalogPageSkeleton rowCount={2} />
       ) : anime.length === 0 ? (
         <EmptyState
           icon={Clapperboard}

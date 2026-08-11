@@ -8,7 +8,8 @@ import { Navigation, FreeMode } from 'swiper/modules';
 import { Crown, Check, Zap, Star, Rocket, ChevronLeft, ChevronRight, Settings } from 'lucide-react';
 import { api } from '@pelis/convex';
 import { useUser } from '@pelis/auth/hooks';
-import { Spinner, Button } from '@pelis/ui/components';
+import { SubscribePageSkeleton } from '@pelis/ui/features/subscribe-page-skeleton';
+import { Button } from '@pelis/ui/components';
 import { EmptyState } from '@pelis/ui/features/empty-state';
 import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';
 import { toast } from 'sonner';
@@ -183,9 +184,7 @@ export default function SubscribePage() {
       </ScrollReveal>
 
       {isLoading ? (
-        <div className="flex items-center justify-center py-20" role="status" aria-label="Cargando">
-          <Spinner size="lg" />
-        </div>
+        <SubscribePageSkeleton />
       ) : sortedPlans.length === 0 ? (
         <EmptyState
           icon={Crown}

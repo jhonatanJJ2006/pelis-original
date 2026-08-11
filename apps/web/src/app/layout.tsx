@@ -20,11 +20,18 @@ export const metadata = {
   description: 'Disfruta películas y series con una experiencia de streaming premium',
   manifest: '/manifest.json',
   icons: {
-    apple: '/icons/icon-192.svg',
+    apple: '/icons/icon-192.png',
   },
   other: {
     'mobile-web-app-capable': 'yes',
   },
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover' as const,
+  themeColor: '#0a0e1a',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

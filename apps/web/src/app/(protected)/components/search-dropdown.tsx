@@ -3,7 +3,7 @@
 import { useQuery } from 'convex/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { Search, Film, Tv, TrendingUp, Loader2, X } from 'lucide-react';
+import { Search, Film, Tv, TrendingUp, Loader2, X, User } from 'lucide-react';
 import { api } from '@pelis/convex';
 import { cn } from '@pelis/ui/utils';
 import { MoviePoster } from '@pelis/ui/features/movie-poster';
@@ -34,7 +34,7 @@ export function SearchDropdown({
   onSubmit,
   inputRef,
   className,
-  placeholder = 'Buscar películas y series...',
+  placeholder = 'Buscar por título o actor...',
   id = 'search-dropdown',
 }: SearchDropdownProps) {
   const router = useRouter();
@@ -45,11 +45,18 @@ export function SearchDropdown({
 
   const debouncedQuery = useDebounce(value, 300);
   const hasQuery = debouncedQuery.trim().length > 0;
+  const trimmedQuery = debouncedQuery.trim().toLowerCase();
 
   const results = useQuery(
     api.movies.search,
     hasQuery ? { q: debouncedQuery.trim(), limit: 8 } : 'skip'
   ) as MediaItem[] | undefined;
+
+  const matchesByActor = (m: MediaItem): boolean => {
+    if (!hasQuery) return false;
+    if (m.name.toLowerCase().includes(trimmedQuery)) return false;
+    return (m.actors ?? '').toLowerCase().includes(trimmedQuery);
+  };
 
   const showDropdown = isOpen && hasQuery;
   const isLoading = showDropdown && results === undefined;
@@ -199,7 +206,9 @@ export function SearchDropdown({
 
           {hasResults && (
             <div className="max-h-[70vh] overflow-y-auto">
-              {results.map((movie, index) => (
+              {results.map((movie, index) => {
+                const isActorMatch = matchesByActor(movie);
+                return (
                 <button
                   key={movie._id}
                   type="button"
@@ -229,7 +238,13 @@ export function SearchDropdown({
                     <p className="text-xs text-cinema-silver mt-0.5 truncate">
                       {movie.actors}
                     </p>
-                    <div className="flex items-center gap-2 mt-1.5">
+                    <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                      {isActorMatch && (
+                        <span className="inline-flex items-center gap-1 text-[10px] text-cinema-gold bg-cinema-gold/10 px-1.5 py-0.5 rounded">
+                          <User className="w-2.5 h-2.5" />
+                          Coincide con actor
+                        </span>
+                      )}
                       <span className="inline-flex items-center gap-1 text-[10px] text-cinema-ash bg-cinema-elevated/80 px-1.5 py-0.5 rounded">
                         {movie.mediaType === 'series' ? (
                           <><Tv className="w-2.5 h-2.5" /> Serie</>
@@ -245,7 +260,8 @@ export function SearchDropdown({
                     </div>
                   </div>
                 </button>
-              ))}
+                );
+              })}
 
               <div className="border-t border-cinema-border/50 px-3 py-2">
                 <button

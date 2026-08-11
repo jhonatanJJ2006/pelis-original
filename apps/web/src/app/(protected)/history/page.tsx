@@ -5,11 +5,12 @@ import Link from 'next/link';
 import { History, Play, Trash2 } from 'lucide-react';
 import { api } from '@pelis/convex';
 import { useUser } from '@pelis/auth/hooks';
+import { ContinueWatchingRowSkeleton } from '@pelis/ui/features/continue-watching-row';
 import { EmptyState } from '@pelis/ui/features/empty-state';
 import { MoviePoster } from '@pelis/ui/features/movie-poster';
 import { ContentSwiper } from '@pelis/ui/features/content-swiper';
 import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';
-import { Spinner, Button } from '@pelis/ui/components';
+import { Button } from '@pelis/ui/components';
 import { formatDate, formatDuration, getProgressPercentage } from '@pelis/ui/utils';
 import { toast } from 'sonner';
 
@@ -105,8 +106,9 @@ export default function HistoryPage() {
       </ScrollReveal>
 
       {isLoading ? (
-        <div className="flex items-center justify-center py-24" role="status" aria-label="Cargando">
-          <Spinner size="lg" />
+        <div className="space-y-12">
+          <ContinueWatchingRowSkeleton />
+          <ContinueWatchingRowSkeleton count={6} />
         </div>
       ) : (history?.length ?? 0) === 0 ? (
         <EmptyState

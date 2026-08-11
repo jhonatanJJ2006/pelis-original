@@ -24,9 +24,9 @@ export function ContinueWatchingCard({ movie, progress, duration }: ContinueWatc
     >
       <div className="relative aspect-video rounded-2xl overflow-hidden border border-cinema-border bg-cinema-surface motion-safe:transition-[border-color,box-shadow] motion-safe:duration-normal [@media(hover:hover)_and_(pointer:fine)]:group-hover:border-cinema-violet/50 [@media(hover:hover)_and_(pointer:fine)]:group-hover:shadow-[0_8px_32px_rgba(59,130,246,0.25)]">
         <MoviePoster
-          src={movie.image}
+          src={movie.backdropImage ?? movie.image}
           alt={movie.name}
-          className="w-full h-full object-cover motion-safe:transition-transform motion-safe:duration-normal motion-safe:ease-out-expo [@media(hover:hover)_and_(pointer:fine)]:group-hover:scale-105"
+          className="w-full h-full object-contain object-center motion-safe:transition-transform motion-safe:duration-normal motion-safe:ease-out-expo [@media(hover:hover)_and_(pointer:fine)]:group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-cinema-bg via-cinema-bg/55 to-transparent z-[1]" />
         <div className="card-media-scrim absolute inset-0 z-[2]" aria-hidden />

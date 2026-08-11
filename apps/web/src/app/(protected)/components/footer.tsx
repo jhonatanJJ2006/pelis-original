@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { Film } from 'lucide-react';
 import { PwaInstallPrompt } from '@/components/pwa-install-prompt';
 
+import { cn } from '@pelis/ui/utils';
+
 const exploreLinks = [
   { href: '/', label: 'Inicio' },
   { href: '/movies', label: 'Películas' },
@@ -10,9 +12,14 @@ const exploreLinks = [
   { href: '/anime', label: 'Anime' },
 ];
 
-export function Footer() {
+export function Footer({ className }: { className?: string }) {
   return (
-    <footer className="bg-cinema-surface/80 border-t border-cinema-border mt-auto backdrop-blur-sm">
+    <footer
+      className={cn(
+        'bg-cinema-surface/80 border-t border-cinema-border mt-auto backdrop-blur-sm',
+        className
+      )}
+    >
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           <div>

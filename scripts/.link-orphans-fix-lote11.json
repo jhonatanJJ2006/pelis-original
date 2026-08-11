@@ -1,0 +1,81 @@
+{
+  "entries": [
+    {
+      "token": "cola",
+      "tmdbId": 1049574,
+      "name": "Darkness of Man",
+      "search": "Darkness of Man",
+      "year": "2024"
+    },
+    {
+      "token": "664978cbb4b4e",
+      "tmdbId": 937287,
+      "name": "Challengers",
+      "search": "Challengers",
+      "year": "2024"
+    },
+    {
+      "token": "document-4913700035553657447",
+      "tmdbId": 721625,
+      "name": "Songbird",
+      "search": "Songbird",
+      "year": "2020"
+    },
+    {
+      "token": "document-4949888596766098271",
+      "tmdbId": 951491,
+      "name": "Saw X",
+      "search": "Saw X",
+      "year": "2023"
+    },
+    {
+      "token": "document-4981234350424064942",
+      "tmdbId": 889675,
+      "name": "La generación cápsula",
+      "search": "The Pod Generation",
+      "year": "2023"
+    },
+    {
+      "token": "document-5042047131670545128",
+      "tmdbId": 830788,
+      "name": "La invitación",
+      "search": "The Invitation",
+      "year": "2022"
+    },
+    {
+      "token": "document-5042047131670545129",
+      "tmdbId": 4771,
+      "name": "Desaparecida",
+      "search": "Gone Baby Gone",
+      "year": "2007"
+    },
+    {
+      "token": "document-5055798169548358180",
+      "tmdbId": 730047,
+      "name": "Cyrano",
+      "search": "Cyrano",
+      "year": "2021"
+    },
+    {
+      "token": "document-5082585266393187093",
+      "tmdbId": 316727,
+      "name": "12 horas para sobrevivir: El año de la elección",
+      "search": "The Purge Election Year",
+      "year": "2016"
+    },
+    {
+      "token": "document-5095980706748695406",
+      "tmdbId": 843794,
+      "name": "JUNG_E",
+      "search": "JUNG_E",
+      "year": "2023"
+    },
+    {
+      "token": "document-5102613429038875255",
+      "tmdbId": 254473,
+      "name": "Fortaleza prohibida",
+      "search": "Brick Mansions",
+      "year": "2014"
+    }
+  ]
+}

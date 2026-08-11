@@ -25,6 +25,8 @@ export default defineSchema({
     name: v.string(),
     image: v.string(),
     imageId: v.optional(v.id('_storage')),
+    backdropImage: v.optional(v.string()),
+    backdropImageId: v.optional(v.id('_storage')),
     synopsis: v.string(),
     genre: v.string(),
     token: v.string(),
@@ -37,6 +39,7 @@ export default defineSchema({
     featured: v.optional(v.boolean()),
   })
     .index('by_genre', ['genre'])
+    .index('by_token', ['token'])
     .index('by_name', ['name'])
     .index('by_releaseYear', ['releaseYear'])
     .index('by_classification', ['classification'])
@@ -92,13 +95,30 @@ export default defineSchema({
     name: v.string(),
     logo: v.string(),
     category: v.string(),
+    country: v.optional(v.string()),
+    language: v.optional(v.string()),
     streamUrl: v.string(),
     source: v.string(),
-    language: v.string(),
+    sourcePlaylistId: v.optional(v.id('tvPlaylists')),
+    tvgId: v.optional(v.string()),
     isActive: v.boolean(),
+    sortOrder: v.optional(v.number()),
   })
     .index('by_category', ['category'])
-    .index('by_source', ['source']),
+    .index('by_source', ['source'])
+    .index('by_country', ['country'])
+    .index('by_playlist', ['sourcePlaylistId']),
+
+  tvPlaylists: defineTable({
+    name: v.string(),
+    m3uUrl: v.string(),
+    country: v.optional(v.string()),
+    language: v.optional(v.string()),
+    isActive: v.boolean(),
+    lastImportedAt: v.optional(v.number()),
+    totalChannels: v.optional(v.number()),
+  })
+    .index('by_active', ['isActive']),
 
   anime: defineTable({
     title: v.string(),

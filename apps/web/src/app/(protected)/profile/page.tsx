@@ -19,7 +19,8 @@ import { toast } from 'sonner';
 import { api } from '@pelis/convex';
 import { useUser } from '@pelis/auth/hooks';
 import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';
-import { Button, Spinner } from '@pelis/ui/components';
+import { ProfilePageSkeleton } from '@pelis/ui/features/profile-page-skeleton';
+import { Button } from '@pelis/ui/components';
 import { cn } from '@pelis/ui/utils';
 
 interface Plan {
@@ -70,11 +71,7 @@ export default function ProfilePage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="page-shell flex items-center justify-center min-h-[50vh]" role="status">
-        <Spinner size="lg" />
-      </div>
-    );
+    return <ProfilePageSkeleton />;
   }
 
   if (!user) {
