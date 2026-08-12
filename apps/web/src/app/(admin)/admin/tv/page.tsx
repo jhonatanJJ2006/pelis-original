@@ -2,7 +2,7 @@
 
 import { useAction, useMutation, useQuery } from 'convex/react';
 import Link from 'next/link';
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Plus,
   Search,
@@ -15,19 +15,15 @@ import {
   Download,
   RefreshCw,
   Tv,
-  ChevronLeft,
-  ChevronRight,
   Activity,
+  Star,
+  Zap,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@pelis/convex';
 import { Button, Input, Spinner } from '@pelis/ui/components';
 import { AdminTableSkeleton } from '@pelis/ui/features/admin-table-skeleton';
 import { cn } from '@pelis/ui/utils';
-import { VerifyChannelsModal } from './verify-channels-modal';
-
-type StreamStatus = 'unknown' | 'online' | 'offline';
-type StatusFilter = 'all' | StreamStatus | 'inactive';
 
 interface TVChannelRow {
   _id: string;
@@ -39,10 +35,11 @@ interface TVChannelRow {
   streamUrl: string;
   source: string;
   isActive: boolean;
-  sortOrder?: number;
-  streamStatus?: StreamStatus;
+  isPopular?: boolean;
+  streamStatus?: 'online' | 'offline' | 'unknown';
   lastCheckedAt?: number;
   lastStreamError?: string;
+  consecutiveFailures?: number;
 }
 
 interface TVPlaylistRow {
@@ -56,7 +53,7 @@ interface TVPlaylistRow {
   totalChannels?: number;
 }
 
-type Mode = 'channels' | 'playlists';
+type Mode = 'channels' | 'playlists' | 'popular';
 
 function formatDate(ts?: number) {
   if (!ts) return '—';
@@ -66,85 +63,46 @@ function formatDate(ts?: number) {
   });
 }
 
-function StreamStatusBadge({ status }: { status?: StreamStatus }) {
-  const resolved = status ?? 'unknown';
-  const config = {
-    online: { label: 'Online', className: 'bg-emerald-500/20 text-emerald-300' },
-    offline: { label: 'Caído', className: 'bg-red-500/20 text-red-300' },
-    unknown: { label: 'Sin verificar', className: 'bg-cinema-elevated text-cinema-muted' },
-  }[resolved];
-
-  return (
-    <span
-      className={cn(
-        'inline-flex items-center text-[10px] px-2 py-0.5 rounded-full font-medium',
-        config.className
-      )}
-    >
-      {config.label}
-    </span>
-  );
-}
-
-const statusFilters: { value: StatusFilter; label: string }[] = [
-  { value: 'all', label: 'Todos' },
-  { value: 'online', label: 'Online' },
-  { value: 'offline', label: 'Caídos' },
-  { value: 'unknown', label: 'Sin verificar' },
-  { value: 'inactive', label: 'Inactivos' },
-];
-
-const PAGE_SIZE = 15;
-
 export default function AdminTVPage() {
   const [mode, setMode] = useState<Mode>('channels');
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
-  const [page, setPage] = useState(0);
+  const [statusFilter, setStatusFilter] = useState<'' | 'online' | 'offline' | 'unknown'>('');
 
-  const listArgs = useMemo(() => {
-    const args: {
-      search?: string;
-      streamStatus?: StreamStatus;
-      isActive?: boolean;
-    } = {};
-    if (search.trim()) args.search = search.trim();
-    if (statusFilter === 'online' || statusFilter === 'offline' || statusFilter === 'unknown') {
-      args.streamStatus = statusFilter;
-    }
-    if (statusFilter === 'inactive') args.isActive = false;
-    return args;
-  }, [search, statusFilter]);
-
-  const channels = useQuery(api.tv.listAdmin, listArgs) as TVChannelRow[] | undefined;
+  const channels = useQuery(api.tv.list, {
+    search: search || undefined,
+    streamStatus: (statusFilter || undefined) as 'online' | 'offline' | 'unknown' | undefined,
+    popularOnly: mode === 'popular' || undefined,
+  }) as
+    | { items: TVChannelRow[]; total: number; hasMore: boolean; offset: number; limit: number }
+    | undefined;
   const playlists = useQuery(api.tv.listPlaylists, {}) as TVPlaylistRow[] | undefined;
+  const stats = useQuery(api.tv.getStats, {}) as
+    | {
+        total: number;
+        active: number;
+        popular: number;
+        online: number;
+        offline: number;
+        unknown: number;
+        geoBlocked: number;
+      }
+    | undefined;
 
   const removeChannel = useMutation(api.tv.removeChannel);
   const toggleChannel = useMutation(api.tv.toggleChannel);
+  const togglePopular = useMutation(api.tv.togglePopular);
   const removePlaylist = useMutation(api.tv.removePlaylist);
   const importM3U = useAction(api.tv.seedFromM3U);
-  const checkChannel = useAction(api.tvHealth.checkChannelStream);
+  const probeChannel = useAction(api.tv.probeChannel);
+  const probeAll = useAction(api.tv.probeAllChannels);
+  const seedPopular = useMutation(api.seedPopularChannels.seedPopularChannels);
 
   const [deletingChannelId, setDeletingChannelId] = useState<string | null>(null);
   const [deletingPlaylistId, setDeletingPlaylistId] = useState<string | null>(null);
   const [importingId, setImportingId] = useState<string | null>(null);
-  const [checkingId, setCheckingId] = useState<string | null>(null);
-  const [checkingPage, setCheckingPage] = useState(false);
-  const [checkProgress, setCheckProgress] = useState<{ done: number; total: number } | null>(null);
-  const [verifyAllOpen, setVerifyAllOpen] = useState(false);
-
-  const totalChannels = channels?.length ?? 0;
-  const totalPages = Math.max(1, Math.ceil(totalChannels / PAGE_SIZE));
-  const safePage = Math.min(page, totalPages - 1);
-
-  const paginatedChannels = useMemo(() => {
-    if (!channels) return [];
-    const start = safePage * PAGE_SIZE;
-    return channels.slice(start, start + PAGE_SIZE);
-  }, [channels, safePage]);
-
-  const pageStart = totalChannels === 0 ? 0 : safePage * PAGE_SIZE + 1;
-  const pageEnd = Math.min((safePage + 1) * PAGE_SIZE, totalChannels);
+  const [probingId, setProbingId] = useState<string | null>(null);
+  const [probingAll, setProbingAll] = useState(false);
+  const [seedingPopular, setSeedingPopular] = useState(false);
 
   const handleDeleteChannel = async (id: string, name: string) => {
     if (!confirm(`¿Eliminar el canal "${name}"? Esta acción no se puede deshacer.`)) return;
@@ -168,83 +126,14 @@ export default function AdminTVPage() {
     }
   };
 
-  const handleCheckChannel = async (ch: TVChannelRow) => {
-    setCheckingId(ch._id);
+  const handleTogglePopular = async (ch: TVChannelRow) => {
     try {
-      const result = await checkChannel({ channelId: ch._id as any });
-      if (result.streamStatus === 'online') {
-        toast.success(`${ch.name}: stream online`);
-      } else {
-        toast.error(`${ch.name}: ${result.lastStreamError ?? 'stream caído'}`);
-      }
+      await togglePopular({ id: ch._id as any, isPopular: !ch.isPopular });
+      toast.success(ch.isPopular ? 'Quitado de populares' : 'Marcado como popular');
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Error al verificar');
-    } finally {
-      setCheckingId(null);
+      toast.error(error instanceof Error ? error.message : 'Error al actualizar');
     }
   };
-
-  const handleCheckPage = async () => {
-    if (paginatedChannels.length === 0) return;
-
-    setCheckingPage(true);
-    setCheckProgress({ done: 0, total: paginatedChannels.length });
-
-    let online = 0;
-    let offline = 0;
-
-    try {
-      for (let i = 0; i < paginatedChannels.length; i++) {
-        const ch = paginatedChannels[i];
-        setCheckingId(ch._id);
-        setCheckProgress({ done: i, total: paginatedChannels.length });
-
-        try {
-          const result = await checkChannel({ channelId: ch._id as any });
-          if (result.streamStatus === 'online') online += 1;
-          else offline += 1;
-        } catch {
-          offline += 1;
-        }
-      }
-
-      setCheckProgress({ done: paginatedChannels.length, total: paginatedChannels.length });
-      toast.success(
-        `Página ${safePage + 1}: ${online} online · ${offline} caídos · ${paginatedChannels.length} verificados`
-      );
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Error al verificar');
-    } finally {
-      setCheckingId(null);
-      setCheckingPage(false);
-      setCheckProgress(null);
-    }
-  };
-
-  const handleSearchChange = (value: string) => {
-    setSearch(value);
-    setPage(0);
-  };
-
-  const handleStatusFilterChange = (value: StatusFilter) => {
-    setStatusFilter(value);
-    setPage(0);
-  };
-
-  const handleVerifyAllComplete = useCallback(
-    (stats: { online: number; offline: number; total: number; cancelled: boolean }) => {
-      if (stats.cancelled) {
-        toast.info(
-          `Cancelado: ${stats.online} online · ${stats.offline} caídos · ${stats.total} verificados`
-        );
-      } else {
-        toast.success(
-          `Verificación completa: ${stats.online} online · ${stats.offline} caídos · ${stats.total} total`
-        );
-      }
-    },
-    []
-  );
 
   const handleDeletePlaylist = async (id: string, name: string) => {
     if (
@@ -265,13 +154,12 @@ export default function AdminTVPage() {
   };
 
   const handleImport = async (pl: TVPlaylistRow) => {
-    if (!confirm(`¿Reimportar la lista "${pl.name}"? Se agregarán canales nuevos y se actualizarán los existentes.`))
-      return;
+    if (!confirm(`¿Reimportar la lista "${pl.name}"?`)) return;
     setImportingId(pl._id);
     try {
       const result = await importM3U({
         m3uUrl: pl.m3uUrl,
-        playlistId: pl._id as any,
+        playlistId: pl._id,
         country: pl.country,
         language: pl.language,
       });
@@ -285,13 +173,77 @@ export default function AdminTVPage() {
     }
   };
 
+  const handleProbe = async (ch: TVChannelRow) => {
+    setProbingId(ch._id);
+    try {
+      const result = await probeChannel({ channelId: ch._id as any });
+      if (result.streamStatus === 'online') {
+        toast.success(`✓ ${ch.name} está en línea`);
+      } else {
+        toast.error(
+          `${ch.name}: ${result.lastStreamError ?? 'Stream no disponible'}`
+        );
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Error al verificar');
+    } finally {
+      setProbingId(null);
+    }
+  };
+
+  const handleProbeAll = async () => {
+    if (
+      !confirm(
+        '¿Probar todos los canales activos? Esto puede tardar varios minutos y desactivará los canales que fallen 2 veces seguidas.'
+      )
+    )
+      return;
+    setProbingAll(true);
+    try {
+      const result = await probeAll({
+        batchSize: 8,
+        onlyActive: true,
+        deactivateAfterFailures: 2,
+      });
+      toast.success(
+        `Listo: ${result.online} online · ${result.offline} offline · ${result.deactivated} desactivados`
+      );
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Error al probar');
+    } finally {
+      setProbingAll(false);
+    }
+  };
+
+  const handleSeedPopular = async () => {
+    if (
+      !confirm(
+        '¿Sembrar canales populares curados? Si ya existen con el mismo streamUrl se actualizarán y se marcarán como populares.'
+      )
+    )
+      return;
+    setSeedingPopular(true);
+    try {
+      const result = await seedPopular({});
+      toast.success(
+        `Canales curados: ${result.added} nuevos · ${result.updated} actualizados`
+      );
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Error al sembrar');
+    } finally {
+      setSeedingPopular(false);
+    }
+  };
+
   const tabs: { value: Mode; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
     { value: 'channels', label: 'Canales', icon: Tv },
+    { value: 'popular', label: 'Populares', icon: Star },
     { value: 'playlists', label: 'Listas M3U', icon: ListVideo },
   ];
 
+  const channelItems = channels?.items ?? [];
+
   return (
-    <>
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
         <div>
@@ -299,68 +251,91 @@ export default function AdminTVPage() {
             Canales TV
           </h1>
           <p className="text-cinema-muted mt-1 sm:mt-2 text-sm sm:text-base">
-            {mode === 'channels'
-              ? channels
-                ? totalChannels === 0
-                  ? '0 canales'
-                  : `${totalChannels} canales · mostrando ${pageStart}–${pageEnd}`
-                : 'Cargando...'
-              : playlists
+            {mode === 'playlists'
+              ? playlists
                 ? `${playlists.length} listas M3U`
+                : 'Cargando...'
+              : channels
+                ? `${channels.total} canales (${channels.items.length} mostrados)`
                 : 'Cargando...'}
           </p>
         </div>
-        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-          {mode === 'channels' && (
-            <>
-              <Button
-                variant="secondary"
-                className="w-full sm:w-auto"
-                onClick={() => setVerifyAllOpen(true)}
-                disabled={checkingPage || verifyAllOpen || totalChannels === 0}
-              >
-                <Activity className="w-4 h-4" />
-                Verificar todos
-              </Button>
-              <Button
-                variant="secondary"
-                className="w-full sm:w-auto"
-                onClick={handleCheckPage}
-                disabled={checkingPage || verifyAllOpen || paginatedChannels.length === 0}
-              >
-                {checkingPage ? (
-                  <>
-                    <Spinner className="w-4 h-4" />
-                    {checkProgress
-                      ? `Verificando ${checkProgress.done + 1}/${checkProgress.total}...`
-                      : 'Verificando...'}
-                  </>
-                ) : (
-                  <>
-                    <Activity className="w-4 h-4" />
-                    Verificar página ({PAGE_SIZE})
-                  </>
-                )}
-              </Button>
-            </>
-          )}
-          {mode === 'channels' ? (
-            <Link href="/admin/tv/new" className="w-full sm:w-auto">
-              <Button className="w-full sm:w-auto">
-                <Plus className="w-4 h-4" />
-                Nuevo canal
-              </Button>
-            </Link>
-          ) : (
-            <Link href="/admin/tv/playlists" className="w-full sm:w-auto">
-              <Button className="w-full sm:w-auto">
-                <Plus className="w-4 h-4" />
-                Nueva lista M3U
-              </Button>
-            </Link>
-          )}
-        </div>
+        {mode === 'channels' ? (
+          <Link href="/admin/tv/new" className="w-full sm:w-auto">
+            <Button className="w-full sm:w-auto">
+              <Plus className="w-4 h-4" />
+              Nuevo canal
+            </Button>
+          </Link>
+        ) : mode === 'popular' ? (
+          <Button
+            className="w-full sm:w-auto"
+            onClick={handleSeedPopular}
+            disabled={seedingPopular}
+          >
+            {seedingPopular ? (
+              <>
+                <Spinner className="w-4 h-4" />
+                Sembrando...
+              </>
+            ) : (
+              <>
+                <Star className="w-4 h-4" />
+                Sembrar canales populares
+              </>
+            )}
+          </Button>
+        ) : (
+          <Link href="/admin/tv/playlists" className="w-full sm:w-auto">
+            <Button className="w-full sm:w-auto">
+              <Plus className="w-4 h-4" />
+              Nueva lista M3U
+            </Button>
+          </Link>
+        )}
       </div>
+
+      {stats && mode !== 'playlists' && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 mb-6">
+          <StatChip icon={Tv} label="Total" value={stats.total} accent="text-cinema-violet-light" />
+          <StatChip icon={Activity} label="Online" value={stats.online} accent="text-emerald-300" />
+          <StatChip icon={RefreshCw} label="Offline" value={stats.offline} accent="text-red-300" />
+          <StatChip
+            icon={Zap}
+            label="Sin probar"
+            value={stats.unknown}
+            accent="text-cinema-ash"
+          />
+          <StatChip icon={Star} label="Populares" value={stats.popular} accent="text-cinema-gold" />
+          <StatChip icon={Tv} label="Activos" value={stats.active} accent="text-cinema-teal" />
+        </div>
+      )}
+
+      {mode !== 'playlists' && (
+        <div className="mb-4 flex flex-wrap gap-2 items-center">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={handleProbeAll}
+            disabled={probingAll}
+            className="w-full sm:w-auto"
+          >
+            {probingAll ? (
+              <>
+                <LoaderIcon spinning /> Probando todos...
+              </>
+            ) : (
+              <>
+                <Activity className="w-4 h-4" />
+                Probar todos los canales activos
+              </>
+            )}
+          </Button>
+          <p className="text-xs text-cinema-ash">
+            Marca como offline los canales que fallen 2 veces seguidas. Puede tardar varios minutos.
+          </p>
+        </div>
+      )}
 
       <div className="-mx-4 px-4 sm:mx-0 sm:px-0 mb-4">
         <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
@@ -383,217 +358,143 @@ export default function AdminTVPage() {
         </div>
       </div>
 
-      {mode === 'channels' && (
+      {(mode === 'channels' || mode === 'popular') && (
         <>
-          <div className="mb-4 sm:mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <div className="w-full max-w-md">
-              <Input
-                value={search}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                placeholder="Buscar por nombre..."
-                iconLeft={<Search className="w-4 h-4" />}
-                clearable
-                onClear={() => handleSearchChange('')}
-              />
-            </div>
-            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
-              {statusFilters.map((filter) => (
-                <button
-                  key={filter.value}
-                  type="button"
-                  onClick={() => handleStatusFilterChange(filter.value)}
-                  className={cn(
-                    'inline-flex items-center px-3 py-1.5 rounded-full text-xs transition-colors border whitespace-nowrap shrink-0',
-                    statusFilter === filter.value
-                      ? 'bg-cinema-violet/20 text-white border-cinema-violet/40'
-                      : 'text-cinema-muted border-cinema-border hover:text-white hover:border-cinema-silver/30'
-                  )}
-                >
-                  {filter.label}
-                </button>
-              ))}
-            </div>
+          <div className="mb-4 flex flex-wrap gap-2">
+            {(
+              [
+                { value: '', label: 'Todos' },
+                { value: 'online', label: 'Online' },
+                { value: 'offline', label: 'Offline' },
+                { value: 'unknown', label: 'Sin probar' },
+              ] as const
+            ).map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setStatusFilter(opt.value as typeof statusFilter)}
+                className={cn(
+                  'px-3 py-1.5 rounded-full text-xs sm:text-sm transition-colors border whitespace-nowrap shrink-0',
+                  statusFilter === opt.value
+                    ? 'bg-cinema-violet/20 text-white border-cinema-violet/40'
+                    : 'text-cinema-muted border-cinema-border hover:text-white hover:border-cinema-silver/30'
+                )}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="mb-4 sm:mb-6 w-full max-w-md">
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar por nombre..."
+              iconLeft={<Search className="w-4 h-4" />}
+              clearable
+              onClear={() => setSearch('')}
+            />
           </div>
 
           {channels === undefined ? (
             <AdminTableSkeleton />
-          ) : channels.length === 0 ? (
+          ) : channelItems.length === 0 ? (
             <div className="text-center py-24 text-cinema-muted">
-              No hay canales con estos filtros. Importa una lista M3U o crea uno nuevo.
+              No hay canales con ese filtro.
             </div>
           ) : (
             <>
               <div className="md:hidden space-y-3">
-                {paginatedChannels.map((ch) => (
-                  <article key={ch._id} className="rounded-2xl border border-cinema-border bg-cinema-surface p-4">
-                    <div className="flex gap-3">
-                      <div className="w-14 h-14 shrink-0 rounded-lg bg-cinema-elevated border border-cinema-border flex items-center justify-center overflow-hidden">
-                        {ch.logo ? (
-                          <img src={ch.logo} alt={ch.name} className="w-10 h-10 object-contain" />
-                        ) : (
-                          <Radio className="w-6 h-6 text-cinema-silver" />
-                        )}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <h3 className="font-medium text-sm leading-snug text-white truncate">{ch.name}</h3>
-                          <StreamStatusBadge status={ch.streamStatus} />
-                          {!ch.isActive && (
-                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-cinema-elevated text-cinema-muted">
-                              Inactivo
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-xs text-cinema-muted mt-0.5 truncate">
-                          {ch.category}
-                          {ch.country ? ` · ${ch.country}` : ''}
-                        </p>
-                        {ch.lastStreamError && (
-                          <p className="text-[10px] text-red-300/80 mt-1 line-clamp-2">{ch.lastStreamError}</p>
-                        )}
-                      </div>
-                    </div>
-                    <div className="mt-3 pt-3 border-t border-cinema-border/60 flex items-center justify-end gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        aria-label="Probar stream"
-                        disabled={checkingId === ch._id}
-                        onClick={() => handleCheckChannel(ch)}
-                      >
-                        {checkingId === ch._id ? (
-                          <Spinner className="w-4 h-4" />
-                        ) : (
-                          <Activity className="w-4 h-4" />
-                        )}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        aria-label={ch.isActive ? 'Desactivar' : 'Activar'}
-                        onClick={() => handleToggle(ch)}
-                      >
-                        {ch.isActive ? (
-                          <ToggleRight className="w-4 h-4 text-emerald-300" />
-                        ) : (
-                          <ToggleLeft className="w-4 h-4 text-cinema-ash" />
-                        )}
-                      </Button>
-                      <Link href={`/admin/tv/${ch._id}/edit`}>
-                        <Button variant="ghost" size="sm" aria-label="Editar">
-                          <Pencil className="w-4 h-4" />
-                        </Button>
-                      </Link>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        aria-label="Eliminar"
-                        disabled={deletingChannelId === ch._id}
-                        onClick={() => handleDeleteChannel(ch._id, ch.name)}
-                      >
-                        {deletingChannelId === ch._id ? (
-                          <Spinner className="w-4 h-4" />
-                        ) : (
-                          <Trash2 className="w-4 h-4 text-red-400" />
-                        )}
-                      </Button>
-                    </div>
-                  </article>
+                {channelItems.map((ch) => (
+                  <ChannelCard
+                    key={ch._id}
+                    ch={ch}
+                    probingId={probingId}
+                    onProbe={handleProbe}
+                    onToggle={handleToggle}
+                    onTogglePopular={handleTogglePopular}
+                    onDelete={handleDeleteChannel}
+                    deletingId={deletingChannelId}
+                  />
                 ))}
               </div>
 
               <div className="hidden md:block overflow-x-auto rounded-2xl border border-cinema-border bg-cinema-surface">
-                <table className="w-full min-w-[920px] text-sm">
+                <table className="w-full min-w-[960px] text-sm">
                   <thead>
                     <tr className="border-b border-cinema-border text-left text-cinema-muted">
                       <th className="px-4 py-3 font-medium">Canal</th>
-                      <th className="px-4 py-3 font-medium">Stream</th>
+                      <th className="px-4 py-3 font-medium">Estado</th>
                       <th className="px-4 py-3 font-medium">Categoría</th>
-                      <th className="px-4 py-3 font-medium">Activo</th>
+                      <th className="px-4 py-3 font-medium">País</th>
+                      <th className="px-4 py-3 font-medium">Popular</th>
+                      <th className="px-4 py-3 font-medium">Última prueba</th>
                       <th className="px-4 py-3 font-medium text-right">Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {paginatedChannels.map((ch) => (
-                      <tr key={ch._id} className="border-b border-cinema-border/60 hover:bg-cinema-elevated/30 transition-colors">
+                    {channelItems.map((ch) => (
+                      <tr
+                        key={ch._id}
+                        className="border-b border-cinema-border/60 hover:bg-cinema-elevated/30 transition-colors"
+                      >
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 shrink-0 rounded-lg bg-cinema-elevated border border-cinema-border flex items-center justify-center overflow-hidden">
                               {ch.logo ? (
-                                <img src={ch.logo} alt={ch.name} className="w-8 h-8 object-contain" />
+                                <img
+                                  src={ch.logo}
+                                  alt={ch.name}
+                                  className="w-8 h-8 object-contain"
+                                  loading="lazy"
+                                />
                               ) : (
                                 <Radio className="w-5 h-5 text-cinema-silver" />
                               )}
                             </div>
                             <div className="min-w-0">
-                              <p className="font-medium text-white truncate max-w-[240px]">{ch.name}</p>
-                              <p className="text-[10px] text-cinema-ash truncate max-w-[240px]">{ch.streamUrl}</p>
+                              <p className="font-medium text-white truncate max-w-[240px]">
+                                {ch.name}
+                              </p>
+                              <p className="text-[10px] text-cinema-ash truncate max-w-[240px]">
+                                {ch.streamUrl}
+                              </p>
                             </div>
                           </div>
                         </td>
                         <td className="px-4 py-3">
-                          <div className="space-y-1">
-                            <StreamStatusBadge status={ch.streamStatus} />
-                            <p className="text-[10px] text-cinema-ash">{formatDate(ch.lastCheckedAt)}</p>
-                            {ch.lastStreamError && (
-                              <p className="text-[10px] text-red-300/80 max-w-[220px] truncate" title={ch.lastStreamError}>
-                                {ch.lastStreamError}
-                              </p>
-                            )}
-                          </div>
+                          <StatusBadge status={ch.streamStatus} />
                         </td>
                         <td className="px-4 py-3 text-cinema-muted">{ch.category}</td>
+                        <td className="px-4 py-3 text-cinema-muted">{ch.country ?? '—'}</td>
                         <td className="px-4 py-3">
-                          <span
-                            className={cn(
-                              'inline-flex items-center text-[10px] px-2 py-0.5 rounded-full',
-                              ch.isActive ? 'bg-emerald-500/20 text-emerald-300' : 'bg-cinema-elevated text-cinema-muted'
-                            )}
-                          >
-                            {ch.isActive ? 'Activo' : 'Inactivo'}
-                          </span>
+                          {ch.isPopular ? (
+                            <Star className="w-4 h-4 text-cinema-gold fill-cinema-gold" />
+                          ) : (
+                            <span className="text-cinema-ash">—</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-cinema-muted text-xs">
+                          {formatDate(ch.lastCheckedAt)}
+                          {ch.lastStreamError ? (
+                            <p
+                              className="text-[10px] text-red-400 truncate max-w-[180px]"
+                              title={ch.lastStreamError}
+                            >
+                              {ch.lastStreamError}
+                            </p>
+                          ) : null}
                         </td>
                         <td className="px-4 py-3 text-right">
-                          <div className="flex items-center justify-end gap-1">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              aria-label="Probar stream"
-                              disabled={checkingId === ch._id}
-                              onClick={() => handleCheckChannel(ch)}
-                            >
-                              {checkingId === ch._id ? (
-                                <Spinner className="w-4 h-4" />
-                              ) : (
-                                <Activity className="w-4 h-4" />
-                              )}
-                            </Button>
-                            <Button variant="ghost" size="sm" aria-label={ch.isActive ? 'Desactivar' : 'Activar'} onClick={() => handleToggle(ch)}>
-                              {ch.isActive ? (
-                                <ToggleRight className="w-4 h-4 text-emerald-300" />
-                              ) : (
-                                <ToggleLeft className="w-4 h-4 text-cinema-ash" />
-                              )}
-                            </Button>
-                            <Link href={`/admin/tv/${ch._id}/edit`}>
-                              <Button variant="ghost" size="sm" aria-label="Editar">
-                                <Pencil className="w-4 h-4" />
-                              </Button>
-                            </Link>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              aria-label="Eliminar"
-                              disabled={deletingChannelId === ch._id}
-                              onClick={() => handleDeleteChannel(ch._id, ch.name)}
-                            >
-                              {deletingChannelId === ch._id ? (
-                                <Spinner className="w-4 h-4" />
-                              ) : (
-                                <Trash2 className="w-4 h-4 text-red-400" />
-                              )}
-                            </Button>
-                          </div>
+                          <ChannelActions
+                            ch={ch}
+                            probingId={probingId}
+                            deletingId={deletingChannelId}
+                            onProbe={handleProbe}
+                            onToggle={handleToggle}
+                            onTogglePopular={handleTogglePopular}
+                            onDelete={handleDeleteChannel}
+                          />
                         </td>
                       </tr>
                     ))}
@@ -601,32 +502,11 @@ export default function AdminTVPage() {
                 </table>
               </div>
 
-              {totalPages > 1 && (
-                <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-                  <p className="text-xs text-cinema-muted">
-                    Página {safePage + 1} de {totalPages}
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      disabled={safePage === 0 || checkingPage}
-                      onClick={() => setPage((p) => Math.max(0, p - 1))}
-                    >
-                      <ChevronLeft className="w-4 h-4" />
-                      Anterior
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      disabled={safePage >= totalPages - 1 || checkingPage}
-                      onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-                    >
-                      Siguiente
-                      <ChevronRight className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
+              {channels.hasMore && (
+                <p className="text-xs text-cinema-ash mt-4 text-center">
+                  Mostrando {channelItems.length} de {channels.total}. Refiná la búsqueda para
+                  acotar.
+                </p>
               )}
             </>
           )}
@@ -644,14 +524,19 @@ export default function AdminTVPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
               {playlists.map((pl) => (
-                <article key={pl._id} className="rounded-2xl border border-cinema-border bg-cinema-surface p-5 flex flex-col gap-4">
+                <article
+                  key={pl._id}
+                  className="rounded-2xl border border-cinema-border bg-cinema-surface p-5 flex flex-col gap-4"
+                >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-3">
                       <div className="p-2.5 rounded-xl bg-cinema-violet/15 text-cinema-violet-light">
                         <ListVideo className="w-5 h-5" />
                       </div>
                       <div>
-                        <h3 className="font-display text-lg uppercase tracking-wide text-white">{pl.name}</h3>
+                        <h3 className="font-display text-lg uppercase tracking-wide text-white">
+                          {pl.name}
+                        </h3>
                         <p className="text-xs text-cinema-muted mt-0.5">
                           {pl.country ?? 'Sin país'} · {pl.language ?? 'es'}
                         </p>
@@ -660,7 +545,9 @@ export default function AdminTVPage() {
                     <span
                       className={cn(
                         'text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold',
-                        pl.isActive ? 'bg-emerald-500/20 text-emerald-300' : 'bg-cinema-elevated text-cinema-muted'
+                        pl.isActive
+                          ? 'bg-emerald-500/20 text-emerald-300'
+                          : 'bg-cinema-elevated text-cinema-muted'
                       )}
                     >
                       {pl.isActive ? 'Activa' : 'Pausada'}
@@ -673,12 +560,20 @@ export default function AdminTVPage() {
 
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div className="rounded-lg bg-cinema-elevated/40 p-2">
-                      <p className="text-cinema-ash text-[10px] uppercase tracking-wider">Canales</p>
-                      <p className="text-white font-medium text-base mt-0.5">{pl.totalChannels ?? '—'}</p>
+                      <p className="text-cinema-ash text-[10px] uppercase tracking-wider">
+                        Canales
+                      </p>
+                      <p className="text-white font-medium text-base mt-0.5">
+                        {pl.totalChannels ?? '—'}
+                      </p>
                     </div>
                     <div className="rounded-lg bg-cinema-elevated/40 p-2">
-                      <p className="text-cinema-ash text-[10px] uppercase tracking-wider">Última importación</p>
-                      <p className="text-white font-medium mt-0.5">{formatDate(pl.lastImportedAt)}</p>
+                      <p className="text-cinema-ash text-[10px] uppercase tracking-wider">
+                        Última importación
+                      </p>
+                      <p className="text-white font-medium mt-0.5">
+                        {formatDate(pl.lastImportedAt)}
+                      </p>
                     </div>
                   </div>
 
@@ -696,26 +591,29 @@ export default function AdminTVPage() {
                         </>
                       ) : (
                         <>
-                          {pl.lastImportedAt ? <RefreshCw className="w-4 h-4" /> : <Download className="w-4 h-4" />}
+                          {pl.lastImportedAt ? (
+                            <RefreshCw className="w-4 h-4" />
+                          ) : (
+                            <Download className="w-4 h-4" />
+                          )}
                           {pl.lastImportedAt ? 'Reimportar' : 'Importar ahora'}
                         </>
                       )}
                     </Button>
-                    <div className="ml-auto flex gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        aria-label="Eliminar"
-                        disabled={deletingPlaylistId === pl._id}
-                        onClick={() => handleDeletePlaylist(pl._id, pl.name)}
-                      >
-                        {deletingPlaylistId === pl._id ? (
-                          <Spinner className="w-4 h-4" />
-                        ) : (
-                          <Trash2 className="w-4 h-4 text-red-400" />
-                        )}
-                      </Button>
-                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      aria-label="Eliminar"
+                      className="ml-auto"
+                      disabled={deletingPlaylistId === pl._id}
+                      onClick={() => handleDeletePlaylist(pl._id, pl.name)}
+                    >
+                      {deletingPlaylistId === pl._id ? (
+                        <Spinner className="w-4 h-4" />
+                      ) : (
+                        <Trash2 className="w-4 h-4 text-red-400" />
+                      )}
+                    </Button>
                   </div>
                 </article>
               ))}
@@ -724,15 +622,223 @@ export default function AdminTVPage() {
         </>
       )}
     </div>
-
-    {verifyAllOpen && channels && channels.length > 0 && (
-      <VerifyChannelsModal
-        channels={channels.map((ch) => ({ _id: ch._id, name: ch.name }))}
-        checkChannel={(args) => checkChannel({ channelId: args.channelId as any })}
-        onClose={() => setVerifyAllOpen(false)}
-        onComplete={handleVerifyAllComplete}
-      />
-    )}
-    </>
   );
+}
+
+function ChannelCard({
+  ch,
+  probingId,
+  deletingId,
+  onProbe,
+  onToggle,
+  onTogglePopular,
+  onDelete,
+}: {
+  ch: TVChannelRow;
+  probingId: string | null;
+  deletingId: string | null;
+  onProbe: (ch: TVChannelRow) => void;
+  onToggle: (ch: TVChannelRow) => void;
+  onTogglePopular: (ch: TVChannelRow) => void;
+  onDelete: (id: string, name: string) => void;
+}) {
+  return (
+    <article className="rounded-2xl border border-cinema-border bg-cinema-surface p-4">
+      <div className="flex gap-3">
+        <div className="w-14 h-14 shrink-0 rounded-lg bg-cinema-elevated border border-cinema-border flex items-center justify-center overflow-hidden">
+          {ch.logo ? (
+            <img src={ch.logo} alt={ch.name} className="w-10 h-10 object-contain" />
+          ) : (
+            <Radio className="w-6 h-6 text-cinema-silver" />
+          )}
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5">
+            <h3 className="font-medium text-sm leading-snug text-white truncate">{ch.name}</h3>
+            {ch.isPopular && (
+              <Star className="w-3 h-3 text-cinema-gold fill-cinema-gold shrink-0" />
+            )}
+          </div>
+          <p className="text-xs text-cinema-muted mt-0.5 truncate">
+            {ch.category} {ch.country ? `· ${ch.country}` : ''}
+          </p>
+          <p className="text-xs text-cinema-ash mt-1">
+            <StatusBadge status={ch.streamStatus} />
+          </p>
+        </div>
+      </div>
+      <div className="mt-3 pt-3 border-t border-cinema-border/60 flex items-center justify-end gap-1 flex-wrap">
+        <Button
+          variant="ghost"
+          size="sm"
+          aria-label="Probar"
+          onClick={() => onProbe(ch)}
+          disabled={probingId === ch._id}
+        >
+          {probingId === ch._id ? (
+            <Spinner className="w-4 h-4" />
+          ) : (
+            <Activity className="w-4 h-4 text-cinema-violet-light" />
+          )}
+        </Button>
+        <Button variant="ghost" size="sm" aria-label="Popular" onClick={() => onTogglePopular(ch)}>
+          <Star
+            className={cn(
+              'w-4 h-4',
+              ch.isPopular ? 'text-cinema-gold fill-cinema-gold' : 'text-cinema-ash'
+            )}
+          />
+        </Button>
+        <Button variant="ghost" size="sm" aria-label={ch.isActive ? 'Desactivar' : 'Activar'} onClick={() => onToggle(ch)}>
+          {ch.isActive ? (
+            <ToggleRight className="w-4 h-4 text-emerald-300" />
+          ) : (
+            <ToggleLeft className="w-4 h-4 text-cinema-ash" />
+          )}
+        </Button>
+        <Link href={`/admin/tv/${ch._id}/edit`}>
+          <Button variant="ghost" size="sm" aria-label="Editar">
+            <Pencil className="w-4 h-4" />
+          </Button>
+        </Link>
+        <Button
+          variant="ghost"
+          size="sm"
+          aria-label="Eliminar"
+          disabled={deletingId === ch._id}
+          onClick={() => onDelete(ch._id, ch.name)}
+        >
+          {deletingId === ch._id ? (
+            <Spinner className="w-4 h-4" />
+          ) : (
+            <Trash2 className="w-4 h-4 text-red-400" />
+          )}
+        </Button>
+      </div>
+    </article>
+  );
+}
+
+function ChannelActions({
+  ch,
+  probingId,
+  deletingId,
+  onProbe,
+  onToggle,
+  onTogglePopular,
+  onDelete,
+}: {
+  ch: TVChannelRow;
+  probingId: string | null;
+  deletingId: string | null;
+  onProbe: (ch: TVChannelRow) => void;
+  onToggle: (ch: TVChannelRow) => void;
+  onTogglePopular: (ch: TVChannelRow) => void;
+  onDelete: (id: string, name: string) => void;
+}) {
+  return (
+    <div className="flex items-center justify-end gap-1">
+      <Button
+        variant="ghost"
+        size="sm"
+        aria-label="Probar"
+        onClick={() => onProbe(ch)}
+        disabled={probingId === ch._id}
+      >
+        {probingId === ch._id ? (
+          <Spinner className="w-4 h-4" />
+        ) : (
+          <Activity className="w-4 h-4 text-cinema-violet-light" />
+        )}
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        aria-label="Popular"
+        onClick={() => onTogglePopular(ch)}
+      >
+        <Star
+          className={cn(
+            'w-4 h-4',
+            ch.isPopular ? 'text-cinema-gold fill-cinema-gold' : 'text-cinema-ash'
+          )}
+        />
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        aria-label={ch.isActive ? 'Desactivar' : 'Activar'}
+        onClick={() => onToggle(ch)}
+      >
+        {ch.isActive ? (
+          <ToggleRight className="w-4 h-4 text-emerald-300" />
+        ) : (
+          <ToggleLeft className="w-4 h-4 text-cinema-ash" />
+        )}
+      </Button>
+      <Link href={`/admin/tv/${ch._id}/edit`}>
+        <Button variant="ghost" size="sm" aria-label="Editar">
+          <Pencil className="w-4 h-4" />
+        </Button>
+      </Link>
+      <Button
+        variant="ghost"
+        size="sm"
+        aria-label="Eliminar"
+        disabled={deletingId === ch._id}
+        onClick={() => onDelete(ch._id, ch.name)}
+      >
+        {deletingId === ch._id ? (
+          <Spinner className="w-4 h-4" />
+        ) : (
+          <Trash2 className="w-4 h-4 text-red-400" />
+        )}
+      </Button>
+    </div>
+  );
+}
+
+function StatusBadge({ status }: { status?: 'online' | 'offline' | 'unknown' }) {
+  const map = {
+    online: { label: 'Online', className: 'bg-emerald-500/20 text-emerald-300' },
+    offline: { label: 'Offline', className: 'bg-red-500/20 text-red-300' },
+    unknown: { label: 'Sin probar', className: 'bg-cinema-elevated text-cinema-ash' },
+  } as const;
+  const cfg = map[status ?? 'unknown'];
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full',
+        cfg.className
+      )}
+    >
+      {cfg.label}
+    </span>
+  );
+}
+
+function StatChip({
+  icon: Icon,
+  label,
+  value,
+  accent,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: number;
+  accent: string;
+}) {
+  return (
+    <div className="rounded-xl bg-cinema-surface border border-cinema-border p-3">
+      <div className="flex items-center gap-2 text-cinema-ash">
+        <Icon className={cn('w-4 h-4', accent)} />
+        <span className="text-xs uppercase tracking-wider">{label}</span>
+      </div>
+      <p className="text-2xl font-semibold text-white mt-1">{value}</p>
+    </div>
+  );
+}
+
+function LoaderIcon({ spinning }: { spinning: boolean }) {
+  return <Loader2 className={cn('w-4 h-4', spinning && 'animate-spin')} />;
 }

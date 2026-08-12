@@ -15,7 +15,10 @@ export default function TVPlayer({ channelId, channelName }: TVPlayerProps) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const streamUrl = buildTvProxyUrl(channelId);
+  const streamUrl =
+    typeof window !== 'undefined'
+      ? buildTvProxyUrl(channelId, undefined, window.location.origin)
+      : buildTvProxyUrl(channelId);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -35,6 +38,10 @@ export default function TVPlayer({ channelId, channelName }: TVPlayerProps) {
       const hls = new Hls({
         enableWorker: true,
         lowLatencyMode: true,
+        manifestLoadingMaxRetry: 6,
+        levelLoadingMaxRetry: 6,
+        fragLoadingMaxRetry: 6,
+        liveSyncDurationCount: 3,
       });
       hls.loadSource(streamUrl);
       hls.attachMedia(video);
@@ -102,7 +109,7 @@ export default function TVPlayer({ channelId, channelName }: TVPlayerProps) {
   }, [streamUrl]);
 
   return (
-    <div className="relative aspect-video bg-black">
+    <div className="relative w-full h-full bg-black">
       {loading && !error && (
         <div className="absolute inset-0 flex items-center justify-center z-10">
           <div className="text-center">

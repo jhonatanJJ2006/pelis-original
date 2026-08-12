@@ -1,21 +1,5 @@
 import { v } from 'convex/values';
 import { internalMutation, internalQuery } from './_generated/server';
-import { requireAdmin } from './lib/requireAdmin';
-
-export const assertAdmin = internalQuery({
-  args: {},
-  handler: async (ctx) => {
-    await requireAdmin(ctx);
-    return true;
-  },
-});
-
-export const getChannelById = internalQuery({
-  args: { channelId: v.id('tvChannels') },
-  handler: async (ctx, args) => {
-    return await ctx.db.get(args.channelId);
-  },
-});
 
 export const listAllActiveUrls = internalQuery({
   args: {},
@@ -40,6 +24,7 @@ export const upsertChannel = internalMutation({
     tvgId: v.string(),
     source: v.string(),
     isActive: v.boolean(),
+    isPopular: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const existing = await ctx.db
@@ -58,6 +43,7 @@ export const upsertChannel = internalMutation({
       };
       if (args.tvgId) patch.tvgId = args.tvgId;
       if (args.playlistId) patch.sourcePlaylistId = args.playlistId;
+      if (typeof args.isPopular === 'boolean') patch.isPopular = args.isPopular;
       await ctx.db.patch(existing._id, patch);
       return 'updated' as const;
     }
@@ -73,40 +59,10 @@ export const upsertChannel = internalMutation({
       sourcePlaylistId: args.playlistId,
       tvgId: args.tvgId || undefined,
       isActive: args.isActive,
+      isPopular: args.isPopular,
       streamStatus: 'unknown',
     });
     return 'inserted' as const;
-  },
-});
-
-export const updateStreamStatus = internalMutation({
-  args: {
-    channelId: v.id('tvChannels'),
-    streamStatus: v.union(
-      v.literal('unknown'),
-      v.literal('online'),
-      v.literal('offline')
-    ),
-    lastStreamError: v.optional(v.string()),
-  },
-  handler: async (ctx, args) => {
-    await ctx.db.patch(args.channelId, {
-      streamStatus: args.streamStatus,
-      lastCheckedAt: Date.now(),
-      lastStreamError: args.lastStreamError,
-    });
-  },
-});
-
-export const listAllChannelIds = internalQuery({
-  args: {},
-  handler: async (ctx) => {
-    const channels = await ctx.db.query('tvChannels').collect();
-    return channels.map((c) => ({
-      _id: c._id,
-      name: c.name,
-      streamUrl: c.streamUrl,
-    }));
   },
 });
 
@@ -121,5 +77,80 @@ export const markPlaylistImported = internalMutation({
       totalChannels: args.totalChannels,
     });
     return args.playlistId;
+  },
+});
+
+// ==========================================
+//   Helpers de probing
+// ==========================================
+
+export const getChannelForProbe = internalQuery({
+  args: { channelId: v.id('tvChannels') },
+  handler: async (ctx, args) => {
+    const channel = await ctx.db.get(args.channelId);
+    if (!channel) return null;
+    return { _id: channel._id, name: channel.name, streamUrl: channel.streamUrl };
+  },
+});
+
+export const listAllChannelIdsForProbe = internalQuery({
+  args: { onlyActive: v.optional(v.boolean()) },
+  handler: async (ctx, args) => {
+    const channels = await ctx.db.query('tvChannels').collect();
+    return channels
+      .filter((c) => (args.onlyActive ? c.isActive : true))
+      .map((c) => ({
+        channelId: c._id,
+        name: c.name,
+        streamUrl: c.streamUrl,
+      }));
+  },
+});
+
+export const applyProbeResult = internalMutation({
+  args: {
+    channelId: v.id('tvChannels'),
+    streamStatus: v.union(
+      v.literal('online'),
+      v.literal('offline'),
+      v.literal('unknown')
+    ),
+    lastStreamError: v.optional(v.string()),
+    failureThreshold: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const channel = await ctx.db.get(args.channelId);
+    if (!channel) return false;
+
+    const threshold = args.failureThreshold ?? 2;
+    const now = Date.now();
+    const previous = channel.consecutiveFailures ?? 0;
+
+    let nextFailures = previous;
+    if (args.streamStatus === 'online') {
+      nextFailures = 0;
+    } else if (args.streamStatus === 'offline') {
+      nextFailures = previous + 1;
+    }
+
+    // Los canales populares NUNCA se desactivan automáticamente:
+    // el probe se hace desde el servidor (que puede estar geo-bloqueado),
+    // pero los usuarios en Latam pueden acceder a esos streams.
+    const shouldDeactivate =
+      !channel.isPopular && nextFailures >= threshold;
+
+    const patch: Record<string, unknown> = {
+      streamStatus: args.streamStatus,
+      lastCheckedAt: now,
+      lastStreamError: args.lastStreamError,
+      consecutiveFailures: shouldDeactivate ? 0 : nextFailures,
+    };
+
+    if (shouldDeactivate) {
+      patch.isActive = false;
+    }
+
+    await ctx.db.patch(args.channelId, patch);
+    return shouldDeactivate;
   },
 });

@@ -5,6 +5,7 @@ import {
   fetchUpstream,
   getMimeForUrl,
   isSafeUpstreamUrl,
+  resolvePublicOrigin,
   rewriteTvManifest,
 } from '@/lib/tv-stream-proxy';
 
@@ -109,7 +110,8 @@ export async function GET(
 
   if (isManifest) {
     const text = await upstreamResp.text();
-    const rewritten = rewriteTvManifest(text, finalUrl, channelId);
+    const proxyOrigin = resolvePublicOrigin(req.headers);
+    const rewritten = rewriteTvManifest(text, finalUrl, channelId, proxyOrigin ?? undefined);
     return new NextResponse(rewritten, {
       status: 200,
       headers: {

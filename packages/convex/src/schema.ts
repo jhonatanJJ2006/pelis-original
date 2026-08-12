@@ -105,17 +105,20 @@ export default defineSchema({
     sourcePlaylistId: v.optional(v.id('tvPlaylists')),
     tvgId: v.optional(v.string()),
     isActive: v.boolean(),
+    isPopular: v.optional(v.boolean()),
     sortOrder: v.optional(v.number()),
     streamStatus: v.optional(
       v.union(v.literal('unknown'), v.literal('online'), v.literal('offline'))
     ),
     lastCheckedAt: v.optional(v.number()),
     lastStreamError: v.optional(v.string()),
+    consecutiveFailures: v.optional(v.number()),
   })
     .index('by_category', ['category'])
     .index('by_source', ['source'])
     .index('by_country', ['country'])
     .index('by_playlist', ['sourcePlaylistId'])
+    .index('by_popular', ['isPopular'])
     .index('by_streamStatus', ['streamStatus']),
 
   tvPlaylists: defineTable({

@@ -1,96 +1,86 @@
 'use client';
 
-import { useQuery } from 'convex/react';
 import { useParams } from 'next/navigation';
+import { useQuery } from 'convex/react';
+import { AlertCircle, Loader2, Tv } from 'lucide-react';
 import Link from 'next/link';
-import { ArrowLeft, Tv, Loader2, AlertCircle, Crown } from 'lucide-react';
 import { api } from '@pelis/convex';
-import { useUser } from '@pelis/auth/hooks';
-import { Skeleton } from '@pelis/ui/components';
-import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';
-import dynamic from 'next/dynamic';
+import { TVShell } from '../_components/tv-shell';
+import type { SidebarChannel } from '../_components/channel-sidebar';
 
-const TVPlayer = dynamic(() => import('./tv-player'), {
-  ssr: false,
-  loading: () => (
-    <div className="aspect-video bg-cinema-elevated rounded-2xl flex items-center justify-center">
-      <Loader2 className="w-8 h-8 text-cinema-silver animate-spin" />
-    </div>
-  ),
-});
-
-interface TVChannel {
+interface TVChannelItem {
   _id: string;
   name: string;
   logo: string;
   category: string;
-  streamUrl: string;
-  source: string;
-  language: string;
-  isActive: boolean;
+  country?: string;
+  language?: string;
+  isActive?: boolean;
   streamStatus?: 'unknown' | 'online' | 'offline';
 }
 
 export default function TVChannelPage() {
   const params = useParams();
-  const { user } = useUser();
-  const id = params.id as string;
-  const channel = useQuery(api.tv.getById, { id: id as any }) as TVChannel | null | undefined;
+  const id = (params?.id as string) ?? '';
 
-  const isLoading = channel === undefined;
-  const hasActivePlan = !!(user?.planExpiresAt && user.planExpiresAt > Date.now());
+  const channel = useQuery(api.tv.getById, { id: id as any }) as TVChannelItem | null | undefined;
+  const channels = useQuery(api.tv.list, {}) as TVChannelItem[] | undefined;
 
-  if (isLoading) {
+  if (channel === undefined) {
     return (
-      <div className="page-shell space-y-6" aria-busy="true" aria-label="Cargando">
-        <Skeleton className="h-8 w-32" />
-        <Skeleton className="aspect-video w-full rounded-2xl" />
-        <Skeleton className="h-6 w-64" />
+      <div className="fixed inset-0 z-30 bg-black flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-10 h-10 text-cinema-violet animate-spin mx-auto mb-3" />
+          <p className="text-cinema-muted text-sm">Cargando canal...</p>
+        </div>
       </div>
     );
   }
 
-  if (!channel) {
+  if (!channel || channel.isActive === false) {
     return (
-      <div className="page-shell min-h-[60vh] flex items-center justify-center">
-        <div className="text-center">
-          <AlertCircle className="w-12 h-12 text-cinema-muted mx-auto mb-4" />
-          <h1 className="font-display text-3xl text-white uppercase mb-2">Canal no encontrado</h1>
-          <p className="text-cinema-muted mb-6">El canal que buscas no está disponible.</p>
+      <div className="fixed inset-0 z-30 bg-black flex items-center justify-center">
+        <div className="text-center max-w-md px-6">
+          <AlertCircle className="w-14 h-14 text-cinema-muted/40 mx-auto mb-4" />
+          <h1 className="font-display text-3xl text-white uppercase tracking-wide mb-2">
+            Canal no encontrado
+          </h1>
+          <p className="text-cinema-muted text-sm mb-6">
+            El canal que buscás no está disponible.
+          </p>
           <Link
             href="/tv"
-            className="inline-flex items-center gap-2 text-cinema-violet-light hover:text-cinema-violet transition-colors"
+            className="btn-primary inline-flex items-center gap-2 px-5 py-2.5 rounded-[10px]"
           >
-            <ArrowLeft className="w-4 h-4" />
-            Volver a TV
+            <Tv className="w-4 h-4" />
+            Ver todos los canales
           </Link>
         </div>
       </div>
     );
   }
 
-  const isPlayable =
-    channel.isActive && channel.streamStatus === 'online';
+  const isPlayable = channel.streamStatus === 'online';
 
   if (!isPlayable) {
     return (
-      <div className="page-shell min-h-[60vh] flex items-center justify-center">
-        <div className="text-center max-w-md">
-          <AlertCircle className="w-12 h-12 text-cinema-muted mx-auto mb-4" />
-          <h1 className="font-display text-3xl text-white uppercase mb-2">Canal no disponible</h1>
-          <p className="text-cinema-muted mb-6">
+      <div className="fixed inset-0 z-30 bg-black flex items-center justify-center">
+        <div className="text-center max-w-md px-6">
+          <AlertCircle className="w-14 h-14 text-cinema-muted/40 mx-auto mb-4" />
+          <h1 className="font-display text-3xl text-white uppercase tracking-wide mb-2">
+            Canal no disponible
+          </h1>
+          <p className="text-cinema-muted text-sm mb-6">
             {channel.streamStatus === 'offline'
-              ? 'Este canal no está en línea en este momento. El proveedor del stream no responde.'
-              : !channel.isActive
-                ? 'Este canal está desactivado.'
-                : 'Este canal aún no ha sido verificado. Vuelve más tarde.'}
+              ? 'El proveedor del stream no responde en este momento.'
+              : 'Este canal aún no fue verificado. Volvé más tarde.'}
           </p>
           <Link
             href="/tv"
-            className="inline-flex items-center gap-2 text-cinema-violet-light hover:text-cinema-violet transition-colors"
+            className="btn-primary inline-flex items-center gap-2 px-5 py-2.5 rounded-[10px]"
           >
-            <ArrowLeft className="w-4 h-4" />
-            Volver a TV
+            <Tv className="w-4 h-4" />
+            Ver otros canales
           </Link>
         </div>
       </div>
@@ -98,72 +88,11 @@ export default function TVChannelPage() {
   }
 
   return (
-    <div className="page-shell">
-      <ScrollReveal className="mb-6">
-        <Link
-          href="/tv"
-          className="inline-flex items-center gap-2 text-cinema-silver hover:text-white transition-colors text-sm mb-4"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Todos los canales
-        </Link>
-        <div className="flex items-center gap-4">
-          {channel.logo ? (
-            <img src={channel.logo} alt={channel.name} className="w-12 h-12 object-contain" />
-          ) : (
-            <div className="w-12 h-12 rounded-xl bg-cinema-elevated border border-cinema-border flex items-center justify-center">
-              <Tv className="w-6 h-6 text-cinema-silver" />
-            </div>
-          )}
-          <div>
-            <h1 className="font-display text-3xl md:text-4xl tracking-wide text-white uppercase">
-              {channel.name}
-            </h1>
-            <span className="flex items-center gap-1.5 text-xs uppercase tracking-wider text-red-400 font-semibold mt-1">
-              <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse" />
-              EN VIVO
-            </span>
-          </div>
-        </div>
-      </ScrollReveal>
-
-      <div className="rounded-2xl overflow-hidden bg-black border border-cinema-border">
-        {!user ? (
-          <div className="aspect-video flex flex-col items-center justify-center gap-4 p-8">
-            <Tv className="w-12 h-12 text-cinema-muted/40" aria-hidden />
-            <p className="text-cinema-muted text-center max-w-md">
-              Inicia sesión para ver este canal en vivo
-            </p>
-            <Link href="/login" className="btn-primary">
-              Iniciar sesión
-            </Link>
-          </div>
-        ) : !hasActivePlan ? (
-          <div className="aspect-video flex flex-col items-center justify-center gap-4 p-8">
-            <Crown className="w-12 h-12 text-cinema-gold/40" aria-hidden />
-            <p className="text-cinema-muted text-center max-w-md">
-              Necesitas un plan activo para ver TV en vivo
-            </p>
-            <Link href="/subscribe" className="btn-primary-glow inline-flex items-center gap-2">
-              <Crown className="w-4 h-4" aria-hidden />
-              Ver planes
-            </Link>
-          </div>
-        ) : (
-          <TVPlayer channelId={channel._id} channelName={channel.name} />
-        )}
-      </div>
-
-      <div className="mt-6 p-4 rounded-xl bg-cinema-surface border border-cinema-border">
-        <p className="text-sm text-cinema-muted">
-          <span className="text-cinema-silver font-medium">Categoría:</span> {channel.category}
-          <span className="mx-3">·</span>
-          <span className="text-cinema-silver font-medium">Fuente:</span> {channel.source}
-          <span className="mx-3">·</span>
-          <span className="text-cinema-silver font-medium">Idioma:</span>{' '}
-          {channel.language === 'es' ? 'Español' : channel.language}
-        </p>
-      </div>
-    </div>
+    <TVShell
+      channels={(channels ?? []) as SidebarChannel[]}
+      currentChannelId={channel._id}
+      currentChannelName={channel.name}
+      currentChannelLogo={channel.logo}
+    />
   );
 }

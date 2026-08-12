@@ -11,7 +11,12 @@ function ProtectedLayoutClient({ children }: { children: React.ReactNode }) {
   const isMobilePwa = useIsMobilePwa();
   const pathname = usePathname();
   const isHome = pathname === '/';
+  const isTV = pathname?.startsWith('/tv') ?? false;
   useTabSwipe();
+
+  if (isTV) {
+    return <div className="min-h-screen bg-black">{children}</div>;
+  }
 
   return (
     <div className="min-h-screen flex flex-col">

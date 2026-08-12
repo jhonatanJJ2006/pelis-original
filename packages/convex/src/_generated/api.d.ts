@@ -27,6 +27,7 @@ import type * as lib_resolveMovieImage from "../lib/resolveMovieImage.js";
 import type * as lib_tmdb from "../lib/tmdb.js";
 import type * as movies from "../movies.js";
 import type * as seed from "../seed.js";
+import type * as seedPopularChannels from "../seedPopularChannels.js";
 import type * as seed_enhance from "../seed_enhance.js";
 import type * as seed_sql from "../seed_sql.js";
 import type * as seed_update_images from "../seed_update_images.js";
@@ -37,7 +38,6 @@ import type * as stripeWebhook from "../stripeWebhook.js";
 import type * as stripeWebhookAction from "../stripeWebhookAction.js";
 import type * as subscriptions from "../subscriptions.js";
 import type * as tv from "../tv.js";
-import type * as tvHealth from "../tvHealth.js";
 import type * as tvHelpers from "../tvHelpers.js";
 import type * as users from "../users.js";
 
@@ -67,6 +67,7 @@ declare const fullApi: ApiFromModules<{
   "lib/tmdb": typeof lib_tmdb;
   movies: typeof movies;
   seed: typeof seed;
+  seedPopularChannels: typeof seedPopularChannels;
   seed_enhance: typeof seed_enhance;
   seed_sql: typeof seed_sql;
   seed_update_images: typeof seed_update_images;
@@ -77,7 +78,6 @@ declare const fullApi: ApiFromModules<{
   stripeWebhookAction: typeof stripeWebhookAction;
   subscriptions: typeof subscriptions;
   tv: typeof tv;
-  tvHealth: typeof tvHealth;
   tvHelpers: typeof tvHelpers;
   users: typeof users;
 }>;

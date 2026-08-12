@@ -1,6 +1,6 @@
 'use client';
 
-import { useAction, useMutation, useQuery } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Activity } from 'lucide-react';
@@ -11,6 +11,7 @@ import { AdminFormSkeleton } from '@pelis/ui/features/admin-form-skeleton';
 import { cn } from '@pelis/ui/utils';
 import { ChannelForm, type ChannelFormValues } from '../../channel-form';
 import { useState } from 'react';
+import { probeTvChannel } from '@/lib/tv-probe-client';
 
 function formatDate(ts?: number) {
   if (!ts) return 'Sin verificar';
@@ -28,7 +29,6 @@ export default function EditTVChannelPage() {
 
   const channel = useQuery(api.tv.getById, { id: id as any });
   const update = useMutation(api.tv.updateChannel);
-  const checkChannel = useAction(api.tvHealth.checkChannelStream);
 
   const handleSubmit = async (values: ChannelFormValues) => {
     try {
@@ -55,7 +55,7 @@ export default function EditTVChannelPage() {
   const handleCheck = async () => {
     setChecking(true);
     try {
-      const result = await checkChannel({ channelId: id as any });
+      const result = await probeTvChannel(id);
       if (result.streamStatus === 'online') {
         toast.success('Stream online');
       } else {
