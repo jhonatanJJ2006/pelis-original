@@ -1,11 +1,11 @@
 'use client';
 
-import { useMutation, useQuery } from 'convex/react';
+import { useMutation, useQuery } from '@pelis/db/client';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Activity } from 'lucide-react';
 import { toast } from 'sonner';
-import { api } from '@pelis/convex';
+import { api } from '@pelis/db';
 import { Button, Spinner } from '@pelis/ui/components';
 import { AdminFormSkeleton } from '@pelis/ui/features/admin-form-skeleton';
 import { cn } from '@pelis/ui/utils';
@@ -27,7 +27,7 @@ export default function EditTVChannelPage() {
   const id = params.id;
   const [checking, setChecking] = useState(false);
 
-  const channel = useQuery(api.tv.getById, { id: id as any });
+  const channel = useQuery<any>(api.tv.getById, { id: id as any });
   const update = useMutation(api.tv.updateChannel);
 
   const handleSubmit = async (values: ChannelFormValues) => {

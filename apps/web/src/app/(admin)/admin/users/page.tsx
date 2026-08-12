@@ -1,10 +1,10 @@
 'use client';
 
-import { useMutation, useQuery } from 'convex/react';
+import { useMutation, useQuery } from '@pelis/db/client';
 import { useState } from 'react';
 import { Search, Shield, ShieldOff, Crown, Mail, Check, User as UserIcon } from 'lucide-react';
 import { toast } from 'sonner';
-import { api } from '@pelis/convex';
+import { api } from '@pelis/db';
 import { Button, Input } from '@pelis/ui/components';
 import { AdminTableSkeleton } from '@pelis/ui/features/admin-table-skeleton';
 import { cn } from '@pelis/ui/utils';

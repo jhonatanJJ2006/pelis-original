@@ -1,9 +1,9 @@
 'use client';
 
-import { useQuery, useMutation } from 'convex/react';
+import { useQuery, useMutation } from '@pelis/db/client';
 import Link from 'next/link';
 import { History, Play, Trash2 } from 'lucide-react';
-import { api } from '@pelis/convex';
+import { api } from '@pelis/db';
 import { useUser } from '@pelis/auth/hooks';
 import { ContinueWatchingRowSkeleton } from '@pelis/ui/features/continue-watching-row';
 import { EmptyState } from '@pelis/ui/features/empty-state';

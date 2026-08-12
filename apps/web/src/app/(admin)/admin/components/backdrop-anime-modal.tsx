@@ -1,10 +1,10 @@
 'use client';
 
-import { useAction } from 'convex/react';
+import { useAction } from '@pelis/db/client';
 import { useEffect, useState } from 'react';
 import { ArrowRight, Monitor, X } from 'lucide-react';
 import { toast } from 'sonner';
-import { api } from '@pelis/convex';
+import { api } from '@pelis/db';
 import { Button, Spinner } from '@pelis/ui/components';
 import { MoviePoster } from '@pelis/ui/features/movie-poster';
 import { cn } from '@pelis/ui/utils';
@@ -40,8 +40,8 @@ type PreviewResult =
     };
 
 export function BackdropAnimeModal({ anime, onClose, onApplied }: BackdropAnimeModalProps) {
-  const previewBackdrop = useAction(api.adminAnimeEnrichment.previewAnimeBackdrop);
-  const applyBackdrop = useAction(api.adminAnimeEnrichment.applyAnimeBackdrop);
+  const previewBackdrop = useAction<{ animeId: string; tmdbId?: number }, any>(api.adminAnimeEnrichment.previewAnimeBackdrop);
+  const applyBackdrop = useAction<{ animeId: string; tmdbId: number; replaceBackdrop?: boolean }, any>(api.adminAnimeEnrichment.applyAnimeBackdrop);
 
   const [preview, setPreview] = useState<PreviewResult | null>(null);
   const [loading, setLoading] = useState(true);

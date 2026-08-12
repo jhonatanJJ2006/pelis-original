@@ -1,10 +1,10 @@
 'use client';
 
-import { useAction } from 'convex/react';
+import { useAction } from '@pelis/db/client';
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowRight, Monitor, Sparkles, X } from 'lucide-react';
 import { toast } from 'sonner';
-import { api } from '@pelis/convex';
+import { api } from '@pelis/db';
 import { Button, Spinner } from '@pelis/ui/components';
 import { MoviePoster } from '@pelis/ui/features/movie-poster';
 import { getAdminMovieDisplayName } from '../lib/movie-display';
@@ -81,8 +81,8 @@ type PreviewResult =
     };
 
 export function EnrichMovieModal({ movie, onClose, onEnriched }: EnrichMovieModalProps) {
-  const previewMetadata = useAction(api.adminEnrichment.previewMetadata);
-  const enrichMovie = useAction(api.adminEnrichment.enrichMovie);
+  const previewMetadata = useAction<{ movieId: string; tmdbId?: number }, any>(api.adminEnrichment.previewMetadata);
+  const enrichMovie = useAction<{ movieId: string; tmdbId: number; replaceImage?: boolean; replaceBackdrop?: boolean }, any>(api.adminEnrichment.enrichMovie);
 
   const [preview, setPreview] = useState<PreviewResult | null>(null);
   const [loading, setLoading] = useState(true);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useAction, useMutation, useQuery } from 'convex/react';
+import { useAction, useMutation, useQuery } from '@pelis/db/client';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import {
@@ -18,9 +18,10 @@ import {
   Activity,
   Star,
   Zap,
+  Loader2,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { api } from '@pelis/convex';
+import { api } from '@pelis/db';
 import { Button, Input, Spinner } from '@pelis/ui/components';
 import { AdminTableSkeleton } from '@pelis/ui/features/admin-table-skeleton';
 import { cn } from '@pelis/ui/utils';
@@ -88,14 +89,14 @@ export default function AdminTVPage() {
       }
     | undefined;
 
-  const removeChannel = useMutation(api.tv.removeChannel);
-  const toggleChannel = useMutation(api.tv.toggleChannel);
-  const togglePopular = useMutation(api.tv.togglePopular);
-  const removePlaylist = useMutation(api.tv.removePlaylist);
-  const importM3U = useAction(api.tv.seedFromM3U);
-  const probeChannel = useAction(api.tv.probeChannel);
-  const probeAll = useAction(api.tv.probeAllChannels);
-  const seedPopular = useMutation(api.seedPopularChannels.seedPopularChannels);
+  const removeChannel = useMutation<{ id: string }, string>(api.tv.removeChannel);
+  const toggleChannel = useMutation<{ id: string; isActive: boolean }, string>(api.tv.toggleChannel);
+  const togglePopular = useMutation<{ id: string; isPopular: boolean }, string>(api.tv.togglePopular);
+  const removePlaylist = useMutation<{ id: string }, string>(api.tv.removePlaylist);
+  const importM3U = useAction<{ m3uUrl: string; playlistId?: string; country?: string; language?: string }, { total: number; added: number; updated: number; failed: number; failures: string[] }>(api.tv.seedFromM3U);
+  const probeChannel = useAction<{ channelId: string }, { channelId: string; name: string; streamStatus: 'online' | 'offline'; lastStreamError?: string }>(api.tv.probeChannel);
+  const probeAll = useAction<{ batchSize?: number; onlyActive?: boolean; deactivateAfterFailures?: number }, { processed: number; online: number; offline: number; deactivated: number; sampleErrors: Array<{ name: string; error: string }> }>(api.tv.probeAllChannels);
+  const seedPopular = useMutation<{ dryRun?: boolean }, { added: number; updated: number; skipped: number; total: number; dryRun: boolean }>(api.seedPopularChannels.seedPopularChannels);
 
   const [deletingChannelId, setDeletingChannelId] = useState<string | null>(null);
   const [deletingPlaylistId, setDeletingPlaylistId] = useState<string | null>(null);

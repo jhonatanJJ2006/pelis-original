@@ -8,18 +8,16 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const withSerwist = withSerwistInit({
   swSrc: 'sw.ts',
   swDest: 'public/sw.js',
-  // En dev, webpack genera sw.js con eval() que el navegador rechaza en Service Workers.
   disable: process.env.NODE_ENV === 'development',
 });
 
 const nextConfig = {
   transpilePackages: [
     '@pelis/ui',
-    '@pelis/convex',
+    '@pelis/db',
     '@pelis/auth',
     '@pelis/validators',
     'better-auth',
-    '@convex-dev/better-auth',
   ],
   webpack: (config) => {
     config.resolve.alias = {
@@ -30,10 +28,8 @@ const nextConfig = {
   },
   images: {
     remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**.convex.cloud',
-      },
+      { protocol: 'https', hostname: 'image.tmdb.org' },
+      { protocol: 'https', hostname: 'cdn.myanimelist.net' },
     ],
   },
   async headers() {

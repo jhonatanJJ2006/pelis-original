@@ -1,9 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { useQuery } from 'convex/react';
+import { useQuery } from '@pelis/db/client';
 import { Film, AlertTriangle, ImageOff, VideoOff, FileWarning, Monitor } from 'lucide-react';
-import { api } from '@pelis/convex';
+import { api } from '@pelis/db';
 import { AdminDashboardSkeleton } from '@pelis/ui/features/admin-dashboard-skeleton';
 
 const statCards = [
@@ -73,7 +73,7 @@ const statCards = [
 ] as const;
 
 export default function AdminDashboardPage() {
-  const stats = useQuery(api.adminMovies.adminStats, {});
+  const stats = useQuery<any>(api.adminMovies.adminStats, {});
 
   if (stats === undefined) {
     return <AdminDashboardSkeleton />;

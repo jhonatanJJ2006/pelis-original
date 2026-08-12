@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useMutation } from 'convex/react';
+import { useMutation } from '@pelis/db/client';
 import Hls from 'hls.js';
 import { AlertCircle, Maximize, Pause, Play, Volume2, VolumeX } from 'lucide-react';
-import { api } from '@pelis/convex';
+import { api } from '@pelis/db';
 import { cn } from '../../shared/utils';
 
 const DEMO_VIDEO =

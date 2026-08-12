@@ -1,0 +1,312 @@
+// Prisma schema for Pelis — local Postgres replacement for Convex
+// Mirrors packages/convex/src/schema.ts
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Better Auth tables ────────────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  emailVerified Boolean   @default(false)
+  image         String?
+  role          UserRole  @default(USER)
+  banned        Boolean?
+  banReason     String?
+  banExpires    DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  sessions    Session[]
+  accounts    Account[]
+  // Custom domain fields
+  otp             String?
+  otpExpiresAt    DateTime?
+  otpAttempts     Int?      @default(0)
+  otpLastSentAt   DateTime?
+  verifiedAt      DateTime?
+  lastLoginAt     DateTime?
+  lastSessionExpiresAt DateTime?
+
+  @@map("user")
+}
+
+model Session {
+  id                   String   @id @default(cuid())
+  expiresAt            DateTime
+  token                String   @unique
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  ipAddress            String?
+  userAgent            String?
+  userId               String
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activeOrganizationId String?
+  impersonatedBy       String?
+
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("verification")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+// ─── Domain tables ─────────────────────────────────────────────────────────
+
+model Movie {
+  id              String   @id @default(cuid())
+  name            String
+  image           String
+  imageId         String?  // points to public/uploads/<id>.webp
+  backdropImage   String?
+  backdropImageId String?
+  synopsis        String   @default("")
+  genre           String   @default("")
+  token           String   @unique
+  actors          String   @default("")
+  classification  String   @default("PG-13")
+  releaseYear     String   @default("")
+  videoUrl        String?
+  mediaType       MediaType @default(MOVIE)
+  episodes        Int?
+  featured        Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  favorites Favorite[]
+  history   History[]
+
+  @@index([genre])
+  @@index([releaseYear])
+  @@index([classification])
+  @@index([mediaType])
+  @@index([featured])
+  @@index([name])
+  @@map("movie")
+}
+
+enum MediaType {
+  MOVIE
+  SERIES
+}
+
+model Plan {
+  id              String   @id @default(cuid())
+  name            String
+  price           Float
+  description     String   @default("")
+  features        String[] @default([])
+  icon            String   @default("Zap")
+  months          Int      @default(1)
+  recommended     Boolean  @default(false)
+  stripePriceId   String?  @unique
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  subscriptions Subscription[]
+
+  @@map("plan")
+}
+
+model Subscription {
+  id                    String           @id @default(cuid())
+  userId                String           // matches User.id (Better Auth subject)
+  planId                String
+  plan                  Plan             @relation(fields: [planId], references: [id], onDelete: Cascade)
+  startDate             DateTime
+  endDate               DateTime
+  status                SubscriptionStatus @default(ACTIVE)
+  stripeSubscriptionId  String?          @unique
+  stripeCustomerId      String?
+  stripePriceId         String?
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+
+  @@index([userId])
+  @@index([planId])
+  @@index([status])
+  @@index([stripeSubscriptionId])
+  @@map("subscription")
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  EXPIRED
+}
+
+model Series {
+  id              String   @id @default(cuid())
+  name            String
+  image           String
+  imageId         String?
+  backdropImage   String?
+  backdropImageId String?
+  synopsis        String   @default("")
+  genre           String   @default("")
+  token           String   @unique
+  actors          String   @default("")
+  classification  String   @default("PG-13")
+  releaseYear     String   @default("")
+  episodes        Int?
+  season          Int?
+  featured        Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([genre])
+  @@index([classification])
+  @@index([name])
+  @@map("series")
+}
+
+model TVChannel {
+  id                  String    @id @default(cuid())
+  name                String
+  logo                String    @default("")
+  category            String    @default("General")
+  country             String?
+  language            String?
+  streamUrl           String
+  source              String    @default("manual")
+  sourcePlaylistId    String?
+  tvgId               String?
+  isActive            Boolean   @default(true)
+  isPopular           Boolean   @default(false)
+  sortOrder           Int?
+  streamStatus        StreamStatus @default(UNKNOWN)
+  lastCheckedAt       DateTime?
+  lastStreamError     String?
+  consecutiveFailures Int?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@index([category])
+  @@index([source])
+  @@index([country])
+  @@index([sourcePlaylistId])
+  @@index([isPopular])
+  @@index([streamStatus])
+  @@index([isActive])
+  @@index([streamUrl])
+  @@map("tv_channel")
+}
+
+enum StreamStatus {
+  UNKNOWN
+  ONLINE
+  OFFLINE
+}
+
+model TVPlaylist {
+  id             String    @id @default(cuid())
+  name           String
+  m3uUrl         String
+  country        String?
+  language       String?
+  isActive       Boolean   @default(true)
+  lastImportedAt DateTime?
+  totalChannels  Int?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([isActive])
+  @@map("tv_playlist")
+}
+
+model Anime {
+  id                String      @id @default(cuid())
+  title             String
+  alternativeTitle  String?
+  image             String
+  imageId           String?
+  backdropImage     String?
+  backdropImageId   String?
+  synopsis          String      @default("")
+  genre             String[]    @default([])
+  episodes          Int         @default(0)
+  status            AnimeStatus
+  year              Int
+  rating            Float?
+  // Providers stored as JSON: {name,url,language,isActive}[]
+  providers         Json
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  @@index([title])
+  @@index([status])
+  @@map("anime")
+}
+
+enum AnimeStatus {
+  ONGOING
+  COMPLETED
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  movieId   String
+  movie     Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, movieId])
+  @@index([userId])
+  @@index([movieId])
+  @@map("favorite")
+}
+
+model History {
+  id          String   @id @default(cuid())
+  userId      String
+  movieId     String
+  movie       Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  progress    Float    @default(0)
+  duration    Float    @default(0)
+  lastWatched DateTime @default(now())
+
+  @@unique([userId, movieId])
+  @@index([userId])
+  @@index([movieId])
+  @@index([lastWatched])
+  @@map("history")
+}

@@ -1,10 +1,10 @@
 'use client';
 
-import { useAction } from 'convex/react';
+import { useAction } from '@pelis/db/client';
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowRight, Monitor, Sparkles, X } from 'lucide-react';
 import { toast } from 'sonner';
-import { api } from '@pelis/convex';
+import { api } from '@pelis/db';
 import { Button, Spinner } from '@pelis/ui/components';
 import { MoviePoster } from '@pelis/ui/features/movie-poster';
 import { cn } from '@pelis/ui/utils';
@@ -54,8 +54,8 @@ type PreviewResult =
     };
 
 export function EnrichAnimeModal({ anime, onClose, onEnriched }: EnrichAnimeModalProps) {
-  const previewMetadata = useAction(api.adminAnimeEnrichment.previewAnimeMetadata);
-  const enrichAnime = useAction(api.adminAnimeEnrichment.enrichAnime);
+  const previewMetadata = useAction<{ animeId: string; tmdbId?: number }, any>(api.adminAnimeEnrichment.previewAnimeMetadata);
+  const enrichAnime = useAction<{ animeId: string; tmdbId: number; replaceImage?: boolean; replaceBackdrop?: boolean }, any>(api.adminAnimeEnrichment.enrichAnime);
 
   const [preview, setPreview] = useState<PreviewResult | null>(null);
   const [loading, setLoading] = useState(true);

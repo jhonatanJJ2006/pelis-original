@@ -1,9 +1,9 @@
 'use client';
 
-import { useQuery, useMutation } from 'convex/react';
+import { useQuery, useMutation } from '@pelis/db/client';
 import { useMemo, useState } from 'react';
 import { Heart, Film, Tv } from 'lucide-react';
-import { api } from '@pelis/convex';
+import { api } from '@pelis/db';
 import { useUser } from '@pelis/auth/hooks';
 import { MovieGridSkeleton } from '@pelis/ui/features/movie-card';
 import { MovieSwiper } from '@pelis/ui/features/movie-swiper';

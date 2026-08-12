@@ -1,12 +1,12 @@
 'use client';
 
-import { useMutation, useQuery } from 'convex/react';
+import { useMutation, useQuery } from '@pelis/db/client';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { ArrowLeft, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
-import { api } from '@pelis/convex';
+import { api } from '@pelis/db';
 import { Button } from '@pelis/ui/components';
 import { AdminFormSkeleton } from '@pelis/ui/features/admin-form-skeleton';
 import { SeriesForm, type SeriesFormValues } from '../../series-form';
@@ -18,7 +18,7 @@ export default function EditSeriesPage() {
   const id = params.id;
   const [showEnrich, setShowEnrich] = useState(false);
 
-  const series = useQuery(api.adminSeries.getById, { id: id as any });
+  const series = useQuery<any>(api.adminSeries.getById, { id: id as any });
   const update = useMutation(api.adminSeries.update);
 
   const moviesGenres = (useQuery(api.movies.getGenres, {}) as string[] | undefined) ?? [];

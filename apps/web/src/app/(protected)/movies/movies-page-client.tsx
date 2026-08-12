@@ -1,6 +1,7 @@
 'use client';
 
-import { useQuery, usePreloadedQuery, type Preloaded } from 'convex/react';
+import { useQuery } from '@pelis/db/client';
+import type { PreloadedQuery } from '@pelis/db/server';
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { SlidersHorizontal } from 'lucide-react';
@@ -8,7 +9,7 @@ import { MovieRow } from '@pelis/ui/features/movie-row';
 import { EmptyState } from '@pelis/ui/features/empty-state';
 import { CatalogFilterBar } from '@pelis/ui/features/catalog-filter-bar';
 import { CatalogPageSkeleton } from '@pelis/ui/features/catalog-page-skeleton';
-import { api } from '@pelis/convex';
+import { api } from '@pelis/db';
 import type { MediaItem } from '@pelis/ui/types';
 
 const classificationOrder = ['G', 'PG', 'PG-13', 'R', 'NC-17'];
@@ -23,9 +24,9 @@ const classificationLabels: Record<string, string> = {
 
 interface MoviesPageClientProps {
   preloaded: {
-    movies: Preloaded<typeof api.movies.list>;
-    genres: Preloaded<typeof api.movies.getGenres>;
-    years: Preloaded<typeof api.movies.getYears>;
+    movies: PreloadedQuery<MediaItem[]>;
+    genres: PreloadedQuery<string[]>;
+    years: PreloadedQuery<string[]>;
   };
 }
 
@@ -43,9 +44,9 @@ export default function MoviesPageClient({ preloaded }: MoviesPageClientProps) {
 
   const hasFilters = Boolean(selectedGenre || selectedYear || search);
 
-  const preloadedMovies = usePreloadedQuery(preloaded.movies) as MediaItem[] | undefined;
-  const preloadedGenres = usePreloadedQuery(preloaded.genres) as string[] | undefined;
-  const preloadedYears = usePreloadedQuery(preloaded.years) as string[] | undefined;
+  const preloadedMovies = preloaded.movies.data as MediaItem[] | undefined;
+  const preloadedGenres = preloaded.genres.data as string[] | undefined;
+  const preloadedYears = preloaded.years.data as string[] | undefined;
 
   const filteredMovies = useQuery(
     api.movies.list,

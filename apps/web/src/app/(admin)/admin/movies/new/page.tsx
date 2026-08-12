@@ -1,11 +1,11 @@
 'use client';
 
-import { useMutation, useQuery } from 'convex/react';
+import { useMutation, useQuery } from '@pelis/db/client';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
-import { api } from '@pelis/convex';
+import { api } from '@pelis/db';
 import { MovieForm, type MovieFormValues } from '../../components/movie-form';
 
 export default function NewMoviePage() {
@@ -24,7 +24,7 @@ export default function NewMoviePage() {
     ];
 
   const handleUploadImage = async (file: File) => {
-    const uploadUrl = await generateUploadUrl({});
+    const uploadUrl = (await generateUploadUrl({})) as string;
     const response = await fetch(uploadUrl, {
       method: 'POST',
       headers: { 'Content-Type': file.type },

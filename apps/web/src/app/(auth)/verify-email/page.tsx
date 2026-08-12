@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Film } from 'lucide-react';
 import { Button } from '@pelis/ui/components';
-import { getAuthApiBase } from '@pelis/auth/convex-site';
+const getAuthApiBase = () => '/api/auth';
 import { useState, useEffect, Suspense } from 'react';
 
 const OTP_LENGTH = 6;

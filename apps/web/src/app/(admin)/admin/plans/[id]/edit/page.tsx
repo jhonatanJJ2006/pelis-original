@@ -1,11 +1,11 @@
 'use client';
 
-import { useMutation, useQuery } from 'convex/react';
+import { useMutation, useQuery } from '@pelis/db/client';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
-import { api } from '@pelis/convex';
+import { api } from '@pelis/db';
 import { AdminFormSkeleton } from '@pelis/ui/features/admin-form-skeleton';
 import { PlanForm, type PlanFormValues } from '../../plan-form';
 
@@ -14,7 +14,7 @@ export default function EditPlanPage() {
   const router = useRouter();
   const id = params.id;
 
-  const plan = useQuery(api.adminPlans.getById, { id: id as any });
+  const plan = useQuery<any>(api.adminPlans.getById, { id: id as any });
   const update = useMutation(api.adminPlans.update);
 
   const handleSubmit = async (values: PlanFormValues) => {

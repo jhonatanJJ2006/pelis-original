@@ -1,11 +1,11 @@
 'use client';
 
-import { useAction, useQuery } from 'convex/react';
+import { useAction, useQuery } from '@pelis/db/client';
 import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useRef, useState, useEffect } from 'react';
 import { ArrowLeft, Loader2, AlertCircle, Monitor, Crown } from 'lucide-react';
-import { api } from '@pelis/convex';
+import { api } from '@pelis/db';
 import { useUser } from '@pelis/auth/hooks';
 import { Spinner } from '@pelis/ui/components';
 import Hls from 'hls.js';
@@ -37,7 +37,7 @@ export default function AnimeWatchPage() {
   const animeId = params.animeId as string;
   const provider = searchParams.get('provider') || 'gogoanime';
 
-  const getVideoUrl = useAction(api.anime.getVideoUrl);
+  const getVideoUrl = useAction<{ episodeId: string; provider: string }, { sources: Array<{ url: string; quality?: string; isM3U8?: boolean }>; subtitles: Array<{ url: string; lang?: string }> }>(api.anime.getVideoUrl);
   const providers = useQuery(api.anime.getProviders, {}) as
     Array<{ id: string; name: string }> | undefined;
   const providerName = providers?.find((p) => p.id === provider)?.name || provider;

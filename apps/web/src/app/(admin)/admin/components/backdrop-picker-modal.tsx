@@ -1,10 +1,10 @@
 'use client';
 
-import { useAction } from 'convex/react';
+import { useAction } from '@pelis/db/client';
 import { useEffect, useState } from 'react';
 import { ArrowRight, Monitor, X } from 'lucide-react';
 import { toast } from 'sonner';
-import { api } from '@pelis/convex';
+import { api } from '@pelis/db';
 import { Button, Spinner } from '@pelis/ui/components';
 import { MoviePoster } from '@pelis/ui/features/movie-poster';
 import { getAdminMovieDisplayName } from '../lib/movie-display';
@@ -58,8 +58,8 @@ type PreviewResult =
     };
 
 export function BackdropPickerModal({ movie, onClose, onApplied }: BackdropPickerModalProps) {
-  const previewBackdrop = useAction(api.adminEnrichment.previewBackdrop);
-  const applyBackdrop = useAction(api.adminEnrichment.applyBackdrop);
+  const previewBackdrop = useAction<{ movieId: string; tmdbId?: number }, any>(api.adminEnrichment.previewBackdrop);
+  const applyBackdrop = useAction<{ movieId: string; tmdbId: number; replaceBackdrop?: boolean }, any>(api.adminEnrichment.applyBackdrop);
 
   const [preview, setPreview] = useState<PreviewResult | null>(null);
   const [loading, setLoading] = useState(true);

@@ -1,12 +1,12 @@
 'use client';
 
-import { useMutation, useQuery } from 'convex/react';
+import { useMutation, useQuery } from '@pelis/db/client';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { ArrowLeft, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
-import { api } from '@pelis/convex';
+import { api } from '@pelis/db';
 import { Button } from '@pelis/ui/components';
 import { AdminFormSkeleton } from '@pelis/ui/features/admin-form-skeleton';
 import { AnimeForm, type AnimeFormValues } from '../../anime-form';
@@ -61,7 +61,7 @@ export default function EditAnimePage() {
   const id = params.id;
   const [showEnrich, setShowEnrich] = useState(false);
 
-  const anime = useQuery(api.adminAnime.getById, { id: id as any });
+  const anime = useQuery<any>(api.adminAnime.getById, { id: id as any });
   const update = useMutation(api.adminAnime.update);
 
   const handleSubmit = async (values: AnimeFormValues) => {

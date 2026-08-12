@@ -1,12 +1,12 @@
 'use client';
 
-import { usePreloadedQuery, type Preloaded } from 'convex/react';
+import type { PreloadedQuery } from '@pelis/db/server';
 import { useMemo } from 'react';
 import { Tv } from 'lucide-react';
 import { MovieRow } from '@pelis/ui/features/movie-row';
 import { EmptyState } from '@pelis/ui/features/empty-state';
 import { CatalogPageSkeleton } from '@pelis/ui/features/catalog-page-skeleton';
-import { api } from '@pelis/convex';
+import { api } from '@pelis/db';
 import type { MediaItem } from '@pelis/ui/types';
 
 const classificationOrder = ['G', 'PG', 'PG-13', 'R', 'NC-17'];
@@ -21,12 +21,12 @@ const classificationLabels: Record<string, string> = {
 
 interface SeriesPageClientProps {
   preloaded: {
-    series: Preloaded<typeof api.movies.listSeries>;
+    series: PreloadedQuery<MediaItem[]>;
   };
 }
 
 export default function SeriesPageClient({ preloaded }: SeriesPageClientProps) {
-  const series = usePreloadedQuery(preloaded.series) as MediaItem[] | undefined;
+  const series = preloaded.series.data as MediaItem[] | undefined;
   const isLoading = series === undefined;
 
   const grouped = useMemo(() => {

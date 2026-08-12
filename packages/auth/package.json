@@ -6,8 +6,7 @@
   "exports": {
     "./hooks": "./src/hooks.ts",
     "./store": "./src/store.ts",
-    "./providers": "./src/providers.tsx",
-    "./convex-site": "./src/convex-site.ts"
+    "./providers": "./src/providers.tsx"
   },
   "scripts": {
     "clean": "git clean -xdf .cache .turbo node_modules",
@@ -15,9 +14,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@pelis/convex": "workspace:*",
+    "@pelis/db": "workspace:*",
     "@tanstack/react-query": "catalog:",
-    "convex": "^1.42.1",
     "zustand": "^5.0.0"
   },
   "devDependencies": {

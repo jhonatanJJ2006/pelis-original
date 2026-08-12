@@ -3,9 +3,9 @@
 import { memo } from 'react';
 import Link from 'next/link';
 import { Heart, Play, Tv, Film, TrendingUp } from 'lucide-react';
-import { useMutation, useQuery } from 'convex/react';
+import { useMutation, useQuery } from '@pelis/db/client';
 import { useUser } from '@pelis/auth/hooks';
-import { api } from '@pelis/convex';
+import { api } from '@pelis/db';
 import { toast } from 'sonner';
 import { Badge } from '../../shared/ui/badge';
 import { MoviePoster } from '../movie-poster';
@@ -32,7 +32,7 @@ function MovieCardBase({
   const removeFavorite = useMutation(api.favorites.remove);
   const isSeries = movie.mediaType === 'series';
 
-  const isFavorited = useQuery(
+  const isFavorited = useQuery<boolean>(
     api.favorites.check,
     showFavorite && user ? { userId: user._id as any, movieId: movie._id as any } : 'skip'
   );

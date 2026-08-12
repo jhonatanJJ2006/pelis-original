@@ -1,11 +1,11 @@
 'use client';
 
-import { useQuery, useMutation } from 'convex/react';
+import { useQuery, useMutation } from '@pelis/db/client';
 import Link from 'next/link';
 import { useState } from 'react';
 import { AlertTriangle, ImageIcon, Monitor, Pencil, Plus, Search, Sparkles, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { api } from '@pelis/convex';
+import { api } from '@pelis/db';
 import { Button, Input, Spinner } from '@pelis/ui/components';
 import { AdminTableSkeleton } from '@pelis/ui/features/admin-table-skeleton';
 import { MoviePoster } from '@pelis/ui/features/movie-poster';

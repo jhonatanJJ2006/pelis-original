@@ -1,10 +1,10 @@
 'use client';
 
-import { useQuery } from 'convex/react';
+import { useQuery } from '@pelis/db/client';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { Search, Film, Tv, TrendingUp, Loader2, X, User } from 'lucide-react';
-import { api } from '@pelis/convex';
+import { api } from '@pelis/db';
 import { cn } from '@pelis/ui/utils';
 import { MoviePoster } from '@pelis/ui/features/movie-poster';
 import type { MediaItem } from '@pelis/ui/types';

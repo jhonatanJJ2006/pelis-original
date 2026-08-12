@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Film } from 'lucide-react';
 import { Button, Input } from '@pelis/ui/components';
-import { getAuthApiBase } from '@pelis/auth/convex-site';
+const getAuthApiBase = () => '/api/auth';
 import { useState } from 'react';
 
 export default function RegisterPage() {

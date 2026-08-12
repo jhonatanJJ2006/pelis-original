@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ConvexHttpClient } from 'convex/browser';
-import { api } from '@pelis/convex';
+import { prisma } from '@pelis/db';
 import {
   fetchUpstream,
   getMimeForUrl,
@@ -12,18 +11,9 @@ import {
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-function convexClient() {
-  const url = process.env.NEXT_PUBLIC_CONVEX_URL;
-  if (!url) throw new Error('NEXT_PUBLIC_CONVEX_URL is not configured');
-  return new ConvexHttpClient(url);
-}
-
 async function getChannelStreamUrl(channelId: string): Promise<string | null> {
-  const client = convexClient();
-  const channel = await client.query(api.tv.getById, {
-    id: channelId as any,
-  });
-  if (!channel?.isActive || channel.streamStatus !== 'online') return null;
+  const channel = await prisma.tVChannel.findUnique({ where: { id: channelId } });
+  if (!channel?.isActive || channel.streamStatus !== 'ONLINE') return null;
   const streamUrl = channel.streamUrl?.trim();
   if (!streamUrl || !isSafeUpstreamUrl(streamUrl)) return null;
   return streamUrl;

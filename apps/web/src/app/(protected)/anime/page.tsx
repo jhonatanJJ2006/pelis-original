@@ -1,10 +1,10 @@
 'use client';
 
-import { useQuery, useMutation } from 'convex/react';
+import { useQuery, useMutation } from '@pelis/db/client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Clapperboard, Star } from 'lucide-react';
-import { api } from '@pelis/convex';
+import { api } from '@pelis/db';
 import { CatalogPageSkeleton } from '@pelis/ui/features/catalog-page-skeleton';
 import { EmptyState } from '@pelis/ui/features/empty-state';
 import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';

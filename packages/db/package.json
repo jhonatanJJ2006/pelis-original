@@ -1,0 +1,49 @@
+{
+  "name": "@pelis/db",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts",
+    "./client": "./src/client-hooks.ts",
+    "./server": "./src/server.ts",
+    "./registry": "./src/registry.ts",
+    "./types": "./src/types.ts",
+    "./auth": "./src/auth.ts",
+    "./realtime": "./src/realtime.ts",
+    "./storage": "./src/storage.ts"
+  },
+  "scripts": {
+    "dev": "prisma generate && echo 'db: ready'",
+    "build": "prisma generate && echo 'db: built'",
+    "clean": "git clean -xdf .cache .turbo dist node_modules",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:reset": "prisma migrate reset --force",
+    "db:studio": "prisma studio",
+    "db:seed": "tsx scripts/seed.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "@pelis/validators": "workspace:*",
+    "better-auth": "1.4.9",
+    "pg": "^8.13.1",
+    "stripe": "^22.3.2",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@pelis/eslint-config": "workspace:*",
+    "@pelis/tsconfig": "workspace:*",
+    "@types/node": "^22.10.2",
+    "@types/pg": "^8.11.10",
+    "eslint": "catalog:",
+    "prisma": "^5.22.0",
+    "tsx": "^4.19.2",
+    "typescript": "catalog:"
+  }
+}

@@ -1,12 +1,12 @@
 'use client';
 
-import { useAction, useMutation, useQuery } from 'convex/react';
+import { useAction, useMutation, useQuery } from '@pelis/db/client';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Plus, Search, Sparkles, Monitor } from 'lucide-react';
 import { toast } from 'sonner';
-import { api } from '@pelis/convex';
+import { api } from '@pelis/db';
 import { Button, Input, Spinner } from '@pelis/ui/components';
 import { AdminTableSkeleton } from '@pelis/ui/features/admin-table-skeleton';
 import { MoviePoster } from '@pelis/ui/features/movie-poster';
@@ -44,9 +44,10 @@ const filterTabs: { value: QualityFilter; label: string }[] = [
 ];
 
 interface AdminMovie extends AdminMovieListItem {
-  actors?: string;
-  synopsis?: string;
+  actors: string;
+  synopsis: string;
   videoUrl?: string;
+  classification: string;
 }
 
 export default function AdminMoviesPageClient() {
@@ -65,8 +66,8 @@ export default function AdminMoviesPageClient() {
   const [bulkBackdrops, setBulkBackdrops] = useState(false);
 
   const removeMovie = useMutation(api.movies.remove);
-  const enrichMoviesBulk = useAction(api.adminEnrichment.enrichMoviesBulk);
-  const applyBackdropsBulk = useAction(api.adminEnrichment.applyBackdropsBulk);
+  const enrichMoviesBulk = useAction<{ movieIds: string[] }, any>(api.adminEnrichment.enrichMoviesBulk);
+  const applyBackdropsBulk = useAction<{ movieIds: string[] }, any>(api.adminEnrichment.applyBackdropsBulk);
 
   useEffect(() => {
     const filter = searchParams.get('filter') as QualityFilter | null;

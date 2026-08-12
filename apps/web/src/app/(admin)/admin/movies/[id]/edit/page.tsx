@@ -1,12 +1,12 @@
 'use client';
 
-import { useMutation, useQuery } from 'convex/react';
+import { useMutation, useQuery } from '@pelis/db/client';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { ArrowLeft, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
-import { api } from '@pelis/convex';
+import { api } from '@pelis/db';
 import { Button } from '@pelis/ui/components';
 import { AdminFormSkeleton } from '@pelis/ui/features/admin-form-skeleton';
 import { EnrichMovieModal } from '../../../components/enrich-movie-modal';
@@ -19,7 +19,7 @@ export default function EditMoviePage() {
   const movieId = params.id;
   const [showEnrich, setShowEnrich] = useState(false);
 
-  const movie = useQuery(api.movies.getById, { id: movieId as any }) as MediaItem | null | undefined;
+  const movie = (useQuery<MediaItem>(api.movies.getById, { id: movieId as any }) as MediaItem | null | undefined);
   const updateMovie = useMutation(api.movies.update);
   const generateUploadUrl = useMutation(api.movies.generateUploadUrl);
 
@@ -34,7 +34,7 @@ export default function EditMoviePage() {
     ];
 
   const handleUploadImage = async (file: File) => {
-    const uploadUrl = await generateUploadUrl({});
+    const uploadUrl = (await generateUploadUrl({})) as string;
     const response = await fetch(uploadUrl, {
       method: 'POST',
       headers: { 'Content-Type': file.type },

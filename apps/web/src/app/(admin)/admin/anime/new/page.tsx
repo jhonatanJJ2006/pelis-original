@@ -1,11 +1,11 @@
 'use client';
 
-import { useMutation } from 'convex/react';
+import { useMutation } from '@pelis/db/client';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
-import { api } from '@pelis/convex';
+import { api } from '@pelis/db';
 import { AnimeForm, type AnimeFormValues } from '../anime-form';
 
 function parseProviders(text: string) {

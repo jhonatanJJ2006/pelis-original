@@ -1,12 +1,12 @@
 'use client';
 
-import { useQuery, useAction } from 'convex/react';
+import { useQuery, useAction } from '@pelis/db/client';
 import Link from 'next/link';
 import { useMemo, useRef, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, FreeMode } from 'swiper/modules';
 import { Crown, Check, Zap, Star, Rocket, ChevronLeft, ChevronRight, Settings } from 'lucide-react';
-import { api } from '@pelis/convex';
+import { api } from '@pelis/db';
 import { useUser } from '@pelis/auth/hooks';
 import { SubscribePageSkeleton } from '@pelis/ui/features/subscribe-page-skeleton';
 import { Button } from '@pelis/ui/components';
@@ -77,8 +77,8 @@ export default function SubscribePage() {
   const [loadingPlanId, setLoadingPlanId] = useState<string | null>(null);
   const [loadingPortal, setLoadingPortal] = useState(false);
   const plans = (useQuery(api.subscriptions.list, {}) as Plan[] | undefined) ?? [];
-  const createCheckoutSession = useAction(api.stripe.createCheckoutSession);
-  const createPortalSession = useAction(api.stripe.createPortalSession);
+  const createCheckoutSession = useAction<{ planId: string }, { url: string; upgraded: false }>(api.stripe.createCheckoutSession);
+  const createPortalSession = useAction<Record<string, never>, { url: string }>(api.stripe.createPortalSession);
 
   const isLoading = plans === undefined;
   const hasActivePlan = !!(user?.planExpiresAt && user.planExpiresAt > Date.now());

@@ -1,0 +1,13 @@
+{
+  "extends": "@pelis/tsconfig/base.json",
+  "compilerOptions": {
+    "jsx": "preserve",
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["./src/*"]
+    },
+    "types": ["node"]
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", ".turbo"]
+}

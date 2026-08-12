@@ -1,11 +1,11 @@
 'use client';
 
-import { useAction, useMutation, useQuery } from 'convex/react';
+import { useAction, useMutation, useQuery } from '@pelis/db/client';
 import Link from 'next/link';
 import { useState } from 'react';
 import { ArrowLeft, Download, RefreshCw, Trash2, ListVideo, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { api } from '@pelis/convex';
+import { api } from '@pelis/db';
 import { Button, Input, Select, Spinner } from '@pelis/ui/components';
 import { AdminTableSkeleton } from '@pelis/ui/features/admin-table-skeleton';
 import { cn } from '@pelis/ui/utils';
@@ -41,9 +41,9 @@ function formatDate(ts?: number) {
 
 export default function AdminTVPlaylistsPage() {
   const playlists = useQuery(api.tv.listPlaylists, {}) as PlaylistRow[] | undefined;
-  const create = useMutation(api.tv.createPlaylist);
-  const remove = useMutation(api.tv.removePlaylist);
-  const importM3U = useAction(api.tv.seedFromM3U);
+  const create = useMutation<{ name: string; m3uUrl: string; country?: string; language?: string; isActive: boolean }, string>(api.tv.createPlaylist);
+  const remove = useMutation<{ id: string }, string>(api.tv.removePlaylist);
+  const importM3U = useAction<{ m3uUrl: string; playlistId?: string; country?: string; language?: string }, { total: number; added: number; updated: number; failed: number; failures: string[] }>(api.tv.seedFromM3U);
 
   const [form, setForm] = useState({
     name: '',

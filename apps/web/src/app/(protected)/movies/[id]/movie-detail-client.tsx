@@ -1,10 +1,10 @@
 'use client';
 
-import { useQuery, useMutation } from 'convex/react';
+import { useQuery, useMutation } from '@pelis/db/client';
 import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Calendar, Crown, Heart, Play, Tag, User } from 'lucide-react';
-import { api } from '@pelis/convex';
+import { api } from '@pelis/db';
 import { useUser } from '@pelis/auth/hooks';
 import { MovieDetailSkeleton } from '@pelis/ui/features/movie-detail-skeleton';
 import { Badge, Skeleton } from '@pelis/ui/components';
@@ -32,7 +32,7 @@ export default function MovieDetailPageClient() {
   ) as MediaItem[] | undefined;
   const addFavorite = useMutation(api.favorites.add);
   const removeFavorite = useMutation(api.favorites.remove);
-  const isFavorited = useQuery(
+  const isFavorited = useQuery<boolean>(
     api.favorites.check,
     user && movie ? { userId: user._id as any, movieId: movie._id as any } : 'skip'
   );

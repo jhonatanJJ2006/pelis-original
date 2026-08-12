@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useQuery, usePreloadedQuery, type Preloaded } from 'convex/react';
+import { useQuery, usePreloadedQuery } from '@pelis/db/client';
+import type { PreloadedQuery } from '@pelis/db/server';
 import { useUser } from '@pelis/auth/hooks';
 import { MovieRow } from '@pelis/ui/features/movie-row';
 import { ContinueWatchingRow } from '@pelis/ui/features/continue-watching-row';
@@ -9,7 +10,7 @@ import { SectionHeader } from '@pelis/ui/features/section-header';
 import { GenreSwiper, GenreChip } from '@pelis/ui/features/genre-swiper';
 import { HeroCarousel } from './hero-carousel';
 import { HeroSkeleton } from '@pelis/ui/features/hero-skeleton';
-import { api } from '@pelis/convex';
+import { api } from '@pelis/db';
 import type { MediaItem } from '@pelis/ui/types';
 import { cn } from '@pelis/ui/utils';
 
@@ -27,22 +28,22 @@ const genreColors: Record<string, string> = {
 
 interface HomePageClientProps {
   preloaded: {
-    featured: Preloaded<typeof api.movies.getFeatured>;
-    trending: Preloaded<typeof api.movies.getTrending>;
-    movies: Preloaded<typeof api.movies.list>;
-    series: Preloaded<typeof api.movies.listSeries>;
-    genres: Preloaded<typeof api.movies.getGenres>;
+    featured: PreloadedQuery<MediaItem[]>;
+    trending: PreloadedQuery<MediaItem[]>;
+    movies: PreloadedQuery<MediaItem[]>;
+    series: PreloadedQuery<MediaItem[]>;
+    genres: PreloadedQuery<string[]>;
   };
 }
 
 export function HomePageClient({ preloaded }: HomePageClientProps) {
   const { user } = useUser();
-  const movies = usePreloadedQuery(preloaded.movies) as MediaItem[] | undefined;
-  const featuredMovies = usePreloadedQuery(preloaded.featured) as MediaItem[] | undefined;
-  const trending = usePreloadedQuery(preloaded.trending) as MediaItem[] | undefined;
-  const series = usePreloadedQuery(preloaded.series) as MediaItem[] | undefined;
-  const genres = usePreloadedQuery(preloaded.genres) as string[] | undefined;
-  const continueWatching = useQuery(
+  const movies = preloaded.movies.data as MediaItem[] | undefined;
+  const featuredMovies = preloaded.featured.data as MediaItem[] | undefined;
+  const trending = preloaded.trending.data as MediaItem[] | undefined;
+  const series = preloaded.series.data as MediaItem[] | undefined;
+  const genres = preloaded.genres.data as string[] | undefined;
+  const continueWatching = useQuery<Array<{ _id: string; progress: number; duration: number; movie: MediaItem }>>(
     api.history.getContinueWatching,
     user ? { userId: user._id as any, limit: 10 } : 'skip'
   );

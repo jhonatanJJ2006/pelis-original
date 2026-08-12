@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useQuery } from 'convex/react';
+import { useQuery } from '@pelis/db/client';
 import {
   User,
   Heart,
@@ -16,7 +16,7 @@ import {
   Shield,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { api } from '@pelis/convex';
+import { api } from '@pelis/db';
 import { useUser } from '@pelis/auth/hooks';
 import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';
 import { ProfilePageSkeleton } from '@pelis/ui/features/profile-page-skeleton';
@@ -164,7 +164,7 @@ export default function ProfilePage() {
 
             <Link href="/subscribe">
               <Button
-                variant={hasActivePlan ? 'secondary' : 'default'}
+                variant={hasActivePlan ? 'secondary' : 'primary'}
                 className="w-full sm:w-auto inline-flex items-center gap-2"
               >
                 {hasActivePlan ? (

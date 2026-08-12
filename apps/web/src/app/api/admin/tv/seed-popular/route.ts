@@ -1,30 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ConvexHttpClient } from 'convex/browser';
-import { api } from '@pelis/convex';
-import { getToken } from '@/lib/auth';
+import { getRequestCtx, isAdmin, invoke } from '@pelis/db';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-export async function POST(_req: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
-    const token = await getToken();
-    if (!token) {
+    const ctx = await getRequestCtx(req);
+    if (!(await isAdmin(ctx))) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const url = process.env.NEXT_PUBLIC_CONVEX_URL;
-    if (!url) throw new Error('NEXT_PUBLIC_CONVEX_URL is not configured');
-
-    const client = new ConvexHttpClient(url);
-    client.setAuth(token);
-
-    await client.query(api.tv.pingAdmin, {});
-
-    const result = await client.mutation(api.seedPopularChannels.seedPopularChannels, {
-      dryRun: false,
+    const result = await invoke({
+      name: 'tv.seedPopularChannels',
+      args: { dryRun: false },
+      ctx,
     });
-
     return NextResponse.json(result);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Error al sembrar';

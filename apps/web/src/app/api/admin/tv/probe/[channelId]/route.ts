@@ -1,30 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ConvexHttpClient } from 'convex/browser';
-import { api } from '@pelis/convex';
-import { getToken } from '@/lib/auth';
-import { isSafeUpstreamUrl, probeTvStream } from '@/lib/tv-stream-proxy';
+import { getRequestCtx, isAdmin } from '@pelis/db';
+import { probeTvStream } from '@/lib/tv-stream-proxy';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-async function requireAdminClient() {
-  const token = await getToken();
-  if (!token) {
-    throw new Error('No autenticado');
-  }
-
-  const url = process.env.NEXT_PUBLIC_CONVEX_URL;
-  if (!url) throw new Error('NEXT_PUBLIC_CONVEX_URL is not configured');
-
-  const client = new ConvexHttpClient(url);
-  client.setAuth(token);
-  await client.query(api.tv.pingAdmin, {});
-  return client;
-}
-
 export async function POST(
   _req: NextRequest,
-  { params }: { params: { channelId: string } }
+  { params }: { params: { channelId: string } },
 ) {
   const channelId = params.channelId;
   if (!channelId) {
@@ -32,31 +15,54 @@ export async function POST(
   }
 
   try {
-    const client = await requireAdminClient();
-    const channel = await client.query(api.tv.getById, { id: channelId as any });
+    const ctx = await getRequestCtx(_req);
+    if (!(await isAdmin(ctx))) {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+    }
+
+    const { prisma } = await import('@pelis/db');
+    const channel = await prisma.tVChannel.findUnique({ where: { id: channelId } });
     if (!channel) {
       return NextResponse.json({ error: 'channel not found' }, { status: 404 });
     }
 
     const streamUrl = channel.streamUrl?.trim();
-    if (!streamUrl || !isSafeUpstreamUrl(streamUrl)) {
-      return NextResponse.json(
-        {
-          channelId,
-          name: channel.name,
-          streamStatus: 'offline' as const,
-          lastStreamError: 'URL no válida',
-        },
-        { status: 200 }
-      );
+    if (!streamUrl) {
+      await prisma.tVChannel.update({
+        where: { id: channelId },
+        data: { streamStatus: 'OFFLINE', lastStreamError: 'URL no válida', lastCheckedAt: new Date() },
+      });
+      return NextResponse.json({
+        channelId,
+        name: channel.name,
+        streamStatus: 'offline',
+        lastStreamError: 'URL no válida',
+      });
+    }
+
+    const { isSafeUpstreamUrl } = await import('@/lib/tv-stream-proxy');
+    if (!isSafeUpstreamUrl(streamUrl)) {
+      await prisma.tVChannel.update({
+        where: { id: channelId },
+        data: { streamStatus: 'OFFLINE', lastStreamError: 'URL no válida', lastCheckedAt: new Date() },
+      });
+      return NextResponse.json({
+        channelId,
+        name: channel.name,
+        streamStatus: 'offline',
+        lastStreamError: 'URL no válida',
+      });
     }
 
     const result = await probeTvStream(streamUrl);
 
-    await client.mutation(api.tv.reportStreamStatus, {
-      channelId: channelId as any,
-      streamStatus: result.streamStatus,
-      lastStreamError: result.lastStreamError,
+    await prisma.tVChannel.update({
+      where: { id: channelId },
+      data: {
+        streamStatus: result.streamStatus === 'online' ? 'ONLINE' : 'OFFLINE',
+        lastCheckedAt: new Date(),
+        lastStreamError: result.lastStreamError ?? null,
+      },
     });
 
     return NextResponse.json({
