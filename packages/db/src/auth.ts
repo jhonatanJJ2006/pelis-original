@@ -1,7 +1,7 @@
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import type { BetterAuthOptions } from 'better-auth';
-import { prisma } from './client.js';
+import { prisma } from './client';
 
 const siteUrl =
   process.env.SITE_URL?.trim() ||

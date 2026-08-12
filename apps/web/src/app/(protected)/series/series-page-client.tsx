@@ -6,7 +6,8 @@ import { Tv } from 'lucide-react';
 import { MovieRow } from '@pelis/ui/features/movie-row';
 import { EmptyState } from '@pelis/ui/features/empty-state';
 import { CatalogPageSkeleton } from '@pelis/ui/features/catalog-page-skeleton';
-import { api } from '@pelis/db';
+import { useQuery } from '@pelis/db/client';
+import { api } from '@pelis/db/api';
 import type { MediaItem } from '@pelis/ui/types';
 
 const classificationOrder = ['G', 'PG', 'PG-13', 'R', 'NC-17'];
@@ -26,7 +27,8 @@ interface SeriesPageClientProps {
 }
 
 export default function SeriesPageClient({ preloaded }: SeriesPageClientProps) {
-  const series = preloaded.series.data as MediaItem[] | undefined;
+  const liveSeries = useQuery<MediaItem[]>(api.movies.listSeries, {}) as MediaItem[] | undefined;
+  const series = liveSeries ?? preloaded.series.data;
   const isLoading = series === undefined;
 
   const grouped = useMemo(() => {

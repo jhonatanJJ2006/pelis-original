@@ -4,7 +4,7 @@ import { useMutation, useQuery } from '@pelis/db/client';
 import { useEffect, useState } from 'react';
 import { Search, X } from 'lucide-react';
 import { toast } from 'sonner';
-import { api } from '@pelis/db';
+import { api } from '@pelis/db/api';
 import { Button, Input, Spinner } from '@pelis/ui/components';
 import { MoviePoster } from '@pelis/ui/features/movie-poster';
 import { getAdminMovieDisplayName } from '../lib/movie-display';

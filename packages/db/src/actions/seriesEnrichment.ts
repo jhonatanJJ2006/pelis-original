@@ -2,19 +2,19 @@
  * Series-specific enrichment actions.
  */
 import { z } from 'zod';
-import { prisma } from '../client.js';
-import { notifyChange } from '../realtime.js';
-import { register } from '../registry.js';
-import { requireAdmin } from '../lib/requireAdmin.js';
+import { prisma } from '../client';
+import { notifyChange } from '../realtime';
+import { register } from '../registry';
+import { requireAdmin } from '../lib/requireAdmin';
 import {
   fetchTmdbMetadata,
   downloadPosterBlob,
   downloadBackdropBlob,
   type TmdbMetadata,
-} from './enrichment.js';
-import { uploadFile, deleteFile } from '../storage.js';
-import { resolveMovieImagePath } from '../lib/resolveMovieImage.js';
-import { isMissingBackdrop, isMissingImage } from '../lib/movieQuality.js';
+} from './enrichment';
+import { uploadFile, deleteFile } from '../storage';
+import { resolveMovieImagePath } from '../lib/resolveMovieImage';
+import { isMissingBackdrop, isMissingImage } from '../lib/movieQuality';
 
 export const fetchTmdbMetadataAction = register({
   kind: 'action',

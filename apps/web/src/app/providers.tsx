@@ -3,7 +3,7 @@
 import { ReactNode, useEffect } from 'react';
 import { authClient } from '@/lib/auth-client';
 
-export function ConvexClientProvider({ children }: { children: ReactNode }) {
+export function AppProviders({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Eagerly trigger any auth session bootstrap the SDK performs.
     void authClient.getSession();

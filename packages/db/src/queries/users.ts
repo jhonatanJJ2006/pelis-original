@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { prisma } from '../client.js';
-import { register } from '../registry.js';
+import { prisma } from '../client';
+import { register } from '../registry';
 
 export const me = register({
   kind: 'query',

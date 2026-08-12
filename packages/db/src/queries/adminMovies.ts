@@ -1,13 +1,13 @@
 import { z } from 'zod';
-import { prisma } from '../client.js';
-import { notifyChange } from '../realtime.js';
-import { register } from '../registry.js';
-import { requireAdmin } from '../lib/requireAdmin.js';
+import { prisma } from '../client';
+import { notifyChange } from '../realtime';
+import { register } from '../registry';
+import { requireAdmin } from '../lib/requireAdmin';
 import {
   getMovieQualityFlags,
   matchesQualityFilter,
   type MovieQualityFilter,
-} from '../lib/movieQuality.js';
+} from '../lib/movieQuality';
 
 const qualityFilterValidator = z.enum([
   'all',

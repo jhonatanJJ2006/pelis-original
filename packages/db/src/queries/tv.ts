@@ -1,8 +1,9 @@
 import { z } from 'zod';
-import { prisma } from '../client.js';
-import { notifyChange } from '../realtime.js';
-import { register } from '../registry.js';
-import { requireAdmin } from '../lib/requireAdmin.js';
+import { prisma } from '../client';
+import { notifyChange } from '../realtime';
+import { register } from '../registry';
+import { toTvChannelShape } from '../lib/shapes';
+import { requireAdmin } from '../lib/requireAdmin';
 
 const TVChannelCreate = z.object({
   name: z.string(),
@@ -56,7 +57,7 @@ export const list = register({
       skip: a.offset ?? 0,
     });
     return {
-      items: channels,
+      items: channels.map(toTvChannelShape),
       total,
       offset: a.offset ?? 0,
       limit: a.limit ?? 48,
@@ -71,7 +72,8 @@ export const getById = register({
   reads: ['tv_channel'],
   args: z.object({ id: z.string() }),
   handler: async (_ctx, { id }) => {
-    return prisma.tVChannel.findUnique({ where: { id } });
+    const channel = await prisma.tVChannel.findUnique({ where: { id } });
+    return channel ? toTvChannelShape(channel) : null;
   },
 });
 

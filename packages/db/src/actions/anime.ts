@@ -3,7 +3,7 @@
  * Ported from packages/convex/src/anime.ts (action context).
  */
 import { z } from 'zod';
-import { register } from '../registry.js';
+import { register } from '../registry';
 
 const CONSUMET_API = 'https://api.consumet.org';
 

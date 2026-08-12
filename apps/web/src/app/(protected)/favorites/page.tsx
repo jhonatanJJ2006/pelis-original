@@ -3,7 +3,7 @@
 import { useQuery, useMutation } from '@pelis/db/client';
 import { useMemo, useState } from 'react';
 import { Heart, Film, Tv } from 'lucide-react';
-import { api } from '@pelis/db';
+import { api } from '@pelis/db/api';
 import { useUser } from '@pelis/auth/hooks';
 import { MovieGridSkeleton } from '@pelis/ui/features/movie-card';
 import { MovieSwiper } from '@pelis/ui/features/movie-swiper';

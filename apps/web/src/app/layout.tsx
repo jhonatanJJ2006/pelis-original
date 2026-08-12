@@ -2,7 +2,7 @@ import { Bebas_Neue, Outfit } from 'next/font/google';
 import './globals.css';
 import { Providers } from '@pelis/auth/providers';
 import { Toaster } from 'sonner';
-import { ConvexClientProvider } from './providers';
+import { AppProviders } from './providers';
 
 const outfit = Outfit({
   subsets: ['latin'],
@@ -45,7 +45,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className={`${outfit.variable} ${bebasNeue.variable} font-sans`}>
         <Providers>
-          <ConvexClientProvider>
+          <AppProviders>
             {children}
             <Toaster
               closeButton
@@ -58,7 +58,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 },
               }}
             />
-          </ConvexClientProvider>
+          </AppProviders>
         </Providers>
       </body>
     </html>

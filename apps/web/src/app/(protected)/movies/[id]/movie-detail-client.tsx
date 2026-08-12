@@ -4,7 +4,7 @@ import { useQuery, useMutation } from '@pelis/db/client';
 import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Calendar, Crown, Heart, Play, Tag, User } from 'lucide-react';
-import { api } from '@pelis/db';
+import { api } from '@pelis/db/api';
 import { useUser } from '@pelis/auth/hooks';
 import { MovieDetailSkeleton } from '@pelis/ui/features/movie-detail-skeleton';
 import { Badge, Skeleton } from '@pelis/ui/components';

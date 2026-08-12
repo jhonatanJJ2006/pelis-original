@@ -1,6 +1,6 @@
-import type { FunctionDefinition } from './registry.js';
-import { getDefinition, callHandler } from './registry.js';
-import type { RequestCtx } from './lib/requireAdmin.js';
+import type { FunctionDefinition } from './registry';
+import { getDefinition, callHandler } from './registry';
+import type { RequestCtx } from './lib/requireAdmin';
 
 export class InvokeError extends Error {
   constructor(message: string, public readonly status: number = 400) {

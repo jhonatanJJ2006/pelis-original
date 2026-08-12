@@ -1,8 +1,8 @@
 import { z } from 'zod';
-import { prisma } from '../client.js';
-import { notifyChange } from '../realtime.js';
-import { register } from '../registry.js';
-import { requireAdmin } from '../lib/requireAdmin.js';
+import { prisma } from '../client';
+import { notifyChange } from '../realtime';
+import { register } from '../registry';
+import { requireAdmin } from '../lib/requireAdmin';
 
 const SeriesCreate = z.object({
   name: z.string(),

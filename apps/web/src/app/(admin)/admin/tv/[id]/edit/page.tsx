@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Activity } from 'lucide-react';
 import { toast } from 'sonner';
-import { api } from '@pelis/db';
+import { api } from '@pelis/db/api';
 import { Button, Spinner } from '@pelis/ui/components';
 import { AdminFormSkeleton } from '@pelis/ui/features/admin-form-skeleton';
 import { cn } from '@pelis/ui/utils';

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { ImageIcon, Monitor, Pencil, Plus, Search, Sparkles, Star, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { api } from '@pelis/db';
+import { api } from '@pelis/db/api';
 import { Button, Input, Spinner } from '@pelis/ui/components';
 import { AdminTableSkeleton } from '@pelis/ui/features/admin-table-skeleton';
 import { MoviePoster } from '@pelis/ui/features/movie-poster';

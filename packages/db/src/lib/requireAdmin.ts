@@ -1,4 +1,4 @@
-import { prisma } from '../client.js';
+import { prisma } from '../client';
 
 export class AuthError extends Error {
   constructor(message: string, public readonly status: number = 401) {

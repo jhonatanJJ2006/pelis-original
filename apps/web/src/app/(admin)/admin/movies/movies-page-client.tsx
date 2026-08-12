@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Plus, Search, Sparkles, Monitor } from 'lucide-react';
 import { toast } from 'sonner';
-import { api } from '@pelis/db';
+import { api } from '@pelis/db/api';
 import { Button, Input, Spinner } from '@pelis/ui/components';
 import { AdminTableSkeleton } from '@pelis/ui/features/admin-table-skeleton';
 import { MoviePoster } from '@pelis/ui/features/movie-poster';

@@ -105,7 +105,7 @@ export async function notifyChange(
   const payload = JSON.stringify({ table, op, ts: Date.now(), rowId });
   try {
     // Use the prisma client for the notify call (it manages connection pool).
-    const { prisma } = await import('./client.js');
+    const { prisma } = await import('./client');
     await prisma.$executeRawUnsafe(
       `SELECT pg_notify('${LISTEN_CHANNEL}', $1)`,
       payload,

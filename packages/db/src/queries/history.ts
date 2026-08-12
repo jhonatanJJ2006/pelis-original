@@ -1,6 +1,7 @@
 import { z } from 'zod';
-import { prisma } from '../client.js';
-import { register } from '../registry.js';
+import { prisma } from '../client';
+import { register } from '../registry';
+import { toMovieShape } from '../lib/shapes';
 
 export const listByUser = register({
   kind: 'query',
@@ -15,7 +16,7 @@ export const listByUser = register({
     });
     return items.map((h) => ({
       ...h,
-      movie: h.movie,
+      movie: h.movie ? toMovieShape(h.movie) : null,
     }));
   },
 });

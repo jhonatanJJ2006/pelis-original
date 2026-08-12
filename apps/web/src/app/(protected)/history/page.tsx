@@ -3,7 +3,7 @@
 import { useQuery, useMutation } from '@pelis/db/client';
 import Link from 'next/link';
 import { History, Play, Trash2 } from 'lucide-react';
-import { api } from '@pelis/db';
+import { api } from '@pelis/db/api';
 import { useUser } from '@pelis/auth/hooks';
 import { ContinueWatchingRowSkeleton } from '@pelis/ui/features/continue-watching-row';
 import { EmptyState } from '@pelis/ui/features/empty-state';

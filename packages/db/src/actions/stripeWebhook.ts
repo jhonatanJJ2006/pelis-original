@@ -1,6 +1,6 @@
 import Stripe from 'stripe';
 import { z } from 'zod';
-import { register } from '../registry.js';
+import { register } from '../registry';
 
 function getStripe() {
   const secretKey = process.env.STRIPE_SECRET_KEY;
@@ -58,7 +58,7 @@ export const processWebhook = register({
       };
     }
 
-    const { prisma } = await import('../client.js');
+    const { prisma } = await import('../client');
 
     try {
       switch (event.type) {

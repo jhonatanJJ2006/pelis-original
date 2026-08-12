@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Heart, Play, Tv, Film, TrendingUp } from 'lucide-react';
 import { useMutation, useQuery } from '@pelis/db/client';
 import { useUser } from '@pelis/auth/hooks';
-import { api } from '@pelis/db';
+import { api } from '@pelis/db/api';
 import { toast } from 'sonner';
 import { Badge } from '../../shared/ui/badge';
 import { MoviePoster } from '../movie-poster';

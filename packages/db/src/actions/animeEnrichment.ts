@@ -3,13 +3,13 @@
  * These are exposed to the client through the function registry.
  */
 import { z } from 'zod';
-import { register } from '../registry.js';
+import { register } from '../registry';
 import {
   fetchTmdbMetadata,
   downloadPosterBlob,
   downloadBackdropBlob,
   type TmdbMetadata,
-} from './enrichment.js';
+} from './enrichment';
 
 const CONSUMET_API = 'https://api.consumet.org';
 
@@ -31,7 +31,7 @@ export const previewAnimeMetadata = register({
   name: 'adminAnimeEnrichment.previewAnimeMetadata',
   args: z.object({ animeId: z.string(), tmdbId: z.number().optional() }),
   handler: async (_ctx, { animeId, tmdbId }) => {
-    const { prisma } = await import('../client.js');
+    const { prisma } = await import('../client');
     const anime = await prisma.anime.findUnique({ where: { id: animeId } });
     if (!anime) throw new Error('Anime no encontrado');
     const metadata = await fetchTmdbMetadata(anime.title, String(anime.year), tmdbId);
@@ -57,7 +57,7 @@ export const enrichAnime = register({
     replaceBackdrop: z.boolean().optional(),
   }),
   handler: async (_ctx, { animeId, tmdbId }) => {
-    const { prisma } = await import('../client.js');
+    const { prisma } = await import('../client');
     const anime = await prisma.anime.findUnique({ where: { id: animeId } });
     if (!anime) throw new Error('Anime no encontrado');
     const metadata = await fetchTmdbMetadata(anime.title, String(anime.year), tmdbId);
@@ -90,7 +90,7 @@ export const previewAnimeBackdrop = register({
   name: 'adminAnimeEnrichment.previewAnimeBackdrop',
   args: z.object({ animeId: z.string(), tmdbId: z.number().optional() }),
   handler: async (_ctx, { animeId, tmdbId }) => {
-    const { prisma } = await import('../client.js');
+    const { prisma } = await import('../client');
     const anime = await prisma.anime.findUnique({ where: { id: animeId } });
     if (!anime) throw new Error('Anime no encontrado');
     const metadata = await fetchTmdbMetadata(anime.title, String(anime.year), tmdbId);
@@ -118,7 +118,7 @@ export const applyAnimeBackdrop = register({
     replaceBackdrop: z.boolean().optional(),
   }),
   handler: async (_ctx, { animeId, tmdbId }) => {
-    const { prisma } = await import('../client.js');
+    const { prisma } = await import('../client');
     const anime = await prisma.anime.findUnique({ where: { id: animeId } });
     if (!anime) throw new Error('Anime no encontrado');
     const metadata = await fetchTmdbMetadata(anime.title, String(anime.year), tmdbId);
@@ -140,11 +140,11 @@ export const applyAnimeBackdrop = register({
 
 // Local helpers so we don't need to duplicate storage imports.
 async function uploadFileLocal(blob: Buffer) {
-  const { uploadFile } = await import('../storage.js');
+  const { uploadFile } = await import('../storage');
   return uploadFile(blob);
 }
 async function notifyChangeAnime(id: string) {
-  const { notifyChange } = await import('../realtime.js');
+  const { notifyChange } = await import('../realtime');
   await notifyChange('anime', 'update', id);
 }
 

@@ -1,15 +1,15 @@
 /**
  * TMDB + enrichment actions, ported from packages/convex/src/adminEnrichment.ts.
- * Each action is callable via the function registry /api/_fn/<name>.
+ * Each action is callable via the function registry /api/function/<name>.
  */
 import { z } from 'zod';
-import { prisma } from '../client.js';
-import { notifyChange } from '../realtime.js';
-import { requireAdmin } from '../lib/requireAdmin.js';
-import { hasValidMovieTitle, isMissingBackdrop, isMissingImage } from '../lib/movieQuality.js';
-import { uploadFile, deleteFile } from '../storage.js';
-import { resolveMovieImagePath } from '../lib/resolveMovieImage.js';
-import { register } from '../registry.js';
+import { prisma } from '../client';
+import { notifyChange } from '../realtime';
+import { requireAdmin } from '../lib/requireAdmin';
+import { hasValidMovieTitle, isMissingBackdrop, isMissingImage } from '../lib/movieQuality';
+import { uploadFile, deleteFile } from '../storage';
+import { resolveMovieImagePath } from '../lib/resolveMovieImage';
+import { register } from '../registry';
 
 const TMDB_API_KEY = process.env.TMDB_API_KEY;
 const TMDB_BASE = 'https://api.themoviedb.org/3';

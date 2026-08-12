@@ -5,7 +5,7 @@ import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useRef, useState, useEffect } from 'react';
 import { ArrowLeft, Loader2, AlertCircle, Monitor, Crown } from 'lucide-react';
-import { api } from '@pelis/db';
+import { api } from '@pelis/db/api';
 import { useUser } from '@pelis/auth/hooks';
 import { Spinner } from '@pelis/ui/components';
 import Hls from 'hls.js';

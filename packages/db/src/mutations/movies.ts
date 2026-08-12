@@ -1,9 +1,9 @@
 import { z } from 'zod';
-import { prisma } from '../client.js';
-import { notifyChange } from '../realtime.js';
-import { register } from '../registry.js';
-import { requireAdmin } from '../lib/requireAdmin.js';
-import { resolveMovieImagePath } from '../lib/resolveMovieImage.js';
+import { prisma } from '../client';
+import { notifyChange } from '../realtime';
+import { register } from '../registry';
+import { requireAdmin } from '../lib/requireAdmin';
+import { resolveMovieImagePath } from '../lib/resolveMovieImage';
 
 const MovieCreate = z.object({
   name: z.string(),

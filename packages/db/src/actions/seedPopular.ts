@@ -3,9 +3,9 @@
  * Used by the admin UI to bootstrap the TV guide with curated content.
  */
 import { z } from 'zod';
-import { prisma } from '../client.js';
-import { notifyChange } from '../realtime.js';
-import { register } from '../registry.js';
+import { prisma } from '../client';
+import { notifyChange } from '../realtime';
+import { register } from '../registry';
 
 interface PopularChannelSeed {
   name: string;

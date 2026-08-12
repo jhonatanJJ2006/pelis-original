@@ -6,7 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { ArrowLeft, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
-import { api } from '@pelis/db';
+import { api } from '@pelis/db/api';
 import { Button } from '@pelis/ui/components';
 import { AdminFormSkeleton } from '@pelis/ui/features/admin-form-skeleton';
 import { AnimeForm, type AnimeFormValues } from '../../anime-form';

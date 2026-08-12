@@ -1,25 +1,25 @@
-export { api } from './registry-bootstrap.js';
-export type { Api, FunctionReference } from './registry-bootstrap.js';
-export { prisma } from './client.js';
-export { auth } from './auth.js';
-export { getRequestCtx, preloadQuery, invoke } from './server.js';
-export type { PreloadedQuery } from './server.js';
-export { isAdmin } from './lib/requireAdmin.js';
-export { uploadFile, deleteFile } from './storage.js';
+export { api } from './api';
+export type { Api, FunctionReference } from './api';
+export { prisma } from './client';
+export { auth } from './auth';
+export { getRequestCtx, preloadQuery, invoke } from './server';
+export type { PreloadedQuery } from './server';
+export { isAdmin } from './lib/requireAdmin';
+export { uploadFile, deleteFile } from './storage';
 export {
   fetchTmdbMetadata,
   downloadPosterBlob,
   downloadBackdropBlob,
   searchMovie,
   type TmdbMetadata,
-} from './actions/enrichment.js';
+} from './actions/enrichment';
 export {
   resolveMovieImagePath,
   enrichMovieImage,
   enrichMovies,
   PLACEHOLDER_IMAGE,
   getHeroImage,
-} from './lib/resolveMovieImage.js';
+} from './lib/resolveMovieImage';
 export {
   hasValidMovieTitle,
   isMissingBackdrop,
@@ -28,4 +28,4 @@ export {
   isOrphanIdName,
   getMovieQualityFlags,
   matchesQualityFilter,
-} from './lib/movieQuality.js';
+} from './lib/movieQuality';

@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { prisma } from '../client.js';
-import { notifyChange } from '../realtime.js';
-import { register } from '../registry.js';
+import { prisma } from '../client';
+import { notifyChange } from '../realtime';
+import { register } from '../registry';
 
 const PROBE_TIMEOUT_MS = 12000;
 const FAILURE_THRESHOLD = 2;

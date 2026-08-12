@@ -45,11 +45,15 @@ function attachListeners(client: SSEClient) {
   const handler = (event: Event) => {
     const me = event as MessageEvent;
     try {
-      const data = JSON.parse(me.data) as { table?: string };
+      const data = JSON.parse(me.data) as { table?: string; fns?: string[] };
+      const affectedFns = new Set(data.fns ?? []);
       const table = data.table;
-      if (!table) return;
       for (const key of Array.from(client.listeners.keys())) {
-        if (key.startsWith(`${table}.`) || key === table) {
+        const fnName = key.split(':')[0] ?? key;
+        const hit =
+          table != null &&
+          (fnName === table || fnName.startsWith(`${table}.`) || affectedFns.has(fnName));
+        if (hit) {
           client.listeners.get(key)?.forEach((fn) => fn());
         }
       }
@@ -110,7 +114,7 @@ export function useQuery<T = unknown>(
 
     const fetcher = async () => {
       try {
-        const res = await fetch(`/api/_fn/${encodeURIComponent(fnName)}`, {
+        const res = await fetch(`/api/function/${encodeURIComponent(fnName)}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
@@ -165,7 +169,7 @@ export function useMutation<TArgs = unknown, TResult = unknown>(
 ): (args?: TArgs) => Promise<TResult> {
   const fnName = resolveName(name);
   return async (args?: TArgs): Promise<TResult> => {
-    const res = await fetch(`/api/_fn/${encodeURIComponent(fnName)}`, {
+    const res = await fetch(`/api/function/${encodeURIComponent(fnName)}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -184,7 +188,7 @@ export function useAction<TArgs = unknown, TResult = unknown>(
 ): (args?: TArgs) => Promise<TResult> {
   const fnName = resolveName(name);
   return async (args?: TArgs): Promise<TResult> => {
-    const res = await fetch(`/api/_fn/${encodeURIComponent(fnName)}`, {
+    const res = await fetch(`/api/function/${encodeURIComponent(fnName)}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',

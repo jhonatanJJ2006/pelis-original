@@ -1,6 +1,7 @@
 import { z } from 'zod';
-import { prisma } from '../client.js';
-import { register } from '../registry.js';
+import { prisma } from '../client';
+import { register } from '../registry';
+import { toAnimeShape } from '../lib/shapes';
 
 const StatusEnum = z.enum(['ongoing', 'completed']);
 
@@ -27,7 +28,7 @@ export const list = register({
         { alternativeTitle: { contains: q, mode: 'insensitive' } },
       ];
     }
-    return prisma.anime.findMany({ where, orderBy: { title: 'asc' } });
+    return (await prisma.anime.findMany({ where, orderBy: { title: 'asc' } })).map(toAnimeShape);
   },
 });
 
@@ -36,7 +37,10 @@ export const getById = register({
   name: 'anime.getById',
   reads: ['anime'],
   args: z.object({ id: z.string() }),
-  handler: async (_ctx, { id }) => prisma.anime.findUnique({ where: { id } }),
+  handler: async (_ctx, { id }) => {
+    const anime = await prisma.anime.findUnique({ where: { id } });
+    return anime ? toAnimeShape(anime) : null;
+  },
 });
 
 export const getGenres = register({

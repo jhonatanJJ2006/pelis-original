@@ -4,10 +4,10 @@
   "private": true,
   "main": "./src/index.ts",
   "type": "module",
-  "sideEffects": false,
   "exports": {
     ".": "./src/index.ts",
     "./client": "./src/client-hooks.ts",
+    "./api": "./src/api.ts",
     "./server": "./src/server.ts",
     "./registry": "./src/registry.ts",
     "./types": "./src/types.ts",

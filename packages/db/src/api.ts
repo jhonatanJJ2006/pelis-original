@@ -1,10 +1,11 @@
 // Public API surface — mirrors @pelis/convex `api` object shape.
-// Import like: `import { api } from '@pelis/db'`
+// Import like: `import { api } from '@pelis/db'` (or `@pelis/db/api`)
 //
 // Each value is a "function reference" consumable by
 // useQuery/useMutation/useAction (string id). The actual handlers live
 // in the registry (populated by the *register() calls in the per-resource
-// files).
+// files). This module is intentionally dependency-free so it can be
+// imported from client components without pulling server code.
 
 /**
  * Build a function reference whose `.name` matches the registered
@@ -24,52 +25,177 @@ export interface FunctionReference {
   name: string;
 }
 
-/**
- * Build references from a module's exports by reading the registered
- * function names from the registry. We can't just use the export key
- * because multiple modules (queries + mutations + actions) share the
- * same qualified namespace.
- */
-function refsFromRegistry(
-  names: string[],
-): Record<string, FunctionReference> {
+function ns(names: string[]): Record<string, FunctionReference> {
   const out: Record<string, FunctionReference> = {};
   for (const fullName of names) {
-    const [, local] = fullName.split('.');
+    const local = fullName.split('.').pop();
     if (!local) continue;
     out[local] = makeRef(fullName);
   }
   return out;
 }
 
-import { getRegistry } from './registry.js';
-
-const allNames = Array.from(getRegistry().keys());
-
-function ns(prefix: string): Record<string, FunctionReference> {
-  return refsFromRegistry(allNames.filter((n) => n.startsWith(`${prefix}.`)));
-}
-
-// Build namespace per Convex module.
+// Build namespace per Convex module. Names must match the registry.
 export const api = {
-  movies: { ...ns('movies') },
-  favorites: { ...ns('favorites') },
-  history: { ...ns('history') },
-  users: { ...ns('users') },
-  subscriptions: { ...ns('subscriptions') },
-  anime: { ...ns('anime') },
-  tv: { ...ns('tv') },
-  adminMovies: { ...ns('adminMovies') },
-  adminSeries: { ...ns('adminSeries') },
-  adminAnime: { ...ns('adminAnime') },
-  adminPlans: { ...ns('adminPlans') },
-  adminUsers: { ...ns('adminUsers') },
-  adminEnrichment: { ...ns('adminEnrichment') },
-  adminAnimeEnrichment: { ...ns('adminAnimeEnrichment') },
-  adminSeriesEnrichment: { ...ns('adminSeriesEnrichment') },
-  seedPopularChannels: ns('tv.seedPopularChannels'),
-  stripe: { ...ns('stripe') },
-  stripeWebhookAction: { ...ns('stripeWebhookAction') },
+  movies: ns([
+    'movies.create',
+    'movies.generateUploadUrl',
+    'movies.getByGenre',
+    'movies.getById',
+    'movies.getClassifications',
+    'movies.getFeatured',
+    'movies.getGenres',
+    'movies.getTrending',
+    'movies.getYears',
+    'movies.list',
+    'movies.listSeries',
+    'movies.remove',
+    'movies.search',
+    'movies.update',
+  ]),
+  favorites: ns([
+    'favorites.add',
+    'favorites.check',
+    'favorites.listByUser',
+    'favorites.remove',
+  ]),
+  history: ns([
+    'history.clearAll',
+    'history.getByUserAndMovie',
+    'history.getContinueWatching',
+    'history.listByUser',
+    'history.remove',
+    'history.upsert',
+  ]),
+  users: ns([
+    'users.getByEmail',
+    'users.me',
+    'users.recordLogin',
+    'users.setOtp',
+    'users.setRole',
+    'users.upsertUser',
+    'users.verifyOtp',
+  ]),
+  subscriptions: ns([
+    'subscriptions.adminCreateSubscription',
+    'subscriptions.cancel',
+    'subscriptions.getById',
+    'subscriptions.getByUser',
+    'subscriptions.list',
+    'subscriptions.setStripePriceId',
+    'subscriptions.subscribe',
+  ]),
+  anime: ns([
+    'anime.create',
+    'anime.getById',
+    'anime.getEpisodes',
+    'anime.getGenres',
+    'anime.getProviders',
+    'anime.getVideoUrl',
+    'anime.list',
+    'anime.remove',
+    'anime.searchExternal',
+    'anime.seed',
+    'anime.update',
+  ]),
+  tv: ns([
+    'tv.addChannel',
+    'tv.createPlaylist',
+    'tv.dedupePopularChannels',
+    'tv.getById',
+    'tv.getCategories',
+    'tv.getCountries',
+    'tv.getLanguages',
+    'tv.getStats',
+    'tv.list',
+    'tv.listPlaylists',
+    'tv.pingAdmin',
+    'tv.probeAllChannels',
+    'tv.probeChannel',
+    'tv.removeByPlaylist',
+    'tv.removeChannel',
+    'tv.removePlaylist',
+    'tv.reportStreamStatus',
+    'tv.resetAllChannelsProbe',
+    'tv.resetChannelProbe',
+    'tv.seedFromM3U',
+    'tv.seedPopularChannels',
+    'tv.toggleChannel',
+    'tv.togglePopular',
+    'tv.updateChannel',
+    'tv.updatePlaylist',
+  ]),
+  adminMovies: ns([
+    'adminMovies.adminList',
+    'adminMovies.adminStats',
+    'adminMovies.merge',
+  ]),
+  adminSeries: ns([
+    'adminSeries.adminList',
+    'adminSeries.adminStats',
+    'adminSeries.create',
+    'adminSeries.getById',
+    'adminSeries.remove',
+    'adminSeries.update',
+  ]),
+  adminAnime: ns([
+    'adminAnime.adminList',
+    'adminAnime.adminStats',
+    'adminAnime.getById',
+  ]),
+  adminPlans: ns([
+    'adminPlans.adminList',
+    'adminPlans.create',
+    'adminPlans.getById',
+    'adminPlans.remove',
+    'adminPlans.setRecommended',
+    'adminPlans.update',
+  ]),
+  adminUsers: ns([
+    'adminUsers.adminCreateSubscription',
+    'adminUsers.adminList',
+    'adminUsers.adminRevokeSubscription',
+    'adminUsers.adminSetRole',
+    'adminUsers.adminStats',
+  ]),
+  adminEnrichment: ns([
+    'adminEnrichment.applyBackdrop',
+    'adminEnrichment.applyBackdropPatch',
+    'adminEnrichment.applyBackdropsBulk',
+    'adminEnrichment.applyMetadataPatch',
+    'adminEnrichment.assertAdmin',
+    'adminEnrichment.enrichMovie',
+    'adminEnrichment.enrichMoviesBulk',
+    'adminEnrichment.getMovieForEnrichment',
+    'adminEnrichment.previewBackdrop',
+    'adminEnrichment.previewMetadata',
+  ]),
+  adminAnimeEnrichment: ns([
+    'adminAnimeEnrichment.applyAnimeBackdrop',
+    'adminAnimeEnrichment.downloadBackdrop',
+    'adminAnimeEnrichment.downloadPoster',
+    'adminAnimeEnrichment.enrichAnime',
+    'adminAnimeEnrichment.fetchTmdbMetadata',
+    'adminAnimeEnrichment.previewAnimeBackdrop',
+    'adminAnimeEnrichment.previewAnimeMetadata',
+    'adminAnimeEnrichment.searchExternal',
+  ]),
+  adminSeriesEnrichment: ns([
+    'adminSeriesEnrichment.applySeriesBackdrop',
+    'adminSeriesEnrichment.applySeriesEnrichment',
+    'adminSeriesEnrichment.downloadBackdrop',
+    'adminSeriesEnrichment.downloadPoster',
+    'adminSeriesEnrichment.enrichSeries',
+    'adminSeriesEnrichment.fetchTmdbMetadata',
+    'adminSeriesEnrichment.previewSeriesBackdrop',
+    'adminSeriesEnrichment.previewSeriesMetadata',
+  ]),
+  seedPopularChannels: ns(['tv.seedPopularChannels']),
+  stripe: ns([
+    'stripe.createCheckoutSession',
+    'stripe.createPortalSession',
+  ]),
+  stripeWebhookAction: ns(['stripeWebhookAction.processWebhook']),
 } as const;
 
 export type Api = typeof api;

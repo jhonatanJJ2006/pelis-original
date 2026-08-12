@@ -16,7 +16,7 @@ import {
   Star,
   RefreshCw,
 } from 'lucide-react';
-import { api } from '@pelis/db';
+import { api } from '@pelis/db/api';
 import { TvChannelGridSkeleton } from '@pelis/ui/features/tv-channel-grid-skeleton';
 import { EmptyState } from '@pelis/ui/features/empty-state';
 import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';

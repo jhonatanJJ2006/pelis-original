@@ -10,7 +10,7 @@ import { SectionHeader } from '@pelis/ui/features/section-header';
 import { GenreSwiper, GenreChip } from '@pelis/ui/features/genre-swiper';
 import { HeroCarousel } from './hero-carousel';
 import { HeroSkeleton } from '@pelis/ui/features/hero-skeleton';
-import { api } from '@pelis/db';
+import { api } from '@pelis/db/api';
 import type { MediaItem } from '@pelis/ui/types';
 import { cn } from '@pelis/ui/utils';
 
@@ -38,15 +38,21 @@ interface HomePageClientProps {
 
 export function HomePageClient({ preloaded }: HomePageClientProps) {
   const { user } = useUser();
-  const movies = preloaded.movies.data as MediaItem[] | undefined;
-  const featuredMovies = preloaded.featured.data as MediaItem[] | undefined;
-  const trending = preloaded.trending.data as MediaItem[] | undefined;
-  const series = preloaded.series.data as MediaItem[] | undefined;
-  const genres = preloaded.genres.data as string[] | undefined;
+  const liveMovies = useQuery<MediaItem[]>(api.movies.list, {}) as MediaItem[] | undefined;
+  const liveFeatured = useQuery<MediaItem[]>(api.movies.getFeatured, {}) as MediaItem[] | undefined;
+  const liveTrending = useQuery<MediaItem[]>(api.movies.getTrending, {}) as MediaItem[] | undefined;
+  const liveSeries = useQuery<MediaItem[]>(api.movies.listSeries, {}) as MediaItem[] | undefined;
+  const liveGenres = useQuery<string[]>(api.movies.getGenres, {}) as string[] | undefined;
   const continueWatching = useQuery<Array<{ _id: string; progress: number; duration: number; movie: MediaItem }>>(
     api.history.getContinueWatching,
     user ? { userId: user._id as any, limit: 10 } : 'skip'
   );
+
+  const movies = liveMovies ?? preloaded.movies.data;
+  const featuredMovies = liveFeatured ?? preloaded.featured.data;
+  const trending = liveTrending ?? preloaded.trending.data;
+  const series = liveSeries ?? preloaded.series.data;
+  const genres = liveGenres ?? preloaded.genres.data;
 
   const topGenres = (genres ?? []).slice(0, 4);
 

@@ -16,7 +16,7 @@ import {
   Shield,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { api } from '@pelis/db';
+import { api } from '@pelis/db/api';
 import { useUser } from '@pelis/auth/hooks';
 import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';
 import { ProfilePageSkeleton } from '@pelis/ui/features/profile-page-skeleton';

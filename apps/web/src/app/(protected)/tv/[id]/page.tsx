@@ -4,7 +4,7 @@ import { useParams } from 'next/navigation';
 import { useQuery } from '@pelis/db/client';
 import { AlertCircle, Loader2, Tv } from 'lucide-react';
 import Link from 'next/link';
-import { api } from '@pelis/db';
+import { api } from '@pelis/db/api';
 import { TVShell } from '../_components/tv-shell';
 import type { SidebarChannel } from '../_components/channel-sidebar';
 

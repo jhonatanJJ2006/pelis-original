@@ -4,7 +4,7 @@ import { useQuery, useMutation } from '@pelis/db/client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Clapperboard, Star } from 'lucide-react';
-import { api } from '@pelis/db';
+import { api } from '@pelis/db/api';
 import { CatalogPageSkeleton } from '@pelis/ui/features/catalog-page-skeleton';
 import { EmptyState } from '@pelis/ui/features/empty-state';
 import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';

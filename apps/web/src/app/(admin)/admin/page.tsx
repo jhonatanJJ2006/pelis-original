@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useQuery } from '@pelis/db/client';
 import { Film, AlertTriangle, ImageOff, VideoOff, FileWarning, Monitor } from 'lucide-react';
-import { api } from '@pelis/db';
+import { api } from '@pelis/db/api';
 import { AdminDashboardSkeleton } from '@pelis/ui/features/admin-dashboard-skeleton';
 
 const statCards = [

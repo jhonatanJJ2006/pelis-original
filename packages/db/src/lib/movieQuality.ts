@@ -1,4 +1,4 @@
-import { PLACEHOLDER_IMAGE } from './resolveMovieImage.js';
+import { PLACEHOLDER_IMAGE } from './resolveMovieImage';
 
 const ORPHAN_ID_RE = /^[a-f0-9]{6,}$/i;
 const LEGACY_ORPHAN_RE = /^ok(-ru-\d+)?$/i;
@@ -121,4 +121,4 @@ export function matchesQualityFilter(
   }
 }
 
-export { PLACEHOLDER_IMAGE } from './resolveMovieImage.js';
+export { PLACEHOLDER_IMAGE } from './resolveMovieImage';

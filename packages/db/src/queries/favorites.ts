@@ -1,6 +1,7 @@
 import { z } from 'zod';
-import { prisma } from '../client.js';
-import { register } from '../registry.js';
+import { prisma } from '../client';
+import { register } from '../registry';
+import { toMovieShape } from '../lib/shapes';
 
 export const listByUser = register({
   kind: 'query',
@@ -13,7 +14,7 @@ export const listByUser = register({
       include: { movie: true },
       orderBy: { createdAt: 'desc' },
     });
-    return favorites.map((f) => f.movie).filter(Boolean);
+    return favorites.map((f) => (f.movie ? toMovieShape(f.movie) : null)).filter(Boolean);
   },
 });
 

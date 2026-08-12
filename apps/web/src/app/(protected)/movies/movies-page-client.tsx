@@ -9,7 +9,7 @@ import { MovieRow } from '@pelis/ui/features/movie-row';
 import { EmptyState } from '@pelis/ui/features/empty-state';
 import { CatalogFilterBar } from '@pelis/ui/features/catalog-filter-bar';
 import { CatalogPageSkeleton } from '@pelis/ui/features/catalog-page-skeleton';
-import { api } from '@pelis/db';
+import { api } from '@pelis/db/api';
 import type { MediaItem } from '@pelis/ui/types';
 
 const classificationOrder = ['G', 'PG', 'PG-13', 'R', 'NC-17'];
@@ -50,17 +50,15 @@ export default function MoviesPageClient({ preloaded }: MoviesPageClientProps) {
 
   const filteredMovies = useQuery(
     api.movies.list,
-    hasFilters
-      ? {
-          genre: selectedGenre || undefined,
-          year: selectedYear || undefined,
-          search: search || undefined,
-          mediaType: 'movie' as const,
-        }
-      : 'skip'
+    {
+      genre: selectedGenre || undefined,
+      year: selectedYear || undefined,
+      search: search || undefined,
+      mediaType: 'movie' as const,
+    }
   ) as MediaItem[] | undefined;
 
-  const movies = hasFilters ? filteredMovies : preloadedMovies;
+  const movies = filteredMovies ?? preloadedMovies;
   const genres = preloadedGenres ?? [];
   const years = preloadedYears ?? [];
 

@@ -7,10 +7,11 @@
  */
 
 import type { NextRequest } from 'next/server';
-import { auth } from './auth.js';
-import { prisma } from './client.js';
-import { invoke } from './invoke.js';
-import type { RequestCtx } from './lib/requireAdmin.js';
+import './registry-bootstrap';
+import { auth } from './auth';
+import { prisma } from './client';
+import { invoke } from './invoke';
+import type { RequestCtx } from './lib/requireAdmin';
 
 export async function getRequestCtx(req: Request | NextRequest): Promise<RequestCtx> {
   const headers = req.headers;

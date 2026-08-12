@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { prisma } from '../client.js';
-import { register } from '../registry.js';
-import { requireAdmin } from '../lib/requireAdmin.js';
+import { prisma } from '../client';
+import { register } from '../registry';
+import { requireAdmin } from '../lib/requireAdmin';
 
 const StatusEnum = z.enum(['ongoing', 'completed']);
 

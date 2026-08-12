@@ -4,7 +4,7 @@ import { useQuery } from '@pelis/db/client';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { Search, Film, Tv, TrendingUp, Loader2, X, User } from 'lucide-react';
-import { api } from '@pelis/db';
+import { api } from '@pelis/db/api';
 import { cn } from '@pelis/ui/utils';
 import { MoviePoster } from '@pelis/ui/features/movie-poster';
 import type { MediaItem } from '@pelis/ui/types';
@@ -13,7 +13,7 @@ interface SearchDropdownProps {
   value: string;
   onChange: (value: string) => void;
   onSubmit: (e: React.FormEvent) => void;
-  inputRef?: React.RefObject<HTMLInputElement | null>;
+  inputRef?: React.Ref<HTMLInputElement>;
   className?: string;
   placeholder?: string;
   id?: string;
@@ -166,7 +166,7 @@ export function SearchDropdown({
             onClick={() => {
               onChange('');
               setIsOpen(false);
-              inputRef?.current?.focus();
+              if (typeof inputRef === 'object' && inputRef?.current) inputRef.current.focus();
             }}
             aria-label="Limpiar búsqueda"
             className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6 rounded-md text-cinema-ash hover:text-white hover:bg-cinema-elevated transition-colors duration-150 cursor-pointer"

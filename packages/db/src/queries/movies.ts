@@ -1,7 +1,8 @@
 import { z } from 'zod';
-import { prisma } from '../client.js';
-import { register } from '../registry.js';
-import { AuthError } from '../lib/requireAdmin.js';
+import { prisma } from '../client';
+import { register } from '../registry';
+import { AuthError } from '../lib/requireAdmin';
+import { toMovieShape } from '../lib/shapes';
 
 const MediaTypeEnum = z.enum(['movie', 'series']);
 
@@ -34,7 +35,7 @@ export const list = register({
       ];
     }
     const movies = await prisma.movie.findMany({ where, orderBy: { name: 'asc' } });
-    return movies;
+    return movies.map(toMovieShape);
   },
 });
 
@@ -55,7 +56,7 @@ export const search = register({
       orderBy: { name: 'asc' },
       take: limit ?? 8,
     });
-    return movies;
+    return movies.map(toMovieShape);
   },
 });
 
@@ -65,7 +66,8 @@ export const getById = register({
   reads: ['movie'],
   args: z.object({ id: z.string() }),
   handler: async (_ctx, { id }) => {
-    return prisma.movie.findUnique({ where: { id } });
+    const movie = await prisma.movie.findUnique({ where: { id } });
+    return movie ? toMovieShape(movie) : null;
   },
 });
 
@@ -75,8 +77,8 @@ export const getFeatured = register({
   reads: ['movie'],
   handler: async () => {
     const featured = await prisma.movie.findMany({ where: { featured: true }, take: 10 });
-    if (featured.length > 0) return featured;
-    return prisma.movie.findMany({ orderBy: { name: 'asc' }, take: 10 });
+    if (featured.length > 0) return featured.map(toMovieShape);
+    return (await prisma.movie.findMany({ orderBy: { name: 'asc' }, take: 10 })).map(toMovieShape);
   },
 });
 
@@ -90,7 +92,7 @@ export const getTrending = register({
       orderBy: { releaseYear: 'desc' },
       take: args?.limit ?? 12,
     });
-    return movies;
+    return movies.map(toMovieShape);
   },
 });
 
@@ -100,11 +102,11 @@ export const getByGenre = register({
   reads: ['movie'],
   args: z.object({ genre: z.string(), limit: z.number().optional() }),
   handler: async (_ctx, { genre, limit }) => {
-    return prisma.movie.findMany({
+    return (await prisma.movie.findMany({
       where: { genre },
       orderBy: { name: 'asc' },
       take: limit ?? 12,
-    });
+    })).map(toMovieShape);
   },
 });
 
@@ -117,11 +119,11 @@ export const listSeries = register({
       where: { mediaType: 'SERIES' },
       orderBy: { name: 'asc' },
     });
-    if (series.length > 0) return series;
+    if (series.length > 0) return series.map(toMovieShape);
     const all = await prisma.movie.findMany({ orderBy: { name: 'asc' } });
     return all.filter((_, i) => i % 3 === 0).map((m) => ({
-      ...m,
-      mediaType: 'SERIES' as const,
+      ...toMovieShape(m),
+      mediaType: 'series' as const,
       episodes: m.episodes ?? 8,
     }));
   },

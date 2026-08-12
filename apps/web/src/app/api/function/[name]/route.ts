@@ -1,7 +1,7 @@
 /**
  * Generic function-invocation endpoint.
  *
- * POST /api/_fn/<name>  →  invoke the function with the JSON body as args.
+ * POST /api/function/<name>  →  invoke the function with the JSON body as args.
  * Used by useQuery / useMutation / useAction client hooks.
  */
 

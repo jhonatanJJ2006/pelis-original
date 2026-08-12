@@ -1,6 +1,6 @@
 import Stripe from 'stripe';
 import { z } from 'zod';
-import { register } from '../registry.js';
+import { register } from '../registry';
 
 const SITE_URL = process.env.SITE_URL || 'http://localhost:3000';
 
@@ -17,7 +17,7 @@ export const createCheckoutSession = register({
   args: z.object({ planId: z.string() }),
   handler: async (ctx, { planId }) => {
     if (!ctx.userId) throw new Error('No autenticado');
-    const { prisma } = await import('../client.js');
+    const { prisma } = await import('../client');
     const plan = await prisma.plan.findUnique({ where: { id: planId } });
     if (!plan) throw new Error('Plan no encontrado');
     if (!plan.stripePriceId) throw new Error('Plan not configured for Stripe');
@@ -118,7 +118,7 @@ export const createPortalSession = register({
   reads: ['subscription'],
   handler: async (ctx) => {
     if (!ctx.userId) throw new Error('No autenticado');
-    const { prisma } = await import('../client.js');
+    const { prisma } = await import('../client');
     const subscription = await prisma.subscription.findFirst({
       where: { userId: ctx.userId, status: 'ACTIVE' },
     });

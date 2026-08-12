@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useState } from 'react';
 import { ArrowLeft, Star, Play, Tv, Loader2, AlertCircle } from 'lucide-react';
-import { api } from '@pelis/db';
+import { api } from '@pelis/db/api';
 import { MovieDetailSkeleton } from '@pelis/ui/features/movie-detail-skeleton';
 import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';
 import { cn } from '@pelis/ui/utils';

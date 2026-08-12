@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { Plus, Pencil, Trash2, CreditCard, Star, Check, Zap, Rocket, Crown } from 'lucide-react';
 import { toast } from 'sonner';
-import { api } from '@pelis/db';
+import { api } from '@pelis/db/api';
 import { Button, Spinner } from '@pelis/ui/components';
 import { AdminTableSkeleton } from '@pelis/ui/features/admin-table-skeleton';
 import { cn } from '@pelis/ui/utils';
