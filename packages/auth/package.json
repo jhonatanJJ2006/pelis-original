@@ -4,9 +4,11 @@
   "private": true,
   "type": "module",
   "exports": {
+    "./client": "./src/client.ts",
     "./hooks": "./src/hooks.ts",
     "./store": "./src/store.ts",
-    "./providers": "./src/providers.tsx"
+    "./providers": "./src/providers.tsx",
+    "./session-sync": "./src/session-sync.tsx"
   },
   "scripts": {
     "clean": "git clean -xdf .cache .turbo node_modules",
@@ -16,6 +18,7 @@
   "dependencies": {
     "@pelis/db": "workspace:*",
     "@tanstack/react-query": "catalog:",
+    "better-auth": "1.4.9",
     "zustand": "^5.0.0"
   },
   "devDependencies": {

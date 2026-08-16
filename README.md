@@ -1,36 +1,29 @@
 # Pelis App
 
-Plataforma de streaming de películas reconstruida con Next.js 14, TypeScript, Convex y Tailwind CSS.
+Plataforma de streaming de películas, series, anime y TV en vivo.  
+Stack: **Next.js 14 + Postgres + `@pelis/db` + Better Auth**.
 
 ## Tech Stack
 
 - **Frontend**: Next.js 14 (App Router), TypeScript, Tailwind CSS
-- **Backend**: Convex (database + functions)
+- **Backend**: Postgres + Prisma (`@pelis/db`)
 - **Auth**: Better Auth + Google OAuth
-- **Payments**: Stripe (placeholder)
-- **State**: Zustand + TanStack Query
+- **Payments**: Stripe
+- **Anime streaming**: Consumet API (self-hosted o pública)
 - **Monorepo**: Turborepo + pnpm
 
 ## Estructura del Proyecto
 
 ```
 pelis-original/
-├── apps/
-│   └── web/                    # Next.js frontend
-├── packages/
-│   ├── convex/                 # Convex backend (schema, functions)
-│   ├── ui/                    # Componentes compartidos
-│   ├── auth/                  # Auth hooks y store
-│   ├── validators/            # Zod schemas
-│   └── email/                 # Resend email adapter
-├── tooling/
-│   ├── eslint/                # ESLint configs
-│   ├── tailwind/              # Tailwind configs
-│   ├── typescript/            # TypeScript configs
-│   └── prettier/              # Prettier configs
-├── turbo.json
-├── pnpm-workspace.yaml
-└── package.json
+├── apps/web/              # Next.js frontend
+├── packages/db/           # Backend Postgres + Prisma
+├── packages/ui/           # Componentes compartidos
+├── packages/auth/         # Auth hooks y store
+├── packages/validators/   # Zod schemas
+├── docker/consumet/       # Consumet self-hosted
+├── docs/                  # Auditoría y guías
+└── docker-compose.yml     # Consumet + Redis
 ```
 
 ## Getting Started
@@ -43,25 +36,31 @@ pnpm install
 
 ### 2. Configurar variables de entorno
 
-Crear `.env` en la raíz:
-
-```env
-DATABASE_URL=postgresql://...
-BETTER_AUTH_SECRET=your_secret
-RESEND_API_KEY=re_...
-NEXT_PUBLIC_CONVEX_URL=https://your-deployment.convex.cloud
-AUTH_GOOGLE_ID=...
-AUTH_GOOGLE_SECRET=...
+```bash
+cp .env.example .env
+# Editar DATABASE_URL, BETTER_AUTH_SECRET, etc.
 ```
 
-### 3. Deploy Convex
+### 3. Base de datos
 
 ```bash
-cd packages/convex
-npx convex deploy
+pnpm --filter @pelis/db db:migrate
+pnpm --filter @pelis/db db:seed
 ```
 
-### 4. Ejecutar en desarrollo
+### 4. Anime (opcional)
+
+```bash
+# Importar ~200 títulos desde AniList
+pnpm --filter @pelis/db import:anilist -- --limit 200
+
+# Levantar Consumet self-hosted para streaming
+docker compose up -d redis consumet
+```
+
+Ver [`docs/ANIME-PROVIDERS.md`](docs/ANIME-PROVIDERS.md) para troubleshooting.
+
+### 5. Desarrollo
 
 ```bash
 pnpm dev
@@ -70,31 +69,21 @@ pnpm dev
 ## Scripts
 
 ```bash
-pnpm dev          # Desarrollo
-pnpm build        # Build producción
-pnpm lint         # ESLint
-pnpm typecheck    # TypeScript check
+pnpm dev                              # Desarrollo
+pnpm build                            # Build producción
+pnpm lint                             # ESLint
+pnpm typecheck                        # TypeScript check
+pnpm --filter @pelis/db db:migrate    # Migraciones
+pnpm --filter @pelis/db import:anilist # Import catálogo anime
+docker compose up -d consumet redis   # Consumet self-hosted
 ```
+
+## Documentación
+
+- [`docs/AUDIT.md`](docs/AUDIT.md) — Auditoría de gaps del sitio
+- [`docs/ANIME-PROVIDERS.md`](docs/ANIME-PROVIDERS.md) — Setup anime/streaming
+- [`TODO.md`](TODO.md) — Backlog del proyecto
 
 ## Deployment
 
-Producción en **verpelis.pro** (servidor local + Cloudflare Tunnel + Convex).  
-`git push` **no** actualiza el sitio: hay que rebuildar y reiniciar el servicio.
-
-```bash
-./scripts/deploy-prod.sh          # frontend + Convex (recomendado)
-./scripts/deploy-prod.sh --web    # solo Next.js
-./scripts/deploy-prod.sh --convex # solo Convex
-```
-
-Guía completa: [DEPLOY.md](./DEPLOY.md) (sección 10: deploy rápido).
-
-### Convex (referencia)
-
-```bash
-cd packages/convex && npx convex dev --once
-```
-
-## Licencia
-
-ISC
+Ver [`DEPLOY.md`](DEPLOY.md) para instrucciones de despliegue.

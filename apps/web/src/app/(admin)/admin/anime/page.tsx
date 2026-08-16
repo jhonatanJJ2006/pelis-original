@@ -1,9 +1,9 @@
 'use client';
 
-import { useQuery, useMutation } from '@pelis/db/client';
+import { useQuery, useMutation, useAction } from '@pelis/db/client';
 import Link from 'next/link';
 import { useState } from 'react';
-import { ImageIcon, Monitor, Pencil, Plus, Search, Sparkles, Star, Trash2 } from 'lucide-react';
+import { Download, ImageIcon, Monitor, Pencil, Plus, Search, Sparkles, Star, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@pelis/db/api';
 import { Button, Input, Spinner } from '@pelis/ui/components';
@@ -12,6 +12,8 @@ import { MoviePoster } from '@pelis/ui/features/movie-poster';
 import { cn } from '@pelis/ui/utils';
 import { EnrichAnimeModal } from '../components/enrich-anime-modal';
 import { BackdropAnimeModal } from '../components/backdrop-anime-modal';
+import { ProviderHealthPanel } from '../components/provider-health-panel';
+import { AnilistSearchModal } from '../components/anilist-search-modal';
 
 interface AnimeRow {
   _id: string;
@@ -34,6 +36,8 @@ export default function AdminAnimePage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [enrichTarget, setEnrichTarget] = useState<AnimeRow | null>(null);
   const [backdropTarget, setBackdropTarget] = useState<AnimeRow | null>(null);
+  const [showAnilistSearch, setShowAnilistSearch] = useState(false);
+  const [importingCatalog, setImportingCatalog] = useState(false);
 
   const anime = useQuery(api.adminAnime.adminList, {
     search: search || undefined,
@@ -42,6 +46,20 @@ export default function AdminAnimePage() {
   }) as AnimeRow[] | undefined;
 
   const remove = useMutation(api.adminAnime.remove);
+  const importCatalog = useAction(api.anime.importCatalogBulk);
+
+  const handleImportCatalog = async () => {
+    if (!confirm('¿Importar ~200 animes populares desde AniList? Puede tardar varios minutos.')) return;
+    setImportingCatalog(true);
+    try {
+      const result = (await importCatalog({ limit: 200 })) as { imported: number; skipped: number; total: number };
+      toast.success(`Importados: ${result.imported}, omitidos: ${result.skipped}`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Error al importar catálogo');
+    } finally {
+      setImportingCatalog(false);
+    }
+  };
 
   const handleDelete = async (id: string, title: string) => {
     if (!confirm(`¿Eliminar "${title}"? Esta acción no se puede deshacer.`)) return;
@@ -73,13 +91,25 @@ export default function AdminAnimePage() {
             {anime ? `${anime.length} títulos` : 'Cargando...'}
           </p>
         </div>
-        <Link href="/admin/anime/new" className="w-full sm:w-auto">
-          <Button className="w-full sm:w-auto">
-            <Plus className="w-4 h-4" />
-            Nuevo anime
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <Button variant="ghost" onClick={() => setShowAnilistSearch(true)}>
+            <Search className="w-4 h-4" />
+            AniList
           </Button>
-        </Link>
+          <Button variant="ghost" onClick={handleImportCatalog} disabled={importingCatalog}>
+            {importingCatalog ? <Spinner className="w-4 h-4" /> : <Download className="w-4 h-4" />}
+            Importar catálogo
+          </Button>
+          <Link href="/admin/anime/new" className="w-full sm:w-auto">
+            <Button className="w-full sm:w-auto">
+              <Plus className="w-4 h-4" />
+              Nuevo anime
+            </Button>
+          </Link>
+        </div>
       </div>
+
+      <ProviderHealthPanel />
 
       <div className="-mx-4 px-4 sm:mx-0 sm:px-0 mb-4">
         <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
@@ -301,6 +331,13 @@ export default function AdminAnimePage() {
           anime={backdropTarget}
           onClose={() => setBackdropTarget(null)}
           onApplied={() => setBackdropTarget(null)}
+        />
+      )}
+
+      {showAnilistSearch && (
+        <AnilistSearchModal
+          onClose={() => setShowAnilistSearch(false)}
+          onImported={() => setShowAnilistSearch(false)}
         />
       )}
     </div>

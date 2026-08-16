@@ -72,6 +72,14 @@ playwright-report/
 images/
 apps/web/public/images/
 apps/web/public/peliculas/
+apps/web/public/uploads/
 
 # Frames temporales para identificación de películas huérfanas
 tmp/movie-frames/
+
+# Telegram movie dumper (local data + session)
+tools/telegram-dumper/data/
+tools/telegram-dumper/.env
+tools/telegram-dumper/*.session
+tools/telegram-dumper/*.session-journal
+tools/telegram-dumper/.venv/

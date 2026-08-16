@@ -15,6 +15,7 @@ import {
   X,
   Star,
   RefreshCw,
+  Sparkles,
 } from 'lucide-react';
 import { api } from '@pelis/db/api';
 import { TvChannelGridSkeleton } from '@pelis/ui/features/tv-channel-grid-skeleton';
@@ -30,6 +31,8 @@ const categoryIcons: Record<string, React.ComponentType<{ className?: string }>>
   Deportes: Globe,
   Infantil: Gamepad,
   Música: Music,
+  Anime: Sparkles,
+  Animación: Sparkles,
 };
 
 const categoryLabels: Record<string, string> = {
@@ -44,6 +47,8 @@ const categoryLabels: Record<string, string> = {
   Documentales: 'Documentales',
   Cultura: 'Cultura',
   Religión: 'Religión',
+  Anime: 'Anime',
+  Animación: 'Animación',
 };
 
 interface TVChannel {

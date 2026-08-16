@@ -9,8 +9,10 @@
  * `import-legacy-sql.ts`.
  */
 import { PrismaClient } from '@prisma/client';
+import { getProvidersSortedByPriority } from '../src/lib/anime-providers.js';
 
 const prisma = new PrismaClient();
+const PROVIDERS = getProvidersSortedByPriority();
 
 const ANIME_SEED: Array<{
   title: string;
@@ -155,12 +157,6 @@ const ANIME_SEED: Array<{
     rating: 8.5,
     image: 'https://cdn.myanimelist.net/images/anime/1441/122753.jpg',
   },
-];
-
-const PROVIDERS = [
-  { id: 'gogoanime', name: 'GogoAnime', baseUrl: 'https://gogoanime.cl', language: 'sub' as const },
-  { id: 'zoro', name: 'Zoro', baseUrl: 'https://zoro.to', language: 'sub' as const },
-  { id: 'animepahe', name: 'AnimePahe', baseUrl: 'https://animepahe.ru', language: 'sub' as const },
 ];
 
 async function seedPlans() {

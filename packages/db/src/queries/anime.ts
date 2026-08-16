@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { prisma } from '../client';
 import { register } from '../registry';
 import { toAnimeShape } from '../lib/shapes';
+import { getProvidersSortedByPriority, toProviderListItem } from '../lib/anime-providers';
 
 const StatusEnum = z.enum(['ongoing', 'completed']);
 
@@ -53,15 +54,33 @@ export const getGenres = register({
   },
 });
 
-const PROVIDERS = [
-  { id: 'gogoanime', name: 'GogoAnime', baseUrl: 'https://gogoanime.cl', language: 'sub' as const },
-  { id: 'zoro', name: 'Zoro', baseUrl: 'https://zoro.to', language: 'sub' as const },
-  { id: 'animepahe', name: 'AnimePahe', baseUrl: 'https://animepahe.ru', language: 'sub' as const },
-];
+export const search = register({
+  kind: 'query',
+  name: 'anime.search',
+  reads: ['anime'],
+  args: z.object({ query: z.string(), limit: z.number().optional() }),
+  handler: async (_ctx, { query, limit }) => {
+    const q = query.trim().toLowerCase();
+    if (!q) return [];
+    const items = await prisma.anime.findMany({
+      where: {
+        OR: [
+          { title: { contains: q, mode: 'insensitive' } },
+          { alternativeTitle: { contains: q, mode: 'insensitive' } },
+        ],
+      },
+      orderBy: { title: 'asc' },
+      take: limit ?? 10,
+    });
+    return items.map(toAnimeShape);
+  },
+});
+
+const PROVIDERS = getProvidersSortedByPriority();
 
 export const getProviders = register({
   kind: 'query',
   name: 'anime.getProviders',
   reads: [],
-  handler: async () => PROVIDERS.map((p) => ({ id: p.id, name: p.name, baseUrl: p.baseUrl, language: p.language })),
+  handler: async () => PROVIDERS.map(toProviderListItem),
 });

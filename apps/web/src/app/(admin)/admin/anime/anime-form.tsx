@@ -13,6 +13,8 @@ export interface AnimeFormValues {
   status: 'ongoing' | 'completed';
   year: string;
   rating: string;
+  anilistId: string;
+  malId: string;
   providersText: string;
 }
 
@@ -32,6 +34,8 @@ const defaultValues: AnimeFormValues = {
   status: 'completed',
   year: new Date().getFullYear().toString(),
   rating: '',
+  anilistId: '',
+  malId: '',
   providersText: '',
 };
 
@@ -150,6 +154,22 @@ export function AnimeForm({ initialValues, onSubmit, submitLabel = 'Guardar' }: 
           max="10"
           value={values.rating}
           onChange={(e) => setField('rating', e.target.value)}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <Input
+          label="AniList ID"
+          type="number"
+          value={values.anilistId}
+          onChange={(e) => setField('anilistId', e.target.value)}
+          placeholder="ej. 21 (One Piece)"
+        />
+        <Input
+          label="MAL ID"
+          type="number"
+          value={values.malId}
+          onChange={(e) => setField('malId', e.target.value)}
         />
       </div>
 

@@ -51,6 +51,8 @@ function buildArgs(id: string, values: AnimeFormValues) {
     status: values.status,
     year: Number(values.year),
     rating: values.rating ? Number(values.rating) : undefined,
+    anilistId: values.anilistId ? Number(values.anilistId) : undefined,
+    malId: values.malId ? Number(values.malId) : undefined,
     providers,
   };
 }
@@ -124,6 +126,8 @@ export default function EditAnimePage() {
           status: anime.status,
           year: anime.year.toString(),
           rating: anime.rating?.toString() ?? '',
+          anilistId: anime.anilistId?.toString() ?? '',
+          malId: anime.malId?.toString() ?? '',
           providersText: providersToText(anime.providers ?? []),
         }}
         onSubmit={handleSubmit}

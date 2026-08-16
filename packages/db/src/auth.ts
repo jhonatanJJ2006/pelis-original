@@ -8,12 +8,44 @@ const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
   'http://localhost:3000';
 
+function resolveSecureCookies(baseUrl: string): boolean {
+  const override = process.env.BETTER_AUTH_SECURE_COOKIES?.trim().toLowerCase();
+  if (override === 'true') return true;
+  if (override === 'false') return false;
+  // HTTPS production URLs need Secure cookies; local HTTP dev must not use them.
+  return baseUrl.startsWith('https://') && process.env.NODE_ENV === 'production';
+}
+
+function resolveTrustedOrigins(baseUrl: string): string[] {
+  const origins = new Set<string>([baseUrl]);
+  for (const key of ['NEXT_PUBLIC_SITE_URL', 'BETTER_AUTH_URL'] as const) {
+    const value = process.env[key]?.trim();
+    if (value) origins.add(value);
+  }
+  if (process.env.NODE_ENV !== 'production') {
+    origins.add('http://localhost:3000');
+    origins.add('http://127.0.0.1:3000');
+  }
+  origins.add('https://verpelis.pro');
+  origins.add('https://www.verpelis.pro');
+  return [...origins];
+}
+
 export function createAuth() {
   const opts: BetterAuthOptions = {
     appName: 'Pelis',
     baseURL: siteUrl,
     secret: process.env.BETTER_AUTH_SECRET!,
-    trustedOrigins: [siteUrl],
+    trustedOrigins: resolveTrustedOrigins(siteUrl),
+    advanced: {
+      useSecureCookies: resolveSecureCookies(siteUrl),
+      defaultCookieAttributes: {
+        sameSite: 'lax',
+        secure: resolveSecureCookies(siteUrl),
+        httpOnly: true,
+        path: '/',
+      },
+    },
     database: prismaAdapter(prisma, { provider: 'postgresql' }),
     emailAndPassword: {
       enabled: true,

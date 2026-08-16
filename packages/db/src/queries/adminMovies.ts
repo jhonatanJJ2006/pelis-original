@@ -3,6 +3,7 @@ import { prisma } from '../client';
 import { notifyChange } from '../realtime';
 import { register } from '../registry';
 import { requireAdmin } from '../lib/requireAdmin';
+import { toMovieShape } from '../lib/shapes';
 import {
   getMovieQualityFlags,
   matchesQualityFilter,
@@ -67,7 +68,7 @@ export const adminList = register({
       );
     }
     return movies.map((movie) => ({
-      ...movie,
+      ...toMovieShape(movie),
       quality: getMovieQualityFlags({
         name: movie.name,
         token: movie.token,

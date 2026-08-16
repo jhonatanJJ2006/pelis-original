@@ -1,34 +1,51 @@
 #!/usr/bin/env bash
-# Despliega cambios en verpelis.pro (frontend + Convex).
+# Despliega cambios en verpelis.pro (Postgres + Next.js producción).
 # Uso:
-#   ./scripts/deploy-prod.sh          # web + convex (default)
-#   ./scripts/deploy-prod.sh --web    # solo Next.js
-#   ./scripts/deploy-prod.sh --convex # solo Convex
+#   ./scripts/deploy-prod.sh           # db migrate + build + restart (default)
+#   ./scripts/deploy-prod.sh --web     # solo build + restart (sin migraciones)
+#   ./scripts/deploy-prod.sh --db-only # solo migraciones Prisma
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 MODE="${1:---all}"
 
 usage() {
-  echo "Uso: $0 [--all|--web|--convex]"
+  echo "Uso: $0 [--all|--web|--db-only]"
   exit 1
 }
 
 case "$MODE" in
-  --all|--web|--convex) ;;
+  --all|--web|--db-only) ;;
   -h|--help) usage ;;
   *) usage ;;
 esac
+
+free_port_3000() {
+  if command -v fuser >/dev/null 2>&1; then
+    fuser -k 3000/tcp >/dev/null 2>&1 || true
+  fi
+  sleep 1
+}
+
+if [[ "$MODE" == "--all" || "$MODE" == "--db-only" ]]; then
+  echo "→ Aplicando migraciones Postgres..."
+  cd "$ROOT"
+  pnpm --filter @pelis/db db:deploy
+  echo "✓ Migraciones aplicadas"
+fi
 
 if [[ "$MODE" == "--web" || "$MODE" == "--all" ]]; then
   echo "→ Build Next.js (apps/web)..."
   cd "$ROOT/apps/web"
   pnpm build
 
+  echo "→ Liberando puerto 3000 (dev server u otro proceso)..."
+  free_port_3000
+
   echo "→ Reiniciando pelis-web..."
   sudo systemctl restart pelis-web
 
-  sleep 2
+  sleep 3
   if systemctl is-active --quiet pelis-web; then
     echo "✓ pelis-web activo"
   else
@@ -38,13 +55,6 @@ if [[ "$MODE" == "--web" || "$MODE" == "--all" ]]; then
 
   HTTP_CODE="$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/ || true)"
   echo "✓ localhost:3000 → HTTP $HTTP_CODE"
-fi
-
-if [[ "$MODE" == "--convex" || "$MODE" == "--all" ]]; then
-  echo "→ Desplegando Convex..."
-  cd "$ROOT/packages/convex"
-  npx convex dev --once
-  echo "✓ Convex desplegado"
 fi
 
 echo ""

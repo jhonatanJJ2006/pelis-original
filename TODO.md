@@ -1,74 +1,92 @@
 # TODO — Pelis Original
 
-Lista de tareas del proyecto. Actualizada tras conectar imágenes y rediseño UI.
+Lista de tareas del proyecto. Stack actual: **Next.js 14 + Postgres + `@pelis/db` + Better Auth**.
+
+Ver auditoría completa en [`docs/AUDIT.md`](docs/AUDIT.md).
 
 ---
 
 ## Completado recientemente
 
 - [x] Rediseño UI cinematográfico (home, películas, series, favoritos, historial)
-- [x] Schema Convex ampliado (`mediaType`, `featured`, `videoUrl`, etc.)
+- [x] Migración Convex → Postgres + Prisma (`@pelis/db`)
 - [x] Queries: trending, por género, continuar viendo, limpiar historial
 - [x] Componentes UI: `MovieRow`, `ContinueWatchingCard`, `VideoPlayer`, `EmptyState`, `MoviePoster`
 - [x] Conexión imágenes: hash MD5 → `/peliculas/peliculas/{hash}.webp`
-- [x] Pósters en `apps/web/public/peliculas/peliculas/` (gitignored)
-- [x] Skills de UI/UX y arquitectura instaladas
-- [x] `claude.md` con catálogo de skills
+- [x] Página de perfil (`/profile`)
+- [x] Búsqueda global en header (películas/series)
+- [x] PWA parcial (manifest, SW Serwist, install prompt)
+- [x] Panel admin CRUD (movies, series, anime, TV, users, plans)
+- [x] Enrichment TMDB para películas/series/anime
+- [x] Auditoría documentada en `docs/AUDIT.md`
+- [x] Anime: schema `anilistId`, proveedores centralizados, fallback, import AniList
+- [x] `.env.example` documentado
 
 ---
 
 ## Prioridad alta
 
-- [ ] **Copiar pósters en entornos nuevos** — Las imágenes no van en Git. Ejecutar al clonar:
-  ```powershell
-  Copy-Item "C:\Users\ASUS\Desktop\paginas web\pelis\public\peliculas\peliculas\*.webp" `
-    "apps\web\public\peliculas\peliculas\" -Force
-  ```
-- [ ] **Imágenes de series** — Los hashes de series no están en la carpeta local; añadir assets o definir carpeta alternativa
-- [ ] **Reproductor de video** — Conectar `movie.token` / `videoUrl` con el servidor de streaming real
-- [ ] **Stripe** — Implementar pagos reales (actualmente placeholder en README)
-- [ ] **Panel admin** — CRUD de películas/series con subida de pósters vía `generateUploadUrl`
+- [ ] **Copiar pósters en entornos nuevos** — Las imágenes no van en Git. Ver `scripts/audit-images.mjs`
+- [ ] **Imágenes de series** — Hashes de series faltantes en carpeta local
+- [ ] **Unificar series** — Admin tabla `Series` vs público `Movie.mediaType = SERIES`
+- [ ] **Reproductor de video** — Conectar `movie.token` / `videoUrl` con servidor de streaming real
+- [ ] **Stripe producción** — Configurar keys reales + webhook
+- [ ] **Levantar Consumet self-hosted** — `docker compose up consumet redis` (ver `docs/ANIME-PROVIDERS.md`)
 
 ---
 
-## Backend (Convex)
+## Backend
 
-- [ ] Proteger `movies/create` y `movies/update` con rol `admin`
+- [x] Proteger mutaciones admin con `requireAdmin`
 - [ ] Validar payloads con `movieSchema` de `@pelis/validators`
-- [ ] Script de seed o migración documentado para catálogo inicial
-- [ ] Revisar límites del plan Free de Convex (warning en deploy)
-- [ ] Reiniciar `pnpm dev` si el watcher de Convex deja de sincronizar
+- [x] Script de seed documentado (`pnpm --filter @pelis/db db:seed`)
+- [x] Import AniList (`pnpm --filter @pelis/db import:anilist`)
+- [ ] Proteger `/api/stream/*` con auth/plan activo
 
 ---
 
 ## Frontend
 
-- [ ] Página de perfil de usuario (`/profile`)
-- [ ] Búsqueda global en header (actualmente solo en `/movies`)
+- [x] Página de perfil de usuario (`/profile`)
+- [x] Búsqueda global en header
+- [x] Búsqueda incluye anime
+- [x] Anime en bottom tab bar (móvil)
 - [ ] Estados de carga y error unificados en todas las páginas
 - [ ] `next/image` con dominios remotos si se usan URLs externas
-- [ ] PWA / instalable en móvil (opcional)
-- [ ] Tests E2E de flujos críticos (login, favoritos, historial)
+- [ ] Tests E2E de flujos críticos (login, favoritos, historial) — actualizar de Convex
+
+---
+
+## Anime
+
+- [x] Campo `anilistId` en schema
+- [x] 7 proveedores con fallback automático
+- [x] Health check de proveedores (admin)
+- [x] Import ~200 títulos desde AniList
+- [x] Fix IDs en detalle y reproductor
+- [ ] Favoritos/historial para anime
+- [ ] Paginación episodios largos (500+ eps)
 
 ---
 
 ## UI/UX
 
-- [ ] Auditar accesibilidad con skill `scan` o `audit`
+- [ ] Auditar accesibilidad
 - [ ] Pulir responsive en móvil (historial, detalle, reproductor)
-- [ ] Placeholder de póster más representativo (no reutilizar un póster real)
+- [ ] Placeholder de póster más representativo
 - [ ] Animaciones reducidas con `prefers-reduced-motion`
-- [ ] SEO: metadata por película/serie (`generateMetadata`)
+- [ ] SEO: metadata por película/serie/anime (`generateMetadata`)
+- [ ] Página `not-found.tsx` custom
 
 ---
 
 ## DevOps y calidad
 
 - [ ] CI: `pnpm typecheck` + `pnpm lint` en PRs
-- [ ] Documentar variables de entorno en `.env.example`
-- [ ] Quitar `tsbuildinfo` del historial de Git (`git rm --cached`)
-- [ ] Deploy Vercel con assets de pósters (copiar en build o CDN externo)
-- [ ] Monitoreo de errores (Sentry configurado pero falló por red en dev)
+- [x] Documentar variables de entorno en `.env.example`
+- [ ] Quitar `ignoreBuildErrors` de `next.config.mjs`
+- [ ] Deploy con assets de pósters (copiar en build o CDN)
+- [ ] Monitoreo de errores (Sentry)
 
 ---
 
@@ -76,9 +94,8 @@ Lista de tareas del proyecto. Actualizada tras conectar imágenes y rediseño UI
 
 - [ ] Recomendaciones personalizadas por historial
 - [ ] Notificaciones de nuevos estrenos
-- [ ] Múltiples perfiles por cuenta (estilo Netflix)
+- [ ] Múltiples perfiles por cuenta
 - [ ] Descargas offline (PWA + cache)
-- [ ] Integración TMDB para metadata y pósters faltantes
 - [ ] Música (el SQL legacy tenía tabla `musics`)
 
 ---
@@ -87,9 +104,12 @@ Lista de tareas del proyecto. Actualizada tras conectar imágenes y rediseño UI
 
 ```bash
 pnpm install
-cp .env.local .env   # editar valores
-cd packages/convex && npx convex dev
-# En otra terminal:
+cp .env.example .env   # editar valores
+pnpm --filter @pelis/db db:migrate
+pnpm --filter @pelis/db db:seed
+# Opcional: importar catálogo anime
+pnpm --filter @pelis/db import:anilist -- --limit 200
+# Opcional: Consumet self-hosted
+docker compose up -d consumet redis
 pnpm dev
-# Copiar pósters (ver sección Prioridad alta)
 ```

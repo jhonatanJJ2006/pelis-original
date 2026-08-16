@@ -1,5 +1,5 @@
 import { promises as fs } from 'node:fs';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { createHash, randomUUID } from 'node:crypto';
 
 /**
@@ -7,9 +7,31 @@ import { createHash, randomUUID } from 'node:crypto';
  *
  * Files live under <project>/apps/web/public/uploads/<id>.webp
  * and are served by Next.js as static assets at /uploads/<id>.webp.
+ *
+ * Resolve el directorio de uploads buscando hacia arriba hasta encontrar
+ * `apps/web/public/uploads`. Esto permite ejecutar tanto desde la raíz del
+ * monorepo (`pnpm dev`) como desde `apps/web/` (`next dev` directo).
  */
 
-const UPLOAD_DIR = join(process.cwd(), 'public', 'uploads');
+function findUploadsDir(): string {
+  const candidates = [
+    join(process.cwd(), 'public', 'uploads'),
+    join(process.cwd(), 'apps', 'web', 'public', 'uploads'),
+  ];
+  for (const c of candidates) {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      require('node:fs').accessSync(c);
+      return c;
+    } catch {
+      // keep searching
+    }
+  }
+  // Fallback: crear bajo cwd/public/uploads (modo dev desde raíz).
+  return candidates[0]!;
+}
+
+const UPLOAD_DIR = resolve(findUploadsDir());
 
 async function ensureDir() {
   await fs.mkdir(UPLOAD_DIR, { recursive: true });

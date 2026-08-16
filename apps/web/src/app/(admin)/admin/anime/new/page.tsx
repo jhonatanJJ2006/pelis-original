@@ -44,6 +44,8 @@ function buildArgs(values: AnimeFormValues) {
     status: values.status,
     year: Number(values.year),
     rating: values.rating ? Number(values.rating) : undefined,
+    anilistId: values.anilistId ? Number(values.anilistId) : undefined,
+    malId: values.malId ? Number(values.malId) : undefined,
     providers: parseProviders(values.providersText),
   };
 }

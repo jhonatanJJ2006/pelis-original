@@ -1,0 +1,23 @@
+[Unit]
+Description=Telegram movie channels dumper (sync)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/det/Desktop/PELIS/pelis-original/tools/telegram-dumper
+ExecStart=/home/det/Desktop/PELIS/pelis-original/tools/telegram-dumper/scripts/sync.sh
+StandardOutput=journal
+StandardError=journal
+TimeoutStartSec=infinity
+Restart=no
+Nice=10
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/home/det/Desktop/PELIS/pelis-original/tools/telegram-dumper/data
+
+[Install]
+WantedBy=default.target

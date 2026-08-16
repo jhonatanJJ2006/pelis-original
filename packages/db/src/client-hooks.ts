@@ -118,6 +118,7 @@ export function useQuery<T = unknown>(
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
+          cache: 'no-store',
           body: JSON.stringify(args ?? {}),
         });
         if (!res.ok) {

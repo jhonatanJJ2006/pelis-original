@@ -257,6 +257,10 @@ model Anime {
   id                String      @id @default(cuid())
   title             String
   alternativeTitle  String?
+  slug              String?     @unique
+  anilistId         Int?        @unique
+  malId             Int?
+  tmdbId            Int?
   image             String
   imageId           String?
   backdropImage     String?
@@ -274,6 +278,7 @@ model Anime {
 
   @@index([title])
   @@index([status])
+  @@index([anilistId])
   @@map("anime")
 }
 

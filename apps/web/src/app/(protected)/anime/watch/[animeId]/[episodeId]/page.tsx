@@ -33,14 +33,23 @@ export default function AnimeWatchPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [activeProvider, setActiveProvider] = useState<string | null>(null);
   const episodeId = params.episodeId as string;
-  const animeId = params.animeId as string;
+  const dbAnimeId = params.animeId as string;
   const provider = searchParams.get('provider') || 'gogoanime';
 
-  const getVideoUrl = useAction<{ episodeId: string; provider: string }, { sources: Array<{ url: string; quality?: string; isM3U8?: boolean }>; subtitles: Array<{ url: string; lang?: string }> }>(api.anime.getVideoUrl);
+  const getVideoUrl = useAction<
+    { episodeId: string; provider: string; tryFallback?: boolean },
+    {
+      provider: string;
+      sources: Array<{ url: string; quality?: string; isM3U8?: boolean }>;
+      subtitles: Array<{ url: string; lang?: string }>;
+    }
+  >(api.anime.getVideoUrl);
   const providers = useQuery(api.anime.getProviders, {}) as
     Array<{ id: string; name: string }> | undefined;
-  const providerName = providers?.find((p) => p.id === provider)?.name || provider;
+  const displayProvider = activeProvider ?? provider;
+  const providerName = providers?.find((p) => p.id === displayProvider)?.name || displayProvider;
 
   const hasActivePlan = !!(user?.planExpiresAt && user.planExpiresAt > Date.now());
 
@@ -59,8 +68,10 @@ export default function AnimeWatchPage() {
         const result = await getVideoUrl({
           episodeId,
           provider,
+          tryFallback: true,
         });
         if (!cancelled) {
+          setActiveProvider(result.provider ?? provider);
           setVideoData(result as any);
           if (!result?.sources?.length) {
             setError('No se encontraron fuentes de video para este episodio.');
@@ -124,7 +135,7 @@ export default function AnimeWatchPage() {
   return (
     <div className="page-shell">
       <Link
-        href={`/anime/${encodeURIComponent(animeId)}`}
+        href={`/anime/${dbAnimeId}`}
         className="inline-flex items-center gap-2 text-cinema-silver hover:text-white transition-colors text-sm mb-6"
       >
         <ArrowLeft className="w-4 h-4" />
@@ -174,7 +185,7 @@ export default function AnimeWatchPage() {
                       {providers?.map((p) => (
                         <Link
                           key={p.id}
-                          href={`/anime/watch/${animeId}/${episodeId}?provider=${p.id}`}
+                          href={`/anime/watch/${dbAnimeId}/${episodeId}?provider=${p.id}`}
                           className="px-3 py-1.5 rounded-lg bg-cinema-elevated text-cinema-silver hover:text-white text-sm border border-cinema-border transition-colors"
                         >
                           {p.name}
@@ -222,7 +233,7 @@ export default function AnimeWatchPage() {
                 {providers.map((p) => (
                   <Link
                     key={p.id}
-                    href={`/anime/watch/${animeId}/${episodeId}?provider=${p.id}`}
+                    href={`/anime/watch/${dbAnimeId}/${episodeId}?provider=${p.id}`}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all border ${
                       provider === p.id
                         ? 'bg-cinema-violet text-white border-cinema-violet'

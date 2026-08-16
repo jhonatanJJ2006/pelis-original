@@ -3,7 +3,7 @@
 import { useQuery } from '@pelis/db/client';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { Search, Film, Tv, TrendingUp, Loader2, X, User } from 'lucide-react';
+import { Search, Film, Tv, TrendingUp, Loader2, X, User, Sparkles } from 'lucide-react';
 import { api } from '@pelis/db/api';
 import { cn } from '@pelis/ui/utils';
 import { MoviePoster } from '@pelis/ui/features/movie-poster';
@@ -52,6 +52,20 @@ export function SearchDropdown({
     hasQuery ? { q: debouncedQuery.trim(), limit: 8 } : 'skip'
   ) as MediaItem[] | undefined;
 
+  const animeResults = useQuery(
+    api.anime.search,
+    hasQuery ? { query: debouncedQuery.trim(), limit: 5 } : 'skip'
+  ) as Array<{ _id: string; title: string; image: string; year: number; genre: string[] }> | undefined;
+
+  type SearchResult =
+    | { type: 'movie'; item: MediaItem }
+    | { type: 'anime'; item: { _id: string; title: string; image: string; year: number; genre: string[] } };
+
+  const combinedResults: SearchResult[] = [
+    ...(results ?? []).map((item) => ({ type: 'movie' as const, item })),
+    ...(animeResults ?? []).map((item) => ({ type: 'anime' as const, item })),
+  ];
+
   const matchesByActor = (m: MediaItem): boolean => {
     if (!hasQuery) return false;
     if (m.name.toLowerCase().includes(trimmedQuery)) return false;
@@ -59,9 +73,9 @@ export function SearchDropdown({
   };
 
   const showDropdown = isOpen && hasQuery;
-  const isLoading = showDropdown && results === undefined;
-  const hasResults = showDropdown && results && results.length > 0;
-  const noResults = showDropdown && results && results.length === 0;
+  const isLoading = showDropdown && (results === undefined || animeResults === undefined);
+  const hasResults = showDropdown && combinedResults.length > 0;
+  const noResults = showDropdown && results !== undefined && animeResults !== undefined && combinedResults.length === 0;
 
   useEffect(() => {
     if (hasQuery) {
@@ -81,34 +95,38 @@ export function SearchDropdown({
   }, []);
 
   const navigateTo = useCallback(
-    (movie: MediaItem) => {
+    (result: SearchResult) => {
       setIsOpen(false);
       onChange('');
-      router.push(`/movies/${movie._id}`);
+      if (result.type === 'movie') {
+        router.push(`/movies/${result.item._id}`);
+      } else {
+        router.push(`/anime/${result.item._id}`);
+      }
     },
     [router, onChange]
   );
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (!showDropdown || !results) return;
+    if (!showDropdown || combinedResults.length === 0) return;
 
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault();
         setSelectedIndex((prev) =>
-          prev < results.length - 1 ? prev + 1 : 0
+          prev < combinedResults.length - 1 ? prev + 1 : 0
         );
         break;
       case 'ArrowUp':
         e.preventDefault();
         setSelectedIndex((prev) =>
-          prev > 0 ? prev - 1 : results.length - 1
+          prev > 0 ? prev - 1 : combinedResults.length - 1
         );
         break;
       case 'Enter':
         e.preventDefault();
-        if (selectedIndex >= 0 && results[selectedIndex]) {
-          navigateTo(results[selectedIndex]);
+        if (selectedIndex >= 0 && combinedResults[selectedIndex]) {
+          navigateTo(combinedResults[selectedIndex]);
         } else {
           onSubmit(e as unknown as React.FormEvent);
         }
@@ -206,16 +224,18 @@ export function SearchDropdown({
 
           {hasResults && (
             <div className="max-h-[70vh] overflow-y-auto">
-              {results.map((movie, index) => {
-                const isActorMatch = matchesByActor(movie);
-                return (
+              {combinedResults.map((result, index) => {
+                if (result.type === 'movie') {
+                  const movie = result.item;
+                  const isActorMatch = matchesByActor(movie);
+                  return (
                 <button
-                  key={movie._id}
+                  key={`movie-${movie._id}`}
                   type="button"
                   role="option"
                   aria-selected={index === selectedIndex}
                   data-result-index={index}
-                  onClick={() => navigateTo(movie)}
+                  onClick={() => navigateTo(result)}
                   onMouseEnter={() => setSelectedIndex(index)}
                   className={cn(
                     'w-full flex items-start gap-3 px-3 py-2.5 text-left transition-colors duration-150',
@@ -260,6 +280,40 @@ export function SearchDropdown({
                     </div>
                   </div>
                 </button>
+                  );
+                }
+
+                const anime = result.item;
+                return (
+                  <button
+                    key={`anime-${anime._id}`}
+                    type="button"
+                    role="option"
+                    aria-selected={index === selectedIndex}
+                    data-result-index={index}
+                    onClick={() => navigateTo(result)}
+                    onMouseEnter={() => setSelectedIndex(index)}
+                    className={cn(
+                      'w-full flex items-start gap-3 px-3 py-2.5 text-left transition-colors duration-150',
+                      index === selectedIndex
+                        ? 'bg-cinema-violet/20'
+                        : 'hover:bg-cinema-elevated/50'
+                    )}
+                  >
+                    <div className="w-10 h-14 shrink-0 rounded overflow-hidden bg-cinema-elevated">
+                      <img src={anime.image} alt={anime.title} className="w-full h-full object-cover" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-white truncate leading-tight">{anime.title}</p>
+                      <p className="text-xs text-cinema-silver mt-0.5 truncate">{anime.genre.slice(0, 2).join(', ')}</p>
+                      <div className="flex items-center gap-2 mt-1.5">
+                        <span className="inline-flex items-center gap-1 text-[10px] text-cinema-ash bg-cinema-elevated/80 px-1.5 py-0.5 rounded">
+                          <Sparkles className="w-2.5 h-2.5" /> Anime
+                        </span>
+                        <span className="text-[10px] text-cinema-ash">{anime.year}</span>
+                      </div>
+                    </div>
+                  </button>
                 );
               })}
 

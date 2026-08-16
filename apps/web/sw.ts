@@ -46,5 +46,13 @@ installSerwist({
         expiration: { maxEntries: 500, maxAgeSeconds: 60 * 24 * 60 * 60 },
       },
     },
+    {
+      urlPattern: /\/uploads\/.*/,
+      handler: 'StaleWhileRevalidate',
+      options: {
+        cacheName: 'uploads',
+        expiration: { maxEntries: 100, maxAgeSeconds: 7 * 24 * 60 * 60 },
+      },
+    },
   ],
 });

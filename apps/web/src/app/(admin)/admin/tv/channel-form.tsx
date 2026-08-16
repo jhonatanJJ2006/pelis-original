@@ -47,6 +47,8 @@ const KNOWN_CATEGORIES = [
   'Documentales',
   'Cultura',
   'Religión',
+  'Anime',
+  'Animación',
 ];
 
 const KNOWN_COUNTRIES = [

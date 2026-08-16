@@ -21,12 +21,14 @@
     "clean": "git clean -xdf .cache .turbo dist node_modules",
     "lint": "eslint src",
     "typecheck": "tsc --noEmit",
-    "db:generate": "prisma generate",
-    "db:migrate": "prisma migrate dev",
-    "db:deploy": "prisma migrate deploy",
-    "db:reset": "prisma migrate reset --force",
-    "db:studio": "prisma studio",
-    "db:seed": "tsx scripts/seed.ts"
+    "db:generate": "dotenv -e ../../.env -- prisma generate",
+    "db:migrate": "dotenv -e ../../.env -- prisma migrate dev",
+    "db:deploy": "dotenv -e ../../.env -- prisma migrate deploy",
+    "db:reset": "dotenv -e ../../.env -- prisma migrate reset --force",
+    "db:studio": "dotenv -e ../../.env -- prisma studio",
+    "db:seed": "dotenv -e ../../.env -- tsx scripts/seed.ts",
+    "import:convex": "dotenv -e ../../.env -- tsx scripts/import-convex-snapshot.ts",
+    "import:anilist": "dotenv -e ../../.env -- tsx scripts/import-anilist-catalog.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
@@ -41,8 +43,10 @@
     "@pelis/tsconfig": "workspace:*",
     "@types/node": "^22.10.2",
     "@types/pg": "^8.11.10",
+    "dotenv-cli": "^7.4.2",
     "eslint": "catalog:",
     "prisma": "^5.22.0",
+    "sharp": "^0.35.3",
     "tsx": "^4.19.2",
     "typescript": "catalog:"
   }

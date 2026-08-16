@@ -1,12 +1,18 @@
 const HASH_RE = /^[a-f0-9]{32}$/i;
+const SLUG_RE = /^[a-z0-9][a-z0-9-]{1,80}$/i;
+const CONVEX_LEGACY_RE = /^https?:\/\/[\w-]+\.convex\.cloud\/api\/storage\//i;
 
 export const PLACEHOLDER_IMAGE = '/peliculas/placeholder.webp';
 
 export function resolveMovieImagePath(image: string | null | undefined): string {
   if (!image) return PLACEHOLDER_IMAGE;
+  // URLs legacy de Convex (uncommon-dolphin-XXX.convex.cloud) ya no existen;
+  // el cliente debe caer al placeholder para que no se muestre un 404.
+  if (CONVEX_LEGACY_RE.test(image)) return PLACEHOLDER_IMAGE;
   if (/^https?:\/\//i.test(image)) return image;
   if (image.startsWith('/')) return image;
   if (HASH_RE.test(image)) return `/peliculas/peliculas/${image}.webp`;
+  if (SLUG_RE.test(image)) return `/peliculas/${image}.webp`;
   return image;
 }
 

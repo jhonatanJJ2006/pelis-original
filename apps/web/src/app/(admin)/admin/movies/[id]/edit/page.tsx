@@ -35,13 +35,20 @@ export default function EditMoviePage() {
 
   const handleUploadImage = async (file: File) => {
     const uploadUrl = (await generateUploadUrl({})) as string;
+    const form = new FormData();
+    form.append('file', file, file.name);
+    form.append('filename', file.name);
     const response = await fetch(uploadUrl, {
       method: 'POST',
-      headers: { 'Content-Type': file.type },
-      body: file,
+      credentials: 'include',
+      body: form,
     });
-    const { storageId } = await response.json();
-    return { image: URL.createObjectURL(file), imageId: storageId };
+    if (!response.ok) {
+      const errText = await response.text().catch(() => '');
+      throw new Error(`Upload failed (${response.status}): ${errText}`);
+    }
+    const data = (await response.json()) as { id: string; url: string };
+    return { image: data.url, imageId: data.id };
   };
 
   const handleSubmit = async (values: MovieFormValues, intent?: 'save' | 'continue') => {

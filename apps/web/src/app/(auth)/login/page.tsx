@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Film } from 'lucide-react';
 import { Button, Input } from '@pelis/ui/components';
 const getAuthApiBase = () => '/api/auth';
-import { authClient } from '@/lib/auth-client';
+import { authClient } from '@pelis/auth/client';
 import { useState, useEffect, Suspense } from 'react';
 
 function LoginForm() {
@@ -75,8 +75,9 @@ function LoginForm() {
         setError(message);
         return;
       }
-      router.push('/');
-      router.refresh();
+      await authClient.getSession({ query: { disableCookieCache: true } });
+      // Hard navigation so cookies/session are picked up reliably after sign-in.
+      window.location.assign('/');
     } catch {
       setError('Error de conexión. Intenta de nuevo.');
     } finally {
