@@ -2,17 +2,24 @@
  * Anime actions: external provider lookups via Consumet API.
  */
 import { z } from 'zod';
+import type { Anime } from '@prisma/client';
 import { prisma } from '../client';
 import { register } from '../registry';
 import {
+  DEFAULT_ANIME_PROVIDER_ID,
+  buildProviderEmbedUrl,
+  getEmbedProviders,
+  getProviderById,
   getProvidersSortedByPriority,
 } from '../lib/anime-providers';
 import {
   fetchEpisodesWithFallback,
+  fetchVideoByEpisodeNumber,
   fetchVideoWithFallback,
   searchConsumet,
   checkProvidersHealth,
 } from '../lib/consumet-client';
+import { fetchEpisodeList } from '../lib/anizip-client';
 import { searchAnilist, getAnilistById } from '../lib/anilist';
 
 export const searchExternal = register({
@@ -66,6 +73,146 @@ export const resolveAnilistId = register({
       },
     });
     return { anilistId: updated.anilistId, malId: updated.malId };
+  },
+});
+
+/**
+ * Ensure a catalog row has an AniList id, resolving and persisting it on first
+ * use. Everything downstream (episode lists, embed players) is keyed by it.
+ */
+async function ensureAnilistId(anime: Anime): Promise<number | null> {
+  if (anime.anilistId) return anime.anilistId;
+  try {
+    const results = await searchAnilist(anime.title, anime.year);
+    const match = results[0];
+    if (!match) return null;
+    await prisma.anime.update({
+      where: { id: anime.id },
+      data: { anilistId: match.id, malId: match.idMal ?? null, format: match.format ?? null },
+    });
+    return match.id;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Episode list for one season, independent of any streaming provider.
+ *
+ * Uses ani.zip metadata (Spanish titles, thumbnails, air dates) and falls back
+ * to numbered placeholders, so the user can always choose an episode and only
+ * then worry about which provider plays it.
+ */
+export const getSeasonEpisodes = register({
+  kind: 'action',
+  name: 'anime.getSeasonEpisodes',
+  writes: ['anime'],
+  args: z.object({ animeId: z.string() }),
+  handler: async (_ctx, { animeId }) => {
+    const anime = await prisma.anime.findUnique({ where: { id: animeId } });
+    if (!anime) throw new Error('Anime no encontrado');
+
+    const anilistId = await ensureAnilistId(anime);
+    const { episodes, source } = await fetchEpisodeList(anilistId, anime.episodes);
+
+    return {
+      animeId: anime.id,
+      anilistId,
+      source,
+      episodes: episodes.map((ep) => ({
+        number: ep.number,
+        title: ep.title,
+        overview: ep.overview,
+        image: ep.image,
+        airDate: ep.airDate,
+        runtime: ep.runtime,
+      })),
+    };
+  },
+});
+
+/**
+ * Resolve how to play one episode.
+ *
+ * `embed` providers only need the AniList id and episode number, so they answer
+ * instantly and work even when the server cannot reach streaming sites.
+ * `hls` providers are scraped and may return nothing; when that happens and
+ * `tryFallback` is set, the best working embed is returned instead.
+ */
+export const getEpisodeStream = register({
+  kind: 'action',
+  name: 'anime.getEpisodeStream',
+  writes: ['anime'],
+  args: z.object({
+    animeId: z.string(),
+    episodeNumber: z.number().min(1),
+    provider: z.string().optional(),
+    dub: z.boolean().optional(),
+    tryFallback: z.boolean().optional(),
+  }),
+  handler: async (_ctx, { animeId, episodeNumber, provider, dub, tryFallback = true }) => {
+    const anime = await prisma.anime.findUnique({ where: { id: animeId } });
+    if (!anime) throw new Error('Anime no encontrado');
+
+    const anilistId = await ensureAnilistId(anime);
+    const requestedId = provider ?? DEFAULT_ANIME_PROVIDER_ID;
+    const requested = getProviderById(requestedId);
+
+    if (!anilistId) {
+      return {
+        kind: 'none' as const,
+        provider: null,
+        error: 'No pudimos identificar este anime en AniList, así que no hay fuentes disponibles.',
+      };
+    }
+
+    if (requested?.kind === 'embed') {
+      const url = buildProviderEmbedUrl(requested.id, { anilistId, malId: anime.malId, episodeNumber, dub });
+      if (url) {
+        return { kind: 'embed' as const, provider: requested.id, url, dub: Boolean(dub) };
+      }
+    }
+
+    if (requested?.kind === 'hls') {
+      const result = await fetchVideoByEpisodeNumber(anilistId, episodeNumber, requested.id);
+      if (result.provider && result.video.sources.length > 0) {
+        return {
+          kind: 'hls' as const,
+          provider: result.provider,
+          sources: result.video.sources,
+          subtitles: result.video.subtitles,
+          triedProviders: result.triedProviders,
+        };
+      }
+      if (!tryFallback) {
+        return {
+          kind: 'none' as const,
+          provider: requested.id,
+          triedProviders: result.triedProviders,
+          error: 'Este proveedor no devolvió fuentes para el episodio.',
+        };
+      }
+    }
+
+    // Last resort: any embed player, which needs no scraping to work.
+    for (const embed of getEmbedProviders()) {
+      const url = buildProviderEmbedUrl(embed.id, { anilistId, malId: anime.malId, episodeNumber, dub });
+      if (url) {
+        return {
+          kind: 'embed' as const,
+          provider: embed.id,
+          url,
+          dub: Boolean(dub),
+          fellBackFrom: requested?.id ?? null,
+        };
+      }
+    }
+
+    return {
+      kind: 'none' as const,
+      provider: requested?.id ?? null,
+      error: 'Ningún proveedor pudo entregar este episodio.',
+    };
   },
 });
 
@@ -140,12 +287,18 @@ export const importFromAnilist = register({
 
     const title = media.title.english || media.title.romaji || media.title.native || 'Sin título';
     const { slugifyTitle, mapAnilistStatus, stripHtml } = await import('../lib/anilist');
+    const { deriveSeriesFields } = await import('../lib/anime-series');
     const providers = getProvidersSortedByPriority().slice(0, 3).map((p) => ({
       name: p.name,
       url: p.baseUrl,
       language: p.language === 'sub/dub' ? 'sub' : p.language,
       isActive: true,
     }));
+
+    const series = deriveSeriesFields(title, media.format);
+    const seriesMainExists = await prisma.anime.count({
+      where: { seriesKey: series.seriesKey, isSeriesMain: true },
+    });
 
     const created = await prisma.anime.create({
       data: {
@@ -162,6 +315,8 @@ export const importFromAnilist = register({
         year: media.seasonYear ?? new Date().getFullYear(),
         rating: media.averageScore ? media.averageScore / 10 : null,
         providers,
+        ...series,
+        isSeriesMain: seriesMainExists === 0,
       },
     });
     return { id: created.id, created: true };

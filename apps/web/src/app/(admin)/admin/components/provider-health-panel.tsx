@@ -11,6 +11,7 @@ import { cn } from '@pelis/ui/utils';
 interface ProviderHealth {
   id: string;
   name: string;
+  kind: 'embed' | 'hls';
   ok: boolean;
   responseMs: number | null;
   error?: string;
@@ -38,6 +39,7 @@ export function ProviderHealthPanel() {
   }, []);
 
   const okCount = results?.filter((r) => r.ok).length ?? 0;
+  const embedOk = results?.filter((r) => r.kind === 'embed' && r.ok).length ?? 0;
 
   return (
     <div className="mb-6 p-4 rounded-2xl border border-cinema-border bg-cinema-surface">
@@ -45,7 +47,9 @@ export function ProviderHealthPanel() {
         <div>
           <h2 className="text-sm font-medium text-white">Estado de proveedores</h2>
           <p className="text-xs text-cinema-muted mt-0.5">
-            {results ? `${okCount}/${results.length} operativos` : 'Comprobando...'}
+            {results
+              ? `${okCount}/${results.length} operativos · ${embedOk} reproductor(es) integrado(s)`
+              : 'Comprobando...'}
           </p>
         </div>
         <Button variant="ghost" size="sm" onClick={runCheck} disabled={loading}>
@@ -68,7 +72,12 @@ export function ProviderHealthPanel() {
             >
               {r.ok ? <CheckCircle2 className="w-4 h-4 shrink-0" /> : <XCircle className="w-4 h-4 shrink-0" />}
               <div className="min-w-0 flex-1">
-                <p className="font-medium truncate">{r.name}</p>
+                <p className="font-medium truncate">
+                  {r.name}
+                  <span className="ml-1.5 text-[10px] opacity-60 font-normal">
+                    {r.kind === 'embed' ? 'integrado' : 'scraper'}
+                  </span>
+                </p>
                 <p className="text-[10px] opacity-70 truncate">
                   {r.ok
                     ? `${r.responseMs ?? '—'}ms`

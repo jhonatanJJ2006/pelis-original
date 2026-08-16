@@ -12,12 +12,14 @@ import {
   ArrowLeft,
   X,
   Radio,
+  Sparkles,
 } from 'lucide-react';
 import { cn } from '@pelis/ui/utils';
 
 const navItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, enabled: true },
   { href: '/admin/movies', label: 'Películas', icon: Film, enabled: true },
+  { href: '/admin/movies/new-releases', label: 'Nuevas películas', icon: Sparkles, enabled: true },
   { href: '/admin/series', label: 'Series', icon: Tv, enabled: true },
   { href: '/admin/anime', label: 'Anime', icon: Clapperboard, enabled: true },
   { href: '/admin/tv', label: 'Canales TV', icon: Radio, enabled: true },

@@ -49,7 +49,7 @@ def _serialize_reactions(reactions: MessageReactions | None) -> list[dict[str, A
                 "emoji": emoji,
                 "document_id": doc_id,
                 "count": rc.count,
-                "chosen": rc.chosen,
+                "chosen": getattr(rc, "chosen", None),
             }
         )
     return out

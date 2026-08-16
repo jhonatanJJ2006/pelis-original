@@ -3,6 +3,7 @@
  */
 import { PrismaClient } from '@prisma/client';
 import { getProvidersSortedByPriority } from './anime-providers';
+import { deriveSeriesFields } from './anime-series';
 import {
   fetchAnilistCatalog,
   mapAnilistStatus,
@@ -38,6 +39,12 @@ async function upsertAnimeFromMedia(prisma: PrismaClient, media: AnilistMedia): 
   if (existing) return 'skipped';
 
   const title = pickAnilistTitle(media);
+  const series = deriveSeriesFields(title, media.format);
+  // Only the first entry of a franchise represents it in the catalog.
+  const seriesMainExists = await prisma.anime.count({
+    where: { seriesKey: series.seriesKey, isSeriesMain: true },
+  });
+
   await prisma.anime.create({
     data: {
       title,
@@ -53,6 +60,8 @@ async function upsertAnimeFromMedia(prisma: PrismaClient, media: AnilistMedia): 
       year: media.seasonYear ?? new Date().getFullYear(),
       rating: media.averageScore ? media.averageScore / 10 : null,
       providers: defaultProviders(),
+      ...series,
+      isSeriesMain: seriesMainExists === 0,
     },
   });
   return 'imported';

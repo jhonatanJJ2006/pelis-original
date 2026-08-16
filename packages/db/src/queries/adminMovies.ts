@@ -158,3 +158,40 @@ export const merge = register({
     return { merged: true, targetId };
   },
 });
+
+export const recent = register({
+  kind: 'query',
+  name: 'adminMovies.recent',
+  reads: ['movie'],
+  args: z
+    .object({
+      sinceDays: z.number().optional(),
+      limit: z.number().optional(),
+    })
+    .optional(),
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const sinceDays = args?.sinceDays ?? 30;
+    const limit = args?.limit ?? 100;
+    const since = new Date(Date.now() - sinceDays * 24 * 60 * 60 * 1000);
+    const movies = await prisma.movie.findMany({
+      where: { createdAt: { gte: since } },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+    });
+    return movies.map((movie) => ({
+      ...toMovieShape(movie),
+      quality: getMovieQualityFlags({
+        name: movie.name,
+        token: movie.token,
+        image: movie.image,
+        videoUrl: movie.videoUrl,
+        synopsis: movie.synopsis,
+        actors: movie.actors,
+        classification: movie.classification,
+        genre: movie.genre,
+        backdropImage: movie.backdropImage,
+      }),
+    }));
+  },
+});

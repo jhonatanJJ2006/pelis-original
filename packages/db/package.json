@@ -28,7 +28,8 @@
     "db:studio": "dotenv -e ../../.env -- prisma studio",
     "db:seed": "dotenv -e ../../.env -- tsx scripts/seed.ts",
     "import:convex": "dotenv -e ../../.env -- tsx scripts/import-convex-snapshot.ts",
-    "import:anilist": "dotenv -e ../../.env -- tsx scripts/import-anilist-catalog.ts"
+    "import:anilist": "dotenv -e ../../.env -- tsx scripts/import-anilist-catalog.ts",
+    "group:anime": "dotenv -e ../../.env -- tsx scripts/group-anime-series.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",

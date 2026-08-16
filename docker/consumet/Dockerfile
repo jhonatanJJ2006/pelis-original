@@ -1,16 +1,10 @@
-FROM node:20-alpine
-
-WORKDIR /app
-
-RUN apk add --no-cache git python3 make g++
-
-RUN git clone --depth 1 https://github.com/consumet/api.consumet.org.git . \
-  && npm install --omit=dev
-
-ENV PORT=3000
-ENV REDIS_HOST=redis
-ENV REDIS_PORT=6379
-
-EXPOSE 3000
-
-CMD ["node", "src/main.js"]
+# Consumet self-hosted (opcional)
+#
+# El repo oficial consumet/api.consumet.org está deshabilitado en GitHub.
+# Usamos la imagen preconstruida riimuru/consumet-api vía docker-compose.yml.
+#
+# Levantar:
+#   sudo docker compose up -d redis consumet
+#
+# Verificar:
+#   curl "http://localhost:3001/meta/anilist/info/21?provider=gogoanime"

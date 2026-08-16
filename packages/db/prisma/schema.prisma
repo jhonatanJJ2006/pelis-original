@@ -271,6 +271,15 @@ model Anime {
   status            AnimeStatus
   year              Int
   rating            Float?
+  // AniList format: TV, TV_SHORT, MOVIE, OVA, ONA, SPECIAL
+  format            String?
+  // Series grouping: every entry of the same franchise shares `seriesKey`.
+  // `isSeriesMain` marks the single entry that represents the series in the catalog.
+  seriesKey         String?
+  seriesTitle       String?
+  seasonNumber      Int?
+  seasonLabel       String?
+  isSeriesMain      Boolean     @default(false)
   // Providers stored as JSON: {name,url,language,isActive}[]
   providers         Json
   createdAt         DateTime    @default(now())
@@ -279,6 +288,8 @@ model Anime {
   @@index([title])
   @@index([status])
   @@index([anilistId])
+  @@index([seriesKey])
+  @@index([seriesKey, seasonNumber])
   @@map("anime")
 }
 

@@ -2,11 +2,10 @@ services:
   redis:
     image: redis:7-alpine
     restart: unless-stopped
-    ports:
-      - "6379:6379"
+    # Sin puerto en host: evita conflicto si ya tienes Redis local en 6379
 
   consumet:
-    build: ./docker/consumet
+    image: riimuru/consumet-api:latest
     restart: unless-stopped
     ports:
       - "3001:3000"
@@ -14,5 +13,6 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       PORT: 3000
+      NODE_ENV: PROD
     depends_on:
       - redis
