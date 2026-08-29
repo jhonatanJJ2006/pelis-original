@@ -3,7 +3,6 @@
 import { memo, useState, type CSSProperties } from 'react';
 import { cn } from '../../shared/utils';
 
-const PLACEHOLDER = '/peliculas/placeholder.webp';
 
 interface MoviePosterProps {
   src: string;

@@ -87,3 +87,10 @@ docker compose up -d consumet redis   # Consumet self-hosted
 ## Deployment
 
 Ver [`DEPLOY.md`](DEPLOY.md) para instrucciones de despliegue.
+
+## Tests y diseno
+
+Sistema de diseno: DESIGN.md (Maison Noir). Playground en /playground (solo desarrollo).
+
+Scripts: test, test:unit, test:components, test:e2e, test:e2e:ui, test:smoke, test:playground, test:all.
+E2E usa PLAYWRIGHT_BASE_URL (default http://localhost:3000) y reuseExistingServer fuera de CI.
