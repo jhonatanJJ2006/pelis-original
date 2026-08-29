@@ -16,7 +16,7 @@ describe('Button', () => {
 
   it('applies the danger variant class', () => {
     render(<Button variant="danger">Eliminar</Button>);
-    expect(screen.getByRole('button')).toHaveClass('bg-red-600');
+    expect(screen.getByRole('button')).toHaveClass('bg-cinema-danger');
   });
 
   it('applies the gold variant class', () => {

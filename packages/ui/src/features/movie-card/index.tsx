@@ -69,8 +69,8 @@ function MovieCardBase({
           'rounded-2xl overflow-hidden',
           'bg-cinema-surface border border-cinema-border',
           'motion-safe:transition-[transform,border-color,box-shadow] motion-safe:duration-normal motion-safe:ease-out-expo',
-          '[@media(hover:hover)_and_(pointer:fine)]:group-hover:border-cinema-violet/50',
-          '[@media(hover:hover)_and_(pointer:fine)]:group-hover:shadow-[0_8px_32px_rgba(59,130,246,0.2)]',
+          '[@media(hover:hover)_and_(pointer:fine)]:group-hover:border-cinema-accent',
+          '[@media(hover:hover)_and_(pointer:fine)]:group-hover:shadow-[0_12px_36px_rgba(196,163,90,0.16)]',
           '[@media(hover:hover)_and_(pointer:fine)]:group-hover:-translate-y-1'
         )}
       >
@@ -93,7 +93,7 @@ function MovieCardBase({
           <div className="card-actions-layer absolute inset-0 z-[3] flex items-center justify-center">
             <div className="card-actions-toolbar flex items-center gap-3">
               <div
-                className="card-action-btn card-action-btn--play p-3 rounded-full bg-cinema-accent text-white shadow-glow"
+                className="card-action-btn card-action-btn--play p-3 rounded-full bg-cinema-accent text-cinema-bg shadow-glow"
                 aria-hidden
               >
                 <Play className="w-5 h-5 card-play-icon" fill="currentColor" />
@@ -105,8 +105,8 @@ function MovieCardBase({
                   className={cn(
                     'card-action-btn card-action-btn--heart p-3 rounded-full motion-safe:active:scale-95',
                     isFavorited
-                      ? 'bg-cinema-accent text-white shadow-glow'
-                      : 'bg-cinema-elevated/90 text-white hover:bg-cinema-violet/40 border border-cinema-border'
+                      ? 'bg-cinema-accent text-cinema-bg shadow-glow'
+                      : 'bg-cinema-elevated/90 text-cinema-chalk hover:bg-cinema-accent/20 border border-cinema-border'
                   )}
                   aria-label={isFavorited ? 'Quitar de favoritos' : 'Agregar a favoritos'}
                 >
@@ -141,7 +141,7 @@ function MovieCardBase({
           </div>
         </div>
         <div className="p-3">
-          <h3 className="font-medium text-sm truncate mb-1 transition-colors duration-200 group-hover:text-cinema-accent-light">
+          <h3 className="font-medium text-sm text-cinema-chalk truncate mb-1 transition-colors duration-200 group-hover:text-cinema-accent-light">
             {movie.name}
           </h3>
           <div className="flex items-center justify-between text-xs text-cinema-silver">

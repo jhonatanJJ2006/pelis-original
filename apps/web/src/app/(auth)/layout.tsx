@@ -12,7 +12,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         className="absolute inset-0 opacity-40"
         style={{
           backgroundImage:
-            'radial-gradient(ellipse 60% 50% at 20% 20%, rgba(59,130,246,0.35), transparent), radial-gradient(ellipse 50% 40% at 80% 80%, rgba(34,211,238,0.2), transparent)',
+            'radial-gradient(ellipse 60% 50% at 20% 20%, rgba(196,163,90,0.18), transparent), radial-gradient(ellipse 50% 40% at 80% 80%, rgba(139,30,45,0.12), transparent)',
         }}
         aria-hidden
       />
@@ -20,10 +20,10 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       <header className="relative py-6 px-4 z-10">
         <div className="container mx-auto">
           <Link href="/" className="flex items-center gap-2.5 w-fit group">
-            <div className="w-10 h-10 bg-gradient-to-br from-cinema-violet to-cinema-teal rounded flex items-center justify-center group-hover:scale-105 transition-transform shadow-glow-violet">
-              <Film className="w-6 h-6 text-white" aria-hidden />
+            <div className="w-10 h-10 bg-gradient-to-br from-cinema-accent to-cinema-gold rounded flex items-center justify-center group-hover:scale-105 transition-transform shadow-glow">
+              <Film className="w-6 h-6 text-cinema-bg" aria-hidden />
             </div>
-            <span className="font-display text-2xl tracking-widest text-white uppercase">
+            <span className="font-display text-2xl tracking-tight text-cinema-chalk">
               Pelis
             </span>
           </Link>

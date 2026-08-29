@@ -36,10 +36,29 @@ function MoviePosterBase({
   const [failed, setFailed] = useState(false);
   const srcSet = responsive ? buildSrcSet(src) : undefined;
 
+  if (!src || failed) {
+    return (
+      <div
+        className={cn('relative overflow-hidden bg-cinema-bg', className)}
+        style={style}
+        role="img"
+        aria-label={alt}
+      >
+        <div className="absolute inset-x-0 top-0 h-[11%] bg-cinema-bg border-b border-cinema-border/50" />
+        <div className="absolute inset-x-0 bottom-0 h-[11%] bg-cinema-bg border-t border-cinema-border/50" />
+        <div className="absolute inset-x-[8%] inset-y-[11%] border border-cinema-accent/20 bg-cinema-elevated/70 flex items-center justify-center">
+          <span className="font-display text-[10px] tracking-[0.28em] text-cinema-muted/45 uppercase">
+            Maison Noir
+          </span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <img
-      src={!src || failed ? PLACEHOLDER : src}
-      srcSet={failed ? undefined : srcSet}
+      src={src}
+      srcSet={srcSet}
       sizes={srcSet ? '(max-width: 640px) 200px, 400px' : undefined}
       alt={alt}
       className={cn(className)}

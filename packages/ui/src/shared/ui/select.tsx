@@ -27,12 +27,12 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
             ref={ref}
             id={id}
             className={cn(
-              'w-full h-11 appearance-none bg-cinema-surface border border-cinema-border rounded-[10px] pl-4 pr-9 text-sm text-white cursor-pointer',
+              'w-full h-11 appearance-none bg-cinema-surface border border-cinema-border rounded-[10px] pl-4 pr-9 text-sm text-cinema-chalk cursor-pointer',
               'shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]',
               'hover:border-cinema-silver/40 hover:bg-cinema-elevated/60',
               'focus:outline-none focus:ring-2 focus:ring-cinema-accent/50 focus:border-cinema-accent/60 focus:hover:bg-cinema-surface focus:hover:border-cinema-accent/60',
               'transition-all duration-200',
-              error && 'border-red-500 focus:ring-red-500/50 hover:border-red-500/70',
+              error && 'border-cinema-danger focus:ring-cinema-danger/50 hover:border-cinema-danger/70',
               className
             )}
             aria-invalid={error ? true : undefined}
@@ -49,7 +49,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           </div>
         </div>
         {error && (
-          <p id={`${id}-error`} className="mt-1 text-sm text-red-400" role="alert">
+          <p id={`${id}-error`} className="mt-1 text-sm text-cinema-danger-light" role="alert">
             {error}
           </p>
         )}

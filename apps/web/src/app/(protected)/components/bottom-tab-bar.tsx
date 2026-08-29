@@ -35,7 +35,7 @@ export function BottomTabBar() {
               className={cn(
                 'relative flex flex-1 items-center justify-center h-12 rounded-2xl transition-all duration-200',
                 isActive
-                  ? 'text-cinema-violet-light'
+                  ? 'text-cinema-accent-light'
                   : 'text-cinema-ash active:scale-95 hover:text-cinema-muted'
               )}
               aria-label={tab.label}
@@ -43,7 +43,7 @@ export function BottomTabBar() {
             >
               {isActive && (
                 <span
-                  className="absolute inset-x-2 inset-y-1.5 rounded-xl bg-cinema-violet/15"
+                  className="absolute inset-x-2 inset-y-1.5 rounded-xl bg-cinema-accent/15"
                   aria-hidden
                 />
               )}

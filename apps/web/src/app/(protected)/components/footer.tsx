@@ -24,10 +24,10 @@ export function Footer({ className }: { className?: string }) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           <div>
             <Link href="/" className="flex items-center gap-2.5 mb-4 group">
-              <div className="w-9 h-9 rounded bg-gradient-to-br from-cinema-violet to-cinema-teal flex items-center justify-center">
-                <Film className="w-5 h-5 text-white" aria-hidden />
+              <div className="w-9 h-9 rounded bg-gradient-to-br from-cinema-accent to-cinema-gold flex items-center justify-center">
+                <Film className="w-5 h-5 text-cinema-bg" aria-hidden />
               </div>
-              <span className="font-display text-2xl tracking-widest text-white uppercase">
+              <span className="font-display text-2xl tracking-tight text-cinema-chalk">
                 Pelis
               </span>
             </Link>

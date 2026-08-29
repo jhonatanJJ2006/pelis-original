@@ -1,4 +1,4 @@
-import { Bebas_Neue, Outfit } from 'next/font/google';
+import { Fraunces, Outfit } from 'next/font/google';
 import './globals.css';
 import { Providers } from '@pelis/auth/providers';
 import { Toaster } from 'sonner';
@@ -9,8 +9,7 @@ const outfit = Outfit({
   variable: '--font-body',
 });
 
-const bebasNeue = Bebas_Neue({
-  weight: '400',
+const fraunces = Fraunces({
   subsets: ['latin'],
   variable: '--font-display',
 });
@@ -31,19 +30,19 @@ export const viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover' as const,
-  themeColor: '#0a0e1a',
+  themeColor: '#0B0B0D',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es" className="dark">
       <head>
-        <meta name="theme-color" content="#0a0e1a" />
+        <meta name="theme-color" content="#0B0B0D" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="application-name" content="Pelis" />
       </head>
-      <body className={`${outfit.variable} ${bebasNeue.variable} font-sans`}>
+      <body className={`${outfit.variable} ${fraunces.variable} font-sans`}>
         <Providers>
           <AppProviders>
             {children}
@@ -52,9 +51,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               position="top-right"
               toastOptions={{
                 style: {
-                  background: '#1B1838',
-                  border: '1px solid #3D3566',
-                  color: '#FFFFFF',
+                  background: '#141418',
+                  border: '1px solid #2A2A32',
+                  color: '#F4F1EA',
                 },
               }}
             />

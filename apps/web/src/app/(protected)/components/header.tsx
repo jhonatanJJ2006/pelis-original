@@ -68,10 +68,10 @@ export function Header({ sticky = true, minimalNav = false }: HeaderProps) {
       <nav className="container mx-auto px-4" aria-label="Principal">
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
-            <div className="w-9 h-9 rounded bg-gradient-to-br from-cinema-violet to-cinema-teal flex items-center justify-center shadow-glow-violet group-hover:scale-105 transition-transform duration-200">
-              <Film className="w-5 h-5 text-white" />
+            <div className="w-9 h-9 rounded bg-gradient-to-br from-cinema-accent to-cinema-gold flex items-center justify-center shadow-glow group-hover:scale-105 transition-transform duration-200">
+              <Film className="w-5 h-5 text-cinema-bg" />
             </div>
-            <span className="font-display text-2xl tracking-widest text-gradient-accent uppercase">
+            <span className="font-display text-2xl tracking-tight text-cinema-chalk">
               Pelis
             </span>
           </Link>
@@ -105,8 +105,8 @@ export function Header({ sticky = true, minimalNav = false }: HeaderProps) {
                 className={cn(
                   'flex items-center gap-1.5 px-3 py-2 rounded text-sm font-medium transition-all duration-200',
                   isActive(item.href, item.exact)
-                    ? 'bg-cinema-violet/20 text-cinema-violet-light'
-                    : 'text-cinema-silver hover:text-white hover:bg-cinema-elevated/50'
+                    ? 'bg-cinema-accent/15 text-cinema-accent-light'
+                    : 'text-cinema-silver hover:text-cinema-chalk hover:bg-cinema-elevated/50'
                 )}
               >
                 <item.icon className="w-4 h-4" aria-hidden />
@@ -141,8 +141,8 @@ export function Header({ sticky = true, minimalNav = false }: HeaderProps) {
                 href="/profile"
                 className={cn(
                   'flex items-center gap-2 rounded-full p-0.5 transition-all',
-                  'hover:ring-2 hover:ring-cinema-violet/50',
-                  isActive('/profile') && 'ring-2 ring-cinema-violet/60'
+                  'hover:ring-2 hover:ring-cinema-accent/50',
+                  isActive('/profile') && 'ring-2 ring-cinema-accent/60'
                 )}
                 aria-label="Ir a mi perfil"
               >
@@ -150,11 +150,11 @@ export function Header({ sticky = true, minimalNav = false }: HeaderProps) {
                   <img
                     src={user.image}
                     alt=""
-                    className="w-9 h-9 rounded-full ring-2 ring-cinema-violet/50"
+                    className="w-9 h-9 rounded-full ring-2 ring-cinema-accent/50"
                   />
                 ) : (
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cinema-accent to-cinema-violet flex items-center justify-center ring-2 ring-cinema-violet/50">
-                    <User className="w-4 h-4 text-white" aria-hidden />
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cinema-accent to-cinema-gold flex items-center justify-center ring-2 ring-cinema-accent/50">
+                    <User className="w-4 h-4 text-cinema-bg" aria-hidden />
                   </div>
                 )}
                 <span className="text-sm text-cinema-muted hidden lg:inline max-w-[120px] truncate pr-1">

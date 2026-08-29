@@ -21,8 +21,8 @@ export function SectionHeader({
     <div className={cn('flex items-end justify-between gap-4 mb-5 group', className)}>
       <div className="relative">
         <div className="flex items-center gap-3">
-          <div className="w-1 h-8 bg-gradient-to-b from-cinema-violet via-cinema-teal to-cinema-violet-light rounded-full hidden sm:block" />
-          <h2 className="font-display text-2xl md:text-3xl tracking-wide text-white uppercase">
+          <div className="w-1 h-8 bg-gradient-to-b from-cinema-accent to-cinema-gold rounded-full hidden sm:block" />
+          <h2 className="font-display text-2xl md:text-3xl tracking-tight text-cinema-chalk">
             {title}
           </h2>
         </div>
