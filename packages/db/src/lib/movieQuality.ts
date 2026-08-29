@@ -4,14 +4,12 @@ const ORPHAN_ID_RE = /^[a-f0-9]{6,}$/i;
 const LEGACY_ORPHAN_RE = /^ok(-ru-\d+)?$/i;
 const DOCUMENT_ID_RE = /^document[-_]\d+$/i;
 
-export function isOrphanIdName(name: string, token?: string): boolean {
+export function isOrphanIdName(name: string, _token?: string): boolean {
   const trimmed = name.trim();
   if (!trimmed) return true;
   if (ORPHAN_ID_RE.test(trimmed)) return true;
   if (LEGACY_ORPHAN_RE.test(trimmed)) return true;
   if (DOCUMENT_ID_RE.test(trimmed)) return true;
-  if (token && trimmed.toLowerCase() === token.toLowerCase()) return true;
-  if (token && trimmed.toLowerCase().replace(/_/g, '-') === token.toLowerCase()) return true;
   return false;
 }
 
@@ -57,7 +55,10 @@ export function isIncompleteMovie(movie: {
 }
 
 export function isMissingBackdrop(backdropImage?: string | null): boolean {
-  return !backdropImage || backdropImage.trim() === '';
+  if (!backdropImage || backdropImage.trim() === '') return true;
+  // Backdrops legacy `/peliculas/*-backdrop.webp` no existen en disco (404).
+  if (backdropImage.startsWith('/peliculas/')) return true;
+  return false;
 }
 
 export interface MovieQualityFlags {

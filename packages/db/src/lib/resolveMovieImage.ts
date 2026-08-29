@@ -34,5 +34,8 @@ export function enrichMovies<T extends Parameters<typeof enrichMovieImage>[0]>(m
 }
 
 export function getHeroImage(movie: { backdropImage?: string | null; image: string }): string {
-  return movie.backdropImage?.trim() || movie.image;
+  const backdrop = movie.backdropImage?.trim();
+  // Backdrops legacy `/peliculas/*-backdrop.webp` no existen en disco: usar el póster.
+  if (backdrop && !backdrop.startsWith('/peliculas/')) return backdrop;
+  return movie.image;
 }

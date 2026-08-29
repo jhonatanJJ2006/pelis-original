@@ -17,6 +17,8 @@ export const list = register({
       classification: z.string().optional(),
       search: z.string().optional(),
       mediaType: MediaTypeEnum.optional(),
+      limit: z.number().optional(),
+      offset: z.number().optional(),
     })
     .optional(),
   handler: async (_ctx, args) => {
@@ -34,7 +36,12 @@ export const list = register({
         { genre: { contains: q, mode: 'insensitive' } },
       ];
     }
-    const movies = await prisma.movie.findMany({ where, orderBy: { name: 'asc' } });
+    const movies = await prisma.movie.findMany({
+      where,
+      orderBy: { name: 'asc' },
+      take: a.limit,
+      skip: a.offset,
+    });
     return movies.map(toMovieShape);
   },
 });

@@ -20,30 +20,43 @@ interface PopularChannelSeed {
 }
 
 const POPULAR: PopularChannelSeed[] = [
-  // News
-  { name: 'CNN en Español', logo: '', category: 'Noticias', country: 'Estados Unidos', language: 'es', streamUrl: 'https://turnerlive.warnermedia.com/cnn-es/index.m3u8', source: 'popular', sortOrder: 1 },
-  { name: 'BBC World News', logo: '', category: 'Noticias', country: 'Reino Unido', language: 'en', streamUrl: 'https://vs-hls-push-ww-live.bbcvideo.co.uk/live/1778/bbc_world_service.m3u8', source: 'popular', sortOrder: 2 },
-  { name: 'RT en Español', logo: '', category: 'Noticias', country: 'Rusia', language: 'es', streamUrl: 'https://rt-news-gw-rus.cdnvideo.ru/rtnews/rtnews.stream.m3u8', source: 'popular', sortOrder: 3 },
-  { name: 'France 24 Español', logo: '', category: 'Noticias', country: 'Francia', language: 'es', streamUrl: 'https://static.france24.com/live/F24_ES_LO_HLS/live_web.m3u8', source: 'popular', sortOrder: 4 },
-  { name: 'DW Español', logo: '', category: 'Noticias', country: 'Alemania', language: 'es', streamUrl: 'https://dwamdstream102.akamaized.net/live/mulitvslive/dwtves/index.m3u8', source: 'popular', sortOrder: 5 },
+  // ─── Noticias ──────────────────────────────────────────────────────
+  // Solo feeds públicos verificados (Pluto TV + oficiales).
+  // Antes teniamos CNN/BBC/RT/DW con feeds que ya no funcionan.
+  { name: 'France 24 Español', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/France_24_logo_2018.svg/512px-France_24_logo_2018.svg.png', category: 'Noticias', country: 'Francia', language: 'es', streamUrl: 'https://static.france24.com/live/F24_ES_LO_HLS/live_web.m3u8', source: 'popular', sortOrder: 1 },
+  { name: 'Euronews Spanish', logo: 'https://images.pluto.tv/channels/60d3583ef310610007fb02b1/colorLogoPNG.png', category: 'Noticias', country: 'España', language: 'es', streamUrl: 'https://jmp2.uk/plu-60d3583ef310610007fb02b1.m3u8', source: 'popular', sortOrder: 2 },
 
-  // Entertainment
-  { name: 'Trome', logo: '', category: 'Entretenimiento', country: 'Perú', language: 'es', streamUrl: 'https://cloudflare.trome.pe/live/tvlive.m3u8', source: 'popular', sortOrder: 1 },
-  { name: 'Willax', logo: '', category: 'Entretenimiento', country: 'Perú', language: 'es', streamUrl: 'https://cdn2.willaxplay.com/cdn-origin/live-channel-720.m3u8', source: 'popular', sortOrder: 2 },
-  { name: 'Latina', logo: '', category: 'Entretenimiento', country: 'Perú', language: 'es', streamUrl: 'https://cdns3.amgcloudservers.com/latina-1/index.m3u8', source: 'popular', sortOrder: 3 },
-  { name: 'América TV', logo: '', category: 'Entretenimiento', country: 'Perú', language: 'es', streamUrl: 'https://cdn2.america.tv/america-livetv/live.m3u8', source: 'popular', sortOrder: 4 },
+  // ─── Entretenimiento ───────────────────────────────────────────────
+  // Pluto TV Latam (feeds públicos estables).
+  { name: 'Pluto TV Comedia made in Spain', logo: 'https://images.pluto.tv/channels/5f1abce155a03d0007718834/colorLogoPNG.png', category: 'Entretenimiento', country: 'España', language: 'es', streamUrl: 'https://jmp2.uk/plu-5f1abce155a03d0007718834.m3u8', source: 'popular', sortOrder: 1 },
+  { name: 'Comedia a lo bestia de Pluto TV', logo: 'https://images.pluto.tv/channels/68de3db35fc0afe85de0b843/colorLogoPNG.png', category: 'Entretenimiento', country: 'Latinoamérica', language: 'es', streamUrl: 'https://jmp2.uk/plu-68de3db35fc0afe85de0b843.m3u8', source: 'popular', sortOrder: 2 },
+  { name: 'Pluto TV Comedias Románticas', logo: 'https://images.pluto.tv/channels/655b5d865812e80008843bd1/colorLogoPNG.png', category: 'Entretenimiento', country: 'Latinoamérica', language: 'es', streamUrl: 'https://jmp2.uk/plu-655b5d865812e80008843bd1.m3u8', source: 'popular', sortOrder: 3 },
 
-  // Sports
-  { name: 'ESPN', logo: '', category: 'Deportes', country: 'Estados Unidos', language: 'es', streamUrl: 'https://amg01201-amg01201c4-rakuten-us-4462.playouts.now.amagi.tv/playlist/amg01201-rakutentv-espn-rakutentv/playlist.m3u8', source: 'popular', sortOrder: 1 },
-  { name: 'Fox Sports', logo: '', category: 'Deportes', country: 'Estados Unidos', language: 'es', streamUrl: 'https://foxvdds.akamaized.net/hls/live/660519/FNTSDFOXSD/Fox_Sports_SD/master.m3u8', source: 'popular', sortOrder: 2 },
+  // ─── Deportes ──────────────────────────────────────────────────────
+  { name: 'Pluto TV E-Sports', logo: 'https://images.pluto.tv/channels/5ff3934600d4c7000733ff49/colorLogoPNG.png', category: 'Deportes', country: 'Latinoamérica', language: 'es', streamUrl: 'https://jmp2.uk/plu-5ff3934600d4c7000733ff49.m3u8', source: 'popular', sortOrder: 1 },
+  { name: 'Claro Sports', logo: 'https://images.pluto.tv/channels/6320d2755e54db000783fd87/colorLogoPNG.png', category: 'Deportes', country: 'México', language: 'es', streamUrl: 'https://jmp2.uk/plu-6320d2755e54db000783fd87.m3u8', source: 'popular', sortOrder: 2 },
 
-  // Movies & Series
-  { name: 'Cinecanal', logo: '', category: 'Películas', country: 'México', language: 'es', streamUrl: 'https://d2aq75iin1eg2s.cloudfront.net/livecine/v1/master.m3u8', source: 'popular', sortOrder: 1 },
-  { name: 'AMC', logo: '', category: 'Películas', country: 'Estados Unidos', language: 'en', streamUrl: 'https://amg01201-amg01201c4-rakuten-us-4189.playouts.now.amagi.tv/playlist/amg01201-rakutentv-amcrakutentv/playlist.m3u8', source: 'popular', sortOrder: 2 },
-  { name: 'TNT', logo: '', category: 'Películas', country: 'Estados Unidos', language: 'en', streamUrl: 'https://amg01201-amg01201c4-rakuten-us-4197.playouts.now.amagi.tv/playlist/amg01201-rakutentv-tntrakutentv/playlist.m3u8', source: 'popular', sortOrder: 3 },
+  // ─── Películas ─────────────────────────────────────────────────────
+  { name: 'Cine Amor', logo: 'https://images.pluto.tv/channels/5f5136317aedfb0007016f93/colorLogoPNG.png', category: 'Películas', country: 'Latinoamérica', language: 'es', streamUrl: 'https://jmp2.uk/plu-5f5136317aedfb0007016f93.m3u8', source: 'popular', sortOrder: 1 },
+  { name: 'Cine comedia', logo: 'https://images.pluto.tv/channels/5f513564e4622a0007c578c0/colorLogoPNG.png', category: 'Películas', country: 'Latinoamérica', language: 'es', streamUrl: 'https://jmp2.uk/plu-5f513564e4622a0007c578c0.m3u8', source: 'popular', sortOrder: 2 },
+  { name: 'Estrellas de Acción', logo: 'https://images.pluto.tv/channels/5e972a21ad709d00074195ba/colorLogoPNG.png', category: 'Películas', country: 'Latinoamérica', language: 'es', streamUrl: 'https://jmp2.uk/plu-5e972a21ad709d00074195ba.m3u8', source: 'popular', sortOrder: 3 },
+  { name: 'Paramount Network de Pluto TV', logo: 'https://images.pluto.tv/channels/68d566603d3a9580eb461251/colorLogoPNG.png', category: 'Películas', country: 'Latinoamérica', language: 'es', streamUrl: 'https://jmp2.uk/plu-68d566603d3a9580eb461251.m3u8', source: 'popular', sortOrder: 4 },
 
-  // Music
-  { name: 'MTV', logo: '', category: 'Música', country: 'Estados Unidos', language: 'en', streamUrl: 'https://amg01201-amg01201c4-rakuten-us-4190.playouts.now.amagi.tv/playlist/amg01201-rakutentv-mtvrakutentv/playlist.m3u8', source: 'popular', sortOrder: 1 },
+  // ─── Series ────────────────────────────────────────────────────────
+  { name: 'Andromeda', logo: 'https://images.pluto.tv/channels/6850335b5965a2fd49f7e36d/colorLogoPNG.png', category: 'Series', country: 'Latinoamérica', language: 'es', streamUrl: 'https://jmp2.uk/plu-6850335b5965a2fd49f7e36d.m3u8', source: 'popular', sortOrder: 1 },
+  { name: 'El Comisario', logo: 'https://images.pluto.tv/channels/60c343007bcabe0007242aa6/colorLogoPNG.png', category: 'Series', country: 'España', language: 'es', streamUrl: 'https://jmp2.uk/plu-60c343007bcabe0007242aa6.m3u8', source: 'popular', sortOrder: 2 },
+  { name: 'Empeños a lo bestia', logo: 'https://images.pluto.tv/channels/60218baa464ef900073168c1/colorLogoPNG.png', category: 'Series', country: 'Latinoamérica', language: 'es', streamUrl: 'https://jmp2.uk/plu-60218baa464ef900073168c1.m3u8', source: 'popular', sortOrder: 3 },
+
+  // ─── Música ────────────────────────────────────────────────────────
+  { name: 'Concert Channel', logo: 'https://images.pluto.tv/channels/6868152657543d1f8be4ece3/colorLogoPNG.png', category: 'Música', country: 'Latinoamérica', language: 'es', streamUrl: 'https://jmp2.uk/plu-6868152657543d1f8be4ece3.m3u8', source: 'popular', sortOrder: 1 },
+  { name: 'Karaoke por Stingray', logo: 'https://images.pluto.tv/channels/5f85cf621d6d2200079f1de0/colorLogoPNG.png', category: 'Música', country: 'Latinoamérica', language: 'es', streamUrl: 'https://jmp2.uk/plu-5f85cf621d6d2200079f1de0.m3u8', source: 'popular', sortOrder: 2 },
+  { name: 'MTV Biggest Pop', logo: 'https://images.pluto.tv/channels/6047fabfce6e8e00070bcc9f/colorLogoPNG.png', category: 'Música', country: 'Latinoamérica', language: 'es', streamUrl: 'https://jmp2.uk/plu-6047fabfce6e8e00070bcc9f.m3u8', source: 'popular', sortOrder: 3 },
+
+  // ─── Documentales ──────────────────────────────────────────────────
+  { name: 'Pluto TV Animales', logo: 'https://images.pluto.tv/channels/600ae6a78d801e0007117d21/colorLogoPNG.png', category: 'Documentales', country: 'Latinoamérica', language: 'es', streamUrl: 'https://jmp2.uk/plu-600ae6a78d801e0007117d21.m3u8', source: 'popular', sortOrder: 1 },
+  { name: 'Smithsonian Channel Pluto TV', logo: 'https://images.pluto.tv/channels/63a084934734f30007457b2c/colorLogoPNG.png', category: 'Documentales', country: 'Latinoamérica', language: 'es', streamUrl: 'https://jmp2.uk/plu-63a084934734f30007457b2c.m3u8', source: 'popular', sortOrder: 2 },
+  { name: 'Archivos Forenses', logo: 'https://images.pluto.tv/channels/5f984f4a09e92d0007d74647/colorLogoPNG.png', category: 'Documentales', country: 'Latinoamérica', language: 'es', streamUrl: 'https://jmp2.uk/plu-5f984f4a09e92d0007d74647.m3u8', source: 'popular', sortOrder: 3 },
+  { name: 'Crimen & Historia', logo: 'https://images.pluto.tv/channels/64ddcbb14c5ed80008fad416/colorLogoPNG.png', category: 'Documentales', country: 'Latinoamérica', language: 'es', streamUrl: 'https://jmp2.uk/plu-64ddcbb14c5ed80008fad416.m3u8', source: 'popular', sortOrder: 4 },
 
   // ─── Animación / Anime / Infantiles Latam ──────────────────────────────
   // Feeds públicos Pluto TV (via mirror jmp2.uk de iptv-org).

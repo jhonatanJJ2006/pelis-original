@@ -3,7 +3,6 @@
 import { useQuery } from '@pelis/db/client';
 import type { PreloadedQuery } from '@pelis/db/server';
 import { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
 import { SlidersHorizontal } from 'lucide-react';
 import { MovieRow } from '@pelis/ui/features/movie-row';
 import { EmptyState } from '@pelis/ui/features/empty-state';
@@ -13,6 +12,8 @@ import { api } from '@pelis/db/api';
 import type { MediaItem } from '@pelis/ui/types';
 
 const classificationOrder = ['G', 'PG', 'PG-13', 'R', 'NC-17'];
+
+const PAGE_SIZE = 72;
 
 const classificationLabels: Record<string, string> = {
   G: 'Para toda la familia',
@@ -28,19 +29,24 @@ interface MoviesPageClientProps {
     genres: PreloadedQuery<string[]>;
     years: PreloadedQuery<string[]>;
   };
+  initial: { search: string; genre: string; year: string };
 }
 
-export default function MoviesPageClient({ preloaded }: MoviesPageClientProps) {
-  const searchParams = useSearchParams();
-  const [search, setSearch] = useState('');
-  const [selectedGenre, setSelectedGenre] = useState('');
-  const [selectedYear, setSelectedYear] = useState('');
+export default function MoviesPageClient({ preloaded, initial }: MoviesPageClientProps) {
+  const [search, setSearch] = useState(initial.search);
+  const [selectedGenre, setSelectedGenre] = useState(initial.genre);
+  const [selectedYear, setSelectedYear] = useState(initial.year);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   useEffect(() => {
-    setSearch(searchParams.get('search') ?? '');
-    setSelectedGenre(searchParams.get('genre') ?? '');
-    setSelectedYear(searchParams.get('year') ?? '');
-  }, [searchParams]);
+    setSearch(initial.search);
+    setSelectedGenre(initial.genre);
+    setSelectedYear(initial.year);
+  }, [initial]);
+
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [selectedGenre, selectedYear, search]);
 
   const hasFilters = Boolean(selectedGenre || selectedYear || search);
 
@@ -78,6 +84,21 @@ export default function MoviesPageClient({ preloaded }: MoviesPageClientProps) {
       return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
     });
   }, [movies]);
+
+  const visibleGroups = useMemo(() => {
+    if (hasFilters) return grouped;
+    let remaining = visibleCount;
+    const result: typeof grouped = [];
+    for (const [classification, items] of grouped) {
+      if (remaining <= 0) break;
+      result.push([classification, items.slice(0, remaining)]);
+      remaining -= items.length;
+    }
+    return result;
+  }, [grouped, visibleCount, hasFilters]);
+
+  const visibleCount_ = visibleGroups.reduce((acc, [, items]) => acc + items.length, 0);
+  const hasMore = !hasFilters && visibleCount_ < (movies?.length ?? 0);
 
   if (isLoading) {
     return <CatalogPageSkeleton />;
@@ -144,7 +165,7 @@ export default function MoviesPageClient({ preloaded }: MoviesPageClientProps) {
         />
       ) : (
         <div className="space-y-10">
-          {grouped.map(([classification, items]) => (
+          {visibleGroups.map(([classification, items]) => (
             <MovieRow
               key={classification}
               title={classification}
@@ -152,6 +173,17 @@ export default function MoviesPageClient({ preloaded }: MoviesPageClientProps) {
               movies={items}
             />
           ))}
+          {!hasFilters && hasMore && (
+            <div className="flex justify-center pt-2">
+              <button
+                type="button"
+                onClick={() => setVisibleCount((n) => n + PAGE_SIZE)}
+                className="btn-secondary inline-flex items-center gap-2"
+              >
+                Cargar más
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -97,6 +97,7 @@ export default function AdminTVPage() {
   const probeChannel = useAction<{ channelId: string }, { channelId: string; name: string; streamStatus: 'online' | 'offline'; lastStreamError?: string }>(api.tv.probeChannel);
   const probeAll = useAction<{ batchSize?: number; onlyActive?: boolean; deactivateAfterFailures?: number }, { processed: number; online: number; offline: number; deactivated: number; sampleErrors: Array<{ name: string; error: string }> }>(api.tv.probeAllChannels);
   const seedPopular = useMutation<{ dryRun?: boolean }, { added: number; updated: number; skipped: number; total: number; dryRun: boolean }>(api.seedPopularChannels.seedPopularChannels);
+  const cleanupNonWorking = useAction<{ dryRun?: boolean; threshold?: number; deleteOlderThanDays?: number }, { dryRun: boolean; wouldDeactivate?: number; wouldDelete?: number; sample?: Array<{ id: string; name: string; reasons: string[] }>; deactivated?: number; deleted?: number }>(api.tv.cleanupNonWorking);
 
   const [deletingChannelId, setDeletingChannelId] = useState<string | null>(null);
   const [deletingPlaylistId, setDeletingPlaylistId] = useState<string | null>(null);
@@ -104,6 +105,7 @@ export default function AdminTVPage() {
   const [probingId, setProbingId] = useState<string | null>(null);
   const [probingAll, setProbingAll] = useState(false);
   const [seedingPopular, setSeedingPopular] = useState(false);
+  const [cleanupRunning, setCleanupRunning] = useState(false);
 
   const handleDeleteChannel = async (id: string, name: string) => {
     if (!confirm(`¿Eliminar el canal "${name}"? Esta acción no se puede deshacer.`)) return;
@@ -236,6 +238,47 @@ export default function AdminTVPage() {
     }
   };
 
+  const handleCleanupNonWorking = async () => {
+    if (
+      !confirm(
+        '¿Limpiar canales que no funcionan o no son español?\n\n' +
+          'Se DESACTIVARÁN (no se borran) los canales:\n' +
+          '  • con language != es\n' +
+          '  • con errores de geo-bloqueo\n' +
+          '  • con streamStatus = OFFLINE\n' +
+          '  • con nombres en otros idiomas / extranjeros conocidos\n\n' +
+          'Primero se hace un DRY-RUN para mostrarte la lista.'
+      )
+    )
+      return;
+    setCleanupRunning(true);
+    try {
+      // Paso 1: dry-run para mostrar preview
+      const preview = await cleanupNonWorking({ dryRun: true });
+      const previewSample = (preview.sample ?? [])
+        .slice(0, 10)
+        .map((c) => `  · ${c.name} (${c.reasons.join(', ')})`)
+        .join('\n');
+      const confirmMsg =
+        `DRY-RUN: se desactivarían ${preview.wouldDeactivate ?? 0} canales.\n\n` +
+        `Muestra:\n${previewSample}\n\n` +
+        `¿Aplicar los cambios?`;
+      if (!confirm(confirmMsg)) {
+        toast.info('Cancelado por el usuario');
+        return;
+      }
+      // Paso 2: aplicar
+      const result = await cleanupNonWorking({ dryRun: false });
+      toast.success(
+        `Limpieza aplicada: ${result.deactivated ?? 0} desactivados · ${result.deleted ?? 0} borrados`
+      );
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Error al limpiar');
+    } finally {
+      setCleanupRunning(false);
+    }
+  };
+
   const tabs: { value: Mode; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
     { value: 'channels', label: 'Canales', icon: Tv },
     { value: 'popular', label: 'Populares', icon: Star },
@@ -332,8 +375,26 @@ export default function AdminTVPage() {
               </>
             )}
           </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={handleCleanupNonWorking}
+            disabled={cleanupRunning}
+            className="w-full sm:w-auto"
+          >
+            {cleanupRunning ? (
+              <>
+                <LoaderIcon spinning /> Limpiando...
+              </>
+            ) : (
+              <>
+                <Trash2 className="w-4 h-4" />
+                Limpiar canales que no funcionan
+              </>
+            )}
+          </Button>
           <p className="text-xs text-cinema-ash">
-            Marca como offline los canales que fallen 2 veces seguidas. Puede tardar varios minutos.
+            Probar actualiza estado · Limpiar desactiva canales OFFLINE / no-español (con preview).
           </p>
         </div>
       )}

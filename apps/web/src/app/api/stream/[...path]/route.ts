@@ -7,6 +7,7 @@ import {
   resolveStreamPath,
   rewriteM3u8Manifest,
 } from '@/lib/movie-stream-paths';
+import { denyUnlessStreamAccess } from '@/lib/require-stream-access';
 
 const MIME: Record<string, string> = {
   '.m3u8': 'application/vnd.apple.mpegurl',
@@ -29,10 +30,13 @@ export async function HEAD(
 }
 
 async function serveStreamFile(
-  _req: NextRequest,
+  req: NextRequest,
   params: { path: string[] },
   options?: { headOnly?: boolean }
 ) {
+  const denied = await denyUnlessStreamAccess(req);
+  if (denied) return denied;
+
   const raw = params.path.join('/');
   const resolved = await resolveStreamPath(raw);
 

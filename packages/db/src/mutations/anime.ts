@@ -6,6 +6,7 @@ import { getProvidersSortedByPriority } from '../lib/anime-providers';
 import { deriveSeriesFields } from '../lib/anime-series';
 import { ANIME_SEED } from '../lib/anime-seed-data';
 import { slugifyTitle } from '../lib/anilist';
+import { requireAdmin } from '../lib/requireAdmin';
 
 const PROVIDERS = getProvidersSortedByPriority();
 
@@ -14,7 +15,8 @@ export const seed = register({
   name: 'anime.seed',
   writes: ['anime'],
   args: z.object({}).optional(),
-  handler: async () => {
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
     const existing = await prisma.anime.count();
     if (existing > 0) return { count: existing, seeded: 0 };
     const defaultProviders = PROVIDERS.slice(0, 2).map((p) => ({
@@ -80,7 +82,8 @@ export const create = register({
   name: 'anime.create',
   writes: ['anime'],
   args: AnimeCreate,
-  handler: async (_ctx, args) => {
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     const series = deriveSeriesFields(args.title);
     const seriesMainExists = await prisma.anime.count({
       where: { seriesKey: series.seriesKey, isSeriesMain: true },
@@ -111,7 +114,8 @@ export const update = register({
   name: 'anime.update',
   writes: ['anime'],
   args: AnimeCreate.extend({ id: z.string() }),
-  handler: async (_ctx, args) => {
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     const { id, ...rest } = args;
     const current = await prisma.anime.findUnique({ where: { id }, select: { title: true, format: true } });
     // Renaming can move an entry to a different franchise, so recompute the
@@ -147,7 +151,8 @@ export const remove = register({
   name: 'anime.remove',
   writes: ['anime'],
   args: z.object({ id: z.string() }),
-  handler: async (_ctx, { id }) => {
+  handler: async (ctx, { id }) => {
+    await requireAdmin(ctx);
     await prisma.anime.delete({ where: { id } });
     await notifyChange('anime', 'delete', id);
     return id;

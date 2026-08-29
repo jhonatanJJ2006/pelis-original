@@ -37,17 +37,22 @@ Definidos en `packages/db/src/lib/anime-providers.ts`.
 Se direccionan con AniList ID + número de episodio y cargan **en el navegador del usuario**,
 así que funcionan aunque el servidor no pueda alcanzar los sitios de streaming.
 
-| ID | Nombre UI | Idioma | Prioridad |
-|----|-----------|--------|-----------|
-| vidlink | VidLink | sub/dub | 1 |
-| vidnest | VidNest | sub/dub | 2 |
-| videasy | Videasy | sub/dub | 3 |
+| ID | Nombre UI | Idioma | Prioridad | Estado |
+|----|-----------|--------|-----------|--------|
+| vidnest | VidNest | sub/dub | 1 (default) | Estable |
+| vidlink | VidLink | sub/dub | 2 | Roto: su bundle sigue llamando a `localhost:8080` |
+| videasy | Videasy | sub/dub | 3 | Dominio cambió a `.to`; sin verificar |
+| animeflv | AnimeFLV | sub/dub | 5 | Roto: ya no inyecta iframes en `/ver/…` |
+
+`animeunity` se quitó de la lista: el dominio `www.animeunity.to` ahora redirige a
+`www.animeunity.so`, que no resuelve.
 
 ### `hls` — scraping vía Consumet
 
 Devuelven un `.m3u8` que se reproduce en el player nativo con pistas de subtítulos. Mejor
 integración, pero **frágiles**: dependen de que Consumet siga funcionando y de que la IP del
-servidor no esté bloqueada.
+servidor no esté bloqueada. Hoy por hoy la imagen `riimuru/consumet-api` devuelve 500 para
+todos los providers; solo funcionan con un fork mantenenido.
 
 | ID | Nombre UI | Idioma | Prioridad |
 |----|-----------|--------|-----------|
@@ -64,10 +69,11 @@ servidor no esté bloqueada.
 ## Variables de entorno
 
 ```env
-# Consumet self-hosted, solo necesario para los proveedores `hls`
+# Consumet self-hosted, solo necesario para los proveedores `hls`.
+# Sin esta variable, los `hls` se omiten automáticamente y la app usa los
+# `embed`. El fallback a https://api.consumet.org ya no existe (esa URL
+# apunta hoy a una página de GitHub).
 CONSUMET_API_URL=http://localhost:3001
-
-# Fallback si no se define: https://api.consumet.org
 ```
 
 Levantar Consumet:
@@ -87,12 +93,15 @@ roto (situación habitual: el proyecto `consumet-api` ya no se mantiene). Los pr
 
 `anime.getEpisodeStream` intenta, en orden:
 
-1. El proveedor pedido, si es `embed` → devuelve la URL del iframe.
+1. El proveedor pedido, si es `embed` → devuelve la URL del iframe si su propio backend está
+   sano. Si falla, se añade a la lista de `failedEmbeds` para no caer otra vez sobre él.
 2. El proveedor pedido, si es `hls` → resuelve el episodio en Consumet y busca fuentes.
-3. Cualquier proveedor `embed` disponible.
+3. Cualquier `hls` disponible (intenta todos).
+4. Cualquier `embed` disponible, **excluyendo** el proveedor pedido y los ya fallidos, y
+   re-comprobando salud por cada uno (el primer embed que pase todos los checks gana).
 
-Cuando cae al paso 3, la respuesta incluye `fellBackFrom` y la UI del reproductor avisa de
-que cambió de proveedor.
+Cuando cae a un paso posterior, la respuesta incluye `fellBackFrom` y la UI del reproductor
+avisa de que cambió de proveedor.
 
 ---
 

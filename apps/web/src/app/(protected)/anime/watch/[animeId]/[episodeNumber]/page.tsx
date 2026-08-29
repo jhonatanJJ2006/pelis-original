@@ -3,7 +3,7 @@
 import { useAction, useQuery } from '@pelis/db/client';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { useRef, useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import {
   ArrowLeft,
   Loader2,
@@ -13,12 +13,15 @@ import {
   ChevronLeft,
   ChevronRight,
   Info,
+  Languages,
+  Server,
+  Zap,
 } from 'lucide-react';
 import { api } from '@pelis/db/api';
-import { useUser } from '@pelis/auth/hooks';
+import { hasActivePlan, useUser } from '@pelis/auth/hooks';
 import { Spinner } from '@pelis/ui/components';
 import { cn } from '@pelis/ui/utils';
-import Hls from 'hls.js';
+import { AnimeHlsPlayer } from '@/components/anime-hls-player';
 
 interface ProviderInfo {
   id: string;
@@ -35,6 +38,9 @@ type StreamResult =
       provider: string;
       sources: Array<{ url: string; quality?: string; isM3U8?: boolean }>;
       subtitles: Array<{ url: string; lang?: string }>;
+      intro?: { start: number; end: number } | null;
+      outro?: { start: number; end: number } | null;
+      fellBackFrom?: string | null;
     }
   | { kind: 'none'; provider: string | null; error?: string };
 
@@ -52,12 +58,13 @@ interface EpisodesResponse {
   episodes: Array<{ number: number; title: string }>;
 }
 
+const EMBED_STALL_TIMEOUT_MS = 9000;
+
 export default function AnimeWatchPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
   const { user } = useUser();
-  const videoRef = useRef<HTMLVideoElement>(null);
 
   const animeId = params.animeId as string;
   const episodeNumber = Number(params.episodeNumber);
@@ -77,8 +84,17 @@ export default function AnimeWatchPage() {
   const [episodeNumbers, setEpisodeNumbers] = useState<number[]>([]);
   const [episodeTitle, setEpisodeTitle] = useState<string | null>(null);
 
-  const hasActivePlan = !!(user?.planExpiresAt && user.planExpiresAt > Date.now());
+  const entitled = hasActivePlan(user);
+  const userId = user?._id;
   const season = series?.seasons.find((s) => s._id === animeId);
+
+  // The embed providers shown above the player. These are the players that
+  // either answer instantly (AniList id + episode number) or resolve their
+  // iframe server-side (latanime hosts). The grid wraps, so no cap needed.
+  const primaryProviders = useMemo(
+    () => (providers ?? []).filter((p) => p.kind === 'embed'),
+    [providers]
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -106,7 +122,8 @@ export default function AnimeWatchPage() {
         episodeNumber,
         provider,
         dub,
-        tryFallback: true,
+        // Manual provider switching only: never silently swap servers.
+        tryFallback: false,
       })) as StreamResult;
       setStream(result);
       if (result.kind === 'none') {
@@ -118,57 +135,68 @@ export default function AnimeWatchPage() {
     setLoading(false);
   }, [animeId, episodeNumber, provider, dub, getEpisodeStream]);
 
+  // `user` is a fresh object on every render, so the effect must depend on
+  // stable primitives (`userId`, `entitled`) — otherwise loadStream
+  // re-fires endlessly and the player never settles.
   useEffect(() => {
-    if (!user || !hasActivePlan || !Number.isFinite(episodeNumber)) {
+    if (!userId || !entitled || !Number.isFinite(episodeNumber)) {
       setLoading(false);
       return;
     }
     void loadStream();
-  }, [user, hasActivePlan, episodeNumber, loadStream]);
+  }, [userId, entitled, episodeNumber, loadStream]);
 
   // An iframe from a blocked domain never fires `load`, and being cross-origin
-  // we cannot inspect it — a timeout is the only signal available.
+  // we cannot inspect it — a timeout is the only signal available. Once the
+  // frame DOES load, the timer is cancelled so a working (or even a
+  // loaded-but-broken) player never gets flagged as stalled afterwards.
+  const embedLoadTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
-    if (stream?.kind !== 'embed') return;
-    const timer = setTimeout(() => setEmbedStalled(true), 9000);
-    return () => clearTimeout(timer);
+    if (stream?.kind !== 'embed') {
+      setEmbedStalled(false);
+      return;
+    }
+    setEmbedStalled(false);
+    embedLoadTimerRef.current = setTimeout(() => setEmbedStalled(true), EMBED_STALL_TIMEOUT_MS);
+    return () => {
+      if (embedLoadTimerRef.current) clearTimeout(embedLoadTimerRef.current);
+      embedLoadTimerRef.current = null;
+    };
   }, [stream]);
 
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video || stream?.kind !== 'hls' || !hasActivePlan) return;
-
-    const hlsSource = stream.sources.find((s) => s.isM3U8 || s.url?.includes('.m3u8'));
-    const playUrl = hlsSource?.url ?? stream.sources[0]?.url;
-    if (!playUrl) return;
-
-    if (playUrl.includes('.m3u8') && Hls.isSupported()) {
-      const hls = new Hls({ enableWorker: true });
-      hls.loadSource(playUrl);
-      hls.attachMedia(video);
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        video.play().catch(() => {});
-      });
-      return () => hls.destroy();
-    }
-
-    video.src = playUrl;
-    video.play().catch(() => {});
-    return () => {
-      video.src = '';
-      video.load();
-    };
-  }, [stream, hasActivePlan]);
+  // The unified player handles every HLS stream; a fatal error here means the
+  // server is down, so we surface the manual server switcher.
+  const onPlayerFatalError = useCallback(() => {
+    setError('Este servidor no está disponible ahora mismo. Prueba otro servidor.');
+  }, []);
 
   const goToEpisode = (target: number) => {
     const query = new URLSearchParams(searchParams.toString());
     router.push(`/anime/watch/${animeId}/${target}?${query.toString()}`);
   };
 
+  const buildWatchUrl = useCallback(
+    (next: { provider?: string; dub?: boolean }) => {
+      const query = new URLSearchParams(searchParams.toString());
+      if (next.provider !== undefined) {
+        if (next.provider) query.set('provider', next.provider);
+        else query.delete('provider');
+      }
+      if (next.dub !== undefined) {
+        if (next.dub) query.set('dub', '1');
+        else query.delete('dub');
+      }
+      return `/anime/watch/${animeId}/${episodeNumber}?${query.toString()}`;
+    },
+    [animeId, episodeNumber, searchParams]
+  );
+
   const switchProvider = (providerId: string) => {
-    const query = new URLSearchParams(searchParams.toString());
-    query.set('provider', providerId);
-    router.push(`/anime/watch/${animeId}/${episodeNumber}?${query.toString()}`);
+    router.push(buildWatchUrl({ provider: providerId }));
+  };
+
+  const toggleDub = () => {
+    router.push(buildWatchUrl({ dub: !dub }));
   };
 
   const currentIndex = episodeNumbers.indexOf(episodeNumber);
@@ -179,9 +207,9 @@ export default function AnimeWatchPage() {
       : null;
 
   const activeProviderId = stream && stream.kind !== 'none' ? stream.provider : provider;
-  const activeProviderName =
-    providers?.find((p) => p.id === activeProviderId)?.name ?? activeProviderId ?? '—';
-  const fellBackFrom = stream?.kind === 'embed' ? stream.fellBackFrom : null;
+  const activeProvider = providers?.find((p) => p.id === activeProviderId);
+  const activeProviderName = activeProvider?.name ?? activeProviderId ?? '—';
+  const fellBackFrom = stream && stream.kind !== 'none' ? stream.fellBackFrom : null;
 
   if (user === undefined) {
     return (
@@ -216,6 +244,58 @@ export default function AnimeWatchPage() {
         {episodeTitle && <p className="text-sm text-cinema-muted mt-0.5">{episodeTitle}</p>}
       </div>
 
+      {entitled && primaryProviders.length > 0 && (
+        <div className="mb-4 rounded-2xl bg-cinema-surface border border-cinema-border p-3 md:p-4">
+          <div className="flex items-center gap-2 mb-2.5">
+            <Zap className="w-3.5 h-3.5 text-emerald-400" aria-hidden />
+            <p className="text-[11px] uppercase tracking-widest text-emerald-400 font-medium">
+              Servidor de reproducción
+            </p>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            {primaryProviders.map((p) => {
+              const active = activeProviderId === p.id;
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => switchProvider(p.id)}
+                  aria-pressed={active}
+                  className={cn(
+                    'flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all border',
+                    active
+                      ? 'bg-cinema-violet text-white border-cinema-violet shadow-glow-violet'
+                      : 'bg-cinema-elevated text-cinema-silver hover:text-white border-cinema-border hover:border-cinema-violet/50'
+                  )}
+                >
+                  <span className="truncate">{p.name}</span>
+                  {active && <span className="w-1.5 h-1.5 rounded-full bg-white shrink-0" />}
+                </button>
+              );
+            })}
+          </div>
+          <div className="flex items-center gap-3 mt-3">
+            <button
+              type="button"
+              onClick={toggleDub}
+              className={cn(
+                'inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors',
+                dub
+                  ? 'bg-cinema-violet/15 text-cinema-violet-light border-cinema-violet/40'
+                  : 'bg-cinema-elevated text-cinema-silver hover:text-white border-cinema-border'
+              )}
+              aria-pressed={dub}
+            >
+              <Languages className="w-3.5 h-3.5" aria-hidden />
+              {dub ? 'Doblado' : 'Subtitulado'}
+            </button>
+            <p className="text-[11px] text-cinema-muted">
+              Cambia de servidor arriba si uno no carga.
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="rounded-2xl overflow-hidden bg-black border border-cinema-border mb-4">
         <div className="relative aspect-video bg-black">
           {!user ? (
@@ -228,7 +308,7 @@ export default function AnimeWatchPage() {
                 Iniciar sesión
               </Link>
             </div>
-          ) : !hasActivePlan ? (
+          ) : !entitled ? (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-8">
               <Crown className="w-12 h-12 text-cinema-gold/40" aria-hidden />
               <p className="text-cinema-muted text-center max-w-md">
@@ -256,7 +336,7 @@ export default function AnimeWatchPage() {
                     <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
                     <p className="text-cinema-muted text-sm mb-4">{error}</p>
                     <div className="flex flex-wrap justify-center gap-2">
-                      {providers?.map((p) => (
+                      {primaryProviders.map((p) => (
                         <button
                           key={p.id}
                           type="button"
@@ -279,18 +359,24 @@ export default function AnimeWatchPage() {
                     title={`Episodio ${episodeNumber}`}
                     className="absolute inset-0 w-full h-full"
                     allowFullScreen
-                    // Third-party player: allow playback and fullscreen, but keep
-                    // popups (ad popunders) and top-level navigation blocked.
-                    sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
+                    // VidNest (el único servidor que funciona hoy) detecta el
+                    // atributo sandbox y se niega a reproducir ("Please
+                    // Disable Sandbox"), así que no lo usamos. El bloqueo de
+                    // popunders se deja en manos del bloqueador del usuario.
                     allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
                     referrerPolicy="origin"
-                    onLoad={() => setEmbedStalled(false)}
+                    onLoad={() => {
+                      if (embedLoadTimerRef.current) {
+                        clearTimeout(embedLoadTimerRef.current);
+                        embedLoadTimerRef.current = null;
+                      }
+                      setEmbedStalled(false);
+                    }}
                   />
                   {embedStalled && (
                     <div className="absolute inset-x-0 bottom-0 z-10 p-3 bg-black/85 backdrop-blur-sm">
                       <p className="text-xs text-amber-300 text-center">
-                        El reproductor tarda demasiado en cargar. Puede estar bloqueado por tu red o
-                        tu bloqueador de anuncios: prueba otro proveedor abajo.
+                        Este servidor tarda demasiado en responder. Cambia de servidor arriba.
                       </p>
                     </div>
                   )}
@@ -298,35 +384,30 @@ export default function AnimeWatchPage() {
               )}
 
               {stream?.kind === 'hls' && (
-                <video
-                  ref={videoRef}
-                  className="w-full h-full object-contain"
-                  playsInline
-                  controls
-                  autoPlay
-                >
-                  {stream.subtitles?.map((sub) => (
-                    <track
-                      key={sub.url}
-                      kind="subtitles"
-                      src={sub.url}
-                      label={sub.lang ?? 'Subtítulos'}
-                    />
-                  ))}
-                </video>
+                <AnimeHlsPlayer
+                  source={stream.sources[0] ?? { url: '' }}
+                  subtitles={stream.subtitles}
+                  intro={stream.intro ?? null}
+                  outro={stream.outro ?? null}
+                  episodeLabel={`Episodio ${episodeNumber}`}
+                  onFatalError={onPlayerFatalError}
+                />
               )}
             </>
           )}
         </div>
       </div>
 
-      {hasActivePlan && (
+      {entitled && (
         <>
           <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-xl bg-cinema-surface border border-cinema-border">
             <p className="text-sm text-cinema-silver">
               Reproduciendo vía <span className="text-white font-medium">{activeProviderName}</span>
               {dub && <span className="text-cinema-muted"> · doblado</span>}
             </p>
+            {activeProvider?.note && (
+              <p className="text-xs text-cinema-muted">{activeProvider.note}</p>
+            )}
 
             <div className="flex items-center gap-2">
               <button
@@ -358,30 +439,37 @@ export default function AnimeWatchPage() {
             </p>
           )}
 
-          {providers && providers.length > 0 && (
-            <div className="mt-5">
-              <p className="text-sm text-cinema-silver font-medium mb-3">Cambiar proveedor:</p>
-              <div className="flex flex-wrap gap-2">
-                {providers.map((p) => (
-                  <button
-                    key={p.id}
-                    type="button"
-                    onClick={() => switchProvider(p.id)}
-                    className={cn(
-                      'px-4 py-2 rounded-lg text-sm font-medium transition-all border',
-                      activeProviderId === p.id
-                        ? 'bg-cinema-violet text-white border-cinema-violet'
-                        : 'bg-cinema-elevated text-cinema-silver hover:text-white border-cinema-border hover:border-cinema-violet/40'
-                    )}
-                  >
-                    {p.name}
-                    {p.kind === 'hls' && (
-                      <span className="ml-1.5 text-[10px] opacity-60">externo</span>
-                    )}
-                  </button>
-                ))}
+          {providers && providers.length > primaryProviders.length && (
+            <details className="mt-5 rounded-xl bg-cinema-surface border border-cinema-border p-4 group">
+              <summary className="flex items-center gap-2 cursor-pointer text-sm text-cinema-silver hover:text-white transition-colors list-none">
+                <Server className="w-4 h-4" aria-hidden />
+                Más servidores (scraping, suelen estar caídos)
+                <span className="ml-auto text-xs text-cinema-muted group-open:hidden">mostrar</span>
+                <span className="ml-auto text-xs text-cinema-muted hidden group-open:inline">ocultar</span>
+              </summary>
+              <div className="flex flex-wrap gap-2 mt-3">
+                {providers
+                  .filter((p) => !primaryProviders.some((q) => q.id === p.id))
+                  .map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => switchProvider(p.id)}
+                      className={cn(
+                        'px-3 py-1.5 rounded-lg text-xs font-medium transition-all border',
+                        activeProviderId === p.id
+                          ? 'bg-cinema-violet text-white border-cinema-violet'
+                          : 'bg-cinema-elevated text-cinema-silver hover:text-white border-cinema-border hover:border-cinema-violet/40'
+                      )}
+                    >
+                      {p.name}
+                      {p.kind === 'hls' && (
+                        <span className="ml-1.5 text-[10px] opacity-60">externo</span>
+                      )}
+                    </button>
+                  ))}
               </div>
-            </div>
+            </details>
           )}
         </>
       )}

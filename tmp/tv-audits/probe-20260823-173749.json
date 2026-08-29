@@ -1,0 +1,62 @@
+{
+  "stamp": "20260823-173749",
+  "batchSize": 10,
+  "deactivate": false,
+  "filters": {
+    "onlyUnknown": false,
+    "onlyOffline": false,
+    "limit": 20
+  },
+  "totals": {
+    "tried": 20,
+    "online": 12,
+    "offline": 8,
+    "deactivated": 0
+  },
+  "errors": [
+    {
+      "name": "AMC",
+      "error": "fetch failed"
+    },
+    {
+      "name": "América TV",
+      "error": "fetch failed"
+    },
+    {
+      "name": "BBC World News",
+      "error": "fetch failed"
+    },
+    {
+      "name": "Cartoon Network",
+      "error": "fetch failed"
+    },
+    {
+      "name": "Cinecanal",
+      "error": "fetch failed"
+    },
+    {
+      "name": "CNN en Español",
+      "error": "fetch failed"
+    },
+    {
+      "name": "Discovery Channel",
+      "error": "fetch failed"
+    },
+    {
+      "name": "Discovery Kids",
+      "error": "fetch failed"
+    }
+  ],
+  "summary": [
+    {
+      "status": "ONLINE",
+      "active": true,
+      "n": 2223
+    },
+    {
+      "status": "OFFLINE",
+      "active": true,
+      "n": 805
+    }
+  ]
+}

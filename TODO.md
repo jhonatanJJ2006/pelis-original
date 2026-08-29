@@ -21,6 +21,12 @@ Ver auditoría completa en [`docs/AUDIT.md`](docs/AUDIT.md).
 - [x] Auditoría documentada en `docs/AUDIT.md`
 - [x] Anime: schema `anilistId`, proveedores centralizados, fallback, import AniList
 - [x] `.env.example` documentado
+- [x] TV: scripts de auditoría/probe/cleanup (audit-tv-channels, probe-all-tv, probe-fast-tv, cleanup-tv, promote-popular)
+- [x] TV: `tv.cleanupNonWorking` con dry-run + preview desde admin
+- [x] TV: filtro de no-español al importar M3U (`seedFromM3U` rechaza canales brasileños/extranjeros)
+- [x] TV: 1807 canales OFFLINE/no-español desactivados (2026-08-23)
+- [x] TV: 35 canales populares nuevos promovidos (Pluto TV Latam, France 24, Euronews)
+- [x] TV: array POPULAR en `seedPopular.ts` reescrito con feeds verificados
 
 ---
 
@@ -32,6 +38,8 @@ Ver auditoría completa en [`docs/AUDIT.md`](docs/AUDIT.md).
 - [ ] **Reproductor de video** — Conectar `movie.token` / `videoUrl` con servidor de streaming real
 - [ ] **Stripe producción** — Configurar keys reales + webhook
 - [ ] **Levantar Consumet self-hosted** — `docker compose up consumet redis` (ver `docs/ANIME-PROVIDERS.md`)
+- [ ] **TV: cron de probe automático** — Ejecutar `tv.probeAllChannels` cada 6h para auto-desactivar canales caídos (no existe hoy, ver scripts/probe-all-tv.mjs y probe-fast-tv.mjs)
+- [ ] **TV: mapear categorías del M3U** — Categorías en inglés ('Entertainment', 'News', 'Undefined', 'Religious') conviven con español. Ver scripts/map-tv-categories.mjs
 
 ---
 

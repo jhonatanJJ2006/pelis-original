@@ -110,6 +110,7 @@ export const api = {
   ]),
   tv: ns([
     'tv.addChannel',
+    'tv.cleanupNonWorking',
     'tv.createPlaylist',
     'tv.dedupePopularChannels',
     'tv.getById',

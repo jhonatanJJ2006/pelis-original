@@ -34,45 +34,124 @@ export interface AnimeStreamingProvider {
   note?: string;
   /** `embed` providers: builds the iframe URL. */
   buildEmbedUrl?: (ctx: EmbedContext) => string;
+  /**
+   * `embed` providers whose URL needs server-side resolution (e.g. a catalog
+   * search on the target site). Takes precedence over `buildEmbedUrl`.
+   */
+  resolveEmbedUrl?: (ctx: EmbedContext, opts: { title: string }) => Promise<string | null>;
   /** `hls` providers: the Consumet provider slug used for scraping. */
   consumetId?: string;
 }
 
+/**
+ * Provider ranking notes (verificado en navegador el 2026-08 con
+ * `pnpm --filter @pelis/db playground:providers`):
+ *
+ * - `vidnest` es la fuente activa. El action `getEpisodeStream` resuelve sus
+ *   fuentes HLS reales del lado servidor (ver `vidnest-client.ts`: base64 con
+ *   alfabeto propio, sin AES) y las sirve a través de `/api/anime/stream`,
+ *   así que TODOS los proveedores comparten el mismo reproductor
+ *   `<AnimeHlsPlayer>` — sin iframes, sin popups, sin ads.
+ * - `yourupload`, `mega` y `voe` resuelven su iframe por episodio scrapeando
+ *   latanime.org (`latanime-client.ts`). Disponibilidad varía según el título
+ *   (los viejos traen YourUpload/Mega; los nuevos Mega/VOE). Audio latino o
+ *   castellano.
+ * - `vidlink`, `videasy` y `animeflv` siguen rotos upstream ("We Couldn't
+ *   Find This Episode", backend 404, "no hay vídeos"). Se mantienen como
+ *   fallback iframe por si upstream se recupera.
+ * - Los `hls` vía Consumet devuelven HTTP 500: el scraper está muerto.
+ *
+ * El cambio entre servidores es MANUAL: la UI muestra los botones y el
+ * usuario elige; el servidor nunca sustituye el proveedor pedido.
+ */
 export const ANIME_STREAMING_PROVIDERS: AnimeStreamingProvider[] = [
-  {
-    id: 'vidlink',
-    name: 'VidLink',
-    kind: 'embed',
-    baseUrl: 'https://vidlink.pro',
-    language: 'sub/dub',
-    priority: 1,
-    note: 'Reproductor integrado, sub y dub',
-    buildEmbedUrl: ({ anilistId, episodeNumber, dub }) =>
-      `https://vidlink.pro/anime/${anilistId}/${episodeNumber}/${dub ? 'dub' : 'sub'}` +
-      '?primaryColor=8b5cf6&secondaryColor=a78bfa&icons=default&title=false&poster=true',
-  },
   {
     id: 'vidnest',
     name: 'VidNest',
     kind: 'embed',
     baseUrl: 'https://vidnest.fun',
     language: 'sub/dub',
-    priority: 2,
-    note: 'Reproductor integrado, alternativa principal',
+    priority: 1,
+    note: 'Reproduce en el reproductor de Pelis (fuente HLS vía proxy propio)',
     buildEmbedUrl: ({ anilistId, episodeNumber, dub }) =>
       `https://vidnest.fun/anime/${anilistId}/${episodeNumber}/${dub ? 'dub' : 'sub'}`,
+  },
+  {
+    id: 'yourupload',
+    name: 'YourUpload',
+    kind: 'embed',
+    baseUrl: 'https://www.yourupload.com',
+    language: 'sub/dub',
+    priority: 2,
+    note: 'Español latino/castellano · fuente latanime.org',
+    resolveEmbedUrl: async (ctx, { title }) => {
+      const { resolveLatAnimeEmbedUrl } = await import('./latanime-client');
+      return resolveLatAnimeEmbedUrl('yourupload', ctx, { title });
+    },
+  },
+  {
+    id: 'mega',
+    name: 'Mega',
+    kind: 'embed',
+    baseUrl: 'https://mega.nz',
+    language: 'sub/dub',
+    priority: 3,
+    note: 'Español latino/castellano · fuente latanime.org',
+    resolveEmbedUrl: async (ctx, { title }) => {
+      const { resolveLatAnimeEmbedUrl } = await import('./latanime-client');
+      return resolveLatAnimeEmbedUrl('mega', ctx, { title });
+    },
+  },
+  {
+    id: 'voe',
+    name: 'VOE',
+    kind: 'embed',
+    baseUrl: 'https://voe.sx',
+    language: 'sub/dub',
+    priority: 4,
+    note: 'Español latino/castellano · fuente latanime.org (suele tener muchos anuncios)',
+    resolveEmbedUrl: async (ctx, { title }) => {
+      const { resolveLatAnimeEmbedUrl } = await import('./latanime-client');
+      return resolveLatAnimeEmbedUrl('voe', ctx, { title });
+    },
+  },
+  {
+    id: 'vidlink',
+    name: 'VidLink',
+    kind: 'embed',
+    baseUrl: 'https://vidlink.pro',
+    language: 'sub/dub',
+    priority: 5,
+    note: 'Roto upstream ("We Couldn\'t Find This Episode")',
+    buildEmbedUrl: ({ anilistId, episodeNumber, dub }) =>
+      `https://vidlink.pro/anime/${anilistId}/${episodeNumber}/${dub ? 'dub' : 'sub'}` +
+      '?primaryColor=8b5cf6&secondaryColor=a78bfa&icons=default&title=false&poster=true',
   },
   {
     id: 'videasy',
     name: 'Videasy',
     kind: 'embed',
-    baseUrl: 'https://player.videasy.net',
+    baseUrl: 'https://player.videasy.to',
     language: 'sub/dub',
-    priority: 3,
-    note: 'Reproductor integrado, puede estar bloqueado por algunos DNS',
+    priority: 6,
+    note: 'Roto upstream (su backend responde 404)',
     buildEmbedUrl: ({ anilistId, episodeNumber, dub }) =>
-      `https://player.videasy.net/anime/${anilistId}/${episodeNumber}` +
+      `https://player.videasy.to/anime/${anilistId}/${episodeNumber}` +
       `?color=8b5cf6${dub ? '&dub=true' : ''}`,
+  },
+  {
+    id: 'animeflv',
+    name: 'AnimeFLV',
+    kind: 'embed',
+    baseUrl: 'https://www4.animeflv.net',
+    language: 'sub/dub',
+    priority: 7,
+    note: 'Roto upstream (no inyecta servidores en /ver/)',
+    buildEmbedUrl: () => 'https://www4.animeflv.net',
+    resolveEmbedUrl: async (ctx, { title }) => {
+      const { resolveAnimeflvEmbedUrl } = await import('./animeflv-client');
+      return resolveAnimeflvEmbedUrl(ctx, { title });
+    },
   },
   {
     id: 'gogoanime',
@@ -81,6 +160,7 @@ export const ANIME_STREAMING_PROVIDERS: AnimeStreamingProvider[] = [
     baseUrl: 'https://gogoanime.by',
     language: 'sub',
     priority: 10,
+    note: 'Scraping via Consumet. Suele estar caído',
     consumetId: 'gogoanime',
   },
   {
@@ -90,6 +170,7 @@ export const ANIME_STREAMING_PROVIDERS: AnimeStreamingProvider[] = [
     baseUrl: 'https://hianime.to',
     language: 'sub/dub',
     priority: 11,
+    note: 'Scraping via Consumet (HiAnime). Suele estar caído',
     consumetId: 'zoro',
   },
   {
@@ -99,6 +180,7 @@ export const ANIME_STREAMING_PROVIDERS: AnimeStreamingProvider[] = [
     baseUrl: 'https://animepahe.si',
     language: 'sub',
     priority: 12,
+    note: 'Scraping via Consumet. Suele estar caído',
     consumetId: 'animepahe',
   },
   {
@@ -108,6 +190,7 @@ export const ANIME_STREAMING_PROVIDERS: AnimeStreamingProvider[] = [
     baseUrl: 'https://9animetv.to',
     language: 'sub/dub',
     priority: 13,
+    note: 'Scraping via Consumet. Suele estar caído',
     consumetId: '9anime',
   },
   {
@@ -117,6 +200,7 @@ export const ANIME_STREAMING_PROVIDERS: AnimeStreamingProvider[] = [
     baseUrl: 'https://anikai.to',
     language: 'sub',
     priority: 14,
+    note: 'Scraping via Consumet. Suele estar caído',
     consumetId: 'animekai',
   },
   {
@@ -126,6 +210,7 @@ export const ANIME_STREAMING_PROVIDERS: AnimeStreamingProvider[] = [
     baseUrl: 'https://marin.moe',
     language: 'sub',
     priority: 15,
+    note: 'Scraping via Consumet. Suele estar caído',
     consumetId: 'marin',
   },
   {
@@ -135,17 +220,19 @@ export const ANIME_STREAMING_PROVIDERS: AnimeStreamingProvider[] = [
     baseUrl: 'https://animefox.live',
     language: 'sub',
     priority: 16,
+    note: 'Scraping via Consumet. Suele estar caído',
     consumetId: 'animefox',
   },
 ];
 
-export const DEFAULT_ANIME_PROVIDER_ID = 'vidlink';
+export const DEFAULT_ANIME_PROVIDER_ID = 'vidnest';
 
 /** AniList ID used for provider health checks (One Piece). */
 export const HEALTH_CHECK_ANILIST_ID = '21';
 
-export function getConsumetApiUrl(): string {
-  return process.env.CONSUMET_API_URL?.replace(/\/$/, '') ?? 'https://api.consumet.org';
+export function getConsumetApiUrl(): string | null {
+  const url = process.env.CONSUMET_API_URL?.replace(/\/$/, '');
+  return url ? url : null;
 }
 
 export function getProviderById(id: string): AnimeStreamingProvider | undefined {

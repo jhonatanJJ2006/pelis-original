@@ -109,6 +109,82 @@ async function probeUpstream(streamUrl: string): Promise<{
   }
 }
 
+// Regex de nombres que NO deberían importarse (canales en otros idiomas o geo-bloqueados).
+// Se usan para filtrar al seed desde M3U y mantener solo contenido en español.
+const NON_SPANISH_NAME_RE =
+  /\b(english|arabic|french|hebrew|greek|italian|korean|turkish|turk|deutsch|german|chinese|japanese|polish|russian|portuguese|dutch|hindi|bulgarian|ukrainian|mongolian|hungarian|romanian|czech|slovak|swedish|norwegian|danish|finnish|vietnamese|thai|indonesian|malay|filipino|tagalog|urdu|bengali|swahili|persian|farsi|kurdish|azerbaijani|armenian|georgian|serbian|croatian|slovenian|bosnian|macedonian|albanian|lithuanian|latvian|estonian|catalan|basque|galician)\b/i;
+
+const BRAZILIAN_NAME_RE =
+  /\b(globo tv|globonews|bandnews|bandamax|gnt|rede tv|sbt|multishow|sportv|telecine|combate|gloob|megapix|woohoo|futura|curta|rede brasil|tv brasil|canal brasil|espn brasil|record tv|rede record|cnn brasil|discovery kids br|cartoon network br|nickelodeon br|star channel br|paramount br|tnt br|warner br|fox brasil|cultura 24|cine premiere|tv off)\b/i;
+
+const KNOWN_FOREIGN_NAME_RE =
+  /\b(bfm tv|bharat24|cnbc mongolia|eagle news|etv|mnc|my-ukraina|bulgaria on air|euronews bulgaria|kinokazka|m1 hd|vision 6 tv|diaspora tv|telesur english|real madrid tv english|pop world tv|fox news channel|nbc news now|cnbc|bloomberg|cnn international|al jazeera|france 24 english|rt english|sky news|abc news|euronews english|cgtn|trt world|al arabiya|ary news|geo news|dawn news|hispantv|tv5 monde|arte)\b/i;
+
+const GEO_HINT_RE = /geo.?block|access denied|not available in your|region|geo restriction/i;
+
+const KNOWN_SPANISH_COUNTRIES = new Set([
+  'argentina', 'bolivia', 'chile', 'colombia', 'costa rica', 'cuba', 'ecuador',
+  'el salvador', 'españa', 'spain', 'méxico', 'mexico', 'nicaragua', 'panamá',
+  'panama', 'paraguay', 'perú', 'peru', 'puerto rico', 'república dominicana',
+  'uruguay', 'venezuela', 'latinoamérica', 'latinoamerica', 'latin america',
+]);
+
+/**
+ * Decide si un canal entrante del M3U debe importarse a la DB.
+ *  - Rechaza nombres que matcheen regex de otros idiomas / conocidos extranjeros
+ *  - Acepta si language === 'es' (del tvg-language)
+ *  - Acepta si el país (del tvg-country o argumento) es hispanohablante conocido
+ *  - Acepta si es Pluto TV Latam (jmp2.uk/plu-) que son feeds públicos estables
+ *  - Si no se puede inferir idioma/país, ACEPTAR y dejar language=es para revisión manual
+ *    (preferible meter de más y luego desactivar con cleanup-tv.mjs)
+ */
+function shouldImportChannel(ch: ParsedChannel, fallbackCountry: string): {
+  accept: boolean;
+  reason?: string;
+  language: string;
+  country: string;
+} {
+  const name = ch.name ?? '';
+  const lang = (ch.language ?? '').toLowerCase().trim();
+  const country = (ch.country ?? fallbackCountry ?? '').toLowerCase().trim();
+
+  if (NON_SPANISH_NAME_RE.test(name)) {
+    return { accept: false, reason: 'nombre en idioma no-español', language: lang, country };
+  }
+  if (BRAZILIAN_NAME_RE.test(name)) {
+    return { accept: false, reason: 'canal brasileño (portugués)', language: lang, country };
+  }
+  if (KNOWN_FOREIGN_NAME_RE.test(name)) {
+    return { accept: false, reason: 'canal extranjero conocido', language: lang, country };
+  }
+
+  // Si el streamUrl es de Pluto TV Latam (jmp2.uk/plu-), siempre aceptar (son feeds públicos estables en español).
+  if (ch.streamUrl.includes('jmp2.uk/plu-')) {
+    return { accept: true, language: 'es', country: country || 'Latinoamérica' };
+  }
+
+  // Si el idioma declarado es español, aceptar.
+  if (lang === 'es' || lang === 'spa' || lang === 'spanish') {
+    return { accept: true, language: 'es', country };
+  }
+
+  // Si el país es hispanohablante conocido y el idioma NO es explícitamente otro, asumir español.
+  if (KNOWN_SPANISH_COUNTRIES.has(country) && lang !== 'en' && lang !== 'pt' && lang !== 'fr') {
+    return { accept: true, language: 'es', country };
+  }
+
+  // Idioma explícitamente otro idioma → rechazar
+  if (lang === 'en' || lang === 'eng' || lang === 'english') {
+    return { accept: false, reason: 'idioma=en explícito', language: lang, country };
+  }
+  if (lang === 'pt' || lang === 'por' || lang === 'portuguese') {
+    return { accept: false, reason: 'idioma=pt explícito', language: lang, country };
+  }
+
+  // Sin info suficiente: aceptar y dejar language=es para revisión manual posterior.
+  return { accept: true, language: 'es', country };
+}
+
 export const seedFromM3U = register({
   kind: 'action',
   name: 'tv.seedFromM3U',
@@ -131,15 +207,22 @@ export const seedFromM3U = register({
       args.language ?? 'es',
     );
 
-    const existing = await prisma.tVChannel.findMany({ where: { isActive: true }, select: { streamUrl: true } });
-    const existingUrls = new Set(existing.map((c) => c.streamUrl));
-
     let added = 0;
     let updated = 0;
+    let rejected = 0;
     const failures: string[] = [];
+    const rejectionReasons: Record<string, number> = {};
 
     for (const ch of parsed) {
       try {
+        const decision = shouldImportChannel(ch, args.country ?? 'Desconocido');
+        if (!decision.accept) {
+          rejected++;
+          const reason = decision.reason ?? 'desconocido';
+          rejectionReasons[reason] = (rejectionReasons[reason] ?? 0) + 1;
+          continue;
+        }
+
         const existingChannel = await prisma.tVChannel.findFirst({ where: { streamUrl: ch.streamUrl } });
         if (existingChannel) {
           await prisma.tVChannel.update({
@@ -148,8 +231,8 @@ export const seedFromM3U = register({
               name: ch.name,
               logo: ch.logo || existingChannel.logo,
               category: ch.category || existingChannel.category,
-              country: ch.country || existingChannel.country,
-              language: ch.language || existingChannel.language,
+              country: decision.country || existingChannel.country,
+              language: decision.language || existingChannel.language,
               isActive: true,
               tvgId: ch.tvgId || existingChannel.tvgId,
               sourcePlaylistId: args.playlistId ?? existingChannel.sourcePlaylistId,
@@ -163,8 +246,8 @@ export const seedFromM3U = register({
               name: ch.name,
               logo: ch.logo,
               category: ch.category || 'General',
-              country: ch.country,
-              language: ch.language,
+              country: decision.country,
+              language: decision.language,
               streamUrl: ch.streamUrl,
               source: args.playlistId ? 'm3u-playlist' : 'iptv-org',
               sourcePlaylistId: args.playlistId ?? null,
@@ -175,7 +258,6 @@ export const seedFromM3U = register({
           });
           added++;
         }
-        void existingUrls;
       } catch (err) {
         failures.push(`${ch.name}: ${err instanceof Error ? err.message : 'error'}`);
       }
@@ -194,6 +276,8 @@ export const seedFromM3U = register({
       total: parsed.length,
       added,
       updated,
+      rejected,
+      rejectionReasons,
       failed: failures.length,
       failures: failures.slice(0, 10),
     };
@@ -309,5 +393,98 @@ export const probeAllChannels = register({
     await notifyChange('tv_channel', 'update');
 
     return { processed: all.length, online, offline, deactivated, sampleErrors };
+  },
+});
+
+/**
+ * cleanupNonWorking: desactiva canales que no son español o que están OFFLINE.
+ *  - dryRun=true → solo cuenta qué se desactivaría, sin modificar
+ *  - threshold → desactivar canales con consecutiveFailures >= N (default 2)
+ *  - deleteOlderThanDays → además borrar canales isActive=false con
+ *    streamStatus='OFFLINE' y lastCheckedAt viejo. 0 = no borrar (default 0).
+ *
+ * Devuelve conteos para mostrar al admin en el preview antes de aplicar.
+ */
+export const cleanupNonWorking = register({
+  kind: 'action',
+  name: 'tv.cleanupNonWorking',
+  writes: ['tv_channel'],
+  args: z.object({
+    dryRun: z.boolean().optional(),
+    threshold: z.number().optional(),
+    deleteOlderThanDays: z.number().optional(),
+  }),
+  handler: async (_ctx, args) => {
+    const dryRun = args.dryRun ?? true;
+    const threshold = args.threshold ?? FAILURE_THRESHOLD;
+    const deleteDays = args.deleteOlderThanDays ?? 0;
+
+    // Reusamos los mismos regex que en scripts/cleanup-tv.mjs
+    const all = await prisma.tVChannel.findMany({
+      where: { isActive: true },
+      select: {
+        id: true,
+        name: true,
+        language: true,
+        streamStatus: true,
+        consecutiveFailures: true,
+        lastStreamError: true,
+      },
+    });
+
+    const toDeactivate: Array<{ id: string; name: string; reasons: string[] }> = [];
+
+    for (const ch of all) {
+      const reasons: string[] = [];
+      if (ch.language != null && ch.language !== 'es') reasons.push('no-es');
+      if (ch.lastStreamError && GEO_HINT_RE.test(ch.lastStreamError)) reasons.push('geo');
+      if ((ch.consecutiveFailures ?? 0) >= threshold) reasons.push('failures');
+      if (ch.streamStatus === 'OFFLINE') reasons.push('offline');
+      if (BRAZILIAN_NAME_RE.test(ch.name)) reasons.push('brazilian');
+      if (NON_SPANISH_NAME_RE.test(ch.name)) reasons.push('non-spanish-name');
+      if (KNOWN_FOREIGN_NAME_RE.test(ch.name)) reasons.push('foreign-known');
+      if (reasons.length > 0) toDeactivate.push({ id: ch.id, name: ch.name, reasons });
+    }
+
+    let toDelete: Array<{ id: string; name: string }> = [];
+    if (deleteDays > 0) {
+      const cutoff = new Date(Date.now() - deleteDays * 86400_000);
+      const old = await prisma.tVChannel.findMany({
+        where: {
+          isActive: false,
+          streamStatus: 'OFFLINE',
+          lastCheckedAt: { lt: cutoff },
+        },
+        select: { id: true, name: true },
+      });
+      toDelete = old;
+    }
+
+    if (dryRun) {
+      return {
+        dryRun: true,
+        wouldDeactivate: toDeactivate.length,
+        wouldDelete: toDelete.length,
+        sample: toDeactivate.slice(0, 20),
+      };
+    }
+
+    let deactivated = 0;
+    if (toDeactivate.length > 0) {
+      const res = await prisma.tVChannel.updateMany({
+        where: { id: { in: toDeactivate.map((c) => c.id) } },
+        data: { isActive: false },
+      });
+      deactivated = res.count;
+    }
+    let deleted = 0;
+    if (toDelete.length > 0) {
+      const res = await prisma.tVChannel.deleteMany({
+        where: { id: { in: toDelete.map((c) => c.id) } },
+      });
+      deleted = res.count;
+    }
+    await notifyChange('tv_channel', 'update');
+    return { dryRun: false, deactivated, deleted };
   },
 });

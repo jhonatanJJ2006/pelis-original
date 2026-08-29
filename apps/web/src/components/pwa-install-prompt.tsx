@@ -175,9 +175,12 @@ function usePwaInstall() {
     if (isStandalone()) return;
 
     const onBeforeInstall = (event: Event) => {
-      event.preventDefault();
+      // Capture the event but DON'T preventDefault yet — Chrome suppresses its
+      // native banner as soon as we do, and logs a warning if we never end up
+      // calling `prompt()`. We only preventDefault inside `install()`, right
+      // before we actually call `prompt()` ourselves.
       setDeferredPrompt(event as BeforeInstallPromptEvent);
-      setMode('prompt');
+      setMode((current) => (current === 'hidden' ? current : 'prompt'));
     };
 
     const onAppInstalled = () => {
@@ -200,6 +203,7 @@ function usePwaInstall() {
     if (!deferredPrompt) return;
     setInstalling(true);
     try {
+      deferredPrompt.preventDefault();
       await deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
       if (outcome === 'accepted') {

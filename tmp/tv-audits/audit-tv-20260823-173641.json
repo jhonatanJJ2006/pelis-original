@@ -1,0 +1,174 @@
+{
+  "stamp": "20260823-173641",
+  "databaseUrlHost": "127.0.0.1:5432",
+  "global": {
+    "total": 3028,
+    "active": 3028,
+    "popular": 87,
+    "online": 2222,
+    "offline": 787,
+    "unknown": 19
+  },
+  "byLanguageActive": [
+    {
+      "language": "es",
+      "n": 3020
+    },
+    {
+      "language": "en",
+      "n": 8
+    }
+  ],
+  "byCountryActive": [
+    {
+      "country": "Desconocido",
+      "n": 3000
+    },
+    {
+      "country": "Estados Unidos",
+      "n": 10
+    },
+    {
+      "country": "Latinoamérica",
+      "n": 5
+    },
+    {
+      "country": "Perú",
+      "n": 4
+    },
+    {
+      "country": "Rusia",
+      "n": 1
+    },
+    {
+      "country": "Reino Unido",
+      "n": 1
+    },
+    {
+      "country": "AR",
+      "n": 1
+    },
+    {
+      "country": "Francia",
+      "n": 1
+    },
+    {
+      "country": "México",
+      "n": 1
+    },
+    {
+      "country": "Alemania",
+      "n": 1
+    },
+    {
+      "country": "MX",
+      "n": 1
+    },
+    {
+      "country": "España",
+      "n": 1
+    },
+    {
+      "country": "ES",
+      "n": 1
+    }
+  ],
+  "byStatusActive": [
+    {
+      "status": "ONLINE",
+      "active": true,
+      "n": 2222
+    },
+    {
+      "status": "OFFLINE",
+      "active": true,
+      "n": 787
+    },
+    {
+      "status": "UNKNOWN",
+      "active": true,
+      "n": 19
+    }
+  ],
+  "geoBlockedActive": 1,
+  "topErrors": [
+    {
+      "error": "404",
+      "n": 252
+    },
+    {
+      "error": "403",
+      "n": 132
+    },
+    {
+      "error": "AbortError",
+      "n": 71
+    },
+    {
+      "error": "fetch failed",
+      "n": 45
+    },
+    {
+      "error": "HTTP 403",
+      "n": 15
+    },
+    {
+      "error": "502",
+      "n": 14
+    },
+    {
+      "error": "404: ",
+      "n": 12
+    },
+    {
+      "error": "HTTP 404",
+      "n": 11
+    },
+    {
+      "error": "404: <html><head><title>Not found</title></head><body>Not found</body></html>",
+      "n": 11
+    },
+    {
+      "error": "400",
+      "n": 10
+    },
+    {
+      "error": "Respuesta no es un manifiesto M3U8 válido",
+      "n": 8
+    },
+    {
+      "error": "404: Not found",
+      "n": 7
+    },
+    {
+      "error": "403: You are not allowed to watch this event: Geo Restriction. No estás permitido a ver este contenido.",
+      "n": 7
+    },
+    {
+      "error": "404: not found",
+      "n": 5
+    },
+    {
+      "error": "500",
+      "n": 3
+    }
+  ],
+  "playlists": [
+    {
+      "id": "k9771ysjsbwm0ebrm5t7v9hk3n8c9nbt",
+      "name": "Lista de prueba Pelis",
+      "country": null,
+      "language": "es",
+      "isActive": true,
+      "lastImportedAt": "2026-08-11T03:41:56.363Z",
+      "totalChannels": 3,
+      "m3uUrl": "https://verpelis.pro/tv/curated.m3u"
+    }
+  ],
+  "files": {
+    "csv": "/home/det/Desktop/PELIS/pelis-original/tmp/tv-audits/audit-tv-20260823-173641.csv",
+    "json": "/home/det/Desktop/PELIS/pelis-original/tmp/tv-audits/audit-tv-20260823-173641.json",
+    "sql": "/home/det/Desktop/PELIS/pelis-original/tmp/tv-audits/backup-tv-channel-20260823-173641.sql"
+  },
+  "totalChannels": 3028
+}

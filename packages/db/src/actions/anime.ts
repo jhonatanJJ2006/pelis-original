@@ -18,7 +18,9 @@ import {
   fetchVideoWithFallback,
   searchConsumet,
   checkProvidersHealth,
+  isEmbedProviderHealthy,
 } from '../lib/consumet-client';
+import { fetchVidnestEpisode } from '../lib/vidnest-client';
 import { fetchEpisodeList } from '../lib/anizip-client';
 import { searchAnilist, getAnilistById } from '../lib/anilist';
 
@@ -137,7 +139,12 @@ export const getSeasonEpisodes = register({
  * `embed` providers only need the AniList id and episode number, so they answer
  * instantly and work even when the server cannot reach streaming sites.
  * `hls` providers are scraped and may return nothing; when that happens and
- * `tryFallback` is set, the best working embed is returned instead.
+ * `tryFallback` is set, the best working source is returned instead.
+ *
+ * When the requested embed is down (probed server-side), we fall back to the
+ * `hls` chain first and then to the remaining embeds, **excluding** the
+ * provider we already tried and any other embed whose own backend is
+ * unhealthy. `fellBackFrom` is reported so the UI can explain the switch.
  */
 export const getEpisodeStream = register({
   kind: 'action',
@@ -166,15 +173,76 @@ export const getEpisodeStream = register({
       };
     }
 
+    const embedCtx = { anilistId, malId: anime.malId, episodeNumber, dub };
+    let hlsTried = false;
+    const failedEmbeds = new Set<string>();
+
+    // VidNest resolves real HLS sources server-side (custom-base64 "cipher",
+    // see vidnest-client). Serving them through our own proxy gives every
+    // provider the same clean <video> player — no iframes, no popups.
+    if (!requested || requested.id === 'vidnest') {
+      try {
+        const data = await fetchVidnestEpisode(anilistId, episodeNumber, dub ? 'dub' : 'sub');
+        const master =
+          data.sources.find((s) => s.type === 'hls' || s.file.includes('.m3u8')) ??
+          data.sources[0];
+        if (master?.file) {
+          return {
+            kind: 'hls' as const,
+            provider: 'vidnest',
+            sources: [
+              {
+                url: `/api/anime/stream?u=${encodeURIComponent(master.file)}`,
+                quality: 'auto',
+                isM3U8: true,
+              },
+            ],
+            subtitles: (data.tracks ?? [])
+              .filter((t) => t.kind === 'captions' && t.file)
+              .map((t) => ({
+                url: `/api/anime/stream?u=${encodeURIComponent(t.file)}`,
+                lang: t.label ?? 'Subtítulos',
+              })),
+            intro: data.intro ?? null,
+            outro: data.outro ?? null,
+            triedProviders: ['vidnest'],
+          };
+        }
+      } catch {
+        // VidNest backend failed — fall through to the iframe chain below.
+      }
+    }
+
     if (requested?.kind === 'embed') {
-      const url = buildProviderEmbedUrl(requested.id, { anilistId, malId: anime.malId, episodeNumber, dub });
-      if (url) {
-        return { kind: 'embed' as const, provider: requested.id, url, dub: Boolean(dub) };
+      if (requested.resolveEmbedUrl) {
+        const url = await requested.resolveEmbedUrl(embedCtx, { title: anime.title });
+        if (url) {
+          return { kind: 'embed' as const, provider: requested.id, url, dub: Boolean(dub) };
+        }
+        failedEmbeds.add(requested.id);
+      } else {
+        const url = buildProviderEmbedUrl(requested.id, embedCtx);
+        // Manual mode (`tryFallback: false`): hand back the requested player
+        // as-is — the user decides when to switch, not the server.
+        if (url && tryFallback === false) {
+          return { kind: 'embed' as const, provider: requested.id, url, dub: Boolean(dub) };
+        }
+        const healthy = url ? await isEmbedProviderHealthy(requested.id) : false;
+        if (url && healthy) {
+          return { kind: 'embed' as const, provider: requested.id, url, dub: Boolean(dub) };
+        }
+        failedEmbeds.add(requested.id);
       }
     }
 
     if (requested?.kind === 'hls') {
-      const result = await fetchVideoByEpisodeNumber(anilistId, episodeNumber, requested.id);
+      hlsTried = true;
+      const result = await fetchVideoByEpisodeNumber(
+        anilistId,
+        episodeNumber,
+        requested.id,
+        anime.title,
+      );
       if (result.provider && result.video.sources.length > 0) {
         return {
           kind: 'hls' as const,
@@ -189,23 +257,71 @@ export const getEpisodeStream = register({
           kind: 'none' as const,
           provider: requested.id,
           triedProviders: result.triedProviders,
-          error: 'Este proveedor no devolvió fuentes para el episodio.',
+          error: `${requested.name} no devolvió fuentes para este episodio. Prueba otro servidor.`,
+        };
+      }
+    }
+
+    // Manual mode: the user picked a server and it did not pan out — report
+    // it instead of silently playing a different one.
+    if (!tryFallback) {
+      return {
+        kind: 'none' as const,
+        provider: requested?.id ?? null,
+        error: `${requested?.name ?? 'El servidor'} no tiene este episodio ahora mismo. Elige otro servidor arriba del reproductor.`,
+      };
+    }
+
+    // The requested source is unavailable (broken embed or failed scraper).
+    // Try the hls chain before giving up on native playback.
+    if (!hlsTried) {
+      const hls = await fetchVideoByEpisodeNumber(anilistId, episodeNumber, undefined, anime.title);
+      if (hls.provider && hls.video.sources.length > 0) {
+        return {
+          kind: 'hls' as const,
+          provider: hls.provider,
+          sources: hls.video.sources,
+          subtitles: hls.video.subtitles,
+          triedProviders: hls.triedProviders,
+          fellBackFrom: requested?.id ?? null,
         };
       }
     }
 
     // Last resort: any embed player, which needs no scraping to work.
+    //
+    // We skip the requested provider (already failed above) and any other
+    // embed whose `buildEmbedUrl` already produced something but whose own
+    // backend is known unhealthy — otherwise we'd return the same broken
+    // player the user just rejected.
     for (const embed of getEmbedProviders()) {
-      const url = buildProviderEmbedUrl(embed.id, { anilistId, malId: anime.malId, episodeNumber, dub });
-      if (url) {
-        return {
-          kind: 'embed' as const,
-          provider: embed.id,
-          url,
-          dub: Boolean(dub),
-          fellBackFrom: requested?.id ?? null,
-        };
+      if (embed.id === requested?.id || failedEmbeds.has(embed.id)) continue;
+
+      let url: string | null = null;
+      if (embed.resolveEmbedUrl) {
+        url = await embed.resolveEmbedUrl(embedCtx, { title: anime.title });
+        if (!url) {
+          failedEmbeds.add(embed.id);
+          continue;
+        }
+      } else {
+        url = buildProviderEmbedUrl(embed.id, embedCtx);
+        if (!url) continue;
       }
+
+      const healthy = await isEmbedProviderHealthy(embed.id);
+      if (!healthy) {
+        failedEmbeds.add(embed.id);
+        continue;
+      }
+
+      return {
+        kind: 'embed' as const,
+        provider: embed.id,
+        url,
+        dub: Boolean(dub),
+        fellBackFrom: requested?.id ?? null,
+      };
     }
 
     return {
@@ -227,11 +343,14 @@ export const getEpisodes = register({
   }),
   handler: async (_ctx, { animeId, provider, episodePage, dbId }) => {
     let anilistId = animeId;
+    let title: string | undefined;
     if (dbId) {
       const anime = await prisma.anime.findUnique({ where: { id: dbId } });
       if (anime?.anilistId) {
         anilistId = String(anime.anilistId);
+        title = anime.title;
       } else if (anime) {
+        title = anime.title;
         const results = await searchAnilist(anime.title, anime.year);
         if (results[0]) {
           anilistId = String(results[0].id);
@@ -243,7 +362,7 @@ export const getEpisodes = register({
       }
     }
 
-    const result = await fetchEpisodesWithFallback(anilistId, provider, episodePage);
+    const result = await fetchEpisodesWithFallback(anilistId, provider, episodePage, title);
     return {
       provider: result.provider,
       episodes: result.episodes,

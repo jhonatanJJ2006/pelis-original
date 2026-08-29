@@ -1,44 +1,39 @@
 'use client';
 
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { authClient } from './client';
-import { useAppStore, type User } from './store';
+import { useAppStore } from './store';
+import {
+  applyHydratedUser,
+  decideSessionSync,
+  type MeFetchResult,
+  type MeUserLike,
+  type SessionUserLike,
+} from './session-user';
 
-interface MeUser {
-  _id: string;
-  name: string;
-  email: string;
-  image?: string;
+interface MeUser extends MeUserLike {
   role?: 'USER' | 'ADMIN';
-  emailVerified?: boolean;
-  planId?: string;
-  planExpiresAt?: number;
 }
 
-function toAppUser(
-  sessionUser: {
-    id: string;
-    name: string;
-    email: string;
-    image?: string | null;
-    emailVerified: boolean;
-    role?: string | null;
-  },
-  me?: MeUser | null,
-): User {
-  const role = (me?.role ?? sessionUser.role ?? 'USER').toString().toUpperCase();
+function asSessionUser(user: {
+  id: string;
+  name: string;
+  email: string;
+  image?: string | null;
+  emailVerified: boolean;
+  role?: string | null;
+}): SessionUserLike {
   return {
-    _id: me?._id ?? sessionUser.id,
-    name: me?.name ?? sessionUser.name ?? 'User',
-    email: me?.email ?? sessionUser.email ?? '',
-    image: me?.image ?? sessionUser.image ?? undefined,
-    role: role === 'ADMIN' ? 'admin' : 'user',
-    planId: me?.planId,
-    planExpiresAt: me?.planExpiresAt,
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    image: user.image,
+    emailVerified: user.emailVerified,
+    role: user.role,
   };
 }
 
-async function fetchMeProfile(): Promise<MeUser | null> {
+async function fetchMeProfile(): Promise<MeFetchResult> {
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
       const res = await fetch('/api/function/users.me', {
@@ -52,68 +47,80 @@ async function fetchMeProfile(): Promise<MeUser | null> {
           await new Promise((r) => setTimeout(r, 350));
           continue;
         }
-        return null;
+        return { ok: false };
       }
-      return ((await res.json()) as MeUser | null) ?? null;
+      const json = (await res.json()) as MeUser | null;
+      if (!json || typeof json !== 'object' || !json._id) {
+        return { ok: false };
+      }
+      return { ok: true, user: json };
     } catch {
       if (attempt === 0) {
         await new Promise((r) => setTimeout(r, 350));
         continue;
       }
-      return null;
+      return { ok: false };
     }
   }
-  return null;
+  return { ok: false };
 }
 
 /**
  * Single root subscription to Better Auth session.
  * Keeps zustand in sync so all pages share the same logged-in user.
+ *
+ * Does NOT poll and does not refetch on focus — Better Auth already loads
+ * the session on mount. Extra refetch was wiping session/plan mid-playback.
  */
 export function AuthSessionSync({ children }: { children: ReactNode }) {
-  const { data, isPending, refetch } = authClient.useSession();
+  const { data, isPending, error } = authClient.useSession();
   const setUser = useAppStore((state) => state.setUser);
   const clearUser = useAppStore((state) => state.clearUser);
-
-  // Polling periódico y refetch al volver a la pestaña.
-  useEffect(() => {
-    const interval = setInterval(() => {
-      void refetch();
-    }, 60_000);
-    const onFocus = () => {
-      void refetch();
-    };
-    window.addEventListener('focus', onFocus);
-    return () => {
-      clearInterval(interval);
-      window.removeEventListener('focus', onFocus);
-    };
-  }, [refetch]);
+  const hadLiveSession = useRef(false);
 
   useEffect(() => {
-    if (isPending) return;
+    const sessionUser = data?.user ?? null;
+    const decision = decideSessionSync({
+      isPending,
+      sessionUserId: sessionUser?.id ?? null,
+      sessionError: error,
+      hadLiveSession: hadLiveSession.current,
+    });
 
-    const sessionUser = data?.user;
-    if (!sessionUser) {
+    if (decision.action === 'keep') return;
+
+    if (decision.action === 'clear') {
       clearUser();
       return;
     }
 
-    let cancelled = false;
+    hadLiveSession.current = true;
+    const typed = asSessionUser(sessionUser!);
 
+    let cancelled = false;
     void (async () => {
-      const base = toAppUser(sessionUser);
-      setUser(base);
+      setUser(
+        applyHydratedUser({
+          sessionUser: typed,
+          stored: useAppStore.getState().user,
+        }),
+      );
 
       const me = await fetchMeProfile();
       if (cancelled) return;
-      setUser(toAppUser(sessionUser, me));
+      setUser(
+        applyHydratedUser({
+          sessionUser: typed,
+          stored: useAppStore.getState().user,
+          me,
+        }),
+      );
     })();
 
     return () => {
       cancelled = true;
     };
-  }, [data?.user?.id, isPending, setUser, clearUser, data?.user]);
+  }, [data?.user?.id, isPending, error, setUser, clearUser]);
 
   return children;
 }

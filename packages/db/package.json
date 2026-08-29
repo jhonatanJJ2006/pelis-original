@@ -13,7 +13,8 @@
     "./types": "./src/types.ts",
     "./auth": "./src/auth.ts",
     "./realtime": "./src/realtime.ts",
-    "./storage": "./src/storage.ts"
+    "./storage": "./src/storage.ts",
+    "./lib/vidnest-client": "./src/lib/vidnest-client.ts"
   },
   "scripts": {
     "dev": "prisma generate && echo 'db: ready'",
@@ -29,7 +30,8 @@
     "db:seed": "dotenv -e ../../.env -- tsx scripts/seed.ts",
     "import:convex": "dotenv -e ../../.env -- tsx scripts/import-convex-snapshot.ts",
     "import:anilist": "dotenv -e ../../.env -- tsx scripts/import-anilist-catalog.ts",
-    "group:anime": "dotenv -e ../../.env -- tsx scripts/group-anime-series.ts"
+    "group:anime": "dotenv -e ../../.env -- tsx scripts/group-anime-series.ts",
+    "playground:providers": "dotenv -e ../../.env -- tsx scripts/test-anime-providers.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",

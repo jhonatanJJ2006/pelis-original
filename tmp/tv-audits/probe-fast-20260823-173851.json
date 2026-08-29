@@ -1,0 +1,46 @@
+{
+  "stamp": "20260823-173851",
+  "timeoutMs": 6000,
+  "batch": 32,
+  "statusFilter": "ONLINE",
+  "totals": {
+    "tried": 100,
+    "online": 95,
+    "offline": 5,
+    "totalSecs": "14.9"
+  },
+  "errors": [
+    {
+      "name": "EnerGeek Fan (1080p)",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "Disney Jr. Latin America North HD (1080p)",
+      "error": "HTTP 404"
+    },
+    {
+      "name": "EnerGeek (720p) [Not 24/7]",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "ETC TV (576p)",
+      "error": "HTTP 404"
+    },
+    {
+      "name": "RTC Television",
+      "error": "HTTP 404"
+    }
+  ],
+  "summary": [
+    {
+      "streamStatus": "ONLINE",
+      "isActive": true,
+      "n": 2218
+    },
+    {
+      "streamStatus": "OFFLINE",
+      "isActive": true,
+      "n": 810
+    }
+  ]
+}

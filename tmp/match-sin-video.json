@@ -1,0 +1,970 @@
+{
+  "generatedAt": "2026-08-23T21:58:46.472Z",
+  "results": [
+    {
+      "id": "jh7c6bse5jbjvdws9y5eq5jgk58bs4f6",
+      "token": "661f3b4f07c08",
+      "name": "John Wick: Chapter 4",
+      "year": "2023",
+      "hits": []
+    },
+    {
+      "id": "jh711mk3mf1mzgwsfb097c9zwx8bnsgz",
+      "token": "8-segundos",
+      "name": "8 Seconds",
+      "year": "1994",
+      "hits": []
+    },
+    {
+      "id": "jh77haefy4n6v0mavvzecr454n8bmf14",
+      "token": "avatar-aang-el-ultimo-maestro-aire",
+      "name": "Avatar: Aang, El último Maestro Aire",
+      "year": "2026",
+      "hits": []
+    },
+    {
+      "id": "jh7160ryt67a99h30h5nd5xtr58bn8t8",
+      "token": "avatar-fuego-y-ceniza",
+      "name": "Avatar: Fuego y ceniza",
+      "year": "2025",
+      "hits": []
+    },
+    {
+      "id": "jh7f52w1ggafcr2axgpv153xrn8bngdn",
+      "token": "avengers-doomsday",
+      "name": "Avengers: Doomsday",
+      "year": "2026",
+      "hits": []
+    },
+    {
+      "id": "jh76p6thm7wyk4s4rh7h38d6698bn6m3",
+      "token": "backrooms-sin-salida",
+      "name": "Backrooms: Sin salida",
+      "year": "2026",
+      "hits": []
+    },
+    {
+      "id": "jh7c3x2yyjqarvy8sty3aph0t98bn3t8",
+      "token": "bailarina",
+      "name": "Ballerina",
+      "year": "2025",
+      "hits": []
+    },
+    {
+      "id": "jh74j2fpy96623jgpt95ppg7518bmq82",
+      "token": "ultima-frontera",
+      "name": "Blade Runner 2049",
+      "year": "2017",
+      "hits": []
+    },
+    {
+      "id": "jh797pnea4ytvg3vrnzax6n0gs8bmbk7",
+      "token": "blanca-nieves",
+      "name": "Blanca Nieves",
+      "year": "2025",
+      "hits": []
+    },
+    {
+      "id": "jh7f4dxnbzyxwarnftwvg75zf98bn20r",
+      "token": "bob-esponja-en-busca-de-los-pantalones-c",
+      "name": "Bob Esponja: En busca de los pantalones cuadrados",
+      "year": "2025",
+      "hits": []
+    },
+    {
+      "id": "jh76bjd3680njrjjkaek1k62y58bnrs2",
+      "token": "nomada-digital",
+      "name": "Camino salvaje",
+      "year": "2007",
+      "hits": []
+    },
+    {
+      "id": "jh770pj813kdnygnhs2tvg09058bm7vx",
+      "token": "capitan-america-un-nuevo-mundo",
+      "name": "Capitán América: Un nuevo mundo",
+      "year": "2025",
+      "hits": []
+    },
+    {
+      "id": "jh73wqydqgvaqp8t43w79b3g0d8bn48d",
+      "token": "chainsaw-man-la-pelicula-arco-de-reze",
+      "name": "Chainsaw Man - La película: Arco de Reze",
+      "year": "2025",
+      "hits": []
+    },
+    {
+      "id": "jh7fzv5cfexqacvrnk7c4ctv558bnk6g",
+      "token": "citizen-vigilante",
+      "name": "Citizen Vigilante",
+      "year": "2026",
+      "hits": []
+    },
+    {
+      "id": "jh7a8jw2femca7hcfp39pwnb818bn2ps",
+      "token": "ultima-cancion",
+      "name": "Coco",
+      "year": "2017",
+      "hits": []
+    },
+    {
+      "id": "jh78tkm0qw7h7pd18mess1pdq98bnba8",
+      "token": "traves-espejo",
+      "name": "Coherencia",
+      "year": "2014",
+      "hits": []
+    },
+    {
+      "id": "jh77jt32jn82dap86h8nm8w9h18bnfzh",
+      "token": "corazon-fuego",
+      "name": "Como agua para chocolate",
+      "year": "1992",
+      "hits": []
+    },
+    {
+      "id": "jh7fynd5ccs37bpcbh75qwd3a98bm4p4",
+      "token": "ultimo-dragon",
+      "name": "Cómo entrenar a tu dragón",
+      "year": "2025",
+      "hits": []
+    },
+    {
+      "id": "jh72d81x4wgwysz8yb5dtgstzx8bmtgr",
+      "token": "culpa-mia-londres",
+      "name": "Culpa Mía: Londres",
+      "year": "2025",
+      "hits": []
+    },
+    {
+      "id": "jh7akkn7grx2ab92aye4zvnbe58bn2j0",
+      "token": "culpa-nuestra",
+      "name": "Culpa nuestra",
+      "year": "2025",
+      "hits": []
+    },
+    {
+      "id": "jh7e6q2ar3jsv5amv0q919b9t18bm520",
+      "token": "amigas-siempre",
+      "name": "Damas en Guerra",
+      "year": "2011",
+      "hits": []
+    },
+    {
+      "id": "jh78dmz063sx81pw4zwda9eak98bmyw2",
+      "token": "demon-slayer-kimetsu-no-yaiba-castillo-i",
+      "name": "Demon Slayer: Kimetsu no Yaiba Castillo infinito",
+      "year": "2025",
+      "hits": []
+    },
+    {
+      "id": "jh7e72a5d9vh9r7f8ttmqme9d98bnat2",
+      "token": "depredador-tierras-salvajes",
+      "name": "Depredador: Tierras salvajes",
+      "year": "2025",
+      "hits": []
+    },
+    {
+      "id": "jh7a39y3b7mbd1nfjhf90e54nx8bmc2m",
+      "token": "desaparecida",
+      "name": "Desapareció una Noche",
+      "year": "2007",
+      "hits": []
+    },
+    {
+      "id": "jh74wgy1s996kw6dxhdfb1ar0d8bn6rk",
+      "token": "destino-final-lazos-de-sangre",
+      "name": "Destino final lazos de sangre",
+      "year": "2025",
+      "hits": []
+    },
+    {
+      "id": "jh7e29eq66nwtjv9de2chh1fwh8bnd5w",
+      "token": "amor-primera-linea",
+      "name": "Diario de una pasión",
+      "year": "2004",
+      "hits": []
+    },
+    {
+      "id": "jh77wbbn2xzjpmn7062209bb858bmf3g",
+      "token": "legado",
+      "name": "Diarios de motocicleta",
+      "year": "2004",
+      "hits": []
+    },
+    {
+      "id": "jh7d1s2bnncb1ayzch4c725cgh8bmmfj",
+      "token": "dracula",
+      "name": "Drácula",
+      "year": "2025",
+      "hits": [
+        {
+          "channelId": -1002154921408,
+          "msgId": 1194,
+          "date": "2024-06-10T22:02:27+00:00",
+          "sizeMB": 192,
+          "textSnippet": "El poder de la sangre de Drácula  (1970)  | Audio latino 🇲🇽 |  | Si te gusta el contenido no olvides apo",
+          "filePath": "/home/det/Desktop/PELIS/pelis-original/tools/telegram-dumper/data/media/-1002154921408_1194_5111829904870080863.mp4",
+          "fileName": "-1002154921408_1194_5111829904870080863.mp4"
+        }
+      ]
+    },
+    {
+      "id": "jh70x68zmt5bph7fsaf41mepdh8bn2ta",
+      "token": "latidos-corazon",
+      "name": "Dulce noviembre",
+      "year": "2001",
+      "hits": []
+    },
+    {
+      "id": "jh745tc15g1ggmy5kxr01jsa2h8bnzwb",
+      "token": "panico",
+      "name": "El Conjuro",
+      "year": "2013",
+      "hits": []
+    },
+    {
+      "id": "jh7d92rwga785xryxpc0p534x58bnzza",
+      "token": "el-conjuro-4-ultimos-ritos",
+      "name": "El Conjuro 4: Últimos ritos",
+      "year": "2025",
+      "hits": []
+    },
+    {
+      "id": "jh7eh28x0z1057dn6g8jt05ysh8bn4wp",
+      "token": "ciudad-cristal",
+      "name": "El diablo viste a la moda",
+      "year": "2006",
+      "hits": []
+    },
+    {
+      "id": "jh7ajxt4e3bwwx1dwj8q895jg98bmhxx",
+      "token": "el-diablo-viste-a-la-moda-2",
+      "name": "El diablo viste a la moda 2",
+      "year": "2026",
+      "hits": []
+    },
+    {
+      "id": "jh72936p8jar3j63qetfbn4ek58bndk7",
+      "token": "elio",
+      "name": "Elio",
+      "year": "2025",
+      "hits": []
+    },
+    {
+      "id": "jh7ecdva87sxqg2qp732r8ycp18bnpz7",
+      "token": "cupido-electrico",
+      "name": "Ella",
+      "year": "2013",
+      "hits": [
+        {
+          "channelId": -1002154921408,
+          "msgId": 513,
+          "date": "2024-05-31T20:36:28+00:00",
+          "sizeMB": 127,
+          "textSnippet": "Las pequeñas cosas (2016) (Castellano)",
+          "filePath": "/home/det/Desktop/PELIS/pelis-original/tools/telegram-dumper/data/media/-1002154921408_513_6048343714126893600.mp4",
+          "fileName": "-1002154921408_513_6048343714126893600.mp4"
+        }
+      ]
+    },
+    {
+      "id": "jh7actxfkegce1kkjf2kz9n9mh8bnccx",
+      "token": "planeta-salvaje",
+      "name": "El Libro de la Selva",
+      "year": "2016",
+      "hits": []
+    },
+    {
+      "id": "jh70dzpcwznwmwyq647946zk9x8bnm3a",
+      "token": "el-pasajero-del-diablo",
+      "name": "El Pasajero Del Diablo",
+      "year": "2026",
+      "hits": []
+    },
+    {
+      "id": "jh71x92czzs77e93twjf97gp5s8bm2x9",
+      "token": "mar-profundo",
+      "name": "El Secreto del Abismo",
+      "year": "1989",
+      "hits": []
+    },
+    {
+      "id": "jh75vd6t2eqcc2efg77my9p1vs8bn6k1",
+      "token": "sombras-pasado",
+      "name": "El secreto de sus ojos",
+      "year": "2009",
+      "hits": []
+    },
+    {
+      "id": "jh76naj8ymzm4am77ym2jc2hvn8bnqb5",
+      "token": "eclipse",
+      "name": "El Sexto Sentido",
+      "year": "1999",
+      "hits": []
+    },
+    {
+      "id": "jh75zg95r4d73vr1qsyktc34d98bnrzv",
+      "token": "el-sobreviviente",
+      "name": "El sobreviviente",
+      "year": "2025",
+      "hits": []
+    },
+    {
+      "id": "jh75gmtjkp44g4a5peekt4srad8bnnyt",
+      "token": "el-ultimo-gran-golpe",
+      "name": "El último gran golpe",
+      "year": "2026",
+      "hits": []
+    },
+    {
+      "id": "jh7f7vrgxwehx06sp60fnrbkz98bnpke",
+      "token": "juicio-final",
+      "name": "El veredicto",
+      "year": "1982",
+      "hits": []
+    },
+    {
+      "id": "jh7a6rxyhy1x364zh5ws7qk6b98bnz9z",
+      "token": "en-la-zona-gris",
+      "name": "En la zona gris",
+      "year": "2026",
+      "hits": []
+    },
+    {
+      "id": "jh78zhazyrjj4zjfrt7zq2gw958bnt7r",
+      "token": "enola-holmes-3",
+      "name": "Enola Holmes 3",
+      "year": "2026",
+      "hits": []
+    },
+    {
+      "id": "jh764dpq7wp035qspfek087hss8bnxbr",
+      "token": "aventura-cumbre",
+      "name": "Everest",
+      "year": "2015",
+      "hits": []
+    },
+    {
+      "id": "jh735wtv3cvxdz90g8f2x8fpb58bmvvc",
+      "token": "evil-dead-en-llamas",
+      "name": "Evil Dead: En llamas",
+      "year": "2026",
+      "hits": []
+    },
+    {
+      "id": "jh79t08hk7gsjg7k5bb8w31f3s8bnj3w",
+      "token": "exterminio-el-templo-de-huesos",
+      "name": "Exterminio: El templo de huesos",
+      "year": "2026",
+      "hits": []
+    },
+    {
+      "id": "jh776w2ywnpna9av0cdsw89xg58bnvw2",
+      "token": "exterminio-la-evolucion",
+      "name": "Exterminio: La evolución",
+      "year": "2025",
+      "hits": []
+    },
+    {
+      "id": "jh7easxctmn9sfq68a6f26c9s58bmk9p",
+      "token": "five-nights-at-freddy-s-2",
+      "name": "Five Nights at Freddy's 2",
+      "year": "2025",
+      "hits": []
+    },
+    {
+      "id": "jh74rnkq8x2vn1c9e6pv72n6y58bmjx6",
+      "token": "frankenstein",
+      "name": "Frankenstein",
+      "year": "2025",
+      "hits": []
+    },
+    {
+      "id": "jh7et11a49grgg2ev68kyeb1mh8bn1va",
+      "token": "reino-hielo",
+      "name": "Frozen: Una Aventura Congelada",
+      "year": "2013",
+      "hits": []
+    },
+    {
+      "id": "jh7dwsjmg4184cke1wgckhn6hx8bm750",
+      "token": "amigo-robot",
+      "name": "Grandes Héroes",
+      "year": "2014",
+      "hits": []
+    },
+    {
+      "id": "jh74szqyfntstmn9axxnfeawcd8bmqw4",
+      "token": "zombielandia",
+      "name": "Guerra mundial Z",
+      "year": "2013",
+      "hits": []
+    },
+    {
+      "id": "jh7bpf3kpwge3b6ahw1nems8gs8bmvgy",
+      "token": "hacker",
+      "name": "Hackers: Ningún sistema es seguro",
+      "year": "2014",
+      "hits": []
+    },
+    {
+      "id": "jh78g4mem8aqaj09cnjnp2xvas8bnmpj",
+      "token": "hamnet",
+      "name": "Hamnet",
+      "year": "2025",
+      "hits": []
+    },
+    {
+      "id": "jh75csrvkymz8z5qpr6239rbfs8bmhj8",
+      "token": "hechizo-luna",
+      "name": "Hechizo de amor",
+      "year": "1998",
+      "hits": []
+    },
+    {
+      "id": "jh7byk7fqgpk9337ejbjyk35fh8bmqe0",
+      "token": "hermanito",
+      "name": "Hermanito",
+      "year": "2026",
+      "hits": []
+    },
+    {
+      "id": "jh7bw2qvjjvnctga5vy2bj7mt18bn7y2",
+      "token": "hoppers-operacion-castor",
+      "name": "Hoppers: Operación castor",
+      "year": "2026",
+      "hits": []
+    },
+    {
+      "id": "jh7ajwttcrhgpdh7xwe8r6j9y58bmfqc",
+      "token": "impacto-mortal",
+      "name": "Impacto Mortal",
+      "year": "2026",
+      "hits": []
+    },
+    {
+      "id": "jh708z9p8ec82ffs34gvswchp98bmqyj",
+      "token": "dibujos-animados",
+      "name": "Intensa-Mente",
+      "year": "2015",
+      "hits": []
+    },
+    {
+      "id": "jh77y7zr0ev2fk4tnvbygtdayn8bmfam",
+      "token": "intercambiados",
+      "name": "Intercambiados",
+      "year": "2026",
+      "hits": []
+    },
+    {
+      "id": "jh7a6htwyrpn9q9mc9caqvf5898bmcvj",
+      "token": "jujutsu-kaisen-ejecucion",
+      "name": "JUJUTSU KAISEN: Ejecución",
+      "year": "2025",
+      "hits": []
+    },
+    {
+      "id": "jh70pg841kgj8f0vkcpsnjs7bd8bmmzs",
+      "token": "noche-juego",
+      "name": "Jumanji: En la selva",
+      "year": "2017",
+      "hits": []
+    },
+    {
+      "id": "jh72vvryandwgvba3qvc4kt6618bm3zf",
+      "token": "jurassic-world-renace",
+      "name": "Jurassic World: Renace",
+      "year": "2025",
+      "hits": []
+    },
+    {
+      "id": "jh7atsrxrwnepg21bhpszb9p1h8bnma6",
+      "token": "rescate-altamar",
+      "name": "La aventura del Poseidón",
+      "year": "1972",
+      "hits": []
+    },
+    {
+      "id": "jh7ajwtm7qsrwgnx0e1exg26zn8bn3xe",
+      "token": "bosque-susurrante",
+      "name": "La Bruja",
+      "year": "2016",
+      "hits": []
+    },
+    {
+      "id": "jh7ex3jn2fknewwpkd8axa1j4h8bnbnc",
+      "token": "noche-mentiras",
+      "name": "La cena",
+      "year": "2017",
+      "hits": []
+    },
+    {
+      "id": "jh76rv5ap1x7t0h0s8xshk8bps8bmrjq",
+      "token": "bajo-cero",
+      "name": "La cosa del otro mundo",
+      "year": "1982",
+      "hits": []
+    },
+    {
+      "id": "jh74wq08gf8tswnxchwdb48hzn8bn78a",
+      "token": "la-empleada",
+      "name": "La Empleada",
+      "year": "2025",
+      "hits": []
+    },
+    {
+      "id": "jh77tywj1vtzqkr7ph27tdtt2h8bms32",
+      "token": "la-guerra-de-los-mundos",
+      "name": "La guerra de los mundos",
+      "year": "2025",
+      "hits": []
+    },
+    {
+      "id": "jh71yksgrxkqgmgeraww71kd7h8bnzd1",
+      "token": "guerra-vecinos",
+      "name": "La Guerra de los Roses",
+      "year": "1989",
+      "hits": []
+    },
+    {
+      "id": "jh79h7mex4dge5h1m092v4d9c98bmv8c",
+      "token": "la-hora-de-la-desaparicion",
+      "name": "La hora de la desaparición",
+      "year": "2025",
+      "hits": []
+    },
+    {
+      "id": "jh761mf86m9gqw92gg10gcrzn18bnwtt",
+      "token": "inventor",
+      "name": "La invención de Hugo Cabret",
+      "year": "2011",
+      "hits": []
+    },
+    {
+      "id": "jh73w2xaeww21yfj9yamkakxgx8bmx14",
+      "token": "mas-alla-razon",
+      "name": "La Isla Siniestra",
+      "year": "2010",
+      "hits": []
+    },
+    {
+      "id": "jh7bj0zrmmazs6e8t7q4erfbbs8bmsyf",
+      "token": "enigma-faraon",
+      "name": "La Momia",
+      "year": "1999",
+      "hits": []
+    },
+    {
+      "id": "jh7f4vz8dhnj5rxjxsz1emehch8bnk68",
+      "token": "la-odisea",
+      "name": "La Odisea",
+      "year": "2026",
+      "hits": []
+    },
+    {
+      "id": "jh7bzbe1qqnrgpbap76ksdqejx8bm0eg",
+      "token": "la-posesion-de-la-momia",
+      "name": "La posesión de la momia",
+      "year": "2026",
+      "hits": []
+    },
+    {
+      "id": "jh73ysre08pqhvey5maagnc72h8bntr0",
+      "token": "las-guerreras-k-pop",
+      "name": "Las guerreras k-pop",
+      "year": "2025",
+      "hits": []
+    },
+    {
+      "id": "jh71apebwt4hp56q2t66d99nyd8bmvzs",
+      "token": "lilo-y-stitch",
+      "name": "Lilo y Stitch",
+      "year": "2025",
+      "hits": []
+    },
+    {
+      "id": "jh78p7pc210253s0nwpk7ej2qn8bmjjc",
+      "token": "los-4-fantasticos-primeros-pasos",
+      "name": "Los 4 Fantásticos: Primeros pasos",
+      "year": "2025",
+      "hits": []
+    },
+    {
+      "id": "jh713tj5xkcgzd31t6n8pmh0h58bm5pz",
+      "token": "los-ilusionistas-3-ahora-me-ves-ahora-no",
+      "name": "Los ilusionistas 3: Ahora me ves, ahora no",
+      "year": "2025",
+      "hits": []
+    },
+    {
+      "id": "jh725axrm9yqqdaha8gf51j1es8bncmf",
+      "token": "super-familia",
+      "name": "Los increíbles",
+      "year": "2004",
+      "hits": []
+    },
+    {
+      "id": "jh7d70yazh959nfdtf6z7a1t0s8bntz7",
+      "token": "casa-acantilado",
+      "name": "Los otros",
+      "year": "2001",
+      "hits": []
+    },
+    {
+      "id": "jh7acf9y393payehtf4hd149318bnx7j",
+      "token": "los-tipos-malos-2",
+      "name": "Los tipos malos 2",
+      "year": "2025",
+      "hits": []
+    },
+    {
+      "id": "jh7ey32j36pzjvby8z07p1n9158bm78b",
+      "token": "marty-supremo",
+      "name": "Marty Supremo",
+      "year": "2025",
+      "hits": []
+    },
+    {
+      "id": "jh7e1w2v1jhwx9fnjg4y8grqqx8bnj22",
+      "token": "mensajes-de-voz-para-isabelle",
+      "name": "Mensajes de voz para Isabelle",
+      "year": "2026",
+      "hits": []
+    },
+    {
+      "id": "jh73deay64n4a574xtkgacx1zh8bmers",
+      "token": "michael",
+      "name": "Michael",
+      "year": "2026",
+      "hits": []
+    },
+    {
+      "id": "jh7bf18m69kt2ev6kkjjew64ts8bnj9z",
+      "token": "luna-sangre",
+      "name": "Midsommar: el terror no espera la noche",
+      "year": "2019",
+      "hits": []
+    },
+    {
+      "id": "jh79ywpv4ej3sacy695m7kb5xx8bm0tc",
+      "token": "minions-monstruos",
+      "name": "Minions & Monstruos",
+      "year": "2026",
+      "hits": []
+    },
+    {
+      "id": "jh7fd6fpg8h8g831b8r9nxc09h8bm0yq",
+      "token": "codigo-rojo",
+      "name": "Misión Imposible 6: Repercusión",
+      "year": "2018",
+      "hits": []
+    },
+    {
+      "id": "jh71nb5ynt1dgmkmjbnkpk4xzd8bnpp6",
+      "token": "mision-imposible-la-sentencia-final",
+      "name": "Misión: Imposible - La sentencia final",
+      "year": "2025",
+      "hits": []
+    },
+    {
+      "id": "jh7112jbd53fty7xq5wxw282g58bn3hm",
+      "token": "ultimo-horizonte",
+      "name": "Misión Rescate",
+      "year": "2015",
+      "hits": []
+    },
+    {
+      "id": "jh78cgqcwq0ndzgm02xjsn08nh8bm7c2",
+      "token": "moana",
+      "name": "Moana",
+      "year": "2026",
+      "hits": []
+    },
+    {
+      "id": "jh73x706semtmn2zrfqcmb5xan8bmnmn",
+      "token": "mortal-kombat-ii",
+      "name": "Mortal Kombat II",
+      "year": "2026",
+      "hits": []
+    },
+    {
+      "id": "jh797vhktze63x3p30nhmn8j4h8bm1pp",
+      "token": "misterio-venecia",
+      "name": "Muerte en el Nilo",
+      "year": "2022",
+      "hits": []
+    },
+    {
+      "id": "jh7ar143gbxy7f9h877m6tw3ed8bm88f",
+      "token": "ne-zha-2-el-renacer-del-alma",
+      "name": "Ne Zha 2: El Renacer del Alma",
+      "year": "2025",
+      "hits": []
+    },
+    {
+      "id": "jh7089s3sae32016ar76055j1x8bn40h",
+      "token": "secreto-abuela",
+      "name": "No se Aceptan Devoluciones",
+      "year": "2013",
+      "hits": []
+    },
+    {
+      "id": "jh720pwks1gq62mwwbf1fg7rr18bn2v0",
+      "token": "obsesion",
+      "name": "Obsesión",
+      "year": "2026",
+      "hits": []
+    },
+    {
+      "id": "jh75gtw1nfvrkzmysrez603z5s8bn0pp",
+      "token": "operacion-sombra",
+      "name": "Operación Sombra",
+      "year": "2025",
+      "hits": []
+    },
+    {
+      "id": "jh7a4v3wetf484rn0jf138er598bmk6m",
+      "token": "aventura-prehistorica",
+      "name": "Parque Jurásico",
+      "year": "1993",
+      "hits": []
+    },
+    {
+      "id": "jh74ww8sssw85kf8rnw3nzs5vx8bnewv",
+      "token": "pasajero",
+      "name": "Pasajero",
+      "year": "2025",
+      "hits": []
+    },
+    {
+      "id": "jh74r8gh9r74tmd7a5yjm6zw0x8bm8gd",
+      "token": "pecadores",
+      "name": "Pecadores",
+      "year": "2025",
+      "hits": []
+    },
+    {
+      "id": "jh736dqpwvzmhs3ykcyj253b2h8bmsk3",
+      "token": "galaxia-perdida",
+      "name": "Perdidos en el espacio",
+      "year": "1998",
+      "hits": []
+    },
+    {
+      "id": "jh71tjcw6gj951vrxtsz6w75vn8bn789",
+      "token": "proyecto-fin-del-mundo",
+      "name": "Proyecto Fin del Mundo",
+      "year": "2026",
+      "hits": []
+    },
+    {
+      "id": "jh70ajjm6gqxm2g6agxw7xv8k18bm988",
+      "token": "operacion-fenix",
+      "name": "Rambo II - La misión",
+      "year": "1985",
+      "hits": []
+    },
+    {
+      "id": "jh76cafh19y323t6s2mbsvttjn8bn0kg",
+      "token": "receta-secreta",
+      "name": "Ratatouille",
+      "year": "2007",
+      "hits": []
+    },
+    {
+      "id": "jh7dvswe75hqn7w7jd40n8hsqs8bny6x",
+      "token": "rescate-implacable",
+      "name": "Rescate implacable",
+      "year": "2025",
+      "hits": []
+    },
+    {
+      "id": "jh74sdf9zbdf3hs27z0hk3yyg18bn2py",
+      "token": "punto-quiebre",
+      "name": "Rocky",
+      "year": "1976",
+      "hits": []
+    },
+    {
+      "id": "jh76vmfc912grk1n5az8ddcjv98bnfs9",
+      "token": "scary-movie-terrorificamente-incorrecta",
+      "name": "Scary Movie: Terroríficamente incorrecta",
+      "year": "2026",
+      "hits": []
+    },
+    {
+      "id": "jh7e1vht7xhna4s00wg3frvy2d8bnw3c",
+      "token": "scream-7",
+      "name": "Scream 7",
+      "year": "2026",
+      "hits": []
+    },
+    {
+      "id": "jh776mr1ka2pfwn9n2a9x7etgn8bnaqk",
+      "token": "camino-casa",
+      "name": "Siempre a tu Lado: Hachiko",
+      "year": "2009",
+      "hits": []
+    },
+    {
+      "id": "jh776g3qqftvay5wk8eddzj29s8bnjfg",
+      "token": "spider-man-un-nuevo-dia",
+      "name": "Spider-Man: Un nuevo día",
+      "year": "2026",
+      "hits": []
+    },
+    {
+      "id": "jh76e8jy8031gtd6n2ymjx0c4n8bn4r6",
+      "token": "star-wars-the-mandalorian-and-grogu",
+      "name": "Star Wars: The Mandalorian and Grogu",
+      "year": "2026",
+      "hits": []
+    },
+    {
+      "id": "jh77zp7j6ymkvxydvmmtaysz598bn9dv",
+      "token": "ritmo-salvaje",
+      "name": "Step Up 3",
+      "year": "2010",
+      "hits": []
+    },
+    {
+      "id": "jh7d62pvgd2nsgvtc9tr4zq3718bnxv8",
+      "token": "risas-cadena",
+      "name": "Supercool",
+      "year": "2007",
+      "hits": []
+    },
+    {
+      "id": "jh7e3mewz5nh7s9f8fvf122k0n8bm3pf",
+      "token": "supergirl",
+      "name": "Supergirl",
+      "year": "2026",
+      "hits": []
+    },
+    {
+      "id": "jh7729r1d6xr4ekxcr3se16crn8bmysd",
+      "token": "superman",
+      "name": "Superman",
+      "year": "2025",
+      "hits": []
+    },
+    {
+      "id": "jh75v7s9zewdke4j6k3hrh1yen8bnxdq",
+      "token": "super-mario-galaxy-la-pelicula",
+      "name": "Super Mario Galaxy: La película",
+      "year": "2026",
+      "hits": []
+    },
+    {
+      "id": "jh79w4wz2k0jzqr84qkb18dqpn8bnvv4",
+      "token": "gran-salto",
+      "name": "Talentos ocultos",
+      "year": "2016",
+      "hits": []
+    },
+    {
+      "id": "jh7b6e5y9scyntd6qsqn63t12s8bn6v8",
+      "token": "the-furious",
+      "name": "The Furious",
+      "year": "2026",
+      "hits": []
+    },
+    {
+      "id": "jh7an6tj65jr4tasrvbrkwyzgn8bnphw",
+      "token": "the-punisher-la-ultima-muerte",
+      "name": "The Punisher: La última muerte",
+      "year": "2026",
+      "hits": []
+    },
+    {
+      "id": "jh75atartndj1zt3pt55mtjj718bm8mh",
+      "token": "thunderbolts",
+      "name": "Thunderbolts*",
+      "year": "2025",
+      "hits": []
+    },
+    {
+      "id": "jh71ep06dzthwn3nz31d1prwe98bn7x5",
+      "token": "amor-cafe",
+      "name": "Tienes Un E-mail",
+      "year": "1998",
+      "hits": []
+    },
+    {
+      "id": "jh716px5xxdfg24hzxjqjwbnxd8bn1t2",
+      "token": "tormenta-inminente",
+      "name": "Tornado",
+      "year": "1996",
+      "hits": []
+    },
+    {
+      "id": "jh76qk6x7yfattywxgaz0txt6x8bm7pn",
+      "token": "toy-story-5",
+      "name": "Toy Story 5",
+      "year": "2026",
+      "hits": []
+    },
+    {
+      "id": "jh7ap4j775r01xh2kctcwgepts8bmext",
+      "token": "tron-ares",
+      "name": "TRON: Ares",
+      "year": "2025",
+      "hits": []
+    },
+    {
+      "id": "jh76p0n2jsqmr5xk6jzhjdyc698bmns9",
+      "token": "tu-corazon-sera-destrozado",
+      "name": "Tu corazón será destrozado",
+      "year": "2026",
+      "hits": []
+    },
+    {
+      "id": "jh7fx7ptmyyffdx4kwsq18g9598bmbms",
+      "token": "lazos-sangre",
+      "name": "Una buena mentira",
+      "year": "2014",
+      "hits": []
+    },
+    {
+      "id": "jh79cqyxfp9a8eynka55w3endn8bmmn5",
+      "token": "una-pelicula-de-minecraft",
+      "name": "Una película de Minecraft",
+      "year": "2025",
+      "hits": []
+    },
+    {
+      "id": "jh7b969ppdy1yf98kpvwmbgem18bm764",
+      "token": "rio-lavanda",
+      "name": "Un Buen Año",
+      "year": "2006",
+      "hits": []
+    },
+    {
+      "id": "jh77r0zjv5xa8xb4pkmf2v3rj98bmc28",
+      "token": "rebano",
+      "name": "Un día para sobrevivir",
+      "year": "2012",
+      "hits": []
+    },
+    {
+      "id": "jh744t43w0nawn2yp8t4hjb0rx8bn898",
+      "token": "filo-tiempo",
+      "name": "Volver al Futuro",
+      "year": "1985",
+      "hits": []
+    },
+    {
+      "id": "jh70p0yhx8z3qz1adkdq72etxx8bmr6h",
+      "token": "contrarreloj",
+      "name": "Zona de miedo",
+      "year": "2008",
+      "hits": []
+    },
+    {
+      "id": "jh7erehy27h4r1e8smqqzhs1qh8bmyxk",
+      "token": "zootopia-2",
+      "name": "Zootopia 2",
+      "year": "2025",
+      "hits": []
+    }
+  ]
+}

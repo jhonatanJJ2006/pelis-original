@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { prisma } from '../client';
 import { notifyChange } from '../realtime';
 import { register } from '../registry';
+import { requireAdmin } from '../lib/requireAdmin';
 
 export const list = register({
   kind: 'query',
@@ -42,7 +43,8 @@ export const adminCreateSubscription = register({
     months: z.number(),
     status: z.enum(['active', 'cancelled', 'expired']).optional(),
   }),
-  handler: async (_ctx, { userId, planId, months, status }) => {
+  handler: async (ctx, { userId, planId, months, status }) => {
+    await requireAdmin(ctx);
     const plan = await prisma.plan.findUnique({ where: { id: planId } });
     if (!plan) throw new Error('Plan not found');
     const now = new Date();
@@ -67,7 +69,7 @@ export const setStripePriceId = register({
   writes: ['plan'],
   args: z.object({ planId: z.string(), stripePriceId: z.string() }),
   handler: async (ctx, { planId, stripePriceId }) => {
-    if (!ctx.userId) throw new Error('Not authenticated');
+    await requireAdmin(ctx);
     const plan = await prisma.plan.findUnique({ where: { id: planId } });
     if (!plan) throw new Error('Plan not found');
     await prisma.plan.update({ where: { id: planId }, data: { stripePriceId } });

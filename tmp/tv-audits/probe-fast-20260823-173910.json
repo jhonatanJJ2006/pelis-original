@@ -1,0 +1,226 @@
+{
+  "stamp": "20260823-173910",
+  "timeoutMs": 6000,
+  "batch": 48,
+  "statusFilter": "ONLINE",
+  "totals": {
+    "tried": 2218,
+    "online": 1270,
+    "offline": 948,
+    "totalSecs": "272.5"
+  },
+  "errors": [
+    {
+      "name": "KandelaTV (480p)",
+      "error": "HTTP 404"
+    },
+    {
+      "name": "Misiones Cuatro",
+      "error": "fetch failed"
+    },
+    {
+      "name": "Free Speech TV (720p)",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "Suram TV (1080p)",
+      "error": "HTTP 404"
+    },
+    {
+      "name": "Vaya semanita",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "Xtra Tv (720p) [Not 24/7]",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "ICONE TV",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "Urban Mix (720p)",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "América Estéreo Ibarra (720p)",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "América Estéreo Tulcán (614p)",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "RTG (720p)",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "24 Канал (1080p)",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "WKAQ-DT1 (Telemundo PR) (1080p)",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "La Reina TV [Geo-blocked]",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "15.1 BPB (720p)",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "Monte Maria (1080p)",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "JNE TV (720p)",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "Sensacion Costa",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "Milenio Televisión (720p)",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "Turbo Mix Radio TV (720p)",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "Africanews (720p)",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "Pluto TV Cine Familia",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "IRINN2 Live Farsi News",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "Television Tarapoto (720p)",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "COCO TV (1080p) [Not 24/7]",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "Verso TV",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "Candelita TV (480p)",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "Yuma77",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "TV MAX (720p)",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "Pluto TV Motor",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "ShowVen TV (720p)",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "Radio Contemporanea Coihueco (720p)",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "BNB Digital (720p)",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "Goiena Eus (720p)",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "Rakuten TV Comedy Movies Spain (1080p)",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "Blu Radio (720p)",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "Onda TV (720p)",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "Canal Doñana (720p) [Not 24/7]",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "XPTV US (720p)",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "CBS News Detroit (720p)",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "Al Hadath (1080p)",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "Bethel TV (720p)",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "Expressen TV (1080p)",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "CNC Bugavisión (720p)",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "Notigram TV (XHFGL-TDT) (1080p)",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "entelevision (1080p) [Not 24/7]",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "Controversia TV (720p) [Not 24/7]",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "IeanJesus Ecuador (720p)",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "Red Uno (720p)",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "name": "La Que Buena Atlanta",
+      "error": "The operation was aborted due to timeout"
+    }
+  ],
+  "summary": [
+    {
+      "streamStatus": "OFFLINE",
+      "isActive": true,
+      "n": 1758
+    },
+    {
+      "streamStatus": "ONLINE",
+      "isActive": true,
+      "n": 1270
+    }
+  ]
+}

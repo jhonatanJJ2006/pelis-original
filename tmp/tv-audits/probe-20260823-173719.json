@@ -1,0 +1,102 @@
+{
+  "stamp": "20260823-173719",
+  "batchSize": 8,
+  "deactivate": false,
+  "filters": {
+    "onlyUnknown": true,
+    "onlyOffline": false,
+    "limit": null
+  },
+  "totals": {
+    "tried": 19,
+    "online": 1,
+    "offline": 18,
+    "deactivated": 0
+  },
+  "errors": [
+    {
+      "name": "AMC",
+      "error": "fetch failed"
+    },
+    {
+      "name": "América TV",
+      "error": "fetch failed"
+    },
+    {
+      "name": "BBC World News",
+      "error": "fetch failed"
+    },
+    {
+      "name": "Cartoon Network",
+      "error": "fetch failed"
+    },
+    {
+      "name": "Cinecanal",
+      "error": "fetch failed"
+    },
+    {
+      "name": "CNN en Español",
+      "error": "fetch failed"
+    },
+    {
+      "name": "Discovery Channel",
+      "error": "fetch failed"
+    },
+    {
+      "name": "Discovery Kids",
+      "error": "fetch failed"
+    },
+    {
+      "name": "DW Español",
+      "error": "400: "
+    },
+    {
+      "name": "ESPN",
+      "error": "fetch failed"
+    },
+    {
+      "name": "Fox Sports",
+      "error": "fetch failed"
+    },
+    {
+      "name": "Latina",
+      "error": "fetch failed"
+    },
+    {
+      "name": "MTV",
+      "error": "fetch failed"
+    },
+    {
+      "name": "National Geographic",
+      "error": "fetch failed"
+    },
+    {
+      "name": "RT en Español",
+      "error": "fetch failed"
+    },
+    {
+      "name": "TNT",
+      "error": "fetch failed"
+    },
+    {
+      "name": "Trome",
+      "error": "fetch failed"
+    },
+    {
+      "name": "Willax",
+      "error": "fetch failed"
+    }
+  ],
+  "summary": [
+    {
+      "status": "ONLINE",
+      "active": true,
+      "n": 2223
+    },
+    {
+      "status": "OFFLINE",
+      "active": true,
+      "n": 805
+    }
+  ]
+}

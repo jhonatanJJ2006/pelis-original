@@ -440,9 +440,10 @@ async function performBackdropApply(movieId: string, tmdbId: number, replaceBack
         backdropImage: resolveMovieImagePath(`/uploads/${uploaded.id}.webp`),
       },
     });
+    await notifyChange('movie', 'update', movieId);
+    return { updated: true };
   }
-  await notifyChange('movie', 'update', movieId);
-  return { updated: true };
+  return { updated: false };
 }
 
 export const previewBackdrop = register({

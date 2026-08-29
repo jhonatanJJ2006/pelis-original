@@ -33,3 +33,21 @@ export async function isAdmin(ctx: RequestCtx): Promise<boolean> {
   });
   return user?.role === 'ADMIN';
 }
+
+/** Same “active” meaning as users.me + client hasActivePlan: ACTIVE and endDate in the future. */
+export async function hasActivePlan(userId: string, now = Date.now()): Promise<boolean> {
+  const subscription = await prisma.subscription.findFirst({
+    where: { userId, status: 'ACTIVE' },
+  });
+  const endDate = subscription?.endDate.getTime();
+  const hasValidExpiry = typeof endDate === 'number' && Number.isFinite(endDate) && endDate > 0;
+  return hasValidExpiry && endDate! > now;
+}
+
+/** Session required. ADMIN is allowed through; regular users need an active plan. */
+export async function requireActivePlan(ctx: RequestCtx): Promise<string> {
+  const userId = requireUser(ctx);
+  if (ctx.isAdmin || (await isAdmin(ctx))) return userId;
+  if (await hasActivePlan(userId)) return userId;
+  throw new AuthError('Requiere plan activo', 403);
+}

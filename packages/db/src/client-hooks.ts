@@ -1,11 +1,9 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { nextQueryState, type QueryState } from './query-state';
 
-interface UseQueryState<T> {
-  data: T | undefined;
-  error: Error | null;
-}
+type UseQueryState<T> = QueryState<T>;
 
 type SSEClient = {
   url: string;
@@ -88,6 +86,16 @@ function isSkip(args: unknown): boolean {
   );
 }
 
+function postRequestInit(body: unknown): RequestInit & { cache?: 'no-store' } {
+  return {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    cache: 'no-store',
+    body: JSON.stringify(body ?? {}),
+  };
+}
+
 function resolveName(fnOrName: unknown): string {
   if (typeof fnOrName === 'string') return fnOrName;
   if (typeof fnOrName === 'function') {
@@ -114,20 +122,14 @@ export function useQuery<T = unknown>(
 
     const fetcher = async () => {
       try {
-        const res = await fetch(`/api/function/${encodeURIComponent(fnName)}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          cache: 'no-store',
-          body: JSON.stringify(args ?? {}),
-        });
+        const res = await fetch(`/api/function/${encodeURIComponent(fnName)}`, postRequestInit(args));
         if (!res.ok) {
           throw new Error(`useQuery(${fnName}) failed: ${res.status}`);
         }
         const data = (await res.json()) as T;
-        setState({ data, error: null });
+        setState((prev) => nextQueryState(prev, { ok: true, data }));
       } catch (err) {
-        setState({ data: undefined, error: err as Error });
+        setState((prev) => nextQueryState(prev, { ok: false, error: err as Error }));
       }
     };
 
@@ -169,38 +171,34 @@ export function useMutation<TArgs = unknown, TResult = unknown>(
   name: string | { name: string },
 ): (args?: TArgs) => Promise<TResult> {
   const fnName = resolveName(name);
-  return async (args?: TArgs): Promise<TResult> => {
-    const res = await fetch(`/api/function/${encodeURIComponent(fnName)}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify(args ?? {}),
-    });
-    if (!res.ok) {
-      const text = await res.text().catch(() => '');
-      throw new Error(text || `useMutation(${fnName}) failed: ${res.status}`);
-    }
-    return (await res.json()) as TResult;
-  };
+  return useCallback(
+    async (args?: TArgs): Promise<TResult> => {
+      const res = await fetch(`/api/function/${encodeURIComponent(fnName)}`, postRequestInit(args));
+      if (!res.ok) {
+        const text = await res.text().catch(() => '');
+        throw new Error(text || `useMutation(${fnName}) failed: ${res.status}`);
+      }
+      return (await res.json()) as TResult;
+    },
+    [fnName],
+  );
 }
 
 export function useAction<TArgs = unknown, TResult = unknown>(
   name: string | { name: string },
 ): (args?: TArgs) => Promise<TResult> {
   const fnName = resolveName(name);
-  return async (args?: TArgs): Promise<TResult> => {
-    const res = await fetch(`/api/function/${encodeURIComponent(fnName)}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify(args ?? {}),
-    });
-    if (!res.ok) {
-      const text = await res.text().catch(() => '');
-      throw new Error(text || `useAction(${fnName}) failed: ${res.status}`);
-    }
-    return (await res.json()) as TResult;
-  };
+  return useCallback(
+    async (args?: TArgs): Promise<TResult> => {
+      const res = await fetch(`/api/function/${encodeURIComponent(fnName)}`, postRequestInit(args));
+      if (!res.ok) {
+        const text = await res.text().catch(() => '');
+        throw new Error(text || `useAction(${fnName}) failed: ${res.status}`);
+      }
+      return (await res.json()) as TResult;
+    },
+    [fnName],
+  );
 }
 
 export function usePreloadedQuery<T>(preloaded: PreloadedQuery<T>): T {
@@ -217,3 +215,5 @@ export type FunctionReference<TArgs = unknown, TResult = unknown> = {
   (...args: TArgs[]): TResult;
   name: string;
 };
+
+export { nextQueryState } from './query-state';

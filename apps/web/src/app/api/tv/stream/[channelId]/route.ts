@@ -7,6 +7,7 @@ import {
   resolvePublicOrigin,
   rewriteTvManifest,
 } from '@/lib/tv-stream-proxy';
+import { denyUnlessStreamAccess } from '@/lib/require-stream-access';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -23,6 +24,9 @@ export async function GET(
   req: NextRequest,
   { params }: { params: { channelId: string } }
 ) {
+  const denied = await denyUnlessStreamAccess(req);
+  if (denied) return denied;
+
   const channelId = params.channelId;
   if (!channelId) {
     return NextResponse.json({ error: 'missing channel id' }, { status: 400 });

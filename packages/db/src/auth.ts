@@ -22,10 +22,10 @@ function resolveTrustedOrigins(baseUrl: string): string[] {
     const value = process.env[key]?.trim();
     if (value) origins.add(value);
   }
-  if (process.env.NODE_ENV !== 'production') {
-    origins.add('http://localhost:3000');
-    origins.add('http://127.0.0.1:3000');
-  }
+  // `next start` corre con NODE_ENV=production, pero también se abre desde el
+  // PC vía http://localhost:3000: esas origins deben ser de confianza siempre.
+  origins.add('http://localhost:3000');
+  origins.add('http://127.0.0.1:3000');
   origins.add('https://verpelis.pro');
   origins.add('https://www.verpelis.pro');
   return [...origins];

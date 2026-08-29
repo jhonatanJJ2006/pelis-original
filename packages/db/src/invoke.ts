@@ -1,6 +1,6 @@
 import type { FunctionDefinition } from './registry';
 import { getDefinition, callHandler } from './registry';
-import type { RequestCtx } from './lib/requireAdmin';
+import { AuthError, type RequestCtx } from './lib/requireAdmin';
 
 export class InvokeError extends Error {
   constructor(message: string, public readonly status: number = 400) {
@@ -34,9 +34,11 @@ export async function invoke({ name, args, ctx }: InvokeOptions): Promise<unknow
     return await callHandler(def, ctx, parsed);
   } catch (err) {
     if (err instanceof InvokeError) throw err;
+    if (err instanceof AuthError) throw new InvokeError(err.message, err.status);
     const msg = err instanceof Error ? err.message : 'unknown error';
     if (msg.includes('No autenticado')) throw new InvokeError(msg, 401);
     if (msg.includes('Requiere rol admin')) throw new InvokeError(msg, 403);
+    if (msg.includes('Requiere plan activo')) throw new InvokeError(msg, 403);
     if (msg.includes('Plan no encontrado') || msg.includes('No encontrado')) {
       throw new InvokeError(msg, 404);
     }

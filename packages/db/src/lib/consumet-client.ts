@@ -5,6 +5,11 @@
  * provider can be perfectly configured and still return nothing because the
  * site changed or blocks the server. Callers must treat empty results as normal
  * and fall back to an `embed` provider.
+ *
+ * As of this writing the bundled `riimuru/consumet-api` image and the public
+ * `api.consumet.org` (now an unrelated GitHub page) both fail. Without a
+ * working `CONSUMET_API_URL` we skip every `hls` provider and let the caller
+ * try the `embed` chain instead.
  */
 import {
   getConsumetApiUrl,
@@ -45,8 +50,14 @@ const HEALTH_CACHE_TTL_MS = 15 * 60 * 1000;
 const BROWSER_USER_AGENT =
   'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36';
 
-async function consumetFetch(path: string, timeoutMs = 10000): Promise<Response> {
+/**
+ * Returns null when no Consumet is configured so callers can skip `hls`
+ * providers entirely instead of throwing. The previous fallback to the public
+ * `api.consumet.org` is gone — it now resolves to an unrelated GitHub page.
+ */
+async function consumetFetch(path: string, timeoutMs = 10000): Promise<Response | null> {
   const base = getConsumetApiUrl();
+  if (!base) return null;
   return fetch(`${base}${path}`, { signal: AbortSignal.timeout(timeoutMs) });
 }
 
@@ -55,17 +66,93 @@ function consumetSlug(providerId: string): string {
   return getProviderById(providerId)?.consumetId ?? providerId;
 }
 
+const embedHealthCache = new Map<string, { at: number; ok: boolean }>();
+const EMBED_HEALTH_TTL_MS = 10 * 60 * 1000;
+
+/**
+ * Whether an embed provider's *anime* player currently resolves anything.
+ *
+ * A plain HTTP check is useless: the player hosts return 200 even when their
+ * anime backend is down (the failure happens client-side). For Next.js-based
+ * players we follow the page into the anime chunk and look for `localhost`
+ * references — a reliable signal that a production build still calls a dev
+ * backend. For other embeds we just confirm the page itself loads.
+ */
+export async function isEmbedProviderHealthy(providerId: string): Promise<boolean> {
+  const provider = getProviderById(providerId);
+  if (!provider || provider.kind !== 'embed') return true;
+
+  const hit = embedHealthCache.get(providerId);
+  if (hit && Date.now() - hit.at < EMBED_HEALTH_TTL_MS) return hit.ok;
+
+  let ok = false;
+  try {
+    if (providerId === 'vidnest') {
+      // VidNest's backend lives on a sibling domain; the page itself is enough.
+      const response = await fetch(
+        `https://new.vidnest.fun/hianime/anime/${HEALTH_CHECK_ANILIST_ID}/1/sub`,
+        {
+          signal: AbortSignal.timeout(8000),
+          headers: { 'User-Agent': BROWSER_USER_AGENT },
+        },
+      );
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const body = await response.text();
+      ok = body.includes('"data"');
+    } else {
+      ok = await probeEmbedPlayer(provider.baseUrl, providerId);
+    }
+  } catch {
+    ok = false;
+  }
+
+  embedHealthCache.set(providerId, { at: Date.now(), ok });
+  return ok;
+}
+
+/**
+ * Two-step probe for Next.js-style embed players:
+ *
+ * 1. GET the player page and look for `/_next/static/chunks/app/anime/...`
+ *    (the route the page is bundled under).
+ * 2. GET that chunk and confirm it does not contain `localhost:8080` or
+ *    `http://localhost/` — a clear sign the production bundle still calls
+ *    a developer's local backend (e.g. vidlink.pro today).
+ */
+async function probeEmbedPlayer(baseUrl: string, _providerId: string): Promise<boolean> {
+  const page = await fetch(`${baseUrl}/anime/${HEALTH_CHECK_ANILIST_ID}/1/sub`, {
+    signal: AbortSignal.timeout(8000),
+    redirect: 'follow',
+    headers: { 'User-Agent': BROWSER_USER_AGENT },
+  });
+  if (!page.ok) return false;
+  const html = await page.text();
+  const chunkMatch = html.match(/\/_next\/static\/chunks\/app\/anime\/[^"]+page-[^"]+\.js/);
+  if (!chunkMatch) {
+    // Not a Next.js player (or the route moved). Fall back to "page loads".
+    return true;
+  }
+  const chunk = await fetch(`${baseUrl}${chunkMatch[0]}`, {
+    signal: AbortSignal.timeout(8000),
+    headers: { 'User-Agent': BROWSER_USER_AGENT },
+  });
+  if (!chunk.ok) return false;
+  const code = await chunk.text();
+  return !code.includes('localhost:8080') && !code.includes('http://localhost:');
+}
+
 export async function fetchEpisodesFromProvider(
   anilistId: string | number,
   providerId: string,
   episodePage?: number,
+  _title?: string,
 ): Promise<AnimeEpisode[]> {
   const pageParam = episodePage ? `&page=${episodePage}` : '';
   try {
     const response = await consumetFetch(
       `/meta/anilist/info/${anilistId}?provider=${consumetSlug(providerId)}${pageParam}`,
     );
-    if (!response.ok) return [];
+    if (!response || !response.ok) return [];
     const data = (await response.json()) as {
       episodes?: Array<{
         id: string;
@@ -91,11 +178,10 @@ export async function fetchVideoFromProvider(
   episodeId: string,
   providerId: string,
 ): Promise<VideoSourceResult> {
+  const path = `/meta/anilist/watch/${episodeId}?provider=${consumetSlug(providerId)}`;
   try {
-    const response = await consumetFetch(
-      `/meta/anilist/watch/${episodeId}?provider=${consumetSlug(providerId)}`,
-    );
-    if (!response.ok) return { sources: [], subtitles: [] };
+    const response = await consumetFetch(path, 10000);
+    if (!response || !response.ok) return { sources: [], subtitles: [] };
     const data = (await response.json()) as {
       sources?: Array<{ url: string; quality?: string; isM3U8?: boolean }>;
       subtitles?: Array<{ url: string; lang?: string }>;
@@ -117,6 +203,7 @@ export async function fetchEpisodesWithFallback(
   anilistId: string | number,
   preferredProviderId?: string,
   episodePage?: number,
+  title?: string,
 ): Promise<{ provider: string; episodes: AnimeEpisode[]; triedProviders: string[] }> {
   const order = getHlsProviders();
   const preferred = preferredProviderId ? getProviderById(preferredProviderId) : undefined;
@@ -128,7 +215,7 @@ export async function fetchEpisodesWithFallback(
   const triedProviders: string[] = [];
   for (const provider of queue) {
     triedProviders.push(provider.id);
-    const episodes = await fetchEpisodesFromProvider(anilistId, provider.id, episodePage);
+    const episodes = await fetchEpisodesFromProvider(anilistId, provider.id, episodePage, title);
     if (episodes.length > 0) {
       return { provider: provider.id, episodes, triedProviders };
     }
@@ -146,8 +233,9 @@ export async function resolveEpisodeId(
   anilistId: string | number,
   providerId: string,
   episodeNumber: number,
+  title?: string,
 ): Promise<string | null> {
-  const episodes = await fetchEpisodesFromProvider(anilistId, providerId);
+  const episodes = await fetchEpisodesFromProvider(anilistId, providerId, undefined, title);
   if (episodes.length === 0) return null;
   const match = episodes.find((ep) => ep.number === episodeNumber);
   return match?.id ?? null;
@@ -162,6 +250,7 @@ export async function fetchVideoByEpisodeNumber(
   anilistId: string | number,
   episodeNumber: number,
   preferredProviderId?: string,
+  title?: string,
 ): Promise<{ provider: string | null; video: VideoSourceResult; triedProviders: string[] }> {
   const order = getHlsProviders();
   const preferred = preferredProviderId ? getProviderById(preferredProviderId) : undefined;
@@ -173,7 +262,7 @@ export async function fetchVideoByEpisodeNumber(
   const triedProviders: string[] = [];
   for (const provider of queue) {
     triedProviders.push(provider.id);
-    const episodeId = await resolveEpisodeId(anilistId, provider.id, episodeNumber);
+    const episodeId = await resolveEpisodeId(anilistId, provider.id, episodeNumber, title);
     if (!episodeId) continue;
     const video = await fetchVideoFromProvider(episodeId, provider.id);
     if (video.sources.length > 0) {
@@ -217,7 +306,7 @@ export async function searchConsumet(query: string): Promise<unknown[]> {
         `/meta/anilist/${encodeURIComponent(query)}?provider=${consumetSlug(provider.id)}`,
         5000,
       );
-      if (response.ok) {
+      if (response && response.ok) {
         const data = await response.json();
         results.push(...((data as { results?: unknown[] }).results ?? []).slice(0, 5));
       }
@@ -238,6 +327,7 @@ export async function checkProvidersHealth(): Promise<ProviderHealthResult[]> {
     return healthCache.results;
   }
 
+  const consumetConfigured = Boolean(getConsumetApiUrl());
   const results: ProviderHealthResult[] = [];
 
   for (const provider of getProvidersSortedByPriority()) {
@@ -277,12 +367,35 @@ export async function checkProvidersHealth(): Promise<ProviderHealthResult[]> {
       continue;
     }
 
+    if (!consumetConfigured) {
+      results.push({
+        id: provider.id,
+        name: provider.name,
+        kind: 'hls',
+        ok: false,
+        responseMs: null,
+        error: 'No hay CONSUMET_API_URL configurado',
+      });
+      continue;
+    }
+
     try {
       const response = await consumetFetch(
         `/meta/anilist/info/${HEALTH_CHECK_ANILIST_ID}?provider=${consumetSlug(provider.id)}`,
         8000,
       );
       const responseMs = Date.now() - started;
+      if (!response) {
+        results.push({
+          id: provider.id,
+          name: provider.name,
+          kind: 'hls',
+          ok: false,
+          responseMs: null,
+          error: 'Sin respuesta de Consumet',
+        });
+        continue;
+      }
       if (!response.ok) {
         results.push({
           id: provider.id,

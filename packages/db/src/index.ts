@@ -4,7 +4,7 @@ export { prisma } from './client';
 export { auth } from './auth';
 export { getRequestCtx, preloadQuery, invoke } from './server';
 export type { PreloadedQuery } from './server';
-export { isAdmin } from './lib/requireAdmin';
+export { isAdmin, requireUser, requireAdmin, requireActivePlan, AuthError } from './lib/requireAdmin';
 export { uploadFile, deleteFile } from './storage';
 export {
   fetchTmdbMetadata,

@@ -1,0 +1,1041 @@
+{
+  "stamp": "20260823-174405",
+  "threshold": 2,
+  "days": 7,
+  "candidatesCount": 1807,
+  "candidatesSample": [
+    {
+      "id": "jx701p5xatvwv3x9r098gkxk318c8563",
+      "name": "like Gecko) Chrome/83.0.4103.97 Safari/537.36 CrKey/1.44.191160\" group-title=\"General\",Telecaribe (720p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx7009274kfqmx79gpv6m49cr58c9rak",
+      "name": "Canal 1 (1080p) [Geo-blocked]",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx7008sr16575z7zm0v029j0s18c8pc5",
+      "name": "Monagas Visión (720p) [Not 24/7]",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx7024dh2beyq33nh2xk4677qx8c9jnv",
+      "name": "TDV TV (240p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx700x9gzf9bqnmwnmvft271n98c82wx",
+      "name": "Suram TV (1080p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx702t8rmefjfbafzv9f1bx9y58c9ter",
+      "name": "TVM para ti (1080p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70471ahs2rsr80r4x6fav7jd8c921m",
+      "name": "Telecolor (480p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx700fqjdw6d2ndz9bywhp9a5s8c9jcz",
+      "name": "Vaya semanita",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx7019vpbgxbcd30wanh2qr2qd8c9c22",
+      "name": "Telehit Musica Estados Unidos (720p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx703bjhf1pysjnccf4pn42y6s8c9yh5",
+      "name": "Antara TV",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx702q266yb42zfsc8ye6eywqd8c8ww7",
+      "name": "ICONE TV",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx703w101kdq8nxzgyeycma5e58c937c",
+      "name": "Hispan TV",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "cmsv9fgku0002e6hvbo3kpj0t",
+      "name": "RT en Español",
+      "country": "Rusia",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx705ghdxhckta6sf817vhvcqs8c8nxn",
+      "name": "América Estéreo Tulcán (614p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx705zrags4nd32e7ms15c7hr18c9s8n",
+      "name": "La Reina TV [Geo-blocked]",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx7061h5rk3ej7vxvqcpjj0ve18c8a0b",
+      "name": "15.1 BPB (720p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx7076f03tz2ca7dkyj6134cpx8c9zjh",
+      "name": "JNE TV (720p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx7056xjvm2qrw4c5cwvevstg98c9t00",
+      "name": "Sensacion Costa",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx706p8eyhrn68j9y3554hj20h8c87q5",
+      "name": "Bolivision (1080p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx706jnkekmfv0ykh23xs2je718c98tq",
+      "name": "Waldivision Internacional",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx706v9y4685my2wpbk4629f9n8c9smt",
+      "name": "like Gecko) Chrome/83.0.4103.97 Safari/537.36 CrKey/1.44.191160\" group-title=\"General\",Trece (720p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx706wpztk3cr3pjn53xn2jwds8c9cdz",
+      "name": "like Gecko) Chrome/92.0.4515.131 Safari/537.36\" group-title=\"General\",Televiaducto Canal 3 (720p) [Not 24/7]",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx7083ddy4q60w6bgjfa6yh91x8c9t18",
+      "name": "JBN Canal 39 (720p) [Not 24/7]",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70501vpp92jj7wqfv7r63fy58c83r3",
+      "name": "Milenio Televisión (720p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx705h6ztknc4m8ffjzt3cgbjd8c9aqz",
+      "name": "Turbo Mix Radio TV (720p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx707zyqr4m5z1gey7vtq9c94h8c94x3",
+      "name": "Prueba Pelis — Canal demo 3 (Mux DAI)",
+      "country": "AR",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx706qajps1def5tzayypvdb2n8c8ftd",
+      "name": "Pluto TV Cine Familia",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx706xktjgbnpw82r3yk0prets8c94bz",
+      "name": "Tele Mocoa Canal 10 (720p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx705r743zmyrq5ker38a3q4m58c8ngz",
+      "name": "DreikoTv (720p) [Not 24/7]",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx7061978aq0bc38d9s7ap1dbs8c8te0",
+      "name": "IRINN2 Live Farsi News",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4",
+        "R6"
+      ]
+    },
+    {
+      "id": "jx704j6mfe50n0evrgj6wr3kfn8c8a6n",
+      "name": "América Estéreo Ibarra (720p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx705vfpvxncrnh26a2k6gwab98c8z1e",
+      "name": "WKAQ-DT1 (Telemundo PR) (1080p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx709jh81j2kefazp2zekfzkfx8c9pwg",
+      "name": "Verso TV",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70919fspg3hdjmfrkmrwz7c18c82zj",
+      "name": "Candelita TV (480p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx708ew2445jz6zpyfp8v1eqf98c9t58",
+      "name": "Yuma77",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70a81z2xbd6j726jge1qjyex8c8bjb",
+      "name": "Nueva Vision 14 (1080p) [Not 24/7]",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx709ev18jke9kg9z5v7xx5bzs8c8j3r",
+      "name": "TV MAX (720p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx709nj9c4wc2j9ezb2qg305kh8c9mbf",
+      "name": "Pluto TV Motor",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70b17955tee5px2s3ehf6z398c9pwd",
+      "name": "ShowVen TV (720p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70ansfgrm7zjh026pn507z618c8pmd",
+      "name": "Radio Contemporanea Coihueco (720p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70asdz1e7y49r3x7p0thggax8c8ns4",
+      "name": "BNB Digital (720p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70b8aq82ak11rtmz5yz0as2n8c9v5m",
+      "name": "Goiena Eus (720p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70am9fhf5eh6kdteb9qs74vh8c8tgn",
+      "name": "Blu Radio (720p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70asvwvjdtgkrygyk87jkfeh8c9jqv",
+      "name": "Onda TV (720p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70t3yf6bhctvw8dng7nbgf8h8c814m",
+      "name": "XPTV US (720p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "cmsv9fgkl0001e6hvemf2svka",
+      "name": "BBC World News",
+      "country": "Reino Unido",
+      "status": "OFFLINE",
+      "failures": 2,
+      "hits": [
+        "R1",
+        "R3",
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70c5vfjc8103whghpcghm1th8c8ask",
+      "name": "CBS News Detroit (720p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70ak58jtr9rcw7fbegnheyw18c8wkv",
+      "name": "Al Hadath (1080p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70cc6syqeahqgnqa1dp2zr098c941x",
+      "name": "Bethel TV (720p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70cd1hjgmryrfd2n0pwzg9sx8c8608",
+      "name": "Expressen TV (1080p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx7090m3dfgg6tf86t6gp3g9ss8c8n9q",
+      "name": "Pauta (1080p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70wbef20pn6pk2hw1qxpzfm58c9jpz",
+      "name": "El-Roi TV (720p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "cmsv9fgk90000e6hvmw7c4la9",
+      "name": "CNN en Español",
+      "country": "Estados Unidos",
+      "status": "OFFLINE",
+      "failures": 2,
+      "hits": [
+        "R3",
+        "R4"
+      ]
+    },
+    {
+      "id": "jx7094bs4z8kdh7v5e7wekqfas8c822g",
+      "name": "Television Tarapoto (720p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70cy2wfxrsqq1fw9x38fhe6x8c973r",
+      "name": "CNC Bugavisión (720p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70czwfscj8etfpe6xc74w9zd8c9sw3",
+      "name": "Notigram TV (XHFGL-TDT) (1080p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70dmfxkvjxfqtw6zj2vwdm1s8c8qa7",
+      "name": "Vahos TV",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70d1wa4p4nbfsjg41k7jqbxn8c8qf5",
+      "name": "entelevision (1080p) [Not 24/7]",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70ec4y61zbetvsrjbbx58ke18c8hzb",
+      "name": "Controversia TV (720p) [Not 24/7]",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70f37q70d7dtc1ng3zgr6tcx8c80fs",
+      "name": "Red Uno (720p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70df9hsbpdxf692ng4d32am18c8dt6",
+      "name": "Logos TV (1080p) [Not 24/7]",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70e1n2tc5h1w69244wg9q5ex8c9cv0",
+      "name": "La Que Buena Atlanta",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70ejp69wzwabgv1j2rzk75gn8c80kk",
+      "name": "BAMOS TV (1080p) [Not 24/7]",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70fnawx2sm9sb07pvq27a4ex8c94h2",
+      "name": "Di TV (1080p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70fva9c32vx4b10jqxgv9mkn8c9n4v",
+      "name": "Canal 24 Horas Catalunya (720p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70ffyjrb6788v5hnnrydd8c98c9r8w",
+      "name": "Guaymate TV (720p) [Not 24/7]",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70f93j3evnbjrqrz31fzna258c8z6c",
+      "name": "TV3CAT (1080p) [Geo-blocked]",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70ecx9yaqx2dbctnnm68whbd8c90ax",
+      "name": "SUR TV (1080p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70exbfzfj8g3mhg89sdgsgxn8c9xf8",
+      "name": "101tv Malaga",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70ghxaad3gb0zr2sjhz785jn8c9qee",
+      "name": "Gaviota TV",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70e8s3mj4sq21xg5cc8hyetx8c8q4x",
+      "name": "News 1st (576p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70eaww8x724srex6baqgwpcx8c9qda",
+      "name": "Pluto TV Thrillers",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70evfydxaqtgkmejfqfwapw98c8583",
+      "name": "Mírame TV (360p) [Not 24/7]",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "cmsv9fglo0007e6hv2jmdwzck",
+      "name": "Latina",
+      "country": "Perú",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "cmsv9fglb0005e6hvwc4tkf4d",
+      "name": "Trome",
+      "country": "Perú",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "cmsv9fgli0006e6hv5635a9s5",
+      "name": "Willax",
+      "country": "Perú",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx77qbdjxbch06p2rza9swmted8c9e3t",
+      "name": "BBC Arabic (720p)",
+      "country": "Desconocido",
+      "status": "ONLINE",
+      "failures": 0,
+      "hits": [
+        "R6"
+      ]
+    },
+    {
+      "id": "jx70hnxe9nkr3dah0s3r8grdbs8c8g6p",
+      "name": "Franchs TV (720p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70jgejh4vbv841te61heq24x8c9v0b",
+      "name": "Oasis TV (720p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70hxv98zmcw2hyre8pd7x3658c9mvv",
+      "name": "Pantalla Clásica EC (512p) [Not 24/7]",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70hvmcgkk2njv2tyzz5tcyp98c9zdc",
+      "name": "Channel One",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70kbexh681wenaa5n190886d8c8cjt",
+      "name": "Garage TV Latin America",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70mjn2wrcvmq9brzsnycw0yd8c9vze",
+      "name": "UCV TV (720p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70mha7gwmykk95w9wjrjhde58c92dp",
+      "name": "Radio Panoramica (720p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70kheb680wawntv6j44xt81d8c8fym",
+      "name": "Teve Vida Network (480p) [Not 24/7]",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70kcsdjtj0rnebcp76gfw54d8c92hc",
+      "name": "RCN Más (1080p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70jne81qt64kbsdgvx10qbxd8c84zn",
+      "name": "Curiquingue TV (720p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70h839dy7rhtacdgpqa9xc9h8c9wkk",
+      "name": "CRTV (720p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70ketdghf9f5j0k7d9mjypj98c86bz",
+      "name": "TVONE Nicaragua (720p) [Not 24/7]",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70mf2x6qwp9qjkdakrjh0ghs8c9pzz",
+      "name": "Star Trek: The Next Generation",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70mvxedrgpe9ejnhq53gwtt18c9997",
+      "name": "South Park: Colección Kyle",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70ksrhmf6mgbcz4bakngabxh8c99vz",
+      "name": "Al Janoub TV",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70mfx5etdpzxk4fr6hpy0zf18c8xpq",
+      "name": "NBC 2",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "cmsv9fglz0009e6hv4i6ib18v",
+      "name": "ESPN",
+      "country": "Estados Unidos",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "cmsv9fgls0008e6hvjhx5cy9e",
+      "name": "América TV",
+      "country": "Perú",
+      "status": "OFFLINE",
+      "failures": 2,
+      "hits": [
+        "R3",
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70mn8gkdapba09b0vbnjsx598c9t5x",
+      "name": "Antena TV",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70ht8mwd3c60pjsvr8zr700s8c9mb1",
+      "name": "ABTV Bariloche",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70gznccxdjp7gyf9pwyp41wh8c9hrs",
+      "name": "Canal Sur Andalucía 2 (720p)",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70n59m90j5rrmzc7n4kq8hvs8c9xbd",
+      "name": "CTT Canal 49 (1080p) [Not 24/7]",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    },
+    {
+      "id": "jx70ns1s2wwrakcx305tqvh67n8c9zk3",
+      "name": "Bajo Techo TV (1080p) [Not 24/7]",
+      "country": "Desconocido",
+      "status": "OFFLINE",
+      "failures": 1,
+      "hits": [
+        "R4"
+      ]
+    }
+  ],
+  "ruleHits": {
+    "R1": 8,
+    "R2": 8,
+    "R3": 8,
+    "R4": 1758,
+    "R5": 8,
+    "R6": 38,
+    "R7": 54
+  },
+  "deleteCount": 0,
+  "deleteIds": [],
+  "summary": [
+    {
+      "streamStatus": "OFFLINE",
+      "isActive": false,
+      "n": 1758
+    },
+    {
+      "streamStatus": "ONLINE",
+      "isActive": true,
+      "n": 1221
+    },
+    {
+      "streamStatus": "ONLINE",
+      "isActive": false,
+      "n": 49
+    }
+  ]
+}

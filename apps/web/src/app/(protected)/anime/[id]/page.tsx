@@ -4,6 +4,7 @@ import { useQuery, useAction } from '@pelis/db/client';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   ArrowLeft,
   Star,
@@ -20,7 +21,6 @@ import { api } from '@pelis/db/api';
 import { MovieDetailSkeleton } from '@pelis/ui/features/movie-detail-skeleton';
 import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';
 import { cn } from '@pelis/ui/utils';
-import { EpisodeProviderDialog, type EpisodeChoice, type ProviderInfo } from './episode-provider-dialog';
 
 interface Season {
   _id: string;
@@ -82,17 +82,16 @@ function formatAirDate(value: string | null): string | null {
 
 export default function AnimeDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const id = params.id as string;
 
   const series = useQuery(api.anime.getSeries, { id }) as AnimeSeries | null | undefined;
-  const providers = useQuery(api.anime.getProviders, {}) as ProviderInfo[] | undefined;
   const getSeasonEpisodes = useAction(api.anime.getSeasonEpisodes);
 
   const [activeSeasonId, setActiveSeasonId] = useState<string | null>(null);
   const [episodes, setEpisodes] = useState<EpisodeMeta[]>([]);
   const [loadingEpisodes, setLoadingEpisodes] = useState(false);
   const [episodeError, setEpisodeError] = useState<string | null>(null);
-  const [chosenEpisode, setChosenEpisode] = useState<EpisodeChoice | null>(null);
 
   // Deep links point at a specific season; otherwise start on the first one.
   useEffect(() => {
@@ -305,16 +304,10 @@ export default function AnimeDetailPage() {
                 <button
                   key={ep.number}
                   type="button"
-                  onClick={() =>
-                    activeSeason &&
-                    setChosenEpisode({
-                      animeId: activeSeason._id,
-                      seasonLabel: activeSeason.seasonLabel,
-                      number: ep.number,
-                      title: ep.title,
-                      image: ep.image,
-                    })
-                  }
+                  onClick={() => {
+                    if (!activeSeason) return;
+                    router.push(`/anime/watch/${activeSeason._id}/${ep.number}`);
+                  }}
                   className="group flex gap-3 p-3 rounded-xl bg-cinema-surface border border-cinema-border hover:border-cinema-violet/50 hover:bg-cinema-elevated transition-all text-left"
                 >
                   <div className="relative w-28 aspect-video rounded-lg overflow-hidden bg-cinema-elevated shrink-0">
@@ -368,14 +361,6 @@ export default function AnimeDetailPage() {
           </div>
         )}
       </ScrollReveal>
-
-      {chosenEpisode && providers && providers.length > 0 && (
-        <EpisodeProviderDialog
-          episode={chosenEpisode}
-          providers={providers}
-          onClose={() => setChosenEpisode(null)}
-        />
-      )}
     </div>
   );
 }

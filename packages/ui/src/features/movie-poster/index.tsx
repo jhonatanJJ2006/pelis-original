@@ -12,6 +12,16 @@ interface MoviePosterProps {
   loading?: 'lazy' | 'eager';
   fetchPriority?: 'high' | 'low' | 'auto';
   style?: CSSProperties;
+  responsive?: boolean;
+}
+
+function buildSrcSet(src: string): string | undefined {
+  if (!src.startsWith('/peliculas/') && !src.startsWith('/uploads/')) return undefined;
+  if (!src.endsWith('.webp') && !src.endsWith('.jpg') && !src.endsWith('.jpeg') && !src.endsWith('.png')) {
+    return undefined;
+  }
+  const base = src.replace(/\.(webp|jpg|jpeg|png)$/i, '');
+  return `${base}-200.webp 200w, ${base}-400.webp 400w`;
 }
 
 function MoviePosterBase({
@@ -21,12 +31,16 @@ function MoviePosterBase({
   loading = 'lazy',
   fetchPriority,
   style,
+  responsive = true,
 }: MoviePosterProps) {
   const [failed, setFailed] = useState(false);
+  const srcSet = responsive ? buildSrcSet(src) : undefined;
 
   return (
     <img
-      src={!src ? PLACEHOLDER : failed ? undefined : src}
+      src={!src || failed ? PLACEHOLDER : src}
+      srcSet={failed ? undefined : srcSet}
+      sizes={srcSet ? '(max-width: 640px) 200px, 400px' : undefined}
       alt={alt}
       className={cn(className)}
       loading={loading}

@@ -5,7 +5,7 @@ import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Calendar, Crown, Heart, Play, Tag, User } from 'lucide-react';
 import { api } from '@pelis/db/api';
-import { useUser } from '@pelis/auth/hooks';
+import { hasActivePlan, useUser } from '@pelis/auth/hooks';
 import { MovieDetailSkeleton } from '@pelis/ui/features/movie-detail-skeleton';
 import { Badge, Skeleton } from '@pelis/ui/components';
 import { VideoPlayer } from '@pelis/ui/features/video-player';
@@ -18,41 +18,53 @@ import { cn } from '@pelis/ui/utils';
 import type { MediaItem } from '@pelis/ui/types';
 import { useResolvedVideoUrl } from '@/hooks/use-resolved-video-url';
 
-export default function MovieDetailPageClient() {
+interface MovieDetailPageClientProps {
+  preloaded: {
+    movie: { data: MediaItem | null };
+    related?: { data: MediaItem[] };
+  };
+}
+
+export default function MovieDetailPageClient({ preloaded }: MovieDetailPageClientProps) {
   const params = useParams();
   const searchParams = useSearchParams();
   const { user } = useUser();
   const id = params.id as string;
   const shouldPlay = searchParams.get('play') === 'true';
 
+  const preloadedMovie = preloaded?.movie?.data;
+  const preloadedRelated = preloaded?.related?.data;
+
   const movie = useQuery(api.movies.getById, { id } as any) as MediaItem | undefined | null;
+  const resolvedMovie = movie ?? preloadedMovie;
   const related = useQuery(
     api.movies.getByGenre,
-    movie ? { genre: movie.genre, limit: 12 } : 'skip'
+    resolvedMovie ? { genre: resolvedMovie.genre, limit: 12 } : 'skip'
   ) as MediaItem[] | undefined;
+  const resolvedRelated = related ?? preloadedRelated;
   const addFavorite = useMutation(api.favorites.add);
   const removeFavorite = useMutation(api.favorites.remove);
   const isFavorited = useQuery<boolean>(
     api.favorites.check,
-    user && movie ? { userId: user._id as any, movieId: movie._id as any } : 'skip'
+    user && resolvedMovie ? { userId: user._id as any, movieId: resolvedMovie._id as any } : 'skip'
   );
 
   const { resolvedUrl, loading: resolvingVideo } = useResolvedVideoUrl(
-    movie?.videoUrl,
-    movie?.token
+    resolvedMovie?.videoUrl,
+    resolvedMovie?.token
   );
 
   const handleFavorite = async () => {
-    if (!user || !movie) {
+    if (!user || !resolvedMovie) {
       toast.error('Inicia sesión para guardar favoritos');
       return;
     }
     try {
       if (isFavorited) {
-        await removeFavorite({ userId: user._id as any, movieId: movie._id as any });
+        await removeFavorite({ userId: user._id as any, movieId: resolvedMovie._id as any });
         toast.success('Eliminado de favoritos');
       } else {
-        await addFavorite({ userId: user._id as any, movieId: movie._id as any });
+        await addFavorite({ userId: user._id as any, movieId: resolvedMovie._id as any });
         toast.success('Agregado a favoritos');
       }
     } catch {
@@ -60,11 +72,11 @@ export default function MovieDetailPageClient() {
     }
   };
 
-  if (movie === undefined) {
+  if (resolvedMovie === undefined) {
     return <MovieDetailSkeleton />;
   }
 
-  if (movie === null) {
+  if (resolvedMovie === null) {
     return (
       <EmptyState
         icon={Play}
@@ -76,10 +88,10 @@ export default function MovieDetailPageClient() {
     );
   }
 
-  const isSeries = movie.mediaType === 'series';
-  const relatedFiltered = (related ?? []).filter((m) => m._id !== movie._id);
-  const hasActivePlan = !!(user?.planExpiresAt && user.planExpiresAt > Date.now());
-  const heroImage = movie.backdropImage ?? movie.image;
+  const isSeries = resolvedMovie.mediaType === 'series';
+  const relatedFiltered = (resolvedRelated ?? []).filter((m) => m._id !== resolvedMovie._id);
+  const entitled = hasActivePlan(user);
+  const heroImage = resolvedMovie.backdropImage ?? resolvedMovie.image;
 
   return (
     <div className="pb-12">
@@ -89,6 +101,7 @@ export default function MovieDetailPageClient() {
           alt=""
           className="w-full h-full object-cover"
           loading="eager"
+          fetchPriority="high"
         />
         <div className="absolute inset-0 hero-gradient-right" />
         <div className="absolute inset-0 hero-gradient-bottom" />
@@ -105,34 +118,34 @@ export default function MovieDetailPageClient() {
         <div className="absolute bottom-0 left-0 right-0 p-8 md:p-14">
           <div className="container mx-auto">
             <div className="flex flex-wrap gap-2 mb-4">
-              <Badge variant="primary">{movie.classification}</Badge>
-              <Badge variant="violet">{movie.genre}</Badge>
-              <Badge>{movie.releaseYear}</Badge>
-              {isSeries && movie.episodes && (
+              <Badge variant="primary">{resolvedMovie.classification}</Badge>
+              <Badge variant="violet">{resolvedMovie.genre}</Badge>
+              <Badge>{resolvedMovie.releaseYear}</Badge>
+              {isSeries && resolvedMovie.episodes && (
                 <Badge variant="warning" className="bg-cinema-gold/90 text-black border-0">
-                  {movie.episodes} episodios
+                  {resolvedMovie.episodes} episodios
                 </Badge>
               )}
             </div>
             <h1 className="font-display text-4xl md:text-6xl tracking-wide text-white uppercase max-w-3xl mb-4">
-              {movie.name}
+              {resolvedMovie.name}
             </h1>
             <p className="text-cinema-muted text-lg mb-6 max-w-2xl line-clamp-2">
-              {movie.synopsis}
+              {resolvedMovie.synopsis}
             </p>
 
             <div className="flex flex-wrap gap-4 md:gap-6 text-sm text-cinema-silver mb-8">
               <div className="flex items-center gap-1.5">
                 <User className="w-4 h-4" aria-hidden />
-                <span>{movie.actors}</span>
+                <span>{resolvedMovie.actors}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <Tag className="w-4 h-4" aria-hidden />
-                <span>{movie.genre}</span>
+                <span>{resolvedMovie.genre}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <Calendar className="w-4 h-4" aria-hidden />
-                <span>{movie.releaseYear}</span>
+                <span>{resolvedMovie.releaseYear}</span>
               </div>
             </div>
 
@@ -140,7 +153,7 @@ export default function MovieDetailPageClient() {
               <button
                 type="button"
                 onClick={() => {
-                  if (!hasActivePlan) {
+                  if (!entitled) {
                     toast.error('Necesitas un plan para reproducir', {
                       action: {
                         label: 'Ver planes',
@@ -188,7 +201,7 @@ export default function MovieDetailPageClient() {
                 Iniciar sesión
               </Link>
             </div>
-          ) : !hasActivePlan ? (
+          ) : !entitled ? (
             <div className="aspect-video rounded-2xl card-feature border border-cinema-gold/20 flex flex-col items-center justify-center gap-4 p-8">
               <Crown className="w-12 h-12 text-cinema-gold/40" aria-hidden />
               <p className="text-cinema-muted text-center max-w-md">
@@ -205,9 +218,9 @@ export default function MovieDetailPageClient() {
             <VideoPlayer
               videoUrl={resolvedUrl}
               poster={heroImage}
-              title={movie.name}
+              title={resolvedMovie.name}
               userId={user._id}
-              movieId={movie._id}
+              movieId={resolvedMovie._id}
               autoPlay={shouldPlay}
             />
           ) : (
@@ -224,7 +237,7 @@ export default function MovieDetailPageClient() {
             <h2 className="font-display text-2xl tracking-wide text-white uppercase mb-4">
               Sinopsis
             </h2>
-            <p className="text-cinema-muted leading-relaxed text-lg">{movie.synopsis}</p>
+            <p className="text-cinema-muted leading-relaxed text-lg">{resolvedMovie.synopsis}</p>
           </div>
           <div className="card-feature p-6 h-fit">
             <h3 className="font-display text-lg tracking-wide text-white uppercase mb-5">
@@ -232,11 +245,11 @@ export default function MovieDetailPageClient() {
             </h3>
             <dl className="space-y-4 text-sm">
               {[
-                ['Clasificación', movie.classification],
-                ['Género', movie.genre],
-                ['Año', movie.releaseYear],
-                ['Actores', movie.actors],
-                ...(isSeries && movie.episodes ? [['Episodios', String(movie.episodes)]] : []),
+                ['Clasificación', resolvedMovie.classification],
+                ['Género', resolvedMovie.genre],
+                ['Año', resolvedMovie.releaseYear],
+                ['Actores', resolvedMovie.actors],
+                ...(isSeries && resolvedMovie.episodes ? [['Episodios', String(resolvedMovie.episodes)]] : []),
               ].map(([label, value]) => (
                 <div
                   key={label}
@@ -252,9 +265,9 @@ export default function MovieDetailPageClient() {
 
         {relatedFiltered.length > 0 && (
           <MovieRow
-            title={`Más de ${movie.genre}`}
+            title={`Más de ${resolvedMovie.genre}`}
             movies={relatedFiltered}
-            href={`/movies?genre=${encodeURIComponent(movie.genre)}`}
+            href={`/movies?genre=${encodeURIComponent(resolvedMovie.genre)}`}
           />
         )}
       </div>
