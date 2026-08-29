@@ -61,6 +61,10 @@ function LoginForm() {
     e.preventDefault();
     setError('');
     setShowVerifyMessage(false);
+    if (!email.trim() || !password.trim()) {
+      setError('Completa todos los campos');
+      return;
+    }
     setLoading(true);
     try {
       const { error: signInError } = await authClient.signIn.email({
@@ -87,12 +91,12 @@ function LoginForm() {
 
   return (
     <div className="w-full max-w-md">
-      <div className="card-glow p-6 md:p-8 shadow-[0_8px_40px_rgba(59,130,246,0.15)]">
+      <div className="card-glow p-6 md:p-8 shadow-[0_8px_40px_rgba(196,163,90,0.12)]">
         <div className="text-center mb-8">
-          <div className="w-14 h-14 bg-gradient-to-br from-cinema-violet to-cinema-teal rounded-xl flex items-center justify-center mx-auto mb-4 shadow-glow-violet">
-            <Film className="w-8 h-8 text-white" aria-hidden />
+          <div className="w-14 h-14 bg-gradient-to-br from-cinema-accent to-cinema-gold rounded-xl flex items-center justify-center mx-auto mb-4 shadow-glow">
+            <Film className="w-8 h-8 text-cinema-bg" aria-hidden />
           </div>
-          <h1 className="font-display text-2xl md:text-3xl tracking-wide text-white uppercase">
+          <h1 className="font-display text-2xl md:text-3xl tracking-tight text-cinema-chalk">
             Iniciar sesión
           </h1>
           <p className="text-cinema-muted mt-2">Accede a tu cuenta para continuar</p>
@@ -178,14 +182,14 @@ function LoginForm() {
 
         {error && !showVerifyMessage && (
           <div
-            className="mb-4 p-3 rounded bg-red-500/10 border border-red-500/30 text-red-400 text-sm text-center"
+            className="mb-4 p-3 rounded bg-cinema-danger/10 border border-cinema-danger/30 text-cinema-danger-light text-sm text-center"
             role="alert"
           >
             {error}
           </div>
         )}
 
-        <form className="space-y-4" onSubmit={handleSubmit}>
+        <form className="space-y-4" onSubmit={handleSubmit} noValidate>
           <Input
             label="Email"
             type="email"
@@ -224,12 +228,12 @@ function LoginForm() {
 function LoginPageFallback() {
   return (
     <div className="w-full max-w-md">
-      <div className="card-glow p-6 md:p-8 shadow-[0_8px_40px_rgba(59,130,246,0.15)]">
+      <div className="card-glow p-6 md:p-8 shadow-[0_8px_40px_rgba(196,163,90,0.12)]">
         <div className="text-center mb-8">
-          <div className="w-14 h-14 bg-gradient-to-br from-cinema-violet to-cinema-teal rounded-xl flex items-center justify-center mx-auto mb-4 shadow-glow-violet">
-            <Film className="w-8 h-8 text-white" aria-hidden />
+          <div className="w-14 h-14 bg-gradient-to-br from-cinema-accent to-cinema-gold rounded-xl flex items-center justify-center mx-auto mb-4 shadow-glow">
+            <Film className="w-8 h-8 text-cinema-bg" aria-hidden />
           </div>
-          <h1 className="font-display text-2xl md:text-3xl tracking-wide text-white uppercase">
+          <h1 className="font-display text-2xl md:text-3xl tracking-tight text-cinema-chalk">
             Iniciar sesión
           </h1>
         </div>

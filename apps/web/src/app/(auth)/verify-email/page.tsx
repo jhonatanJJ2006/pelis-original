@@ -23,8 +23,8 @@ function VerifyForm() {
   if (!emailFromUrl) {
     return (
       <div className="w-full max-w-md">
-        <div className="card-glow p-6 md:p-8 shadow-[0_8px_40px_rgba(59,130,246,0.15)] text-center">
-          <h1 className="font-display text-2xl tracking-wide text-white uppercase mb-4">
+        <div className="card-glow p-6 md:p-8 shadow-[0_8px_40px_rgba(196,163,90,0.12)] text-center">
+          <h1 className="font-display text-2xl tracking-tight text-cinema-chalk mb-4">
             Enlace inválido
           </h1>
           <p className="text-cinema-muted mb-6">No se ha proporcionado un correo electrónico.</p>
@@ -124,7 +124,7 @@ function VerifyForm() {
   if (success) {
     return (
       <div className="w-full max-w-md">
-        <div className="card-glow p-6 md:p-8 shadow-[0_8px_40px_rgba(59,130,246,0.15)] text-center">
+        <div className="card-glow p-6 md:p-8 shadow-[0_8px_40px_rgba(196,163,90,0.12)] text-center">
           <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
             <svg
               className="w-8 h-8 text-white"
@@ -141,7 +141,7 @@ function VerifyForm() {
               />
             </svg>
           </div>
-          <h1 className="font-display text-2xl md:text-3xl tracking-wide text-white uppercase mb-2">
+          <h1 className="font-display text-2xl md:text-3xl tracking-tight text-cinema-chalk mb-2">
             ¡Cuenta verificada!
           </h1>
           <p className="text-cinema-muted">Te estamos redirigiendo...</p>
@@ -152,12 +152,12 @@ function VerifyForm() {
 
   return (
     <div className="w-full max-w-md">
-      <div className="card-glow p-6 md:p-8 shadow-[0_8px_40px_rgba(59,130,246,0.15)]">
+      <div className="card-glow p-6 md:p-8 shadow-[0_8px_40px_rgba(196,163,90,0.12)]">
         <div className="text-center mb-8">
-          <div className="w-14 h-14 bg-gradient-to-br from-cinema-violet to-cinema-teal rounded-xl flex items-center justify-center mx-auto mb-4 shadow-glow-violet">
-            <Film className="w-8 h-8 text-white" aria-hidden />
+          <div className="w-14 h-14 bg-gradient-to-br from-cinema-accent to-cinema-gold rounded-xl flex items-center justify-center mx-auto mb-4 shadow-glow">
+            <Film className="w-8 h-8 text-cinema-bg" aria-hidden />
           </div>
-          <h1 className="font-display text-2xl md:text-3xl tracking-wide text-white uppercase">
+          <h1 className="font-display text-2xl md:text-3xl tracking-tight text-cinema-chalk">
             Verifica tu email
           </h1>
           <p className="text-cinema-muted mt-2">
@@ -168,7 +168,7 @@ function VerifyForm() {
 
         {error && (
           <div
-            className="mb-4 p-3 rounded bg-red-500/10 border border-red-500/30 text-red-400 text-sm text-center"
+            className="mb-4 p-3 rounded bg-cinema-danger/10 border border-cinema-danger/30 text-cinema-danger-light text-sm text-center"
             role="alert"
           >
             {error}

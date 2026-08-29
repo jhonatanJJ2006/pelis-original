@@ -177,7 +177,7 @@ export function HeroCarousel({ movies }: HeroCarouselProps) {
                           isActive ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
                         )}
                       >
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-cinema-violet text-white text-xs font-semibold rounded-full uppercase tracking-wide shadow-glow-violet">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-cinema-accent text-cinema-bg text-xs font-semibold rounded-full uppercase tracking-wide shadow-glow">
                           <Sparkles className="w-3.5 h-3.5" aria-hidden />
                           Destacado
                         </span>
@@ -187,7 +187,7 @@ export function HeroCarousel({ movies }: HeroCarouselProps) {
                       </div>
                       <h2
                         className={cn(
-                          'font-display text-3xl sm:text-5xl md:text-7xl lg:text-8xl tracking-wide text-white uppercase leading-[0.95] mb-5 transition-all duration-500 ease-out delay-75 break-words',
+                          'font-display text-3xl sm:text-5xl md:text-7xl lg:text-8xl tracking-tight text-cinema-chalk leading-[0.95] mb-5 transition-all duration-500 ease-out delay-75 break-words',
                           isActive ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
                         )}
                       >
