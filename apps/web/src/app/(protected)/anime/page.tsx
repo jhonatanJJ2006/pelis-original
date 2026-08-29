@@ -69,10 +69,10 @@ export default function AnimePage() {
   return (
     <div className="page-shell">
       <ScrollReveal className="mb-10">
-        <p className="text-cinema-violet-light text-sm font-medium uppercase tracking-widest mb-2">
+        <p className="text-cinema-accent text-sm font-medium uppercase tracking-widest mb-2">
           Catálogo
         </p>
-        <h1 className="font-display text-4xl md:text-5xl tracking-wide text-white uppercase">
+        <h1 className="font-display text-4xl md:text-5xl tracking-tight text-cinema-chalk">
           Anime
         </h1>
         <p className="text-cinema-muted mt-3 max-w-2xl">
@@ -135,7 +135,7 @@ export default function AnimePage() {
             <Link
               key={s.seriesKey}
               href={`/anime/${s._id}`}
-              className="group relative flex flex-col rounded-2xl overflow-hidden bg-cinema-surface border border-cinema-border hover:border-cinema-violet/50 transition-all hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cinema-violet"
+              className="group relative flex flex-col rounded-2xl overflow-hidden bg-cinema-surface border border-cinema-border hover:border-cinema-accent/60 transition-all hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cinema-accent"
             >
               <div className="relative aspect-[3/4] overflow-hidden bg-cinema-elevated">
                 <img

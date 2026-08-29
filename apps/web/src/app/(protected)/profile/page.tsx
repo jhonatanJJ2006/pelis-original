@@ -80,7 +80,7 @@ export default function ProfilePage() {
         <div className="w-16 h-16 rounded-2xl bg-cinema-elevated border border-cinema-border flex items-center justify-center mb-5">
           <User className="w-8 h-8 text-cinema-silver" aria-hidden />
         </div>
-        <h1 className="font-display text-3xl tracking-wide text-white uppercase mb-3">Mi perfil</h1>
+        <h1 className="font-display text-3xl tracking-tight text-cinema-chalk mb-3">Mi perfil</h1>
         <p className="text-cinema-muted mb-6 max-w-md">
           Inicia sesión para ver tus favoritos, historial y suscripción.
         </p>
@@ -99,19 +99,19 @@ export default function ProfilePage() {
             <img
               src={user.image}
               alt=""
-              className="w-20 h-20 rounded-full ring-2 ring-cinema-violet/50 object-cover"
+              className="w-20 h-20 rounded-full ring-2 ring-cinema-accent/50 object-cover"
             />
           ) : (
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-cinema-accent to-cinema-violet flex items-center justify-center ring-2 ring-cinema-violet/40">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-cinema-accent to-cinema-gold flex items-center justify-center ring-2 ring-cinema-accent/40">
               <User className="w-9 h-9 text-white" aria-hidden />
             </div>
           )}
 
           <div className="min-w-0 flex-1">
-            <p className="text-cinema-violet-light text-sm font-medium uppercase tracking-widest mb-1">
+            <p className="text-cinema-accent text-sm font-medium uppercase tracking-widest mb-1">
               Cuenta
             </p>
-            <h1 className="font-display text-3xl md:text-4xl tracking-wide text-white uppercase truncate">
+            <h1 className="font-display text-3xl md:text-4xl tracking-tight text-cinema-chalk truncate">
               {user.name}
             </h1>
             <p className="flex items-center gap-2 text-cinema-muted text-sm mt-2">
@@ -193,7 +193,7 @@ export default function ProfilePage() {
             <li key={item.href}>
               <Link
                 href={item.href}
-                className="group flex items-center gap-4 rounded-2xl border border-cinema-border bg-cinema-surface p-4 sm:p-5 transition-colors hover:border-cinema-violet/40 hover:bg-cinema-elevated/40"
+                className="group flex items-center gap-4 rounded-2xl border border-cinema-border bg-cinema-surface p-4 sm:p-5 transition-colors hover:border-cinema-accent/40 hover:bg-cinema-elevated/40"
               >
                 <div
                   className={cn(
@@ -205,7 +205,7 @@ export default function ProfilePage() {
                   <item.icon className="w-5 h-5" aria-hidden />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-white font-semibold group-hover:text-cinema-violet-light transition-colors">
+                  <p className="text-white font-semibold group-hover:text-cinema-accent-light transition-colors">
                     {item.label}
                   </p>
                   <p className="text-cinema-muted text-sm">{item.description}</p>
@@ -233,7 +233,7 @@ export default function ProfilePage() {
               <Shield className="w-5 h-5" aria-hidden />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-white font-semibold group-hover:text-cinema-violet-light transition-colors">
+              <p className="text-white font-semibold group-hover:text-cinema-accent-light transition-colors">
                 Panel de admin
               </p>
               <p className="text-cinema-muted text-sm">Gestionar películas y catálogo</p>

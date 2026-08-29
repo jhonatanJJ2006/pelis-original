@@ -62,10 +62,10 @@ export default function FavoritesPage() {
     <div className="page-shell">
       <ScrollReveal className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
         <div>
-          <p className="text-cinema-violet-light text-sm font-medium uppercase tracking-widest mb-2">
+          <p className="text-cinema-accent text-sm font-medium uppercase tracking-widest mb-2">
             Tu lista
           </p>
-          <h1 className="font-display text-4xl md:text-5xl tracking-wide text-white uppercase">
+          <h1 className="font-display text-4xl md:text-5xl tracking-tight text-cinema-chalk">
             Favoritos
           </h1>
           <p className="text-cinema-muted mt-2">{(movies ?? []).length} títulos guardados</p>
@@ -92,7 +92,7 @@ export default function FavoritesPage() {
               className={cn(
                 'px-4 py-2 rounded-lg text-sm font-medium motion-safe:transition-[background-color,color,box-shadow] motion-safe:duration-fast',
                 tab === item.id
-                  ? 'bg-cinema-violet text-white shadow-glow-violet'
+                  ? 'bg-cinema-accent text-cinema-bg shadow-glow'
                   : 'text-cinema-silver hover:text-white hover:bg-cinema-elevated/50'
               )}
             >

@@ -53,10 +53,10 @@ export default function SeriesPageClient({ preloaded }: SeriesPageClientProps) {
   return (
     <div className="page-shell">
       <div className="mb-10">
-        <p className="text-cinema-violet-light text-sm font-medium uppercase tracking-widest mb-2">
+        <p className="text-cinema-accent text-sm font-medium uppercase tracking-widest mb-2">
           Catálogo
         </p>
-        <h1 className="font-display text-4xl md:text-5xl tracking-wide text-white uppercase">
+        <h1 className="font-display text-4xl md:text-5xl tracking-tight text-cinema-chalk">
           Series
         </h1>
         <p className="text-cinema-muted mt-3 max-w-2xl">{series.length} series disponibles</p>

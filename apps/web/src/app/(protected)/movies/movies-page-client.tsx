@@ -107,10 +107,10 @@ export default function MoviesPageClient({ preloaded, initial }: MoviesPageClien
   return (
     <div className="page-shell">
       <div className="mb-10">
-        <p className="text-cinema-violet-light text-sm font-medium uppercase tracking-widest mb-2">
+        <p className="text-cinema-accent text-sm font-medium uppercase tracking-widest mb-2">
           Catálogo
         </p>
-        <h1 className="font-display text-4xl md:text-5xl tracking-wide text-white uppercase mb-2">
+        <h1 className="font-display text-4xl md:text-5xl tracking-tight text-cinema-chalk mb-2">
           Películas
         </h1>
         <p className="text-cinema-muted mb-8">{movies.length} películas disponibles</p>

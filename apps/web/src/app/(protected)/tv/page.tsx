@@ -134,10 +134,10 @@ export default function TVPage() {
   return (
     <div className="page-shell">
       <ScrollReveal className="mb-8">
-        <p className="text-cinema-violet-light text-sm font-medium uppercase tracking-widest mb-2">
+        <p className="text-cinema-accent text-sm font-medium uppercase tracking-widest mb-2">
           Canales
         </p>
-        <h1 className="font-display text-4xl md:text-5xl tracking-wide text-white uppercase">
+        <h1 className="font-display text-4xl md:text-5xl tracking-tight text-cinema-chalk">
           TV en vivo
         </h1>
         <p className="text-cinema-muted mt-3 max-w-2xl">
@@ -191,7 +191,7 @@ export default function TVPage() {
                 setSearch('');
                 setPopularOnly(false);
               }}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm text-cinema-silver border border-cinema-border hover:text-white hover:border-cinema-violet/40 transition-colors"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm text-cinema-silver border border-cinema-border hover:text-cinema-chalk hover:border-cinema-accent/40 transition-colors"
             >
               <X className="w-4 h-4" />
               Limpiar filtros
@@ -310,7 +310,7 @@ export default function TVPage() {
             {sortedCategories.map((category) => (
               <ScrollReveal key={category}>
                 <div className="flex items-baseline gap-3 mb-5">
-                  <h2 className="font-display text-2xl tracking-wide text-white uppercase">
+                  <h2 className="font-display text-2xl tracking-tight text-cinema-chalk">
                     {categoryLabels[category] || category}
                   </h2>
                   <span className="text-xs text-cinema-ash ml-auto">
@@ -350,7 +350,7 @@ function ChannelCard({ channel }: { channel: TVChannel }) {
         'group relative flex flex-col items-center gap-3 p-4 rounded-2xl border transition-all hover:-translate-y-1',
         isOffline
           ? 'bg-cinema-surface/40 border-cinema-border/40 opacity-60'
-          : 'bg-cinema-surface border-cinema-border hover:border-cinema-violet/40'
+          : 'bg-cinema-surface border-cinema-border hover:border-cinema-accent/50'
       )}
     >
       {channel.isPopular && (
@@ -377,13 +377,13 @@ function ChannelCard({ channel }: { channel: TVChannel }) {
       </span>
       <div className="flex items-center gap-1.5 flex-wrap justify-center">
         {isOffline ? (
-          <span className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-red-400 font-semibold">
+          <span className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-cinema-danger-light font-semibold">
             <RefreshCw className="w-3 h-3" />
             No disponible
           </span>
         ) : (
-          <span className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-red-400 font-semibold">
-            <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
+          <span className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-cinema-danger-light font-semibold">
+            <span className="w-1.5 h-1.5 rounded-full bg-cinema-danger motion-safe:animate-pulse" />
             EN VIVO
           </span>
         )}
@@ -416,7 +416,7 @@ function FilterPill({
         'rounded-full font-medium transition-all',
         small ? 'px-3 py-1.5 text-xs' : 'px-4 py-2 text-sm',
         active
-          ? 'bg-cinema-violet text-white'
+          ? 'bg-cinema-accent text-cinema-bg'
           : 'bg-cinema-elevated text-cinema-silver hover:text-white border border-cinema-border'
       )}
     >

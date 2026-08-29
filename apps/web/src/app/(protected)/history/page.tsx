@@ -90,10 +90,10 @@ export default function HistoryPage() {
     <div className="page-shell">
       <ScrollReveal className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
         <div>
-          <p className="text-cinema-violet-light text-sm font-medium uppercase tracking-widest mb-2">
+          <p className="text-cinema-accent text-sm font-medium uppercase tracking-widest mb-2">
             Actividad
           </p>
-          <h1 className="font-display text-4xl md:text-5xl tracking-wide text-white uppercase">
+          <h1 className="font-display text-4xl md:text-5xl tracking-tight text-cinema-chalk">
             Historial
           </h1>
           <p className="text-cinema-muted mt-2">{history?.length ?? 0} títulos en tu historial</p>
@@ -122,7 +122,7 @@ export default function HistoryPage() {
         <div className="space-y-12">
           {continueItems.length > 0 && (
             <section>
-              <h2 className="font-display text-2xl tracking-wide text-white uppercase mb-5">
+              <h2 className="font-display text-2xl tracking-tight text-cinema-chalk mb-5">
                 Continuar viendo
               </h2>
               <ContentSwiper slideClassName="!w-[320px] sm:!w-[360px]">
@@ -139,7 +139,7 @@ export default function HistoryPage() {
           )}
 
           <section>
-            <h2 className="font-display text-2xl tracking-wide text-white uppercase mb-5">
+            <h2 className="font-display text-2xl tracking-tight text-cinema-chalk mb-5">
               {continueItems.length > 0 ? 'Visto recientemente' : 'Todo tu historial'}
             </h2>
             <ContentSwiper slideClassName="!w-[320px] sm:!w-[360px]">
@@ -170,7 +170,7 @@ function HistoryCard({
   const pct = getProgressPercentage(item.progress, item.duration);
 
   return (
-    <div className="bg-cinema-surface rounded-2xl border border-cinema-border overflow-hidden hover:border-cinema-violet/40 motion-safe:transition-[border-color,box-shadow] motion-safe:duration-normal h-full flex flex-col group">
+    <div className="bg-cinema-surface rounded-2xl border border-cinema-border overflow-hidden hover:border-cinema-accent/50 motion-safe:transition-[border-color,box-shadow] motion-safe:duration-normal h-full flex flex-col group">
       <Link
         href={`/movies/${item.movieId}${resume ? '?play=true' : ''}`}
         className="relative aspect-video block overflow-hidden"
@@ -189,7 +189,7 @@ function HistoryCard({
         <div className="absolute inset-0 bg-gradient-to-t from-cinema-bg via-cinema-bg/40 to-transparent" />
         {resume && (
           <div className="absolute inset-0 flex items-center justify-center opacity-0 [@media(hover:hover)_and_(pointer:fine)]:group-hover:opacity-100 motion-safe:transition-opacity">
-            <div className="p-3 rounded-full bg-cinema-violet text-white shadow-glow-violet">
+            <div className="p-3 rounded-full bg-cinema-accent text-cinema-bg shadow-glow">
               <Play className="w-5 h-5" fill="currentColor" />
             </div>
           </div>
@@ -201,7 +201,7 @@ function HistoryCard({
           <div className="min-w-0">
             <Link
               href={`/movies/${item.movieId}${resume ? '?play=true' : ''}`}
-              className="font-medium hover:text-cinema-violet-light transition-colors truncate block"
+              className="font-medium hover:text-cinema-accent-light transition-colors truncate block"
             >
               {item.movie?.name ?? 'Título eliminado'}
             </Link>
@@ -230,7 +230,7 @@ function HistoryCard({
             </div>
             <div className="h-1.5 bg-cinema-elevated rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-cinema-violet to-cinema-teal rounded-full"
+                className="h-full bg-gradient-to-r from-cinema-accent to-cinema-gold rounded-full"
                 style={{ width: `${pct}%` }}
               />
             </div>
