@@ -8,6 +8,7 @@ import {
   resolveStreamPath,
   findManifestForToken,
   rewriteM3u8Manifest,
+  parseByteRange,
 } from './movie-stream-paths';
 
 describe('getOutputRoots', () => {
@@ -153,3 +154,17 @@ describe('rewriteM3u8Manifest', () => {
     expect(output).toContain('/api/stream/token/file.m3u8');
   });
 });
+
+describe('parseByteRange', () => {
+  it('parses start-end and open-ended ranges', () => {
+    expect(parseByteRange('bytes=0-499', 1000)).toEqual({ start: 0, end: 499 });
+    expect(parseByteRange('bytes=500-', 1000)).toEqual({ start: 500, end: 999 });
+  });
+
+  it('parses suffix ranges and rejects invalid input', () => {
+    expect(parseByteRange('bytes=-200', 1000)).toEqual({ start: 800, end: 999 });
+    expect(parseByteRange('bytes=1000-1001', 1000)).toBeNull();
+    expect(parseByteRange(null, 1000)).toBeNull();
+  });
+});
+

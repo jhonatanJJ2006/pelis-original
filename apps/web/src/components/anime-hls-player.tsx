@@ -2,20 +2,21 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Hls from 'hls.js';
+import { AlertCircle, SkipForward, Subtitles } from 'lucide-react';
 import {
-  AlertCircle,
-  Loader2,
-  Maximize,
-  Minimize,
-  Pause,
-  PictureInPicture2,
-  Play,
-  RotateCcw,
-  SkipForward,
-  Subtitles,
-  Volume2,
-  VolumeX,
-} from 'lucide-react';
+  PlayerChrome,
+  PlayerGestureHud,
+  PlayerLoadingOverlay,
+  attachHlsForwardPrefetch,
+  attachNativeHlsPrefetch,
+  createVodHlsConfig,
+  isMobilePlayerViewport,
+  playerVideoFilter,
+  useMobileLandscapePlayer,
+  usePlayerKeyboard,
+  usePlayerSettings,
+  usePlayerSurfaceGestures,
+} from '@pelis/ui/features/video-player';
 import { cn } from '@pelis/ui/utils';
 
 export interface PlayerSource {
@@ -35,17 +36,9 @@ interface AnimeHlsPlayerProps {
   intro?: { start: number; end: number } | null;
   outro?: { start: number; end: number } | null;
   episodeLabel?: string;
+  title?: string;
   /** Called when the stream fails hard, so the parent can suggest other servers. */
   onFatalError?: () => void;
-}
-
-function formatTime(seconds: number): string {
-  if (!Number.isFinite(seconds) || seconds < 0) return '0:00';
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = Math.floor(seconds % 60);
-  if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-  return `${m}:${String(s).padStart(2, '0')}`;
 }
 
 const SUBTITLE_LANG_CODES: Array<[RegExp, string]> = [
@@ -70,6 +63,7 @@ export function AnimeHlsPlayer({
   intro,
   outro,
   episodeLabel,
+  title,
   onFatalError,
 }: AnimeHlsPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -83,8 +77,6 @@ export function AnimeHlsPlayer({
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [buffered, setBuffered] = useState(0);
-  const [volume, setVolume] = useState(1);
-  const [muted, setMuted] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const [controlsVisible, setControlsVisible] = useState(true);
   const [levels, setLevels] = useState<Array<{ index: number; label: string }>>([]);
@@ -92,13 +84,23 @@ export function AnimeHlsPlayer({
   const [activeSubtitle, setActiveSubtitle] = useState(-1);
   const [subtitleMenuOpen, setSubtitleMenuOpen] = useState(false);
   const [qualityMenuOpen, setQualityMenuOpen] = useState(false);
+  const { brightness, setBrightness, volume, setVolume, muted, setMuted, toggleMute } =
+    usePlayerSettings();
+  const onFatalErrorRef = useRef(onFatalError);
+  onFatalErrorRef.current = onFatalError;
 
   const isHlsSource = useMemo(
     () => Boolean(source.isM3U8) || source.url.includes('.m3u8') || source.url.includes('m3u8'),
     [source.url, source.isM3U8]
   );
 
-  // --- Stream loading -------------------------------------------------------
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.volume = volume;
+    video.muted = muted;
+  }, [volume, muted]);
+
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -115,16 +117,12 @@ export function AnimeHlsPlayer({
     const onFatal = (message: string) => {
       setError(message);
       setLoading(false);
-      onFatalError?.();
+      onFatalErrorRef.current?.();
     };
 
     if (isHlsSource && Hls.isSupported()) {
-      const hls = new Hls({
-        enableWorker: true,
-        manifestLoadingMaxRetry: 4,
-        levelLoadingMaxRetry: 4,
-        fragLoadingMaxRetry: 6,
-      });
+      const hls = new Hls(createVodHlsConfig());
+      const stopPrefetch = attachHlsForwardPrefetch(hls, video);
       hlsRef.current = hls;
       hls.loadSource(source.url);
       hls.attachMedia(video);
@@ -133,7 +131,11 @@ export function AnimeHlsPlayer({
         setLoading(false);
         const parsedLevels = data.levels.map((level, index) => ({
           index,
-          label: level.height ? `${level.height}p` : (level.bitrate ? `${Math.round(level.bitrate / 1000)}kbps` : `Nivel ${index + 1}`),
+          label: level.height
+            ? `${level.height}p`
+            : level.bitrate
+              ? `${Math.round(level.bitrate / 1000)}kbps`
+              : `Nivel ${index + 1}`,
         }));
         setLevels(parsedLevels);
         video.play().catch(() => {});
@@ -144,7 +146,12 @@ export function AnimeHlsPlayer({
       });
 
       hls.on(Hls.Events.ERROR, (_event, data) => {
-        if (!data.fatal) return;
+        if (!data.fatal) {
+          if (data.details === Hls.ErrorDetails.BUFFER_STALLED_ERROR) {
+            hls.startLoad();
+          }
+          return;
+        }
         switch (data.type) {
           case Hls.ErrorTypes.NETWORK_ERROR:
             if (data.details === Hls.ErrorDetails.MANIFEST_LOAD_ERROR) {
@@ -162,12 +169,32 @@ export function AnimeHlsPlayer({
       });
 
       return () => {
+        stopPrefetch();
         hls.destroy();
         hlsRef.current = null;
       };
     }
 
-    // Native playback (Safari HLS or plain mp4).
+    if (isHlsSource) {
+      video.preload = 'auto';
+      video.src = source.url;
+      const stopNativePrefetch = attachNativeHlsPrefetch(video, source.url);
+      const onLoaded = () => {
+        setLoading(false);
+        video.play().catch(() => {});
+      };
+      video.addEventListener('loadedmetadata', onLoaded);
+      const onError = () => onFatal('Error al reproducir el video.');
+      video.addEventListener('error', onError);
+      return () => {
+        stopNativePrefetch();
+        video.removeEventListener('loadedmetadata', onLoaded);
+        video.removeEventListener('error', onError);
+        video.removeAttribute('src');
+        video.load();
+      };
+    }
+
     video.src = source.url;
     const onLoaded = () => {
       setLoading(false);
@@ -182,14 +209,12 @@ export function AnimeHlsPlayer({
       video.removeAttribute('src');
       video.load();
     };
-  }, [source.url, isHlsSource, onFatalError]);
+  }, [source.url, isHlsSource]);
 
-  // --- Native HLS subtitle tracks -------------------------------------------
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
     const apply = () => {
-      // Default: first track (usually Spanish or English) ON.
       if (video.textTracks.length > 0) {
         for (let i = 0; i < video.textTracks.length; i++) {
           video.textTracks[i]!.mode = i === 0 ? 'showing' : 'disabled';
@@ -201,7 +226,6 @@ export function AnimeHlsPlayer({
     return () => video.removeEventListener('loadedmetadata', apply);
   }, [subtitles]);
 
-  // --- Video element events --------------------------------------------------
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -232,19 +256,32 @@ export function AnimeHlsPlayer({
     };
   }, []);
 
-  // --- Fullscreen ------------------------------------------------------------
   useEffect(() => {
     const onFsChange = () => setFullscreen(Boolean(document.fullscreenElement));
     document.addEventListener('fullscreenchange', onFsChange);
     return () => document.removeEventListener('fullscreenchange', onFsChange);
   }, []);
 
+  const {
+    landscapeActive,
+    enter: enterLandscape,
+    exit: exitLandscape,
+    surfaceClassName: landscapeClassName,
+    surfaceStyle: landscapeStyle,
+  } = useMobileLandscapePlayer({
+    containerRef,
+    videoRef,
+    enterOnMount: true,
+  });
+
   const togglePlay = useCallback(() => {
     const video = videoRef.current;
     if (!video) return;
-    if (video.paused) video.play().catch(() => {});
-    else video.pause();
-  }, []);
+    if (video.paused) {
+      video.play().catch(() => {});
+      void enterLandscape();
+    } else video.pause();
+  }, [enterLandscape]);
 
   const seek = useCallback((seconds: number) => {
     const video = videoRef.current;
@@ -253,9 +290,14 @@ export function AnimeHlsPlayer({
   }, []);
 
   const toggleFullscreen = useCallback(() => {
+    if (isMobilePlayerViewport()) {
+      if (landscapeActive) void exitLandscape();
+      else void enterLandscape();
+      return;
+    }
     if (document.fullscreenElement) void document.exitFullscreen();
     else containerRef.current?.requestFullscreen().catch(() => {});
-  }, []);
+  }, [enterLandscape, exitLandscape, landscapeActive]);
 
   const togglePip = useCallback(async () => {
     const video = videoRef.current;
@@ -286,7 +328,6 @@ export function AnimeHlsPlayer({
     setSubtitleMenuOpen(false);
   }, []);
 
-  // --- Controls auto-hide ----------------------------------------------------
   const bumpControls = useCallback(() => {
     setControlsVisible(true);
     if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
@@ -304,28 +345,50 @@ export function AnimeHlsPlayer({
     };
   }, [bumpControls]);
 
+  const { hud, hudVisible, didGesture } = usePlayerSurfaceGestures({
+    containerRef,
+    brightness,
+    setBrightness,
+    volume,
+    setVolume,
+    enabled: landscapeActive,
+  });
+
+  usePlayerKeyboard({
+    enabled: !error,
+    onTogglePlay: togglePlay,
+    onSeekDelta: (delta) => seek(currentTime + delta),
+    onVolumeDelta: (delta) => setVolume(volume + delta),
+    onToggleMute: toggleMute,
+    onToggleFullscreen: toggleFullscreen,
+    onBrightnessDelta: (delta) => setBrightness(brightness + delta),
+  });
+
   const showSkipIntro =
     intro && currentTime >= intro.start && currentTime <= intro.end && intro.end - intro.start > 2;
-  const showSkipOutro =
-    outro && currentTime >= outro.start && currentTime <= outro.end && duration > 0;
-
-  const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
+  const showSkipOutro = outro && currentTime >= outro.start && currentTime <= outro.end && duration > 0;
   const bufferedPercent = duration > 0 ? Math.min(100, (buffered / duration) * 100) : 0;
 
   return (
     <div
       ref={containerRef}
-      className="group relative h-full w-full select-none overflow-hidden bg-black"
+      className={cn(
+        'group relative h-full w-full select-none overflow-hidden bg-cinema-bg [touch-action:none]',
+        landscapeClassName,
+      )}
+      style={landscapeStyle}
       onMouseMove={bumpControls}
       onClick={(e) => {
+        if (didGesture()) return;
         if ((e.target as HTMLElement).tagName === 'VIDEO') togglePlay();
       }}
     >
       <video
         ref={videoRef}
         className="h-full w-full object-contain"
+        style={{ filter: playerVideoFilter(brightness) }}
         playsInline
-        preload="metadata"
+        preload="auto"
       >
         {subtitles.map((sub, i) => (
           <track
@@ -340,158 +403,83 @@ export function AnimeHlsPlayer({
       </video>
 
       {loading && !error && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="text-center">
-            <Loader2 className="w-10 h-10 text-cinema-silver animate-spin mx-auto mb-3" />
-            {episodeLabel && <p className="text-cinema-muted text-sm">{episodeLabel}</p>}
-          </div>
-        </div>
+        <PlayerLoadingOverlay
+          message={duration > 0 ? 'Cargando…' : 'Buscando fuentes…'}
+          opaque={duration === 0}
+        />
       )}
+      {landscapeActive && hud && <PlayerGestureHud kind={hud.kind} value={hud.value} visible={hudVisible} />}
 
       {error && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/70 z-20">
-          <div className="text-center max-w-md px-6">
-            <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
-            <p className="text-cinema-muted text-sm">{error}</p>
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-cinema-bg/80">
+          <div className="max-w-md px-6 text-center">
+            <AlertCircle className="mx-auto mb-4 h-12 w-12 text-cinema-danger" />
+            <p className="text-sm text-cinema-muted">{error}</p>
           </div>
         </div>
       )}
 
-      {/* Skip intro / outro */}
       {(showSkipIntro || showSkipOutro) && (
         <button
           type="button"
+          data-player-no-gesture
           onClick={() => seek((showSkipIntro ? intro! : outro!).end + 0.5)}
-          className="absolute bottom-24 right-4 z-30 inline-flex items-center gap-2 rounded-lg bg-white/90 px-4 py-2 text-sm font-semibold text-black hover:bg-white transition-colors"
+          className="absolute bottom-24 right-4 z-30 inline-flex items-center gap-2 rounded-[10px] bg-cinema-accent px-4 py-2 text-sm font-semibold text-cinema-bg hover:bg-cinema-accent-light"
         >
           {showSkipIntro ? (
             <>Saltar intro</>
           ) : (
             <>
-              <SkipForward className="w-4 h-4" aria-hidden />
+              <SkipForward className="h-4 w-4" aria-hidden />
               Siguiente episodio
             </>
           )}
         </button>
       )}
 
-      {/* Big center play button when paused */}
       {!playing && !loading && !error && (
         <button
           type="button"
-          onClick={togglePlay}
+          onClick={() => {
+            if (didGesture()) return;
+            togglePlay();
+          }}
           aria-label="Reproducir"
           className="absolute inset-0 z-20 flex items-center justify-center"
         >
-          <span className="flex h-20 w-20 items-center justify-center rounded-full bg-white/15 backdrop-blur-sm transition-transform hover:scale-105">
-            <Play className="w-9 h-9 text-white fill-current ml-1" aria-hidden />
+          <span className="flex h-20 w-20 items-center justify-center rounded-full bg-cinema-accent text-cinema-bg shadow-glow transition-transform hover:scale-105">
+            <svg viewBox="0 0 24 24" className="ml-1 h-9 w-9 fill-current" aria-hidden>
+              <path d="M8 5v14l11-7z" />
+            </svg>
           </span>
         </button>
       )}
 
-      {/* Controls bar */}
-      <div
-        className={cn(
-          'absolute inset-x-0 bottom-0 z-30 bg-gradient-to-t from-black/90 via-black/60 to-transparent px-4 pb-3 pt-10 transition-opacity duration-300',
-          controlsVisible || !playing ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        )}
-      >
-        {/* Seek bar */}
-        <div className="relative mb-2 h-4 cursor-pointer">
-          <div className="absolute top-1/2 h-1 w-full -translate-y-1/2 rounded-full bg-white/20">
-            <div
-              className="absolute h-full rounded-full bg-white/30"
-              style={{ width: `${bufferedPercent}%` }}
-            />
-            <div
-              className="absolute h-full rounded-full bg-cinema-violet"
-              style={{ width: `${progressPercent}%` }}
-            />
-          </div>
-          <div
-            className="absolute top-1/2 h-3 w-3 -translate-y-1/2 -translate-x-1/2 rounded-full bg-white shadow transition-transform group-hover:scale-110"
-            style={{ left: `${progressPercent}%` }}
-          />
-          <input
-            type="range"
-            min={0}
-            max={duration || 0}
-            step={0.1}
-            value={currentTime}
-            onChange={(e) => seek(Number(e.target.value))}
-            className="absolute inset-0 w-full cursor-pointer opacity-0"
-            aria-label="Buscar"
-          />
-        </div>
-
-        <div className="flex items-center gap-2 text-white">
-          <button
-            type="button"
-            onClick={togglePlay}
-            className="p-1.5 hover:bg-white/10 rounded transition-colors"
-            aria-label={playing ? 'Pausar' : 'Reproducir'}
-          >
-            {playing ? (
-              <Pause className="w-5 h-5 fill-current" aria-hidden />
-            ) : (
-              <Play className="w-5 h-5 fill-current" aria-hidden />
-            )}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => seek(Math.max(0, currentTime - 10))}
-            className="p-1.5 hover:bg-white/10 rounded transition-colors"
-            aria-label="Retroceder 10 segundos"
-          >
-            <RotateCcw className="w-4 h-4" aria-hidden />
-          </button>
-
-          <div className="flex items-center gap-1.5 group/vol">
-            <button
-              type="button"
-              onClick={() => {
-                const video = videoRef.current;
-                if (!video) return;
-                video.muted = !video.muted;
-                setMuted(video.muted);
-              }}
-              className="p-1.5 hover:bg-white/10 rounded transition-colors"
-              aria-label={muted ? 'Activar sonido' : 'Silenciar'}
-            >
-              {muted || volume === 0 ? (
-                <VolumeX className="w-5 h-5" aria-hidden />
-              ) : (
-                <Volume2 className="w-5 h-5" aria-hidden />
-              )}
-            </button>
-            <input
-              type="range"
-              min={0}
-              max={1}
-              step={0.05}
-              value={muted ? 0 : volume}
-              onChange={(e) => {
-                const v = Number(e.target.value);
-                const video = videoRef.current;
-                if (video) {
-                  video.volume = v;
-                  video.muted = v === 0;
-                  setMuted(v === 0);
-                  setVolume(v);
-                }
-              }}
-              className="w-0 group-hover/vol:w-20 transition-all duration-200 accent-white h-1 cursor-pointer"
-              aria-label="Volumen"
-            />
-          </div>
-
-          <span className="text-xs tabular-nums text-white/85 ml-1">
-            {formatTime(currentTime)} <span className="text-white/50">/ {formatTime(duration)}</span>
-          </span>
-
-          <div className="ml-auto flex items-center gap-1">
-            {/* Subtitles menu */}
+      <PlayerChrome
+        playing={playing}
+        onTogglePlay={togglePlay}
+        currentTime={currentTime}
+        duration={duration}
+        onSeek={seek}
+        bufferedPercent={bufferedPercent}
+        volume={volume}
+        muted={muted}
+        onVolumeChange={(value) => {
+          setVolume(value);
+          setMuted(value === 0);
+        }}
+        onToggleMute={toggleMute}
+        brightness={brightness}
+        onBrightnessChange={setBrightness}
+        fullscreen={fullscreen || landscapeActive}
+        onToggleFullscreen={toggleFullscreen}
+        onTogglePip={() => void togglePip()}
+        visible={controlsVisible}
+        title={title}
+        subtitle={episodeLabel}
+        onRewind={() => seek(Math.max(0, currentTime - 10))}
+        trailingExtras={
+          <>
             {subtitles.length > 0 && (
               <div className="relative">
                 <button
@@ -501,22 +489,22 @@ export function AnimeHlsPlayer({
                     setQualityMenuOpen(false);
                   }}
                   className={cn(
-                    'p-1.5 hover:bg-white/10 rounded transition-colors',
-                    activeSubtitle >= 0 && 'text-cinema-violet-light'
+                    'rounded-full p-2.5 hover:bg-white/10 md:p-2',
+                    activeSubtitle >= 0 && 'text-cinema-accent'
                   )}
                   aria-label="Subtítulos"
                   aria-expanded={subtitleMenuOpen}
                 >
-                  <Subtitles className="w-5 h-5" aria-hidden />
+                  <Subtitles className="h-5 w-5" aria-hidden />
                 </button>
                 {subtitleMenuOpen && (
-                  <div className="absolute bottom-full right-0 mb-2 min-w-40 rounded-lg bg-black/95 border border-white/10 py-1 text-sm shadow-xl">
+                  <div className="absolute bottom-full right-0 mb-2 min-w-40 rounded-[10px] border border-cinema-border bg-cinema-bg/95 py-1 text-sm shadow-xl">
                     <button
                       type="button"
                       onClick={() => selectSubtitle(-1)}
                       className={cn(
                         'block w-full px-3 py-1.5 text-left hover:bg-white/10',
-                        activeSubtitle === -1 && 'text-cinema-violet-light'
+                        activeSubtitle === -1 && 'text-cinema-accent'
                       )}
                     >
                       Desactivados
@@ -528,7 +516,7 @@ export function AnimeHlsPlayer({
                         onClick={() => selectSubtitle(i)}
                         className={cn(
                           'block w-full px-3 py-1.5 text-left hover:bg-white/10',
-                          activeSubtitle === i && 'text-cinema-violet-light'
+                          activeSubtitle === i && 'text-cinema-accent'
                         )}
                       >
                         {sub.lang ?? `Subtítulo ${i + 1}`}
@@ -538,8 +526,6 @@ export function AnimeHlsPlayer({
                 )}
               </div>
             )}
-
-            {/* Quality menu */}
             {levels.length > 1 && (
               <div className="relative">
                 <button
@@ -548,20 +534,22 @@ export function AnimeHlsPlayer({
                     setQualityMenuOpen((o) => !o);
                     setSubtitleMenuOpen(false);
                   }}
-                  className="px-2 py-1.5 text-xs font-semibold hover:bg-white/10 rounded transition-colors"
+                  className="rounded-[10px] px-2 py-1.5 text-xs font-semibold hover:bg-white/10"
                   aria-label="Calidad"
                   aria-expanded={qualityMenuOpen}
                 >
-                  {activeLevel >= 0 ? levels.find((l) => l.index === activeLevel)?.label ?? 'Auto' : 'Auto'}
+                  {activeLevel >= 0
+                    ? (levels.find((l) => l.index === activeLevel)?.label ?? 'Auto')
+                    : 'Auto'}
                 </button>
                 {qualityMenuOpen && (
-                  <div className="absolute bottom-full right-0 mb-2 min-w-32 rounded-lg bg-black/95 border border-white/10 py-1 text-sm shadow-xl">
+                  <div className="absolute bottom-full right-0 mb-2 min-w-32 rounded-[10px] border border-cinema-border bg-cinema-bg/95 py-1 text-sm shadow-xl">
                     <button
                       type="button"
                       onClick={() => selectLevel(-1)}
                       className={cn(
                         'block w-full px-3 py-1.5 text-left hover:bg-white/10',
-                        activeLevel === -1 && 'text-cinema-violet-light'
+                        activeLevel === -1 && 'text-cinema-accent'
                       )}
                     >
                       Auto
@@ -573,7 +561,7 @@ export function AnimeHlsPlayer({
                         onClick={() => selectLevel(level.index)}
                         className={cn(
                           'block w-full px-3 py-1.5 text-left hover:bg-white/10',
-                          activeLevel === level.index && 'text-cinema-violet-light'
+                          activeLevel === level.index && 'text-cinema-accent'
                         )}
                       >
                         {level.label}
@@ -583,31 +571,9 @@ export function AnimeHlsPlayer({
                 )}
               </div>
             )}
-
-            <button
-              type="button"
-              onClick={() => void togglePip()}
-              className="p-1.5 hover:bg-white/10 rounded transition-colors"
-              aria-label="Picture in picture"
-            >
-              <PictureInPicture2 className="w-5 h-5" aria-hidden />
-            </button>
-
-            <button
-              type="button"
-              onClick={toggleFullscreen}
-              className="p-1.5 hover:bg-white/10 rounded transition-colors"
-              aria-label={fullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'}
-            >
-              {fullscreen ? (
-                <Minimize className="w-5 h-5" aria-hidden />
-              ) : (
-                <Maximize className="w-5 h-5" aria-hidden />
-              )}
-            </button>
-          </div>
-        </div>
-      </div>
+          </>
+        }
+      />
     </div>
   );
 }

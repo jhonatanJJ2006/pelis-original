@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Heart, Search, Star, Tv, Play, Film, TrendingUp, X } from 'lucide-react';
 import { Badge } from '@pelis/ui/components';
 import { Button, Input, Select, Spinner, Skeleton } from '@pelis/ui/components';
@@ -50,16 +51,35 @@ const sampleMovies: MediaItem[] = [
   },
 ];
 
+const tokens = [
+  { name: 'bg', hex: '#0B0B0D', cls: 'bg-cinema-bg' },
+  { name: 'surface', hex: '#141418', cls: 'bg-cinema-surface' },
+  { name: 'elevated', hex: '#1C1C22', cls: 'bg-cinema-elevated' },
+  { name: 'border', hex: '#2A2A32', cls: 'bg-cinema-border' },
+  { name: 'accent', hex: '#C4A35A', cls: 'bg-cinema-accent' },
+  { name: 'accent-light', hex: '#E0C98A', cls: 'bg-cinema-accent-light' },
+  { name: 'gold', hex: '#F5C842', cls: 'bg-cinema-gold' },
+  { name: 'violet', hex: '#D4B896', cls: 'bg-cinema-violet' },
+  { name: 'teal', hex: '#8A9A7B', cls: 'bg-cinema-teal' },
+  { name: 'muted', hex: '#A39E94', cls: 'bg-cinema-muted' },
+  { name: 'chalk', hex: '#F4F1EA', cls: 'bg-cinema-chalk' },
+  { name: 'danger', hex: '#8B1E2D', cls: 'bg-cinema-danger' },
+];
+
 function PlaygroundSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="border border-cinema-border rounded-2xl p-6 bg-cinema-surface/50">
-      <h2 className="font-display text-xl tracking-wide text-white uppercase mb-4">{title}</h2>
+      <h2 className="font-display text-xl tracking-tight text-cinema-chalk mb-4">{title}</h2>
       {children}
     </section>
   );
 }
 
 export default function PlaygroundPage() {
+  const [search, setSearch] = useState('');
+  const [genre, setGenre] = useState('');
+  const [year, setYear] = useState('');
+
   if (process.env.NODE_ENV === 'production') {
     return null;
   }
@@ -67,17 +87,44 @@ export default function PlaygroundPage() {
   return (
     <div className="page-shell py-10 space-y-10">
       <div>
-        <p className="text-cinema-violet-light text-sm font-medium uppercase tracking-widest mb-2">
-          Dev
+        <p className="text-cinema-accent text-sm font-medium uppercase tracking-widest mb-2">
+          Maison Noir
         </p>
-        <h1 className="font-display text-4xl md:text-5xl tracking-wide text-white uppercase mb-2">
+        <h1 className="font-display text-4xl md:text-5xl tracking-tight text-cinema-chalk mb-2">
           Playground de componentes
         </h1>
         <p className="text-cinema-muted">
-          Catálogo visual de todos los componentes UI con datos de ejemplo. Solo visible en
-          desarrollo.
+          Catálogo vivo del sistema de diseño. Solo visible en desarrollo.
         </p>
       </div>
+
+      <PlaygroundSection title="Tokens de color">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+          {tokens.map((tok) => (
+            <div key={tok.name} className="rounded-xl border border-cinema-border overflow-hidden">
+              <div className={`h-16 ${tok.cls}`} />
+              <div className="p-2.5">
+                <p className="text-xs font-medium text-cinema-chalk">cinema-{tok.name}</p>
+                <p className="text-[11px] text-cinema-muted font-mono">{tok.hex}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </PlaygroundSection>
+
+      <PlaygroundSection title="Escala tipográfica">
+        <div className="space-y-4">
+          <p className="font-display text-5xl md:text-7xl tracking-tight text-cinema-chalk leading-[0.95]">
+            Display XL
+          </p>
+          <p className="font-display text-4xl md:text-5xl tracking-tight text-cinema-chalk">Display L</p>
+          <p className="font-display text-2xl md:text-3xl tracking-tight text-cinema-chalk">Display M</p>
+          <p className="text-lg font-semibold text-cinema-chalk">Título UI</p>
+          <p className="text-base text-cinema-chalk">Cuerpo Outfit sobre tiza.</p>
+          <p className="text-sm text-cinema-muted">Meta / captions en piedra cálida.</p>
+          <p className="text-xs uppercase tracking-widest text-cinema-accent">Eyebrow editorial</p>
+        </div>
+      </PlaygroundSection>
 
       <PlaygroundSection title="Botones">
         <div className="flex flex-wrap items-center gap-3">
@@ -128,16 +175,20 @@ export default function PlaygroundPage() {
           searchId="playground-search"
           searchLabel="Buscar en el playground"
           searchPlaceholder="Buscar por título..."
-          search=""
-          onSearchChange={() => {}}
-          onClear={() => {}}
+          search={search}
+          onSearchChange={setSearch}
+          onClear={() => {
+            setSearch('');
+            setGenre('');
+            setYear('');
+          }}
           showClear
           selects={[
             {
               id: 'pg-genre',
               label: 'Género',
-              value: '',
-              onChange: () => {},
+              value: genre,
+              onChange: setGenre,
               options: [
                 { value: 'action', label: 'Acción' },
                 { value: 'drama', label: 'Drama' },
@@ -147,8 +198,8 @@ export default function PlaygroundPage() {
             {
               id: 'pg-year',
               label: 'Año',
-              value: '',
-              onChange: () => {},
+              value: year,
+              onChange: setYear,
               options: [{ value: '2024', label: '2024' }],
               placeholder: 'Todos los años',
             },
@@ -167,10 +218,13 @@ export default function PlaygroundPage() {
       <PlaygroundSection title="Posters">
         <div className="flex flex-wrap gap-4">
           {sampleMovies.map((movie) => (
-            <div key={movie._id} className="w-40">
-              <MoviePoster src={movie.image} alt={movie.name} />
+            <div key={movie._id} className="w-40 aspect-[2/3]">
+              <MoviePoster src={movie.image} alt={movie.name} className="w-full h-full object-cover" />
             </div>
           ))}
+          <div className="w-40 aspect-[2/3]">
+            <MoviePoster src="" alt="Placeholder letterbox" className="w-full h-full" />
+          </div>
         </div>
       </PlaygroundSection>
 

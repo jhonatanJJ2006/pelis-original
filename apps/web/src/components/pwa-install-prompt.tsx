@@ -247,9 +247,15 @@ function usePwaInstall() {
 interface PwaInstallPromptProps {
   variant?: 'card' | 'inline';
   className?: string;
+  /** Oculta el prompt de instalación cuando ya corre como app instalada. */
+  webOnly?: boolean;
 }
 
-export function PwaInstallPrompt({ variant = 'card', className }: PwaInstallPromptProps) {
+export function PwaInstallPrompt({
+  variant = 'card',
+  className,
+  webOnly = false,
+}: PwaInstallPromptProps) {
   const {
     mode,
     install,
@@ -263,6 +269,8 @@ export function PwaInstallPrompt({ variant = 'card', className }: PwaInstallProm
     dismissApkUpdate,
   } = usePwaInstall();
   const [dismissed, setDismissed] = useState(false);
+
+  if (webOnly && isStandalone()) return null;
 
   // Si hay actualización de APK pendiente, renderizamos un modal
   if (needsApkUpdate) {

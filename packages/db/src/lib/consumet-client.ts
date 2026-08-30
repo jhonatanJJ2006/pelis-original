@@ -88,17 +88,9 @@ export async function isEmbedProviderHealthy(providerId: string): Promise<boolea
   let ok = false;
   try {
     if (providerId === 'vidnest') {
-      // VidNest's backend lives on a sibling domain; the page itself is enough.
-      const response = await fetch(
-        `https://new.vidnest.fun/hianime/anime/${HEALTH_CHECK_ANILIST_ID}/1/sub`,
-        {
-          signal: AbortSignal.timeout(8000),
-          headers: { 'User-Agent': BROWSER_USER_AGENT },
-        },
-      );
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const body = await response.text();
-      ok = body.includes('"data"');
+      const { fetchVidnestEpisode } = await import('./vidnest-client');
+      const data = await fetchVidnestEpisode(Number(HEALTH_CHECK_ANILIST_ID), 1, 'sub');
+      ok = Boolean(data.sources?.some((s) => s.file));
     } else {
       ok = await probeEmbedPlayer(provider.baseUrl, providerId);
     }

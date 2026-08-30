@@ -62,3 +62,24 @@ export function toTvChannelShape<T extends PrismaTvChannel>(c: T) {
       streamStatus === 'ONLINE' ? 'online' : streamStatus === 'OFFLINE' ? 'offline' : 'unknown',
   };
 }
+
+/** Public catalog card: never leak upstream URLs or probe errors. */
+export function toPublicTvChannelShape<T extends PrismaTvChannel>(c: T) {
+  const shaped = toTvChannelShape(c) as Record<string, unknown> & { _id: string };
+  delete shaped.streamUrl;
+  delete shaped.lastStreamError;
+  return shaped;
+}
+
+export function toTvPlaylistShape(p: {
+  id: string;
+  lastImportedAt?: Date | null;
+  [key: string]: unknown;
+}) {
+  const { id, lastImportedAt, ...rest } = p;
+  return {
+    ...rest,
+    _id: id,
+    lastImportedAt: lastImportedAt ? lastImportedAt.getTime() : undefined,
+  };
+}

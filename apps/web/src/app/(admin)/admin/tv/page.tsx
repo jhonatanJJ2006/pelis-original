@@ -2,7 +2,7 @@
 
 import { useAction, useMutation, useQuery } from '@pelis/db/client';
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Plus,
   Search,
@@ -68,11 +68,16 @@ export default function AdminTVPage() {
   const [mode, setMode] = useState<Mode>('channels');
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'' | 'online' | 'offline' | 'unknown'>('');
+  const [offset, setOffset] = useState(0);
+  const [acc, setAcc] = useState<TVChannelRow[]>([]);
 
-  const channels = useQuery(api.tv.list, {
+  const channels = useQuery(api.tv.adminList, {
     search: search || undefined,
     streamStatus: (statusFilter || undefined) as 'online' | 'offline' | 'unknown' | undefined,
     popularOnly: mode === 'popular' || undefined,
+    includeInactive: true,
+    limit: 48,
+    offset,
   }) as
     | { items: TVChannelRow[]; total: number; hasMore: boolean; offset: number; limit: number }
     | undefined;
@@ -98,6 +103,23 @@ export default function AdminTVPage() {
   const probeAll = useAction<{ batchSize?: number; onlyActive?: boolean; deactivateAfterFailures?: number }, { processed: number; online: number; offline: number; deactivated: number; sampleErrors: Array<{ name: string; error: string }> }>(api.tv.probeAllChannels);
   const seedPopular = useMutation<{ dryRun?: boolean }, { added: number; updated: number; skipped: number; total: number; dryRun: boolean }>(api.seedPopularChannels.seedPopularChannels);
   const cleanupNonWorking = useAction<{ dryRun?: boolean; threshold?: number; deleteOlderThanDays?: number }, { dryRun: boolean; wouldDeactivate?: number; wouldDelete?: number; sample?: Array<{ id: string; name: string; reasons: string[] }>; deactivated?: number; deleted?: number }>(api.tv.cleanupNonWorking);
+
+  useEffect(() => {
+    setOffset(0);
+    setAcc([]);
+  }, [search, statusFilter, mode]);
+
+  useEffect(() => {
+    if (!channels) return;
+    if (channels.offset === 0) {
+      setAcc(channels.items);
+      return;
+    }
+    setAcc((prev) => {
+      const seen = new Set(prev.map((c) => c._id));
+      return [...prev, ...channels.items.filter((c) => !seen.has(c._id))];
+    });
+  }, [channels]);
 
   const [deletingChannelId, setDeletingChannelId] = useState<string | null>(null);
   const [deletingPlaylistId, setDeletingPlaylistId] = useState<string | null>(null);
@@ -285,7 +307,7 @@ export default function AdminTVPage() {
     { value: 'playlists', label: 'Listas M3U', icon: ListVideo },
   ];
 
-  const channelItems = channels?.items ?? [];
+  const channelItems = acc;
 
   return (
     <div>
@@ -519,7 +541,7 @@ export default function AdminTVPage() {
                                 {ch.name}
                               </p>
                               <p className="text-[10px] text-cinema-ash truncate max-w-[240px]">
-                                {ch.streamUrl}
+                                {ch.source || 'manual'}
                               </p>
                             </div>
                           </div>
@@ -565,10 +587,18 @@ export default function AdminTVPage() {
               </div>
 
               {channels.hasMore && (
-                <p className="text-xs text-cinema-ash mt-4 text-center">
-                  Mostrando {channelItems.length} de {channels.total}. Refiná la búsqueda para
-                  acotar.
-                </p>
+                <div className="mt-6 flex flex-col items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setOffset((n) => n + 48)}
+                    className="px-4 py-2 rounded-[10px] border border-cinema-border text-sm text-white hover:border-cinema-violet/40"
+                  >
+                    Cargar más
+                  </button>
+                  <p className="text-xs text-cinema-ash">
+                    Mostrando {channelItems.length} de {channels.total}
+                  </p>
+                </div>
               )}
             </>
           )}

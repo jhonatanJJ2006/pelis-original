@@ -72,7 +72,7 @@ export const ANIME_STREAMING_PROVIDERS: AnimeStreamingProvider[] = [
     baseUrl: 'https://vidnest.fun',
     language: 'sub/dub',
     priority: 1,
-    note: 'Reproduce en el reproductor de Pelis (fuente HLS vía proxy propio)',
+    note: 'Reproductor de Pelis · HLS verificado (HiAnime vía VidNest)',
     buildEmbedUrl: ({ anilistId, episodeNumber, dub }) =>
       `https://vidnest.fun/anime/${anilistId}/${episodeNumber}/${dub ? 'dub' : 'sub'}`,
   },
@@ -160,7 +160,7 @@ export const ANIME_STREAMING_PROVIDERS: AnimeStreamingProvider[] = [
     baseUrl: 'https://gogoanime.by',
     language: 'sub',
     priority: 10,
-    note: 'Scraping via Consumet. Suele estar caído',
+    note: 'Consumet (suele estar caído; se usa solo como último recurso)',
     consumetId: 'gogoanime',
   },
   {

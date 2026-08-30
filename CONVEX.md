@@ -1,3 +1,5 @@
+> **LEGADO.** El stack actual es Next.js 14 + Postgres + Prisma (`@pelis/db`) + Better Auth. Convex ya no corre. No usar este archivo como guia. Ver `AGENTS.md`.
+
 # Convex Backend
 
 ## Setup

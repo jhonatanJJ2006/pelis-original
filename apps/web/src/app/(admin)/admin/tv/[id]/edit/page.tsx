@@ -27,7 +27,7 @@ export default function EditTVChannelPage() {
   const id = params.id;
   const [checking, setChecking] = useState(false);
 
-  const channel = useQuery<any>(api.tv.getById, { id: id as any });
+  const channel = useQuery<any>(api.tv.adminGetById, { id: id as any });
   const update = useMutation(api.tv.updateChannel);
 
   const handleSubmit = async (values: ChannelFormValues) => {

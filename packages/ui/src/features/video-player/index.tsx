@@ -1,11 +1,49 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useMutation } from '@pelis/db/client';
 import Hls from 'hls.js';
-import { AlertCircle, Maximize, Pause, Play, Volume2, VolumeX } from 'lucide-react';
+import { AlertCircle, Play } from 'lucide-react';
 import { api } from '@pelis/db/api';
 import { cn } from '../../shared/utils';
+import {
+  PlayerChrome,
+  playerVideoFilter,
+  usePlayerKeyboard,
+  usePlayerSettings,
+} from './player-chrome';
+import { PlayerGestureHud, usePlayerSurfaceGestures } from './player-gestures';
+import { PlayerLoadingOverlay } from './player-loading';
+import { isMobilePlayerViewport, useMobileLandscapePlayer } from './player-landscape';
+import { createVodHlsConfig } from './hls-config';
+import { attachHlsForwardPrefetch, attachNativeHlsPrefetch } from './hls-prefetch';
+
+export {
+  PlayerChrome,
+  formatPlayerTime,
+  playerVideoFilter,
+  usePlayerKeyboard,
+  usePlayerSettings,
+  BRIGHTNESS_DEFAULT,
+  BRIGHTNESS_MAX,
+  BRIGHTNESS_MIN,
+} from './player-chrome';
+export {
+  PlayerGestureHud,
+  applyVerticalDrag,
+  classifySurfaceDrag,
+  gesturePercent,
+  usePlayerSurfaceGestures,
+} from './player-gestures';
+export { PlayerLoadingOverlay } from './player-loading';
+export { createVodHlsConfig, HLS_PREFETCH_SEGMENTS } from './hls-config';
+export { attachHlsForwardPrefetch, attachNativeHlsPrefetch } from './hls-prefetch';
+export {
+  useMobileLandscapePlayer,
+  isMobilePlayerViewport,
+  pickLandscapeFallback,
+  PLAYER_LANDSCAPE_COVER_CLASS,
+} from './player-landscape';
 
 const DEMO_VIDEO =
   'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
@@ -28,14 +66,19 @@ export function VideoPlayer({
   autoPlay = false,
 }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const upsertHistory = useMutation(api.history.upsert);
   const [playing, setPlaying] = useState(autoPlay);
-  const [muted, setMuted] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [showControls, setShowControls] = useState(false);
+  const [showControls, setShowControls] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [mediaReady, setMediaReady] = useState(false);
+  const [fullscreen, setFullscreen] = useState(false);
   const lastSaved = useRef(0);
+  const { brightness, setBrightness, volume, setVolume, muted, setMuted, toggleMute } =
+    usePlayerSettings();
 
   const src = videoUrl || DEMO_VIDEO;
   const isHls = src.includes('.m3u8');
@@ -46,6 +89,7 @@ export function VideoPlayer({
     if (!video) return;
 
     setError(null);
+    setMediaReady(false);
 
     if (!isHls) {
       video.src = src;
@@ -53,24 +97,58 @@ export function VideoPlayer({
     }
 
     if (useHlsJs) {
-      const hls = new Hls({ enableWorker: true });
+      const hls = new Hls(createVodHlsConfig());
+      const stopPrefetch = attachHlsForwardPrefetch(hls, video);
       hls.loadSource(src);
       hls.attachMedia(video);
 
       hls.on(Hls.Events.ERROR, (_, data) => {
-        if (data.fatal) {
-          setError('No se pudo cargar el video. Intenta de nuevo más tarde.');
-          setPlaying(false);
+        if (!data.fatal) {
+          if (data.details === Hls.ErrorDetails.BUFFER_STALLED_ERROR) {
+            hls.startLoad();
+          }
+          return;
+        }
+        switch (data.type) {
+          case Hls.ErrorTypes.NETWORK_ERROR:
+            if (data.details === Hls.ErrorDetails.MANIFEST_LOAD_ERROR) {
+              setError('No se pudo cargar el video. Intenta de nuevo más tarde.');
+              setPlaying(false);
+            } else {
+              hls.startLoad();
+            }
+            break;
+          case Hls.ErrorTypes.MEDIA_ERROR:
+            hls.recoverMediaError();
+            break;
+          default:
+            setError('No se pudo cargar el video. Intenta de nuevo más tarde.');
+            setPlaying(false);
         }
       });
 
-      return () => hls.destroy();
+      return () => {
+        stopPrefetch();
+        hls.destroy();
+      };
     }
 
     if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.preload = 'auto';
       video.src = src;
+      const stopPrefetch = attachNativeHlsPrefetch(video, src);
+      return () => {
+        stopPrefetch();
+      };
     }
   }, [src, isHls, useHlsJs]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.volume = volume;
+    video.muted = muted;
+  }, [volume, muted]);
 
   const saveProgress = async (current: number, total: number) => {
     if (!userId || total <= 0) return;
@@ -91,43 +169,129 @@ export function VideoPlayer({
     video.play().catch(() => setPlaying(false));
   }, [autoPlay, error]);
 
-  const togglePlay = () => {
+  const {
+    landscapeActive,
+    enter: enterLandscape,
+    exit: exitLandscape,
+    surfaceClassName: landscapeClassName,
+    surfaceStyle: landscapeStyle,
+  } = useMobileLandscapePlayer({
+    containerRef,
+    videoRef,
+    enterOnMount: autoPlay,
+  });
+
+  const { hud, hudVisible, didGesture } = usePlayerSurfaceGestures({
+    containerRef,
+    brightness,
+    setBrightness,
+    volume,
+    setVolume,
+    enabled: landscapeActive,
+  });
+
+  const togglePlay = useCallback(() => {
     const video = videoRef.current;
     if (!video || error) return;
     if (video.paused) {
-      video.play();
+      void video.play();
       setPlaying(true);
+      void enterLandscape();
     } else {
       video.pause();
       setPlaying(false);
     }
-  };
+  }, [error, enterLandscape]);
 
-  const toggleFullscreen = () => {
+  const seek = useCallback((seconds: number) => {
+    const video = videoRef.current;
+    if (!video || !Number.isFinite(video.duration)) return;
+    video.currentTime = Math.min(Math.max(0, seconds), Math.max(0, video.duration - 0.25));
+  }, []);
+
+  const toggleFullscreen = useCallback(() => {
+    if (isMobilePlayerViewport()) {
+      if (landscapeActive) void exitLandscape();
+      else void enterLandscape();
+      return;
+    }
+    if (document.fullscreenElement) {
+      void document.exitFullscreen();
+    } else {
+      containerRef.current?.requestFullscreen().catch(() => {});
+    }
+  }, [enterLandscape, exitLandscape, landscapeActive]);
+
+  const togglePip = useCallback(async () => {
     const video = videoRef.current;
     if (!video) return;
-    if (document.fullscreenElement) {
-      document.exitFullscreen();
-    } else {
-      video.requestFullscreen();
+    try {
+      if (document.pictureInPictureElement) await document.exitPictureInPicture();
+      else await video.requestPictureInPicture();
+    } catch {
+      // not supported
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    const onFs = () => setFullscreen(Boolean(document.fullscreenElement));
+    document.addEventListener('fullscreenchange', onFs);
+    return () => document.removeEventListener('fullscreenchange', onFs);
+  }, []);
+
+  const bumpControls = useCallback(() => {
+    setShowControls(true);
+    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    hideTimerRef.current = setTimeout(() => {
+      if (!videoRef.current?.paused) setShowControls(false);
+    }, 3200);
+  }, []);
+
+  useEffect(() => {
+    bumpControls();
+    return () => {
+      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    };
+  }, [bumpControls]);
+
+  usePlayerKeyboard({
+    enabled: !error,
+    onTogglePlay: togglePlay,
+    onSeekDelta: (delta) => seek((videoRef.current?.currentTime ?? 0) + delta),
+    onVolumeDelta: (delta) => setVolume(volume + delta),
+    onToggleMute: toggleMute,
+    onToggleFullscreen: toggleFullscreen,
+    onBrightnessDelta: (delta) => setBrightness(brightness + delta),
+  });
 
   return (
     <div
-      className="relative aspect-video rounded-2xl overflow-hidden bg-cinema-bg border border-cinema-border group shadow-[0_8px_40px_rgba(139,92,246,0.12)]"
-      onMouseEnter={() => setShowControls(true)}
-      onMouseLeave={() => setShowControls(false)}
-      onFocus={() => setShowControls(true)}
+      ref={containerRef}
+      className={cn(
+        'group relative overflow-hidden bg-cinema-bg shadow-[0_8px_40px_rgba(196,163,90,0.10)] [touch-action:none]',
+        landscapeActive
+          ? 'aspect-auto'
+          : 'aspect-video rounded-2xl border border-cinema-border',
+        landscapeClassName,
+      )}
+      style={landscapeStyle}
+      onMouseMove={bumpControls}
+      onFocus={bumpControls}
     >
       <video
         ref={videoRef}
         src={useHlsJs ? undefined : src}
         poster={poster}
-        className="w-full h-full object-contain"
+        className="h-full w-full object-contain"
+        style={{ filter: playerVideoFilter(brightness) }}
         playsInline
+        preload="auto"
         muted={muted}
-        onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
+        onLoadedMetadata={(e) => {
+          setDuration(e.currentTarget.duration);
+          setMediaReady(true);
+        }}
+        onCanPlay={() => setMediaReady(true)}
         onTimeUpdate={(e) => {
           const v = e.currentTarget;
           setProgress(v.currentTime);
@@ -143,102 +307,63 @@ export function VideoPlayer({
             setPlaying(false);
           }
         }}
-        onClick={togglePlay}
+        onClick={() => {
+          if (didGesture()) return;
+          togglePlay();
+        }}
         aria-label={`Reproducir ${title}`}
       />
+      {!mediaReady && !error && (
+        <PlayerLoadingOverlay poster={poster} message="Cargando…" />
+      )}
+      {landscapeActive && hud && <PlayerGestureHud kind={hud.kind} value={hud.value} visible={hudVisible} />}
       {error && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-cinema-bg/90 p-6 text-center">
-          <AlertCircle className="w-10 h-10 text-red-400 mb-3" aria-hidden />
-          <p className="text-white text-sm">{error}</p>
+          <AlertCircle className="mb-3 h-10 w-10 text-cinema-danger" aria-hidden />
+          <p className="text-sm text-cinema-chalk">{error}</p>
         </div>
       )}
-      <div
-        className={cn(
-          'absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-cinema-bg/95 to-transparent transition-opacity duration-200',
-          showControls || !playing ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-        )}
-      >
-        <div
-          className="h-2 md:h-1.5 bg-cinema-elevated rounded-full mb-3 cursor-pointer"
-          role="slider"
-          aria-label="Progreso de reproducción"
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-valuenow={duration ? Math.round((progress / duration) * 100) : 0}
-          tabIndex={0}
-          onClick={(e) => {
-            e.stopPropagation();
-            const video = videoRef.current;
-            if (!video || !duration) return;
-            const rect = e.currentTarget.getBoundingClientRect();
-            const ratio = (e.clientX - rect.left) / rect.width;
-            video.currentTime = ratio * duration;
-          }}
-          onKeyDown={(e) => {
-            const video = videoRef.current;
-            if (!video || !duration) return;
-            if (e.key === 'ArrowRight')
-              video.currentTime = Math.min(video.currentTime + 10, duration);
-            if (e.key === 'ArrowLeft') video.currentTime = Math.max(video.currentTime - 10, 0);
-          }}
-        >
-          <div
-            className="h-full bg-gradient-to-r from-cinema-accent to-cinema-violet rounded-full"
-            style={{ width: `${duration ? (progress / duration) * 100 : 0}%` }}
-          />
-        </div>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                togglePlay();
-              }}
-              className="p-3 md:p-2 rounded-full bg-cinema-elevated/90 hover:bg-cinema-violet/40 border border-cinema-border transition-colors focus-visible:ring-2 focus-visible:ring-cinema-accent/60"
-              aria-label={playing ? 'Pausar' : 'Reproducir'}
-            >
-              {playing ? (
-                <Pause className="w-5 h-5" />
-              ) : (
-                <Play className="w-5 h-5" fill="currentColor" />
-              )}
-            </button>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setMuted(!muted);
-                if (videoRef.current) videoRef.current.muted = !muted;
-              }}
-              className="p-3 md:p-2 rounded-full bg-cinema-elevated/90 hover:bg-cinema-violet/40 border border-cinema-border transition-colors focus-visible:ring-2 focus-visible:ring-cinema-accent/60"
-              aria-label={muted ? 'Activar sonido' : 'Silenciar'}
-            >
-              {muted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-            </button>
-          </div>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              toggleFullscreen();
-            }}
-            className="p-3 md:p-2 rounded-full bg-cinema-elevated/90 hover:bg-cinema-violet/40 border border-cinema-border transition-colors focus-visible:ring-2 focus-visible:ring-cinema-accent/60"
-            aria-label="Pantalla completa"
-          >
-            <Maximize className="w-5 h-5" />
-          </button>
-        </div>
-      </div>
-      {!playing && !error && (
+      <PlayerChrome
+        playing={playing}
+        onTogglePlay={togglePlay}
+        currentTime={progress}
+        duration={duration}
+        onSeek={seek}
+        volume={volume}
+        muted={muted}
+        onVolumeChange={(value) => {
+          setVolume(value);
+          setMuted(value === 0);
+        }}
+        onToggleMute={() => {
+          const video = videoRef.current;
+          toggleMute();
+          if (video) video.muted = !muted;
+        }}
+        brightness={brightness}
+        onBrightnessChange={setBrightness}
+        fullscreen={fullscreen || landscapeActive}
+        onToggleFullscreen={toggleFullscreen}
+        onTogglePip={() => void togglePip()}
+        visible={showControls}
+        title={title}
+        onRewind={() => seek(Math.max(0, progress - 10))}
+      />
+      {!playing && !error && mediaReady && (
         <button
           type="button"
-          onClick={togglePlay}
-          className="absolute inset-0 flex items-center justify-center bg-cinema-bg/40 transition-opacity hover:bg-cinema-bg/50 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-cinema-accent/60"
+          onClick={() => {
+            if (didGesture()) return;
+            togglePlay();
+          }}
+          className={cn(
+            'absolute inset-0 z-20 flex items-center justify-center bg-cinema-bg/35 transition-opacity',
+            'focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-cinema-accent/60',
+          )}
           aria-label="Reproducir"
         >
-          <div className="p-5 rounded-full bg-cinema-accent text-white shadow-glow">
-            <Play className="w-8 h-8" fill="currentColor" />
+          <div className="rounded-full bg-cinema-accent p-5 text-cinema-bg shadow-glow">
+            <Play className="h-8 w-8" fill="currentColor" />
           </div>
         </button>
       )}

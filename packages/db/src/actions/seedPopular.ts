@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { prisma } from '../client';
 import { notifyChange } from '../realtime';
 import { register } from '../registry';
+import { requireAdmin } from '../lib/requireAdmin';
 
 interface PopularChannelSeed {
   name: string;
@@ -79,7 +80,7 @@ const POPULAR: PopularChannelSeed[] = [
     category: 'Anime',
     country: 'Latinoamérica',
     language: 'es',
-    streamUrl: 'https://jmp2.uk/plu-6380c94947c72b0007ee9a13.m3u8',
+    streamUrl: 'https://jmp2.uk/plu-5ff4b9ccf938f8000779eb99.m3u8',
     source: 'popular',
     tvgId: 'OnePiece.us@LatAm',
     sortOrder: 2,
@@ -90,7 +91,7 @@ const POPULAR: PopularChannelSeed[] = [
     category: 'Anime',
     country: 'Latinoamérica',
     language: 'es',
-    streamUrl: 'https://jmp2.uk/plu-68d25b620a0f3829b116bb6f.m3u8',
+    streamUrl: 'https://jmp2.uk/plu-5dcde17bf6591d0009839e02.m3u8',
     source: 'popular',
     tvgId: 'PlutoTVAnime.us@LatAm',
     sortOrder: 3,
@@ -106,26 +107,30 @@ const POPULAR: PopularChannelSeed[] = [
     tvgId: 'DetectiveConan.us@Spain',
     sortOrder: 4,
   },
+  // Disney Channel / Disney Jr. LatAm: NO hay HLS público en español.
+  // El Pluto 62f3e8ad2a8e8000077b013d es Detective Conan Francia, no Disney.
+  // saran-live/disneyjunior es feed MENA (401), no LATAM español.
+  // No re-sembrar feeds PT/FR/EN etiquetados como es.
   {
-    name: 'Disney Channel LatAm',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/f/ff/2024_Disney_Channel_text_logo.svg',
+    name: 'Pluto TV Kids LatAm',
+    logo: 'https://images.pluto.tv/channels/5dd6dae8ce788b0009eaf77b/colorLogoPNG.png',
     category: 'Infantil',
     country: 'Latinoamérica',
     language: 'es',
-    streamUrl: 'https://jmp2.uk/plu-62f3e8ad2a8e8000077b013d.m3u8',
+    streamUrl: 'https://jmp2.uk/plu-5dd6dae8ce788b0009eaf77b.m3u8',
     source: 'popular',
-    tvgId: 'DisneyChannelLatinAmerica.ar@PanregionalHD',
+    tvgId: 'PlutoTVKids.us@LatAm',
     sortOrder: 1,
   },
   {
-    name: 'Disney Jr. LatAm',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/e/e3/2024_Disney_Jr._Logo.svg',
+    name: 'Pluto TV Junior LatAm',
+    logo: 'https://images.pluto.tv/channels/5dcde2ac4bc6c500094ab45b/colorLogoPNG.png',
     category: 'Infantil',
     country: 'Latinoamérica',
     language: 'es',
-    streamUrl: 'https://saran-live.ercdn.net/disneyjunior/index.m3u8',
+    streamUrl: 'https://jmp2.uk/plu-5dcde2ac4bc6c500094ab45b.m3u8',
     source: 'popular',
-    tvgId: 'DisneyJrLatinAmerica.ar@North',
+    tvgId: 'PlutoTVJunior.us@LatAm',
     sortOrder: 2,
   },
   {
@@ -189,30 +194,25 @@ const POPULAR: PopularChannelSeed[] = [
     category: 'Animación',
     country: 'España',
     language: 'es',
-    streamUrl: 'https://jmp2.uk/plu-5e8b580a233dc90007f0cb9d.m3u8',
+    streamUrl: 'https://jmp2.uk/plu-6181404ef48321000797bc41.m3u8',
     source: 'popular',
     tvgId: 'iCarly.de@ES',
     sortOrder: 6,
   },
   {
     name: 'South Park LatAm',
-    logo: 'https://images.pluto.tv/channels/609ae66b359b270007869ff1/colorLogoPNG_1733160636316.png',
+    logo: 'https://images.pluto.tv/channels/609ae5cd48d3200007b0a98e/colorLogoPNG.png',
     category: 'Animación',
     country: 'Latinoamérica',
     language: 'es',
-    streamUrl: 'https://jmp2.uk/plu-609ae66b359b270007869ff1.m3u8',
+    streamUrl: 'https://jmp2.uk/plu-609ae5cd48d3200007b0a98e.m3u8',
     source: 'popular',
     tvgId: 'ComedyCentralSouthPark.us@LatAm',
     sortOrder: 7,
   },
 
-  // Kids (English)
-  { name: 'Cartoon Network', logo: '', category: 'Infantil', country: 'Estados Unidos', language: 'en', streamUrl: 'https://amg01201-amg01201c4-rakuten-us-4231.playouts.now.amagi.tv/playlist/amg01201-rakutentv-cnrakutentv/playlist.m3u8', source: 'popular', sortOrder: 10 },
-  { name: 'Discovery Kids', logo: '', category: 'Infantil', country: 'Estados Unidos', language: 'en', streamUrl: 'https://amg01201-amg01201c4-rakuten-us-4250.playouts.now.amagi.tv/playlist/amg01201-rakutentv-dkrakutentv/playlist.m3u8', source: 'popular', sortOrder: 11 },
-
-  // Documentales & Cultura
-  { name: 'Discovery Channel', logo: '', category: 'Documentales', country: 'Estados Unidos', language: 'en', streamUrl: 'https://amg01201-amg01201c4-rakuten-us-4249.playouts.now.amagi.tv/playlist/amg01201-rakutentv-dcrakutentv/playlist.m3u8', source: 'popular', sortOrder: 1 },
-  { name: 'National Geographic', logo: '', category: 'Documentales', country: 'Estados Unidos', language: 'en', streamUrl: 'https://amg01201-amg01201c4-rakuten-us-4254.playouts.now.amagi.tv/playlist/amg01201-rakutentv-ngrakutentv/playlist.m3u8', source: 'popular', sortOrder: 2 },
+  // No re-sembrar Cartoon Network / Discovery Kids / Discovery / NatGeo en inglés (Rakuten US).
+  // No hay HLS público LATAM/España verificado para esas marcas.
 ];
 
 export const seedPopularChannels = register({
@@ -220,7 +220,8 @@ export const seedPopularChannels = register({
   name: 'tv.seedPopularChannels',
   writes: ['tv_channel'],
   args: z.object({ dryRun: z.boolean().optional() }).optional(),
-  handler: async (_ctx, args) => {
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     const dryRun = args?.dryRun ?? false;
     let added = 0;
     let updated = 0;

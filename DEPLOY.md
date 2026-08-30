@@ -1,3 +1,5 @@
+> **STALE.** Este runbook describe Convex y ya no aplica. Prod hoy: https://verpelis.pro via Cloudflare Tunnel hacia localhost:3000 (systemd pelis-web.service). Secretos solo en `.env`. GitHub Environments (production/staging/dev) los posee Glob y aun no existen. Ver `AGENTS.md`.
+
 # Guía de deploy — Pelis (verpelis.pro)
 
 Runbook completo del proceso de despliegue: cómo exponer la app en `https://verpelis.pro`

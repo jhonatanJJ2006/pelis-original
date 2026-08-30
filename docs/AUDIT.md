@@ -1,7 +1,7 @@
 # Auditoría del sitio — Pelis Original
 
 Documento vivo con el inventario de gaps, bugs e incompletitudes.  
-Última actualización: 2026-08-16.
+Última actualización: 2026-08-29.
 
 ---
 
@@ -19,6 +19,7 @@ Documento vivo con el inventario de gaps, bugs e incompletitudes.
 | PWA | Parcial | SW precache problemático |
 | Imágenes | Alto | Pósters hash faltantes en clone limpio |
 | CI / calidad | Bajo | Sin CI, build ignora TS/lint |
+| Docs agentes | OK | AGENTS.md + docs/APP, ARCHITECTURE, DATA-MODEL, TESTING |
 
 ---
 
@@ -75,7 +76,7 @@ Documento vivo con el inventario de gaps, bugs e incompletitudes.
 
 **Archivos:** `apps/web/src/app/api/stream/`
 
-**Acción pendiente:** Validar sesión/plan activo en middleware o route handler.
+**Estado:** Corregido 2026-08-29 — denyUnlessStreamAccess (requireActivePlan) en stream peliculas/TV/anime. No quitar.
 
 ### 6. Build ignora errores TypeScript y ESLint
 
@@ -123,7 +124,7 @@ Documento vivo con el inventario de gaps, bugs e incompletitudes.
 
 | Issue | Archivo | Estado |
 |-------|---------|--------|
-| Sin `not-found.tsx` custom | `apps/web/src/app/` | Pendiente |
+| not-found.tsx custom | apps/web/src/app/not-found.tsx | Corregido |
 | Sin CI en GitHub Actions | `.github/workflows/` | Pendiente |
 | Sin monitoreo Sentry activo | — | Pendiente |
 | E2E roto (referencia Convex) | `e2e/email-verification.e2e.ts` | Pendiente |
@@ -150,7 +151,7 @@ Documento vivo con el inventario de gaps, bugs e incompletitudes.
 | Stripe suscripción | Parcial |
 | Admin CRUD | Completo |
 | PWA | Parcial |
-| Tests E2E | Parcial (rotos) |
+| Tests E2E | Parcial (email-verification era Convex) |
 
 ---
 
