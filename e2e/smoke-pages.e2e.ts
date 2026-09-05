@@ -7,7 +7,7 @@ import { test, expect } from '@playwright/test';
  */
 
 const PAGES: Array<{ path: string; heading: RegExp; requireData?: boolean }> = [
-  { path: '/', heading: /películas y series destacadas/i },
+  { path: '/', heading: /cine de sala oscura|películas y series destacadas/i },
   { path: '/movies', heading: /películas/i, requireData: true },
   { path: '/series', heading: /series/i },
   { path: '/anime', heading: /anime/i, requireData: true },

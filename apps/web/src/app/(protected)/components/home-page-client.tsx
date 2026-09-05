@@ -13,6 +13,7 @@ import { HeroSkeleton } from '@pelis/ui/features/hero-skeleton';
 import { api } from '@pelis/db/api';
 import type { MediaItem } from '@pelis/ui/types';
 import { cn } from '@pelis/ui/utils';
+import { LandingPage } from './landing-page';
 
 const genreColors: Record<string, string> = {
   Acción: 'from-red-500/30 to-cinema-violet/15',
@@ -37,7 +38,7 @@ interface HomePageClientProps {
 }
 
 export function HomePageClient({ preloaded }: HomePageClientProps) {
-  const { user } = useUser();
+  const { user, isLoading: authLoading } = useUser();
   const liveMovies = useQuery<MediaItem[]>(api.movies.list, {}) as MediaItem[] | undefined;
   const liveFeatured = useQuery<MediaItem[]>(api.movies.getFeatured, {}) as MediaItem[] | undefined;
   const liveTrending = useQuery<MediaItem[]>(api.movies.getTrending, {}) as MediaItem[] | undefined;
@@ -55,6 +56,19 @@ export function HomePageClient({ preloaded }: HomePageClientProps) {
   const genres = liveGenres ?? preloaded.genres.data;
 
   const topGenres = (genres ?? []).slice(0, 4);
+
+  // Visitantes: landing Maison Noir. Con sesión: catálogo de inicio.
+  if (authLoading) {
+    return (
+      <div className="page-shell py-24 flex justify-center" role="status" aria-label="Cargando">
+        <HeroSkeleton />
+      </div>
+    );
+  }
+  if (!user) {
+    return <LandingPage />;
+  }
+
 
   const continueItems =
     continueWatching
