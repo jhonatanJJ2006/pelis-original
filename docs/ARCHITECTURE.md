@@ -14,11 +14,11 @@ Stack actual: Next.js 14 + Postgres/Prisma (@pelis/db) + Better Auth. NUNCA Conv
 ## Flujo de datos
 
 Cliente (RSC preloadQuery o hooks useQuery/useMutation/useAction)
-  -> POST /api/function/<name> (getRequestCtx lee cookie Better Auth)
-  -> invoke() + registry (packages/db/src/registry.ts)
-  -> handler en queries/ mutations/ actions/
-  -> Prisma -> Postgres
-  -> toMovieShape/toAnimeShape (_id, enums minúsculas, enrichMovieImage)
+-> POST /api/function/<name> (getRequestCtx lee cookie Better Auth)
+-> invoke() + registry (packages/db/src/registry.ts)
+-> handler en queries/ mutations/ actions/
+-> Prisma -> Postgres
+-> toMovieShape/toAnimeShape (_id, enums minúsculas, enrichMovieImage)
 Mutations llaman notifyChange; el cliente SSE /api/subscriptions/stream invalida queries.
 
 ## Auth
@@ -28,14 +28,21 @@ requireUser / requireAdmin / requireActivePlan / hasActivePlan: packages/db/src/
 Admin UI: (admin)/layout.tsx comprueba user.role === admin (minúscula en cliente; BD es ADMIN).
 No hay middleware.ts de Next.
 
+## Stripe / plan activo
+
+Checkout crea session con `metadata.convexUserId` + `planId` (y `client_reference_id`).
+Alta de `Subscription` ACTIVE: webhook (`checkout.session.completed`, `customer.subscription.created/updated`, `invoice.paid`) **o** `stripe.syncCheckoutSession` desde `/subscribe/success`.
+`incomplete` no degrada un ACTIVE (retry de webhook). Stream: `denyUnlessStreamAccess` → `requireActivePlan` (ACTIVE + endDate futuro, o ADMIN).
+
 ## Imagenes
 
 packages/db/src/lib/resolveMovieImage.ts:
+
 - hash MD5 32 hex -> /peliculas/peliculas/{hash}.webp
 - slug -> /peliculas/{slug}.webp
 - imageId / backdropImageId -> /uploads/{id}.webp
 - URL *.convex.cloud/api/storage -> placeholder /peliculas/placeholder.webp
-Carpetas gitignored. /uploads se sirve por route handler para no reiniciar pelis-web.
+  Carpetas gitignored. /uploads se sirve por route handler para no reiniciar pelis-web.
 
 ## Anime
 

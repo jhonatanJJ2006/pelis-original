@@ -1,9 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { CheckCircle, Film, Loader2 } from 'lucide-react';
+import { useAction } from '@pelis/db/client';
+import { api } from '@pelis/db/api';
 import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';
 import { Button, Spinner } from '@pelis/ui/components';
 import { useAppStore } from '@pelis/auth/store';
@@ -35,46 +37,66 @@ async function fetchMe(): Promise<MeUser | null> {
   }
 }
 
+function stripSessionIdFromUrl() {
+  const url = new URL(window.location.href);
+  if (!url.searchParams.has('session_id')) return;
+  url.searchParams.delete('session_id');
+  window.history.replaceState({}, '', url.toString());
+}
+
 function SubscribeSuccessContent() {
   const searchParams = useSearchParams();
-  const sessionId = searchParams.get('session_id');
+  const sessionIdFromUrl = searchParams.get('session_id');
+  const sessionIdRef = useRef(sessionIdFromUrl);
+  if (sessionIdFromUrl) sessionIdRef.current = sessionIdFromUrl;
+
   const setUser = useAppStore((s) => s.setUser);
   const [activating, setActivating] = useState(true);
   const [active, setActive] = useState(false);
-
-  useEffect(() => {
-    if (sessionId) {
-      const url = new URL(window.location.href);
-      url.searchParams.delete('session_id');
-      window.history.replaceState({}, '', url.toString());
-    }
-  }, [sessionId]);
+  const syncCheckoutSession = useAction<
+    { sessionId: string },
+    { activated: boolean; planExpiresAt?: number }
+  >(api.stripe.syncCheckoutSession);
 
   useEffect(() => {
     let cancelled = false;
     let attempts = 0;
     const maxAttempts = 12;
 
-    const tick = async () => {
-      attempts += 1;
+    const applyMe = async () => {
       const me = await fetchMe();
-      if (cancelled) return;
-      const ok = !!(me?.planExpiresAt && me.planExpiresAt > Date.now());
-      if (ok && me) {
-        const prev = useAppStore.getState().user;
-        setUser({
-          _id: me._id,
-          name: me.name,
-          email: me.email,
-          role: me.role === 'ADMIN' ? 'admin' : 'user',
-          planId: me.planId,
-          planExpiresAt: me.planExpiresAt,
-          image: prev?.image,
-        });
-        setActive(true);
-        setActivating(false);
-        return;
+      if (cancelled || !me) return false;
+      const ok = !!(me.planExpiresAt && me.planExpiresAt > Date.now());
+      if (!ok) return false;
+      const prev = useAppStore.getState().user;
+      setUser({
+        _id: me._id,
+        name: me.name,
+        email: me.email,
+        role: me.role === 'ADMIN' ? 'admin' : 'user',
+        planId: me.planId,
+        planExpiresAt: me.planExpiresAt,
+        image: prev?.image,
+      });
+      setActive(true);
+      setActivating(false);
+      stripSessionIdFromUrl();
+      return true;
+    };
+
+    const tick = async () => {
+      const sessionId = sessionIdRef.current;
+      if (sessionId && attempts < 3) {
+        try {
+          const result = await syncCheckoutSession({ sessionId });
+          if (cancelled) return;
+          if (result.activated && (await applyMe())) return;
+        } catch {
+          // Webhook may still land; keep polling users.me.
+        }
       }
+      if (await applyMe()) return;
+      attempts += 1;
       if (attempts >= maxAttempts) {
         setActivating(false);
         return;
@@ -86,7 +108,7 @@ function SubscribeSuccessContent() {
     return () => {
       cancelled = true;
     };
-  }, [setUser]);
+  }, [setUser, syncCheckoutSession]);
 
   return (
     <ScrollReveal className="text-center max-w-lg mx-auto">

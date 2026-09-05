@@ -101,13 +101,13 @@ Rutas de apps/web/src/app. Grupo (protected) = header/footer, NO exige login. Gr
 
 - Hace: planes Stripe checkout/portal
 - Archivos: (protected)/subscribe/page.tsx
-- Auth: useUser recomendado. Datos: subscriptions.list, stripe.createCheckoutSession, stripe.createPortalSession.
+- Auth: useUser recomendado. Datos: subscriptions.list, stripe.createCheckoutSession, stripe.createPortalSession, stripe.syncCheckoutSession.
 
 ### `/subscribe/success`
 
-- Hace: retorno Stripe OK (limpia session_id)
+- Hace: retorno Stripe OK. Llama `stripe.syncCheckoutSession` con `session_id` para crear/activar la Subscription (no depende solo del webhook). Luego limpia `session_id`.
 - Archivos: (protected)/subscribe/success/page.tsx
-- Auth: publico de facto. Datos: ninguna query.
+- Auth: sesión requerida para sincronizar el plan. Datos: stripe.syncCheckoutSession, users.me.
 
 ### `/subscribe/cancel`
 
@@ -284,7 +284,8 @@ Rutas de apps/web/src/app. Grupo (protected) = header/footer, NO exige login. Gr
 
 ### `/api/stripe/webhook`
 
-- Hace: Stripe -> stripeWebhookAction.processWebhook
+- Hace: Stripe -> stripeWebhookAction.processWebhook. Eventos: checkout.session.completed, customer.subscription.created/updated/deleted, invoice.paid / payment_succeeded / payment_failed.
+- Alta compartida: packages/db/src/lib/stripe-subscription.ts (también la usa stripe.syncCheckoutSession).
 - Archivos: api/stripe/webhook/route.ts
 - Auth: firma Stripe. Datos: packages/db/src/actions/stripeWebhook.ts.
 

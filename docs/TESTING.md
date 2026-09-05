@@ -5,9 +5,9 @@ Scripts en package.json raiz. Workspace Vitest: vitest.workspace.ts. Playwright:
 ## Vitest (vitest.workspace.ts)
 
 Dos proyectos:
-- unit (environment node, globals): packages/validators/src/**/*.test.ts, apps/web/src/lib/**/*.test.ts (incluye `pwa-update.test.ts`), packages/ui/src/shared/**/*.test.ts, packages/ui/src/features/**/*.test.ts, packages/auth/src/**/*.test.ts, packages/db/src/**/*.test.ts
+- unit (environment node, globals): packages/validators/src/**/*.test.ts, apps/web/src/lib/**/*.test.ts (incluye `pwa-update.test.ts`), packages/ui/src/shared/**/*.test.ts, packages/ui/src/features/**/*.test.ts, packages/auth/src/**/*.test.ts, packages/db/src/**/*.test.ts (incluye `packages/db/src/lib/stripe-subscription.test.ts`: checkout → ACTIVE y no clobber por `incomplete`)
 - components (jsdom, setupFiles ./test/setup.ts): packages/ui/src/**/*.test.tsx. Alias next/link y next/image a test/mocks.
-Exclude: node_modules, e2e, .next, .turbo.
+  Exclude: node_modules, e2e, .next, .turbo.
 
 pnpm test = vitest run (ambos proyectos)
 pnpm test:unit / pnpm test:components / pnpm test:watch
@@ -31,7 +31,9 @@ pnpm test:e2e / test:e2e:ui / test:smoke / test:playground / test:all
 Playground E2E solo tiene sentido en development (la pagina se oculta en production).
 
 ## Ritual por tipo de cambio (para agentes)
+
 Ver tambien AGENTS.md seccion 6.
+
 - UI de componentes: playground + test:playground + test:components
 - Pagina publica: test:smoke
 - API: test:api via test:smoke (api-smoke.e2e.ts)

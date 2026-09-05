@@ -15,7 +15,7 @@ Documento vivo con el inventario de gaps, bugs e incompletitudes.
 | Anime streaming | En reparación | IDs incorrectos + API Consumet inestable |
 | TV en vivo | OK | IPTV, probe admin |
 | Auth | OK | Better Auth + Google |
-| Suscripción | Parcial | Stripe requiere keys reales |
+| Suscripción | OK código | Checkout → sync/webhook → Subscription ACTIVE. Keys/webhook de prod siguen siendo ops |
 | PWA | Parcial | Update modal + sin install CTAs; SW precache de uploads sigue siendo ruido |
 | Imágenes | Alto | Pósters hash faltantes en clone limpio |
 | CI / calidad | Bajo | Sin CI, build ignora TS/lint |
@@ -30,6 +30,7 @@ Documento vivo con el inventario de gaps, bugs e incompletitudes.
 **Síntoma:** Al seleccionar proveedor no aparecen episodios o el video falla.
 
 **Causas:**
+
 - El frontend envía un slug del título a Consumet en lugar del AniList ID.
 - El modelo `Anime` no tenía `anilistId` persistido.
 - `api.consumet.org` público suele devolver 500.
@@ -77,6 +78,18 @@ Documento vivo con el inventario de gaps, bugs e incompletitudes.
 **Archivos:** `apps/web/src/app/api/stream/`
 
 **Estado:** Corregido 2026-08-29 — denyUnlessStreamAccess (requireActivePlan) en stream peliculas/TV/anime. No quitar.
+
+### 5b. Pago Stripe sin plan activo
+
+**Síntoma:** Checkout OK en Stripe, el usuario no podía ver películas (`requireActivePlan` 403).
+
+**Causas:**
+
+- `/subscribe/success` solo hacía poll de `users.me` y dependía del webhook `checkout.session.completed`.
+- `customer.subscription.updated` con `incomplete` (y sus retries) marcaba EXPIRED y pisaba el ACTIVE.
+- No se escuchaba `customer.subscription.created` ni `invoice.paid`.
+
+**Estado:** Corregido 2026-09-05 — `stripe.syncCheckoutSession` + alta compartida en `packages/db/src/lib/stripe-subscription.ts`. `incomplete` ya no degrada ACTIVE.
 
 ### 6. Build ignora errores TypeScript y ESLint
 
@@ -128,48 +141,48 @@ Documento vivo con el inventario de gaps, bugs e incompletitudes.
 
 ## Bajo
 
-| Issue | Archivo | Estado |
-|-------|---------|--------|
-| not-found.tsx custom | apps/web/src/app/not-found.tsx | Corregido |
-| Sin CI en GitHub Actions | `.github/workflows/` | Pendiente |
-| Sin monitoreo Sentry activo | — | Pendiente |
-| E2E roto (referencia Convex) | `e2e/email-verification.e2e.ts` | Pendiente |
-| Sin favoritos/historial anime | schema | Pendiente |
-| Sin SEO `generateMetadata` | páginas detalle | Pendiente |
+| Issue                         | Archivo                         | Estado    |
+| ----------------------------- | ------------------------------- | --------- |
+| not-found.tsx custom          | apps/web/src/app/not-found.tsx  | Corregido |
+| Sin CI en GitHub Actions      | `.github/workflows/`            | Pendiente |
+| Sin monitoreo Sentry activo   | —                               | Pendiente |
+| E2E roto (referencia Convex)  | `e2e/email-verification.e2e.ts` | Pendiente |
+| Sin favoritos/historial anime | schema                          | Pendiente |
+| Sin SEO `generateMetadata`    | páginas detalle                 | Pendiente |
 
 ---
 
 ## Matriz de features
 
-| Feature | Estado |
-|---------|--------|
-| Home + carruseles | Completo |
-| Catálogo películas | Completo |
-| Catálogo series | Roto/desalineado |
-| Detalle película + player | Completo |
-| Detalle serie | Parcial (sin episodios) |
-| Anime catálogo | Completo |
-| Anime reproducción | En reparación |
-| TV en vivo | Completo |
-| Favoritos / Historial | Completo (solo películas) |
-| Perfil | Completo |
-| Auth | Completo |
-| Stripe suscripción | Parcial |
-| Admin CRUD | Completo |
-| PWA | Parcial |
-| Tests E2E | Parcial (email-verification era Convex) |
+| Feature                   | Estado                                  |
+| ------------------------- | --------------------------------------- |
+| Home + carruseles         | Completo                                |
+| Catálogo películas        | Completo                                |
+| Catálogo series           | Roto/desalineado                        |
+| Detalle película + player | Completo                                |
+| Detalle serie             | Parcial (sin episodios)                 |
+| Anime catálogo            | Completo                                |
+| Anime reproducción        | En reparación                           |
+| TV en vivo                | Completo                                |
+| Favoritos / Historial     | Completo (solo películas)               |
+| Perfil                    | Completo                                |
+| Auth                      | Completo                                |
+| Stripe suscripción        | Completo (código; keys/webhook ops)     |
+| Admin CRUD                | Completo                                |
+| PWA                       | Parcial                                 |
+| Tests E2E                 | Parcial (email-verification era Convex) |
 
 ---
 
 ## Dependencias externas
 
-| Servicio | Uso | Riesgo |
-|----------|-----|--------|
-| Consumet API | Episodios/video anime | Alta — auto-hospedar |
-| AniList GraphQL | Metadata anime | Baja — gratis |
-| TMDB | Enrichment posters | Media — requiere API key |
-| Stripe | Pagos | Media — requiere config |
-| Paths locales streaming | Películas | Alta — específico del servidor |
+| Servicio                | Uso                   | Riesgo                                                                                                                         |
+| ----------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Consumet API            | Episodios/video anime | Alta — auto-hospedar                                                                                                           |
+| AniList GraphQL         | Metadata anime        | Baja — gratis                                                                                                                  |
+| TMDB                    | Enrichment posters    | Media — requiere API key                                                                                                       |
+| Stripe                  | Pagos                 | Media — keys + endpoint webhook en Dashboard. El plan también se activa con `stripe.syncCheckoutSession` en /subscribe/success |
+| Paths locales streaming | Películas             | Alta — específico del servidor                                                                                                 |
 
 ---
 
