@@ -79,8 +79,8 @@ export function LandingPage() {
             <span className="block text-cinema-accent-light mt-2">En casa, sin ruido.</span>
           </h1>
           <p className="text-cinema-muted text-lg md:text-xl max-w-2xl mb-10">
-            Pelis reúne películas, series, anime y TV en vivo en una experiencia premium.
-            Entra, explora el catálogo y suscríbete cuando quieras ver sin límites.
+            Pelis reúne películas, series, anime y TV en vivo en una experiencia premium. Entra,
+            explora el catálogo y suscríbete cuando quieras ver sin límites.
           </p>
           <div className="flex flex-wrap items-center gap-3">
             <Link href="/register">
@@ -103,7 +103,9 @@ export function LandingPage() {
 
       <section className="page-shell pb-16 md:pb-20">
         <ScrollReveal>
-          <h2 className="font-display text-2xl md:text-3xl text-cinema-chalk mb-2">Todo en un solo lugar</h2>
+          <h2 className="font-display text-2xl md:text-3xl text-cinema-chalk mb-2">
+            Todo en un solo lugar
+          </h2>
           <p className="text-cinema-muted mb-8 max-w-xl">
             Cuatro mundos. La misma sala. Elige por dónde empezar.
           </p>
@@ -114,7 +116,7 @@ export function LandingPage() {
               <div
                 className={cn(
                   'h-full rounded-2xl border border-cinema-border bg-cinema-surface/60 p-5',
-                  'hover:border-cinema-accent/40 hover:-translate-y-1 transition-all duration-normal ease-out-expo',
+                  'hover:border-cinema-accent/40 hover:-translate-y-1 transition-all duration-normal ease-out-expo'
                 )}
               >
                 <div className="w-10 h-10 rounded-xl bg-cinema-elevated border border-cinema-border flex items-center justify-center mb-4">
@@ -151,8 +153,8 @@ export function LandingPage() {
             Premium cuando lo necesites
           </h2>
           <p className="text-cinema-muted max-w-xl mx-auto mb-8">
-            Mira planes, prueba el checkout en modo test de Stripe y activa el streaming.
-            Sin plan aún puedes recorrer el catálogo.
+            Mira planes, prueba el checkout en modo test de Stripe y activa el streaming. Sin plan
+            aún puedes recorrer el catálogo.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link href="/subscribe">

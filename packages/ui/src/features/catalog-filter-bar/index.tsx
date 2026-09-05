@@ -46,7 +46,12 @@ export function CatalogFilterBar({
     showClear || search.length > 0 || selects.some((select) => select.value.length > 0);
 
   return (
-    <div className={cn('flex flex-col lg:flex-row lg:items-center gap-3 rounded-2xl border border-cinema-border/70 bg-cinema-surface/40 p-3 md:p-4', className)}>
+    <div
+      className={cn(
+        'flex flex-col lg:flex-row lg:items-center gap-3 rounded-2xl border border-cinema-border/70 bg-cinema-surface/40 p-3 md:p-4',
+        className
+      )}
+    >
       <div className="w-full lg:flex-1 lg:min-w-0">
         <label htmlFor={searchId} className="sr-only">
           {searchLabel}
@@ -71,7 +76,10 @@ export function CatalogFilterBar({
             aria-label={select.label}
             value={select.value}
             onChange={(e) => select.onChange(e.target.value)}
-            wrapperClassName={cn('w-[calc(50%-6px)] sm:w-auto shrink-0', select.minWidth ?? 'sm:min-w-[160px]')}
+            wrapperClassName={cn(
+              'w-[calc(50%-6px)] sm:w-auto shrink-0',
+              select.minWidth ?? 'sm:min-w-[160px]'
+            )}
           >
             <option value="">{select.placeholder ?? select.label}</option>
             {select.options.map((option) => (

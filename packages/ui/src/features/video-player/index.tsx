@@ -269,10 +269,8 @@ export function VideoPlayer({
       ref={containerRef}
       className={cn(
         'group relative overflow-hidden bg-cinema-bg shadow-[0_8px_40px_rgba(196,163,90,0.10)] [touch-action:none]',
-        landscapeActive
-          ? 'aspect-auto'
-          : 'aspect-video rounded-2xl border border-cinema-border',
-        landscapeClassName,
+        landscapeActive ? 'aspect-auto' : 'aspect-video rounded-2xl border border-cinema-border',
+        landscapeClassName
       )}
       style={landscapeStyle}
       onMouseMove={bumpControls}
@@ -313,10 +311,10 @@ export function VideoPlayer({
         }}
         aria-label={`Reproducir ${title}`}
       />
-      {!mediaReady && !error && (
-        <PlayerLoadingOverlay poster={poster} message="Cargando…" />
+      {!mediaReady && !error && <PlayerLoadingOverlay poster={poster} message="Cargando…" />}
+      {landscapeActive && hud && (
+        <PlayerGestureHud kind={hud.kind} value={hud.value} visible={hudVisible} />
       )}
-      {landscapeActive && hud && <PlayerGestureHud kind={hud.kind} value={hud.value} visible={hudVisible} />}
       {error && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-cinema-bg/90 p-6 text-center">
           <AlertCircle className="mb-3 h-10 w-10 text-cinema-danger" aria-hidden />
@@ -358,7 +356,7 @@ export function VideoPlayer({
           }}
           className={cn(
             'absolute inset-0 z-20 flex items-center justify-center bg-cinema-bg/35 transition-opacity',
-            'focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-cinema-accent/60',
+            'focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-cinema-accent/60'
           )}
           aria-label="Reproducir"
         >

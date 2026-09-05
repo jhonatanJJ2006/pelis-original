@@ -99,7 +99,9 @@ export default function EditTVChannelPage() {
 
       <div className="mb-6 rounded-xl border border-cinema-border bg-cinema-surface p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <p className="text-xs text-cinema-muted uppercase tracking-wider mb-1">Estado del stream</p>
+          <p className="text-xs text-cinema-muted uppercase tracking-wider mb-1">
+            Estado del stream
+          </p>
           <div className="flex flex-wrap items-center gap-2">
             <span
               className={cn(
@@ -116,7 +118,9 @@ export default function EditTVChannelPage() {
                   ? 'Caído'
                   : 'Sin verificar'}
             </span>
-            <span className="text-xs text-cinema-muted">Última verificación: {formatDate(channel.lastCheckedAt)}</span>
+            <span className="text-xs text-cinema-muted">
+              Última verificación: {formatDate(channel.lastCheckedAt)}
+            </span>
           </div>
           {channel.lastStreamError && (
             <p className="text-xs text-red-300/80 mt-2">{channel.lastStreamError}</p>

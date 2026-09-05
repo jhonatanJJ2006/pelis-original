@@ -117,8 +117,12 @@ export default function PlaygroundPage() {
           <p className="font-display text-5xl md:text-7xl tracking-tight text-cinema-chalk leading-[0.95]">
             Display XL
           </p>
-          <p className="font-display text-4xl md:text-5xl tracking-tight text-cinema-chalk">Display L</p>
-          <p className="font-display text-2xl md:text-3xl tracking-tight text-cinema-chalk">Display M</p>
+          <p className="font-display text-4xl md:text-5xl tracking-tight text-cinema-chalk">
+            Display L
+          </p>
+          <p className="font-display text-2xl md:text-3xl tracking-tight text-cinema-chalk">
+            Display M
+          </p>
           <p className="text-lg font-semibold text-cinema-chalk">Título UI</p>
           <p className="text-base text-cinema-chalk">Cuerpo Outfit sobre tiza.</p>
           <p className="text-sm text-cinema-muted">Meta / captions en piedra cálida.</p>
@@ -159,7 +163,10 @@ export default function PlaygroundPage() {
 
       <PlaygroundSection title="Inputs y selects">
         <div className="space-y-4 max-w-md">
-          <Input placeholder="Buscar películas..." iconLeft={<Search className="w-[18px] h-[18px]" />} />
+          <Input
+            placeholder="Buscar películas..."
+            iconLeft={<Search className="w-[18px] h-[18px]" />}
+          />
           <Input placeholder="Con botón limpiar" clearable defaultValue="algo escrito" />
           <Select aria-label="Género" defaultValue="">
             <option value="">Todos los géneros</option>
@@ -219,7 +226,11 @@ export default function PlaygroundPage() {
         <div className="flex flex-wrap gap-4">
           {sampleMovies.map((movie) => (
             <div key={movie._id} className="w-40 aspect-[2/3]">
-              <MoviePoster src={movie.image} alt={movie.name} className="w-full h-full object-cover" />
+              <MoviePoster
+                src={movie.image}
+                alt={movie.name}
+                className="w-full h-full object-cover"
+              />
             </div>
           ))}
           <div className="w-40 aspect-[2/3]">

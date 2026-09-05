@@ -100,7 +100,10 @@ describe('movieSchema', () => {
   });
 
   it('should accept https image URLs', () => {
-    const result = movieSchema.safeParse({ ...validMovie, image: 'https://cdn.example.com/dune.jpg' });
+    const result = movieSchema.safeParse({
+      ...validMovie,
+      image: 'https://cdn.example.com/dune.jpg',
+    });
     expect(result.success).toBe(true);
   });
 

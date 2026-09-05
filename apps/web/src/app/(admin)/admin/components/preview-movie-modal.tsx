@@ -216,7 +216,9 @@ export function PreviewMovieModal({ movie, onClose, onBackdrop }: PreviewMovieMo
               )}
               <p>
                 <span className="text-cinema-muted">Token: </span>
-                <span className="text-cinema-silver font-mono text-xs break-all">{movie.token}</span>
+                <span className="text-cinema-silver font-mono text-xs break-all">
+                  {movie.token}
+                </span>
               </p>
               {effectiveVideoUrl && (
                 <p>
@@ -284,9 +286,7 @@ export function PreviewMovieModal({ movie, onClose, onBackdrop }: PreviewMovieMo
             </div>
             <div
               className={`relative w-full aspect-video rounded-xl overflow-hidden border bg-cinema-elevated ${
-                movie.backdropImage
-                  ? 'border-cinema-border'
-                  : 'border-dashed border-cinema-border'
+                movie.backdropImage ? 'border-cinema-border' : 'border-dashed border-cinema-border'
               }`}
               data-testid="admin-preview-backdrop"
             >
@@ -317,11 +317,7 @@ export function PreviewMovieModal({ movie, onClose, onBackdrop }: PreviewMovieMo
               <Loader2 className="w-8 h-8 text-cinema-muted animate-spin" aria-hidden />
             </div>
           ) : effectiveVideoUrl ? (
-            <AdminPreviewVideo
-              src={effectiveVideoUrl}
-              poster={movie.image}
-              title={displayName}
-            />
+            <AdminPreviewVideo src={effectiveVideoUrl} poster={movie.image} title={displayName} />
           ) : (
             <div
               className="flex flex-col items-center text-center py-8 px-4 rounded-xl bg-cinema-elevated/40 border border-cinema-border"

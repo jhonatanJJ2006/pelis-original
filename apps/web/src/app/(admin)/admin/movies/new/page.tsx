@@ -14,14 +14,13 @@ export default function NewMoviePage() {
   const generateUploadUrl = useMutation(api.movies.generateUploadUrl);
 
   const genres = (useQuery(api.movies.getGenres, {}) as string[] | undefined) ?? [];
-  const classifications =
-    (useQuery(api.movies.getClassifications, {}) as string[] | undefined) ?? [
-      'G',
-      'PG',
-      'PG-13',
-      'R',
-      'NC-17',
-    ];
+  const classifications = (useQuery(api.movies.getClassifications, {}) as string[] | undefined) ?? [
+    'G',
+    'PG',
+    'PG-13',
+    'R',
+    'NC-17',
+  ];
 
   const handleUploadImage = async (file: File) => {
     const uploadUrl = (await generateUploadUrl({})) as string;

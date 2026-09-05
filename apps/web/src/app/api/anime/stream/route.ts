@@ -42,10 +42,7 @@ export async function GET(request: NextRequest) {
     const response = await fetchAnimeUpstream(upstream, ANIME_CDN_HEADERS, { range });
 
     if (!response.ok && response.status !== 206) {
-      return NextResponse.json(
-        { error: `Upstream respondió ${response.status}` },
-        { status: 502 }
-      );
+      return NextResponse.json({ error: `Upstream respondió ${response.status}` }, { status: 502 });
     }
 
     const contentType = response.headers.get('content-type') ?? '';
@@ -90,7 +87,9 @@ export async function GET(request: NextRequest) {
     const disguised = /\.(jpe?g|png|webp|gif|html|js|css|txt)(?:\?|$)/i.test(upstream);
     headers.set(
       'Content-Type',
-      disguised ? getMimeForUrl(upstream) : contentType || getMimeForUrl(upstream) || 'application/octet-stream'
+      disguised
+        ? getMimeForUrl(upstream)
+        : contentType || getMimeForUrl(upstream) || 'application/octet-stream'
     );
     headers.set('Access-Control-Allow-Origin', '*');
     headers.set('Accept-Ranges', 'bytes');

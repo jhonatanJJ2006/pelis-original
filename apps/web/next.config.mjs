@@ -13,13 +13,7 @@ const withSerwist = withSerwistInit({
 });
 
 const nextConfig = {
-  transpilePackages: [
-    '@pelis/ui',
-    '@pelis/db',
-    '@pelis/auth',
-    '@pelis/validators',
-    'better-auth',
-  ],
+  transpilePackages: ['@pelis/ui', '@pelis/db', '@pelis/auth', '@pelis/validators', 'better-auth'],
   webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,

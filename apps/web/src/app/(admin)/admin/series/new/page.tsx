@@ -13,14 +13,13 @@ export default function NewSeriesPage() {
   const create = useMutation(api.adminSeries.create);
 
   const moviesGenres = (useQuery(api.movies.getGenres, {}) as string[] | undefined) ?? [];
-  const classifications =
-    (useQuery(api.movies.getClassifications, {}) as string[] | undefined) ?? [
-      'G',
-      'PG',
-      'PG-13',
-      'R',
-      'NC-17',
-    ];
+  const classifications = (useQuery(api.movies.getClassifications, {}) as string[] | undefined) ?? [
+    'G',
+    'PG',
+    'PG-13',
+    'R',
+    'NC-17',
+  ];
 
   const handleSubmit = async (values: SeriesFormValues) => {
     try {

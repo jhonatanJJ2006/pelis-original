@@ -15,10 +15,7 @@ function parseProviders(text: string) {
     .filter(Boolean)
     .map((line) => {
       const [name, url, lang] = line.split('|').map((s) => s.trim());
-      const language = (lang === 'dub' || lang === 'esp' ? lang : 'sub') as
-        | 'sub'
-        | 'dub'
-        | 'esp';
+      const language = (lang === 'dub' || lang === 'esp' ? lang : 'sub') as 'sub' | 'dub' | 'esp';
       return {
         name: name || 'Proveedor',
         url: url || '',

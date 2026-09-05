@@ -101,7 +101,11 @@ function SubscribeSuccessContent() {
       </div>
 
       <h1 className="font-display text-4xl md:text-5xl tracking-wide text-white uppercase mb-4">
-        {activating ? 'Activando suscripción…' : active ? '¡Suscripción activada!' : 'Pago recibido'}
+        {activating
+          ? 'Activando suscripción…'
+          : active
+            ? '¡Suscripción activada!'
+            : 'Pago recibido'}
       </h1>
       <p className="text-cinema-muted text-lg mb-8">
         {activating

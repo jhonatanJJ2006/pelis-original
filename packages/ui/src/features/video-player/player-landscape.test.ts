@@ -8,12 +8,7 @@ import {
   pickLandscapeFallback,
 } from './player-landscape';
 
-function fakeWindow(opts: {
-  maxMd?: boolean;
-  coarse?: boolean;
-  width?: number;
-  height?: number;
-}) {
+function fakeWindow(opts: { maxMd?: boolean; coarse?: boolean; width?: number; height?: number }) {
   const width = opts.width ?? 1280;
   const height = opts.height ?? 800;
   return {

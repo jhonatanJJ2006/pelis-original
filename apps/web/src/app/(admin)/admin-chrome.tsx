@@ -59,10 +59,7 @@ export function AdminChrome({ children }: { children: React.ReactNode }) {
         </Link>
       </header>
 
-      <AdminSidebar
-        mobileOpen={mobileNavOpen}
-        onMobileClose={() => setMobileNavOpen(false)}
-      />
+      <AdminSidebar mobileOpen={mobileNavOpen} onMobileClose={() => setMobileNavOpen(false)} />
 
       <main className="flex-1 min-w-0 p-4 sm:p-6 md:p-8 pb-[max(1rem,env(safe-area-inset-bottom))]">
         {children}

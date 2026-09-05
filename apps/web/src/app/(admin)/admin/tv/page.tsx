@@ -95,14 +95,51 @@ export default function AdminTVPage() {
     | undefined;
 
   const removeChannel = useMutation<{ id: string }, string>(api.tv.removeChannel);
-  const toggleChannel = useMutation<{ id: string; isActive: boolean }, string>(api.tv.toggleChannel);
-  const togglePopular = useMutation<{ id: string; isPopular: boolean }, string>(api.tv.togglePopular);
+  const toggleChannel = useMutation<{ id: string; isActive: boolean }, string>(
+    api.tv.toggleChannel
+  );
+  const togglePopular = useMutation<{ id: string; isPopular: boolean }, string>(
+    api.tv.togglePopular
+  );
   const removePlaylist = useMutation<{ id: string }, string>(api.tv.removePlaylist);
-  const importM3U = useAction<{ m3uUrl: string; playlistId?: string; country?: string; language?: string }, { total: number; added: number; updated: number; failed: number; failures: string[] }>(api.tv.seedFromM3U);
-  const probeChannel = useAction<{ channelId: string }, { channelId: string; name: string; streamStatus: 'online' | 'offline'; lastStreamError?: string }>(api.tv.probeChannel);
-  const probeAll = useAction<{ batchSize?: number; onlyActive?: boolean; deactivateAfterFailures?: number }, { processed: number; online: number; offline: number; deactivated: number; sampleErrors: Array<{ name: string; error: string }> }>(api.tv.probeAllChannels);
-  const seedPopular = useMutation<{ dryRun?: boolean }, { added: number; updated: number; skipped: number; total: number; dryRun: boolean }>(api.seedPopularChannels.seedPopularChannels);
-  const cleanupNonWorking = useAction<{ dryRun?: boolean; threshold?: number; deleteOlderThanDays?: number }, { dryRun: boolean; wouldDeactivate?: number; wouldDelete?: number; sample?: Array<{ id: string; name: string; reasons: string[] }>; deactivated?: number; deleted?: number }>(api.tv.cleanupNonWorking);
+  const importM3U = useAction<
+    { m3uUrl: string; playlistId?: string; country?: string; language?: string },
+    { total: number; added: number; updated: number; failed: number; failures: string[] }
+  >(api.tv.seedFromM3U);
+  const probeChannel = useAction<
+    { channelId: string },
+    {
+      channelId: string;
+      name: string;
+      streamStatus: 'online' | 'offline';
+      lastStreamError?: string;
+    }
+  >(api.tv.probeChannel);
+  const probeAll = useAction<
+    { batchSize?: number; onlyActive?: boolean; deactivateAfterFailures?: number },
+    {
+      processed: number;
+      online: number;
+      offline: number;
+      deactivated: number;
+      sampleErrors: Array<{ name: string; error: string }>;
+    }
+  >(api.tv.probeAllChannels);
+  const seedPopular = useMutation<
+    { dryRun?: boolean },
+    { added: number; updated: number; skipped: number; total: number; dryRun: boolean }
+  >(api.seedPopularChannels.seedPopularChannels);
+  const cleanupNonWorking = useAction<
+    { dryRun?: boolean; threshold?: number; deleteOlderThanDays?: number },
+    {
+      dryRun: boolean;
+      wouldDeactivate?: number;
+      wouldDelete?: number;
+      sample?: Array<{ id: string; name: string; reasons: string[] }>;
+      deactivated?: number;
+      deleted?: number;
+    }
+  >(api.tv.cleanupNonWorking);
 
   useEffect(() => {
     setOffset(0);
@@ -205,9 +242,7 @@ export default function AdminTVPage() {
       if (result.streamStatus === 'online') {
         toast.success(`✓ ${ch.name} está en línea`);
       } else {
-        toast.error(
-          `${ch.name}: ${result.lastStreamError ?? 'Stream no disponible'}`
-        );
+        toast.error(`${ch.name}: ${result.lastStreamError ?? 'Stream no disponible'}`);
       }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Error al verificar');
@@ -250,9 +285,7 @@ export default function AdminTVPage() {
     setSeedingPopular(true);
     try {
       const result = await seedPopular({});
-      toast.success(
-        `Canales curados: ${result.added} nuevos · ${result.updated} actualizados`
-      );
+      toast.success(`Canales curados: ${result.added} nuevos · ${result.updated} actualizados`);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Error al sembrar');
     } finally {
@@ -301,11 +334,12 @@ export default function AdminTVPage() {
     }
   };
 
-  const tabs: { value: Mode; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
-    { value: 'channels', label: 'Canales', icon: Tv },
-    { value: 'popular', label: 'Populares', icon: Star },
-    { value: 'playlists', label: 'Listas M3U', icon: ListVideo },
-  ];
+  const tabs: { value: Mode; label: string; icon: React.ComponentType<{ className?: string }> }[] =
+    [
+      { value: 'channels', label: 'Canales', icon: Tv },
+      { value: 'popular', label: 'Populares', icon: Star },
+      { value: 'playlists', label: 'Listas M3U', icon: ListVideo },
+    ];
 
   const channelItems = acc;
 
@@ -366,12 +400,7 @@ export default function AdminTVPage() {
           <StatChip icon={Tv} label="Total" value={stats.total} accent="text-cinema-violet-light" />
           <StatChip icon={Activity} label="Online" value={stats.online} accent="text-emerald-300" />
           <StatChip icon={RefreshCw} label="Offline" value={stats.offline} accent="text-red-300" />
-          <StatChip
-            icon={Zap}
-            label="Sin probar"
-            value={stats.unknown}
-            accent="text-cinema-ash"
-          />
+          <StatChip icon={Zap} label="Sin probar" value={stats.unknown} accent="text-cinema-ash" />
           <StatChip icon={Star} label="Populares" value={stats.popular} accent="text-cinema-gold" />
           <StatChip icon={Tv} label="Activos" value={stats.active} accent="text-cinema-teal" />
         </div>
@@ -781,7 +810,12 @@ function ChannelCard({
             )}
           />
         </Button>
-        <Button variant="ghost" size="sm" aria-label={ch.isActive ? 'Desactivar' : 'Activar'} onClick={() => onToggle(ch)}>
+        <Button
+          variant="ghost"
+          size="sm"
+          aria-label={ch.isActive ? 'Desactivar' : 'Activar'}
+          onClick={() => onToggle(ch)}
+        >
           {ch.isActive ? (
             <ToggleRight className="w-4 h-4 text-emerald-300" />
           ) : (
@@ -843,12 +877,7 @@ function ChannelActions({
           <Activity className="w-4 h-4 text-cinema-violet-light" />
         )}
       </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        aria-label="Popular"
-        onClick={() => onTogglePopular(ch)}
-      >
+      <Button variant="ghost" size="sm" aria-label="Popular" onClick={() => onTogglePopular(ch)}>
         <Star
           className={cn(
             'w-4 h-4',

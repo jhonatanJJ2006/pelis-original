@@ -51,7 +51,14 @@ export default function AnimePage() {
   const isLoading = seriesList === undefined;
 
   useEffect(() => {
-    if (seriesList && seriesList.length === 0 && !seeding && !search && !selectedGenre && !selectedStatus) {
+    if (
+      seriesList &&
+      seriesList.length === 0 &&
+      !seeding &&
+      !search &&
+      !selectedGenre &&
+      !selectedStatus
+    ) {
       setSeeding(true);
       seedAnime().catch(() => {});
     }

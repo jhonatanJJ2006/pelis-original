@@ -51,7 +51,9 @@ describe('PlayerGestureHud layout', () => {
   it('sits at the top center as a horizontal pill, not a vertical meter', () => {
     expect(PLAYER_GESTURE_HUD_FRAME_CLASS).toContain('left-1/2');
     expect(PLAYER_GESTURE_HUD_FRAME_CLASS).toContain('-translate-x-1/2');
-    expect(PLAYER_GESTURE_HUD_FRAME_CLASS).toContain('top-[max(1rem,env(safe-area-inset-top,0px))]');
+    expect(PLAYER_GESTURE_HUD_FRAME_CLASS).toContain(
+      'top-[max(1rem,env(safe-area-inset-top,0px))]'
+    );
     expect(PLAYER_GESTURE_HUD_FRAME_CLASS).not.toContain('top-[28%]');
     expect(PLAYER_GESTURE_HUD_PILL_CLASS).toContain('flex items-center');
     expect(PLAYER_GESTURE_HUD_PILL_CLASS).toContain('bg-cinema-bg/85');
@@ -64,4 +66,3 @@ describe('PlayerGestureHud layout', () => {
     expect(PLAYER_GESTURE_HUD_FILL_CLASS).not.toContain('bottom-0');
   });
 });
-

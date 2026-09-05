@@ -67,7 +67,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               'transition-all duration-200',
               iconLeft && 'pl-11',
               (isPassword || showClear || iconRight) && 'pr-11',
-              error && 'border-cinema-danger focus:ring-cinema-danger/50 hover:border-cinema-danger/70',
+              error &&
+                'border-cinema-danger focus:ring-cinema-danger/50 hover:border-cinema-danger/70',
               className
             )}
             aria-invalid={error ? true : undefined}

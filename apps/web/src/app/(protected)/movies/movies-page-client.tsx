@@ -54,15 +54,12 @@ export default function MoviesPageClient({ preloaded, initial }: MoviesPageClien
   const preloadedGenres = preloaded.genres.data as string[] | undefined;
   const preloadedYears = preloaded.years.data as string[] | undefined;
 
-  const filteredMovies = useQuery(
-    api.movies.list,
-    {
-      genre: selectedGenre || undefined,
-      year: selectedYear || undefined,
-      search: search || undefined,
-      mediaType: 'movie' as const,
-    }
-  ) as MediaItem[] | undefined;
+  const filteredMovies = useQuery(api.movies.list, {
+    genre: selectedGenre || undefined,
+    year: selectedYear || undefined,
+    search: search || undefined,
+    mediaType: 'movie' as const,
+  }) as MediaItem[] | undefined;
 
   const movies = filteredMovies ?? preloadedMovies;
   const genres = preloadedGenres ?? [];

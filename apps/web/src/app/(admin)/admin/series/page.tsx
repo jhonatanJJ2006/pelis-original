@@ -3,7 +3,16 @@
 import { useQuery, useMutation } from '@pelis/db/client';
 import Link from 'next/link';
 import { useState } from 'react';
-import { AlertTriangle, ImageIcon, Monitor, Pencil, Plus, Search, Sparkles, Trash2 } from 'lucide-react';
+import {
+  AlertTriangle,
+  ImageIcon,
+  Monitor,
+  Pencil,
+  Plus,
+  Search,
+  Sparkles,
+  Trash2,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@pelis/db/api';
 import { Button, Input, Spinner } from '@pelis/ui/components';
@@ -88,9 +97,7 @@ export default function AdminSeriesPage() {
       {series === undefined ? (
         <AdminTableSkeleton />
       ) : series.length === 0 ? (
-        <div className="text-center py-24 text-cinema-muted">
-          No hay series con ese filtro.
-        </div>
+        <div className="text-center py-24 text-cinema-muted">No hay series con ese filtro.</div>
       ) : (
         <>
           <div className="md:hidden space-y-3">
@@ -101,10 +108,19 @@ export default function AdminSeriesPage() {
               >
                 <div className="flex gap-3">
                   <div className="w-14 h-20 shrink-0 rounded-lg overflow-hidden bg-cinema-elevated">
-                    <MoviePoster src={s.image} alt={s.name} className="w-full h-full object-cover" />
+                    <MoviePoster
+                      src={s.image}
+                      alt={s.name}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h3 className={cn('font-medium text-sm leading-snug', s.isOrphanId ? 'text-cinema-muted italic' : 'text-white')}>
+                    <h3
+                      className={cn(
+                        'font-medium text-sm leading-snug',
+                        s.isOrphanId ? 'text-cinema-muted italic' : 'text-white'
+                      )}
+                    >
                       {s.isOrphanId ? 'Sin título' : s.name}
                     </h3>
                     <p className="text-xs text-cinema-ash mt-1 truncate">{s.genre}</p>
@@ -180,14 +196,26 @@ export default function AdminSeriesPage() {
               </thead>
               <tbody>
                 {series.map((s) => (
-                  <tr key={s._id} className="border-b border-cinema-border/60 hover:bg-cinema-elevated/30 transition-colors">
+                  <tr
+                    key={s._id}
+                    className="border-b border-cinema-border/60 hover:bg-cinema-elevated/30 transition-colors"
+                  >
                     <td className="px-4 py-3">
                       <div className="w-10 h-14 rounded overflow-hidden bg-cinema-elevated">
-                        <MoviePoster src={s.image} alt={s.name} className="w-full h-full object-cover" />
+                        <MoviePoster
+                          src={s.image}
+                          alt={s.name}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      <p className={cn('font-medium max-w-[280px] truncate', s.isOrphanId ? 'text-cinema-muted italic' : 'text-white')}>
+                      <p
+                        className={cn(
+                          'font-medium max-w-[280px] truncate',
+                          s.isOrphanId ? 'text-cinema-muted italic' : 'text-white'
+                        )}
+                      >
                         {s.isOrphanId ? 'Sin título' : s.name}
                       </p>
                       <p className="text-xs text-cinema-ash mt-0.5">{s.genre}</p>

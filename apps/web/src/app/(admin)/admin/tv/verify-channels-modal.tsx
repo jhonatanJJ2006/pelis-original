@@ -19,7 +19,12 @@ interface VerifyChannelsModalProps {
     lastStreamError?: string;
   }>;
   onClose: () => void;
-  onComplete: (stats: { online: number; offline: number; total: number; cancelled: boolean }) => void;
+  onComplete: (stats: {
+    online: number;
+    offline: number;
+    total: number;
+    cancelled: boolean;
+  }) => void;
 }
 
 type Phase = 'idle' | 'running' | 'done' | 'cancelled';
@@ -124,7 +129,10 @@ export function VerifyChannelsModal({
         <div className="flex items-center justify-between px-5 py-4 border-b border-cinema-border">
           <div className="flex items-center gap-2">
             <Activity className="w-5 h-5 text-cinema-violet-light" />
-            <h2 id="verify-channels-title" className="font-display text-lg uppercase tracking-wide text-white">
+            <h2
+              id="verify-channels-title"
+              className="font-display text-lg uppercase tracking-wide text-white"
+            >
               Verificar canales
             </h2>
           </div>
@@ -148,9 +156,7 @@ export function VerifyChannelsModal({
             </div>
           )}
 
-          {phase === 'done' && (
-            <p className="text-sm text-emerald-300">Verificación completada.</p>
-          )}
+          {phase === 'done' && <p className="text-sm text-emerald-300">Verificación completada.</p>}
 
           {phase === 'cancelled' && (
             <p className="text-sm text-amber-300">Verificación cancelada.</p>

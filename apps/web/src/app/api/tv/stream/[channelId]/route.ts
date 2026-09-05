@@ -20,10 +20,7 @@ async function getChannelStreamUrl(channelId: string): Promise<string | null> {
   return streamUrl;
 }
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { channelId: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { channelId: string } }) {
   const denied = await denyUnlessStreamAccess(req);
   if (denied) return denied;
 
@@ -77,9 +74,7 @@ export async function GET(
     }
 
     const status =
-      upstreamResp.status >= 400 && upstreamResp.status < 600
-        ? upstreamResp.status
-        : 502;
+      upstreamResp.status >= 400 && upstreamResp.status < 600 ? upstreamResp.status : 502;
 
     return NextResponse.json(
       {

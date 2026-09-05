@@ -11,7 +11,11 @@ export function getTabIndex(pathname: string): number {
 }
 
 export function isTabSwipeEnabled(pathname: string): boolean {
-  if (pathname.startsWith('/admin') || pathname.startsWith('/login') || pathname.startsWith('/register')) {
+  if (
+    pathname.startsWith('/admin') ||
+    pathname.startsWith('/login') ||
+    pathname.startsWith('/register')
+  ) {
     return false;
   }
   const detailPatterns = [

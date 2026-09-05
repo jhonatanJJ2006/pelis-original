@@ -32,7 +32,8 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
               'hover:border-cinema-silver/40 hover:bg-cinema-elevated/60',
               'focus:outline-none focus:ring-2 focus:ring-cinema-accent/50 focus:border-cinema-accent/60 focus:hover:bg-cinema-surface focus:hover:border-cinema-accent/60',
               'transition-all duration-200',
-              error && 'border-cinema-danger focus:ring-cinema-danger/50 hover:border-cinema-danger/70',
+              error &&
+                'border-cinema-danger focus:ring-cinema-danger/50 hover:border-cinema-danger/70',
               className
             )}
             aria-invalid={error ? true : undefined}

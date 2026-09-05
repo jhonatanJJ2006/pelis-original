@@ -7,7 +7,11 @@ interface ProfilePageSkeletonProps {
 
 export function ProfilePageSkeleton({ className }: ProfilePageSkeletonProps) {
   return (
-    <div className={cn('page-shell max-w-3xl mx-auto', className)} aria-busy="true" aria-label="Cargando">
+    <div
+      className={cn('page-shell max-w-3xl mx-auto', className)}
+      aria-busy="true"
+      aria-label="Cargando"
+    >
       <div className="mb-10 flex flex-col sm:flex-row items-start sm:items-center gap-5">
         <Skeleton className="w-20 h-20 rounded-2xl shrink-0" />
         <div className="space-y-2 flex-1">
