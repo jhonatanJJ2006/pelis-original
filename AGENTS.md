@@ -82,7 +82,7 @@ Archivo: apps/web/src/app/playground/page.tsx. Detalle: docs/TESTING.md.
    Runtime **Movies local** (pelis-web + Postgres + cloudflared → verpelis.pro). No Vercel. Webhook → `https://verpelis.pro/api/stripe/webhook`. Si `SITE_URL` es localhost, los redirects usan `BETTER_AUTH_URL` público. Diagnóstico: docs/AUDIT.md §5b.
 5. Posters gitignored: apps/web/public/peliculas/ y apps/web/public/uploads/. Hash MD5 32 hex -> /peliculas/peliculas/{hash}.webp. imageId -> /uploads/{id}.webp. Clone limpio = imágenes rotas.
    Ver packages/db/src/lib/resolveMovieImage.ts y scripts/audit-images.mjs.
-6. PWA: no hay prompts ni barras de «instalar app» (`beforeinstallprompt` se silencia). Nueva versión (`version.json` / SW waiting) = modal Aceptar / Más tarde, sin reload forzado. La barra tipo Google + compartir es chrome del navegador o TWA en fallback Custom Tabs (assetlinks), no un componente de la app.
+6. PWA: no hay prompts ni barras de «instalar app» (`beforeinstallprompt` se silencia). Nueva versión = modal Aceptar / Más tarde, sin reload forzado. La versión se lee del deploy local Movies (`/api/app/availability` → `public/version.json` escrito en prebuild, o SW waiting). No asumir Vercel. La barra tipo Google + compartir es chrome del navegador o TWA en fallback Custom Tabs (assetlinks), no un componente de la app.
 
 ## Deploy / entornos (Glob es dueño)
 

@@ -141,7 +141,7 @@ Documento vivo con el inventario de gaps, bugs e incompletitudes.
 
 **Síntoma:** Barras/modales de «instalar app» (`pwa-install-prompt`, `tv-install-bar`, `beforeinstallprompt`) y falta de consentimiento al actualizar el SW.
 
-**Estado:** Corregido 2026-09-05 — se quitaron los CTAs de instalar; `PwaRuntime` silencia el banner nativo y muestra modal Aceptar / Más tarde si cambia `version.json` o hay SW en waiting. La barra tipo Google + compartir sigue siendo chrome del navegador o TWA (`fallbackType: customtabs` si fallan Digital Asset Links), no un componente de la app.
+**Estado:** Corregido 2026-09-05 — se quitaron los CTAs de instalar; `PwaRuntime` silencia el banner nativo y muestra modal Aceptar / Más tarde. En Movies el check usa `/api/app/availability` (disco) + SW waiting; `version.json`/`sw.js` no se cachean. La barra tipo Google + compartir sigue siendo chrome del navegador o TWA (`fallbackType: customtabs` si fallan Digital Asset Links), no un componente de la app. Runtime = systemd local, no Vercel.
 
 ### 11. Admin anime: providers JSON vs streaming
 

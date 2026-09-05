@@ -255,8 +255,9 @@ export default function PlaygroundPage() {
 
       <PlaygroundSection title="Modal de actualización PWA">
         <p className="text-cinema-muted text-sm mb-4">
-          Se muestra cuando hay un service worker en espera o cambia{' '}
-          <code className="text-cinema-chalk">version.json</code>. Aceptar activa el SW; Más tarde
+          Se muestra cuando hay un service worker en espera o cambia la versión del deploy local
+          (Movies: <code className="text-cinema-chalk">/api/app/availability</code> lee{' '}
+          <code className="text-cinema-chalk">version.json</code>). Aceptar activa el SW; Más tarde
           pospone esa versión.
         </p>
         {showUpdateModal ? (

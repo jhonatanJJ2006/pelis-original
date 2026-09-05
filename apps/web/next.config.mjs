@@ -9,7 +9,7 @@ const withSerwist = withSerwistInit({
   swSrc: 'sw.ts',
   swDest: 'public/sw.js',
   disable: process.env.NODE_ENV === 'development',
-  exclude: [/\/uploads\//],
+  exclude: [/\/uploads\//, /\/version\.json$/, /app-version\.json$/, /tv-app-version\.json$/],
 });
 
 const nextConfig = {
@@ -37,6 +37,14 @@ const nextConfig = {
             value: 'public, max-age=604800, stale-while-revalidate=86400',
           },
         ],
+      },
+      {
+        source: '/version.json',
+        headers: [{ key: 'Cache-Control', value: 'no-store, must-revalidate' }],
+      },
+      {
+        source: '/sw.js',
+        headers: [{ key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' }],
       },
     ];
   },
