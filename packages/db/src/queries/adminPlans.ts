@@ -3,6 +3,7 @@ import { prisma } from '../client';
 import { notifyChange } from '../realtime';
 import { register } from '../registry';
 import { requireAdmin } from '../lib/requireAdmin';
+import { toPlanShape } from '../lib/shapes';
 
 const PlanCreate = z.object({
   name: z.string(),
@@ -29,7 +30,7 @@ export const adminList = register({
         const active = subs.filter(
           (s) => s.status === 'ACTIVE' && s.endDate.getTime() > now.getTime(),
         ).length;
-        return { ...p, activeSubscribers: active, totalSubscribers: subs.length };
+        return { ...toPlanShape(p), activeSubscribers: active, totalSubscribers: subs.length };
       }),
     );
     return enriched;
@@ -43,7 +44,8 @@ export const getById = register({
   args: z.object({ id: z.string() }),
   handler: async (ctx, { id }) => {
     await requireAdmin(ctx);
-    return prisma.plan.findUnique({ where: { id } });
+    const plan = await prisma.plan.findUnique({ where: { id } });
+    return plan ? toPlanShape(plan) : null;
   },
 });
 

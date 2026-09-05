@@ -62,3 +62,12 @@ export function toTvChannelShape<T extends PrismaTvChannel>(c: T) {
       streamStatus === 'ONLINE' ? 'online' : streamStatus === 'OFFLINE' ? 'offline' : 'unknown',
   };
 }
+
+export function toPlanShape<T extends { id: string }>(p: T) {
+  const { id, ...rest } = p;
+  return {
+    ...rest,
+    _id: id,
+  };
+}
+
