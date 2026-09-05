@@ -1,0 +1,47 @@
+name: Branch gate
+
+on:
+  pull_request:
+    branches:
+      - main
+      - staging
+
+jobs:
+  branch-gate:
+    name: Soft branch gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate PR head/base refs
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+          echo "base=$BASE_REF head=$HEAD_REF"
+
+          if [ "$BASE_REF" = "main" ]; then
+            if [ "$HEAD_REF" = "staging" ]; then
+              echo "OK: promotion PR staging → main"
+              exit 0
+            fi
+            echo "::error::PRs into main must come from staging only (promotion). Got head='$HEAD_REF'."
+            echo "Open a feat/fix/chore PR to staging first, then promote staging → main after approval."
+            exit 1
+          fi
+
+          if [ "$BASE_REF" = "staging" ]; then
+            case "$HEAD_REF" in
+              feat/*|fix/*|chore/*|feature/*)
+                echo "OK: change PR $HEAD_REF → staging"
+                exit 0
+                ;;
+              *)
+                echo "::error::PRs into staging must come from feat/*, fix/*, or chore/* (feature/* allowed for legacy). Got head='$HEAD_REF'."
+                echo "Create a branch from staging with the correct prefix and open the PR again."
+                exit 1
+                ;;
+            esac
+          fi
+
+          echo "::error::Unexpected base branch '$BASE_REF'."
+          exit 1
