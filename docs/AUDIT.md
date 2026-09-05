@@ -7,19 +7,19 @@ Documento vivo con el inventario de gaps, bugs e incompletitudes.
 
 ## Resumen ejecutivo
 
-| Área | Estado | Notas |
-|------|--------|-------|
-| Catálogo películas | OK | Filtros, búsqueda, detalle |
-| Catálogo series | Crítico | Admin `Series` ≠ público `Movie.mediaType` |
-| Anime catálogo | OK | CRUD admin, listado |
-| Anime streaming | En reparación | IDs incorrectos + API Consumet inestable |
-| TV en vivo | OK | IPTV, probe admin |
-| Auth | OK | Better Auth + Google |
-| Suscripción | OK código | Checkout → sync/webhook → ACTIVE. Ops en Movies (túnel + .env + Postgres local), no Vercel |
-| PWA | Parcial | Update modal + sin install CTAs; SW precache de uploads sigue siendo ruido |
-| Imágenes | Alto | Pósters hash faltantes en clone limpio |
-| CI / calidad | Bajo | Sin CI, build ignora TS/lint |
-| Docs agentes | OK | AGENTS.md + docs/APP, ARCHITECTURE, DATA-MODEL, TESTING |
+| Área               | Estado        | Notas                                                                                      |
+| ------------------ | ------------- | ------------------------------------------------------------------------------------------ |
+| Catálogo películas | OK            | Filtros, búsqueda, detalle                                                                 |
+| Catálogo series    | Crítico       | Admin `Series` ≠ público `Movie.mediaType`                                                 |
+| Anime catálogo     | OK            | CRUD admin, listado                                                                        |
+| Anime streaming    | En reparación | IDs incorrectos + API Consumet inestable                                                   |
+| TV en vivo         | OK            | IPTV, probe admin                                                                          |
+| Auth               | OK            | Better Auth + Google                                                                       |
+| Suscripción        | OK código     | Checkout → sync/webhook → ACTIVE. Ops en Movies (túnel + .env + Postgres local), no Vercel |
+| PWA                | Parcial       | Update modal + sin install CTAs; SW precache de uploads sigue siendo ruido                 |
+| Imágenes           | Alto          | Pósters hash faltantes en clone limpio                                                     |
+| CI / calidad       | Bajo          | Sin CI, build ignora TS/lint                                                               |
+| Docs agentes       | OK            | AGENTS.md + docs/APP, ARCHITECTURE, DATA-MODEL, TESTING                                    |
 
 ---
 

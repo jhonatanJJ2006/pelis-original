@@ -5,9 +5,10 @@ Scripts en package.json raiz. Workspace Vitest: vitest.workspace.ts. Playwright:
 ## Vitest (vitest.workspace.ts)
 
 Dos proyectos:
-- unit (environment node, globals): packages/validators/src/**/*.test.ts, apps/web/src/lib/**/*.test.ts (incluye `pwa-update.test.ts`), packages/ui/src/shared/**/*.test.ts, packages/ui/src/features/**/*.test.ts, packages/auth/src/**/*.test.ts, packages/db/src/**/*.test.ts (incluye `packages/db/src/lib/stripe-subscription.test.ts`: checkout → ACTIVE y no clobber por `incomplete`)
-- components (jsdom, setupFiles ./test/setup.ts): packages/ui/src/**/*.test.tsx. Alias next/link y next/image a test/mocks.
-  Exclude: node_modules, e2e, .next, .turbo.
+
+- unit (environment node, globals): `*.test.ts` en validators, `apps/web/src/lib` (incluye `pwa-update.test.ts`), ui shared/features, auth y `packages/db` (incluye `stripe-subscription.test.ts`: checkout → ACTIVE y no clobber por `incomplete`)
+- components (jsdom, setupFiles `./test/setup.ts`): `packages/ui` `*.test.tsx`. Alias next/link y next/image a test/mocks.
+- Exclude: node_modules, e2e, .next, .turbo.
 
 pnpm test = vitest run (ambos proyectos)
 pnpm test:unit / pnpm test:components / pnpm test:watch
