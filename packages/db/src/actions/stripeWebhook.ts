@@ -1,3 +1,4 @@
+import type { PrismaClient } from '@prisma/client';
 import Stripe from 'stripe';
 import { z } from 'zod';
 import { register } from '../registry';
@@ -58,6 +59,25 @@ function getSubscriptionPeriod(subscription: Stripe.Subscription): { startDate: 
   const startDate = new Date(startSec * 1000);
   const endDate = endSec ? new Date(endSec * 1000) : new Date(startDate.getTime() + 30 * 24 * 60 * 60 * 1000);
   return { startDate, endDate };
+}
+
+/** Mark other ACTIVE rows for the same user as EXPIRED so only the Stripe-backed sub remains. */
+async function supersedeOtherActiveSubscriptions(
+  prisma: PrismaClient,
+  userId: string,
+  keepStripeSubscriptionId: string,
+) {
+  await prisma.subscription.updateMany({
+    where: {
+      userId,
+      status: 'ACTIVE',
+      OR: [
+        { stripeSubscriptionId: null },
+        { stripeSubscriptionId: { not: keepStripeSubscriptionId } },
+      ],
+    },
+    data: { status: 'EXPIRED' },
+  });
 }
 
 export const processWebhook = register({
@@ -121,6 +141,9 @@ export const processWebhook = register({
                 status: 'ACTIVE',
               },
             });
+            if (userId) {
+              await supersedeOtherActiveSubscriptions(prisma, userId, updated.id);
+            }
             break;
           }
           const userId = session.metadata?.convexUserId;
@@ -159,6 +182,7 @@ export const processWebhook = register({
               },
             });
           }
+          await supersedeOtherActiveSubscriptions(prisma, userId, subscription.id);
           break;
         }
         case 'customer.subscription.updated': {

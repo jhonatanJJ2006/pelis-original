@@ -11,9 +11,18 @@ export const me = register({
     if (!ctx.userId) return null;
     const user = await prisma.user.findUnique({ where: { id: ctx.userId } });
     if (!user) return null;
-    const subscription = await prisma.subscription.findFirst({
+    const now = new Date();
+    const activeSubs = await prisma.subscription.findMany({
       where: { userId: ctx.userId, status: 'ACTIVE' },
+      orderBy: { updatedAt: 'desc' },
     });
+    // Prefer not-expired Stripe-backed ACTIVE, then any not-expired ACTIVE, then latest ACTIVE.
+    const subscription =
+      activeSubs.find((s) => s.endDate > now && s.stripeSubscriptionId != null) ??
+      activeSubs.find((s) => s.endDate > now) ??
+      activeSubs.find((s) => s.stripeSubscriptionId != null) ??
+      activeSubs[0] ??
+      null;
     const endDate = subscription?.endDate.getTime();
     const hasValidExpiry = typeof endDate === 'number' && Number.isFinite(endDate) && endDate > 0;
     return {
