@@ -30,7 +30,13 @@ describe('EmptyState', () => {
     const user = userEvent.setup();
     const onAction = vi.fn();
     render(
-      <EmptyState icon={Heart} title="Vacío" description="desc" actionLabel="Recargar" onAction={onAction} />
+      <EmptyState
+        icon={Heart}
+        title="Vacío"
+        description="desc"
+        actionLabel="Recargar"
+        onAction={onAction}
+      />
     );
     await user.click(screen.getByRole('button', { name: 'Recargar' }));
     expect(onAction).toHaveBeenCalledTimes(1);

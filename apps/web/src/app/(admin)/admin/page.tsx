@@ -121,10 +121,7 @@ export default function AdminDashboardPage() {
           Gestiona el catálogo, corrige registros huérfanos y fusiona duplicados.
         </p>
         <div className="flex flex-wrap gap-3">
-          <Link
-            href="/admin/movies/new"
-            className="btn-primary inline-flex items-center gap-2"
-          >
+          <Link href="/admin/movies/new" className="btn-primary inline-flex items-center gap-2">
             <Film className="w-4 h-4" />
             Nueva película
           </Link>

@@ -19,7 +19,8 @@ export default function RegisterPage() {
 
   const translateError = (message: string): string => {
     const translations: Record<string, string> = {
-      'User already exists. Use another email.': 'El usuario ya existe. Usa otro correo electrónico.',
+      'User already exists. Use another email.':
+        'El usuario ya existe. Usa otro correo electrónico.',
       'User already exists.': 'El usuario ya existe.',
       'Invalid email': 'El email no es válido',
       'Password too short': 'La contraseña es demasiado corta',
@@ -199,11 +200,17 @@ export default function RegisterPage() {
 
         <p className="text-center text-cinema-ash text-xs mt-4 leading-relaxed">
           Al crear una cuenta aceptas los{' '}
-          <Link href="/terminos" className="text-cinema-gold hover:text-cinema-gold-light underline">
+          <Link
+            href="/terminos"
+            className="text-cinema-gold hover:text-cinema-gold-light underline"
+          >
             Términos
           </Link>{' '}
           y la{' '}
-          <Link href="/privacidad" className="text-cinema-gold hover:text-cinema-gold-light underline">
+          <Link
+            href="/privacidad"
+            className="text-cinema-gold hover:text-cinema-gold-light underline"
+          >
             Privacidad
           </Link>
           .

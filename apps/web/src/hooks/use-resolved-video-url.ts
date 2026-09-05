@@ -17,7 +17,8 @@ async function resolveVideoUrl(
 
   if (trimmed?.includes('/api/stream/') && trimmed.includes('.m3u8')) {
     // URL plana legacy (/api/stream/{token}/playlist.m3u8) → resolver por token
-    const isFlatLegacy = /\/api\/stream\/[^/]+\/[^/]+\.m3u8$/.test(trimmed) &&
+    const isFlatLegacy =
+      /\/api\/stream\/[^/]+\/[^/]+\.m3u8$/.test(trimmed) &&
       !/\/api\/stream\/[^/]+\/[^/]+\/[^/]+\.m3u8$/.test(trimmed);
 
     if (isFlatLegacy && token) {

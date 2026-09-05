@@ -13,10 +13,7 @@ import { getDefinition } from '@pelis/db/registry';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export async function POST(
-  req: Request,
-  { params }: { params: { name: string } },
-) {
+export async function POST(req: Request, { params }: { params: { name: string } }) {
   const name = decodeURIComponent(params.name);
   const def = getDefinition(name);
   if (!def) {
@@ -36,9 +33,10 @@ export async function POST(
     const data = await invoke({ name, args, ctx });
     return NextResponse.json(data ?? null);
   } catch (err) {
-    const status = err && typeof err === 'object' && 'status' in err
-      ? Number((err as { status: number }).status) || 500
-      : 500;
+    const status =
+      err && typeof err === 'object' && 'status' in err
+        ? Number((err as { status: number }).status) || 500
+        : 500;
     const message = err instanceof Error ? err.message : 'unknown error';
     return NextResponse.json({ error: message }, { status });
   }

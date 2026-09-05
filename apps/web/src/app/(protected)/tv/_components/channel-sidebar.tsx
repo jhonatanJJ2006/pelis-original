@@ -94,12 +94,10 @@ export function ChannelSidebar({ channels, currentId }: ChannelSidebarProps) {
                 'shrink-0 px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors',
                 chip === item.id
                   ? 'bg-cinema-gold text-cinema-bg'
-                  : 'bg-cinema-elevated text-cinema-silver border border-cinema-border',
+                  : 'bg-cinema-elevated text-cinema-silver border border-cinema-border'
               )}
             >
-              {item.id === '__popular' && (
-                <Star className="w-3 h-3 inline mr-1 -mt-0.5" />
-              )}
+              {item.id === '__popular' && <Star className="w-3 h-3 inline mr-1 -mt-0.5" />}
               {item.label}
             </button>
           ))}
@@ -138,14 +136,19 @@ export function ChannelSidebar({ channels, currentId }: ChannelSidebarProps) {
                         className={cn(
                           'flex items-center gap-2 px-2 py-2 rounded-lg my-0.5 transition-colors',
                           'hover:bg-cinema-elevated',
-                          active && 'bg-cinema-gold/10 ring-1 ring-cinema-gold/35',
+                          active && 'bg-cinema-gold/10 ring-1 ring-cinema-gold/35'
                         )}
                         aria-current={active ? 'true' : undefined}
                       >
                         <div className="shrink-0 w-8 h-8 rounded-md bg-cinema-elevated border border-cinema-border flex items-center justify-center overflow-hidden">
                           {c.logo ? (
                             // eslint-disable-next-line @next/next/no-img-element
-                            <img src={c.logo} alt="" className="w-6 h-6 object-contain" loading="lazy" />
+                            <img
+                              src={c.logo}
+                              alt=""
+                              className="w-6 h-6 object-contain"
+                              loading="lazy"
+                            />
                           ) : (
                             <Tv className="w-3.5 h-3.5 text-cinema-silver" />
                           )}

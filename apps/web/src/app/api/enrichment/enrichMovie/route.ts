@@ -24,13 +24,13 @@ export async function POST(req: Request) {
       body.movieId,
       body.tmdbId,
       body.replaceImage ?? false,
-      body.replaceBackdrop ?? false,
+      body.replaceBackdrop ?? false
     );
     return NextResponse.json(result);
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : 'Error al enriquecer' },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

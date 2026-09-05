@@ -91,10 +91,7 @@ export function AdminMovieActions({
 }: AdminMovieActionsProps) {
   return (
     <div
-      className={cn(
-        'flex items-center gap-1',
-        compact ? 'flex-wrap justify-end' : 'justify-end'
-      )}
+      className={cn('flex items-center gap-1', compact ? 'flex-wrap justify-end' : 'justify-end')}
       onClick={(e) => e.stopPropagation()}
     >
       <Button variant="ghost" size="sm" aria-label="Ver película" onClick={onPreview}>
@@ -182,11 +179,7 @@ export function AdminMovieMobileCard({
     >
       <div className="flex gap-3">
         <div className="w-14 h-20 shrink-0 rounded-lg overflow-hidden bg-cinema-elevated">
-          <MoviePoster
-            src={movie.image}
-            alt={displayName}
-            className="w-full h-full object-cover"
-          />
+          <MoviePoster src={movie.image} alt={displayName} className="w-full h-full object-cover" />
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">

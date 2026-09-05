@@ -87,15 +87,15 @@ export function PlanForm({ initialValues, onSubmit, submitLabel = 'Guardar' }: P
 
   const subtitleLangs = useMemo(
     () => parsePrefixedFeature(values.featuresText, PLAN_FEATURE_PREFIX.subtitles),
-    [values.featuresText],
+    [values.featuresText]
   );
   const subtitleTypes = useMemo(
     () => parsePrefixedFeature(values.featuresText, PLAN_FEATURE_PREFIX.types),
-    [values.featuresText],
+    [values.featuresText]
   );
   const audioTracks = useMemo(
     () => parsePrefixedFeature(values.featuresText, PLAN_FEATURE_PREFIX.audio),
-    [values.featuresText],
+    [values.featuresText]
   );
 
   const togglePrefixed = (prefix: string, option: string, selected: string[]) => {
@@ -170,7 +170,9 @@ export function PlanForm({ initialValues, onSubmit, submitLabel = 'Guardar' }: P
           legend="Idiomas de subtítulos"
           options={PLAN_SUBTITLE_LANGS}
           selected={subtitleLangs}
-          onToggle={(option) => togglePrefixed(PLAN_FEATURE_PREFIX.subtitles, option, subtitleLangs)}
+          onToggle={(option) =>
+            togglePrefixed(PLAN_FEATURE_PREFIX.subtitles, option, subtitleLangs)
+          }
         />
         <CheckboxGroup
           legend="Tipos de subtítulos"

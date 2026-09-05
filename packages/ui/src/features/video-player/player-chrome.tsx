@@ -59,7 +59,9 @@ export function usePlayerSettings() {
   const hydrated = useRef(false);
 
   useEffect(() => {
-    setBrightnessState(readNumber(PLAYER_BRIGHTNESS_KEY, BRIGHTNESS_DEFAULT, BRIGHTNESS_MIN, BRIGHTNESS_MAX));
+    setBrightnessState(
+      readNumber(PLAYER_BRIGHTNESS_KEY, BRIGHTNESS_DEFAULT, BRIGHTNESS_MIN, BRIGHTNESS_MAX)
+    );
     setVolumeState(readNumber(PLAYER_VOLUME_KEY, 1, 0, 1));
     try {
       setMutedState(localStorage.getItem(PLAYER_MUTED_KEY) === '1');
@@ -151,7 +153,10 @@ export function usePlayerKeyboard({
     if (!enabled) return;
     const onKey = (event: globalThis.KeyboardEvent) => {
       const target = event.target as HTMLElement | null;
-      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+      if (
+        target &&
+        (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)
+      ) {
         return;
       }
       const key = event.key;
@@ -277,14 +282,12 @@ export function PlayerChrome({
       className={cn(
         'absolute inset-x-0 bottom-0 z-30 bg-gradient-to-t from-cinema-bg via-cinema-bg/80 to-transparent pt-14 transition-opacity duration-normal ease-out-expo',
         'pl-[max(0.75rem,env(safe-area-inset-left,0px))] pr-[max(0.75rem,env(safe-area-inset-right,0px))] pb-[max(0.75rem,env(safe-area-inset-bottom,0px))]',
-        visible || !playing ? 'opacity-100' : 'pointer-events-none opacity-0',
+        visible || !playing ? 'opacity-100' : 'pointer-events-none opacity-0'
       )}
     >
       {(title || subtitle) && (
         <div className="mb-3 px-0.5">
-          {title && (
-            <p className="font-display text-base text-cinema-chalk md:text-lg">{title}</p>
-          )}
+          {title && <p className="font-display text-base text-cinema-chalk md:text-lg">{title}</p>}
           {subtitle && <p className="text-xs text-cinema-muted">{subtitle}</p>}
         </div>
       )}

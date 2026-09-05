@@ -22,10 +22,28 @@ interface PlaylistRow {
 }
 
 const KNOWN_COUNTRIES = [
-  'Argentina', 'Bolivia', 'Brasil', 'Chile', 'Colombia', 'Costa Rica',
-  'Cuba', 'Ecuador', 'El Salvador', 'España', 'Estados Unidos', 'Guatemala',
-  'Honduras', 'México', 'Nicaragua', 'Panamá', 'Paraguay', 'Perú',
-  'Puerto Rico', 'República Dominicana', 'Uruguay', 'Venezuela',
+  'Argentina',
+  'Bolivia',
+  'Brasil',
+  'Chile',
+  'Colombia',
+  'Costa Rica',
+  'Cuba',
+  'Ecuador',
+  'El Salvador',
+  'España',
+  'Estados Unidos',
+  'Guatemala',
+  'Honduras',
+  'México',
+  'Nicaragua',
+  'Panamá',
+  'Paraguay',
+  'Perú',
+  'Puerto Rico',
+  'República Dominicana',
+  'Uruguay',
+  'Venezuela',
 ];
 
 const KNOWN_LANGUAGES = [
@@ -41,9 +59,15 @@ function formatDate(ts?: number) {
 
 export default function AdminTVPlaylistsPage() {
   const playlists = useQuery(api.tv.listPlaylists, {}) as PlaylistRow[] | undefined;
-  const create = useMutation<{ name: string; m3uUrl: string; country?: string; language?: string; isActive: boolean }, string>(api.tv.createPlaylist);
+  const create = useMutation<
+    { name: string; m3uUrl: string; country?: string; language?: string; isActive: boolean },
+    string
+  >(api.tv.createPlaylist);
   const remove = useMutation<{ id: string }, string>(api.tv.removePlaylist);
-  const importM3U = useAction<{ m3uUrl: string; playlistId?: string; country?: string; language?: string }, { total: number; added: number; updated: number; failed: number; failures: string[] }>(api.tv.seedFromM3U);
+  const importM3U = useAction<
+    { m3uUrl: string; playlistId?: string; country?: string; language?: string },
+    { total: number; added: number; updated: number; failed: number; failures: string[] }
+  >(api.tv.seedFromM3U);
 
   const [form, setForm] = useState({
     name: '',
@@ -124,11 +148,7 @@ export default function AdminTVPlaylistsPage() {
   };
 
   const handleDelete = async (pl: PlaylistRow) => {
-    if (
-      !confirm(
-        `¿Eliminar la lista "${pl.name}"? Sus canales se desvinculan (no se borran).`
-      )
-    )
+    if (!confirm(`¿Eliminar la lista "${pl.name}"? Sus canales se desvinculan (no se borran).`))
       return;
     setDeletingId(pl._id);
     try {
@@ -155,11 +175,15 @@ export default function AdminTVPlaylistsPage() {
           Listas M3U
         </h1>
         <p className="text-cinema-muted mt-1 sm:mt-2 text-sm sm:text-base">
-          Importa listas IPTV estilo Magis / Xuper. La primera vez se ejecuta la importación al guardar.
+          Importa listas IPTV estilo Magis / Xuper. La primera vez se ejecuta la importación al
+          guardar.
         </p>
       </div>
 
-      <form onSubmit={handleCreate} className="rounded-2xl border border-cinema-border bg-cinema-surface p-5 space-y-4 max-w-3xl">
+      <form
+        onSubmit={handleCreate}
+        className="rounded-2xl border border-cinema-border bg-cinema-surface p-5 space-y-4 max-w-3xl"
+      >
         <h2 className="font-semibold text-white text-lg">Agregar lista</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
@@ -249,14 +273,19 @@ export default function AdminTVPlaylistsPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {playlists.map((pl) => (
-              <article key={pl._id} className="rounded-2xl border border-cinema-border bg-cinema-surface p-5 flex flex-col gap-4">
+              <article
+                key={pl._id}
+                className="rounded-2xl border border-cinema-border bg-cinema-surface p-5 flex flex-col gap-4"
+              >
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-3">
                     <div className="p-2.5 rounded-xl bg-cinema-violet/15 text-cinema-violet-light">
                       <ListVideo className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="font-display text-lg uppercase tracking-wide text-white">{pl.name}</h3>
+                      <h3 className="font-display text-lg uppercase tracking-wide text-white">
+                        {pl.name}
+                      </h3>
                       <p className="text-xs text-cinema-muted mt-0.5">
                         {pl.country ?? 'Sin país'} · {pl.language ?? 'es'}
                       </p>
@@ -265,7 +294,9 @@ export default function AdminTVPlaylistsPage() {
                   <span
                     className={cn(
                       'text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold',
-                      pl.isActive ? 'bg-emerald-500/20 text-emerald-300' : 'bg-cinema-elevated text-cinema-muted'
+                      pl.isActive
+                        ? 'bg-emerald-500/20 text-emerald-300'
+                        : 'bg-cinema-elevated text-cinema-muted'
                     )}
                   >
                     {pl.isActive ? 'Activa' : 'Pausada'}
@@ -279,10 +310,14 @@ export default function AdminTVPlaylistsPage() {
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div className="rounded-lg bg-cinema-elevated/40 p-2">
                     <p className="text-cinema-ash text-[10px] uppercase tracking-wider">Canales</p>
-                    <p className="text-white font-medium text-base mt-0.5">{pl.totalChannels ?? '—'}</p>
+                    <p className="text-white font-medium text-base mt-0.5">
+                      {pl.totalChannels ?? '—'}
+                    </p>
                   </div>
                   <div className="rounded-lg bg-cinema-elevated/40 p-2">
-                    <p className="text-cinema-ash text-[10px] uppercase tracking-wider">Última importación</p>
+                    <p className="text-cinema-ash text-[10px] uppercase tracking-wider">
+                      Última importación
+                    </p>
                     <p className="text-white font-medium mt-0.5">{formatDate(pl.lastImportedAt)}</p>
                   </div>
                 </div>
@@ -301,7 +336,11 @@ export default function AdminTVPlaylistsPage() {
                       </>
                     ) : (
                       <>
-                        {pl.lastImportedAt ? <RefreshCw className="w-4 h-4" /> : <Download className="w-4 h-4" />}
+                        {pl.lastImportedAt ? (
+                          <RefreshCw className="w-4 h-4" />
+                        ) : (
+                          <Download className="w-4 h-4" />
+                        )}
                         {pl.lastImportedAt ? 'Reimportar' : 'Importar'}
                       </>
                     )}

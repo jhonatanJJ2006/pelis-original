@@ -23,9 +23,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             <div className="w-10 h-10 bg-gradient-to-br from-cinema-accent to-cinema-gold rounded flex items-center justify-center group-hover:scale-105 transition-transform shadow-glow">
               <Film className="w-6 h-6 text-cinema-bg" aria-hidden />
             </div>
-            <span className="font-display text-2xl tracking-tight text-cinema-chalk">
-              Pelis
-            </span>
+            <span className="font-display text-2xl tracking-tight text-cinema-chalk">Pelis</span>
           </Link>
         </div>
       </header>

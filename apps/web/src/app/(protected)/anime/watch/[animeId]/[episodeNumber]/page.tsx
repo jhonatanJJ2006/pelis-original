@@ -99,16 +99,19 @@ export default function AnimeWatchPage() {
     enabled: stream?.kind === 'embed',
     enterOnMount: true,
   });
-  const { hud: embedHud, hudVisible: embedHudVisible, didGesture: embedDidGesture } =
-    usePlayerSurfaceGestures({
-      containerRef: embedSurfaceRef,
-      brightness,
-      setBrightness,
-      volume,
-      setVolume,
-      enabled: stream?.kind === 'embed' && embedLandscapeActive,
-      volumeEnabled: false,
-    });
+  const {
+    hud: embedHud,
+    hudVisible: embedHudVisible,
+    didGesture: embedDidGesture,
+  } = usePlayerSurfaceGestures({
+    containerRef: embedSurfaceRef,
+    brightness,
+    setBrightness,
+    volume,
+    setVolume,
+    enabled: stream?.kind === 'embed' && embedLandscapeActive,
+    volumeEnabled: false,
+  });
 
   const getEpisodeStream = useAction(api.anime.getEpisodeStream);
   const getSeasonEpisodes = useAction(api.anime.getSeasonEpisodes);
@@ -207,7 +210,10 @@ export default function AnimeWatchPage() {
   const streamRef = useRef(stream);
   streamRef.current = stream;
   const onPlayerFatalError = useCallback(() => {
-    const current = streamRef.current && streamRef.current.kind !== 'none' ? streamRef.current.provider : provider;
+    const current =
+      streamRef.current && streamRef.current.kind !== 'none'
+        ? streamRef.current.provider
+        : provider;
     if (current && !failedProviders.includes(current)) {
       setFailedProviders((prev) => [...prev, current]);
       return;
@@ -394,7 +400,7 @@ export default function AnimeWatchPage() {
                   ref={embedSurfaceRef}
                   className={cn(
                     'absolute inset-0 bg-cinema-bg [touch-action:none]',
-                    embedLandscapeClassName,
+                    embedLandscapeClassName
                   )}
                   style={embedLandscapeStyle}
                   onMouseMove={() => setEmbedControlsVisible(true)}
@@ -533,7 +539,9 @@ export default function AnimeWatchPage() {
                 <Server className="w-4 h-4" aria-hidden />
                 Más servidores (scraping, suelen estar caídos)
                 <span className="ml-auto text-xs text-cinema-muted group-open:hidden">mostrar</span>
-                <span className="ml-auto text-xs text-cinema-muted hidden group-open:inline">ocultar</span>
+                <span className="ml-auto text-xs text-cinema-muted hidden group-open:inline">
+                  ocultar
+                </span>
               </summary>
               <div className="flex flex-wrap gap-2 mt-3">
                 {providers

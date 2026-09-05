@@ -24,9 +24,7 @@ export const movieSchema = z.object({
     .min(1, 'La imagen es requerida')
     .refine(
       (value) =>
-        value.startsWith('/') ||
-        value.startsWith('http://') ||
-        value.startsWith('https://'),
+        value.startsWith('/') || value.startsWith('http://') || value.startsWith('https://'),
       'URL o ruta de imagen inválida'
     ),
   synopsis: z.string().min(10, 'La sinopsis debe tener al menos 10 caracteres'),

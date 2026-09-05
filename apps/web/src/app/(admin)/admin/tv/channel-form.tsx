@@ -91,7 +91,11 @@ const KNOWN_LANGUAGES = [
   { value: 'pt', label: 'Portugués' },
 ];
 
-export function ChannelForm({ initialValues, onSubmit, submitLabel = 'Guardar' }: ChannelFormProps) {
+export function ChannelForm({
+  initialValues,
+  onSubmit,
+  submitLabel = 'Guardar',
+}: ChannelFormProps) {
   const [values, setValues] = useState<ChannelFormValues>({ ...defaultValues, ...initialValues });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);

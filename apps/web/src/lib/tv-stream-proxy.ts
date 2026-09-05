@@ -10,8 +10,7 @@ const MIME: Record<string, string> = {
 const PRIVATE_HOST_RE =
   /^(localhost|127\.\d+\.\d+\.\d+|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+|169\.254\.\d+\.\d+|0\.0\.0\.0|\[::1\])$/i;
 
-const LOOPBACK_ORIGIN_RE =
-  /^https?:\/\/(localhost|127\.\d+\.\d+\.\d+|0\.0\.0\.0|\[::1\])(:\d+)?$/i;
+const LOOPBACK_ORIGIN_RE = /^https?:\/\/(localhost|127\.\d+\.\d+\.\d+|0\.0\.0\.0|\[::1\])(:\d+)?$/i;
 
 /**
  * Devuelve el origin público que el navegador realmente usó para llegar al servidor.
@@ -80,15 +79,9 @@ export function isSafeUpstreamUrl(raw: string): boolean {
   }
 }
 
-export function buildTvProxyUrl(
-  channelId: string,
-  upstreamUrl?: string,
-  origin?: string
-): string {
+export function buildTvProxyUrl(channelId: string, upstreamUrl?: string, origin?: string): string {
   const path = `/api/tv/stream/${channelId}`;
-  const relative = upstreamUrl
-    ? `${path}?u=${encodeURIComponent(upstreamUrl)}`
-    : path;
+  const relative = upstreamUrl ? `${path}?u=${encodeURIComponent(upstreamUrl)}` : path;
 
   // Sin origin, o si el origin es loopback → siempre devolver URL RELATIVA
   // para que el navegador use el origin actual y no se conecte a localhost.
@@ -106,10 +99,7 @@ export function rewriteTvManifest(
   const base = new URL(manifestUrl);
 
   // Si el origin es loopback o no fue provisto, devolvemos URLs relativas
-  const safeOrigin =
-    proxyOrigin && !LOOPBACK_ORIGIN_RE.test(proxyOrigin)
-      ? proxyOrigin
-      : undefined;
+  const safeOrigin = proxyOrigin && !LOOPBACK_ORIGIN_RE.test(proxyOrigin) ? proxyOrigin : undefined;
 
   const rewriteUri = (uri: string): string => {
     const trimmed = uri.trim();
@@ -147,8 +137,7 @@ export async function fetchUpstream(
 ): Promise<Response> {
   const headers: HeadersInit = {
     Accept: '*/*',
-    'User-Agent':
-      'Mozilla/5.0 (compatible; PelisTV/1.0; +https://verpelis.pro)',
+    'User-Agent': 'Mozilla/5.0 (compatible; PelisTV/1.0; +https://verpelis.pro)',
   };
 
   if (opts?.range) {
@@ -196,10 +185,7 @@ export type TvProbeResult = {
   lastStreamError?: string;
 };
 
-export async function probeTvStream(
-  streamUrl: string,
-  depth = 0
-): Promise<TvProbeResult> {
+export async function probeTvStream(streamUrl: string, depth = 0): Promise<TvProbeResult> {
   if (!isSafeUpstreamUrl(streamUrl)) {
     return { streamStatus: 'offline', lastStreamError: 'URL no válida o no permitida' };
   }

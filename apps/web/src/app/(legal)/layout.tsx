@@ -26,13 +26,22 @@ export default function LegalLayout({ children }: { children: React.ReactNode })
             <span className="font-display text-2xl tracking-tight text-cinema-chalk">Pelis</span>
           </Link>
           <nav className="flex items-center gap-4 text-sm">
-            <Link href="/terminos" className="text-cinema-silver hover:text-cinema-gold transition-colors">
+            <Link
+              href="/terminos"
+              className="text-cinema-silver hover:text-cinema-gold transition-colors"
+            >
               Términos
             </Link>
-            <Link href="/privacidad" className="text-cinema-silver hover:text-cinema-gold transition-colors">
+            <Link
+              href="/privacidad"
+              className="text-cinema-silver hover:text-cinema-gold transition-colors"
+            >
               Privacidad
             </Link>
-            <Link href="/login" className="text-cinema-gold hover:text-cinema-gold-light transition-colors">
+            <Link
+              href="/login"
+              className="text-cinema-gold hover:text-cinema-gold-light transition-colors"
+            >
               Iniciar sesión
             </Link>
           </nav>

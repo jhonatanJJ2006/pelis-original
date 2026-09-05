@@ -10,10 +10,9 @@ import {
 
 describe('plan subtitle feature lines', () => {
   it('parses default helper text into languages, types, and audio', () => {
-    expect(parsePrefixedFeature(DEFAULT_PLAN_FEATURES_TEXT, PLAN_FEATURE_PREFIX.subtitles)).toEqual([
-      'Español',
-      'English',
-    ]);
+    expect(parsePrefixedFeature(DEFAULT_PLAN_FEATURES_TEXT, PLAN_FEATURE_PREFIX.subtitles)).toEqual(
+      ['Español', 'English']
+    );
     const groups = parsePlanMediaFeatures(DEFAULT_PLAN_FEATURES_TEXT.split('\n'));
     expect(groups.map((g) => g.key)).toEqual(['subtitles', 'types', 'audio']);
   });
@@ -22,7 +21,7 @@ describe('plan subtitle feature lines', () => {
     const next = upsertPrefixedFeature(
       'Catálogo completo\nSubtítulos: Español',
       PLAN_FEATURE_PREFIX.subtitles,
-      ['Español', 'English'],
+      ['Español', 'English']
     );
     expect(next.split('\n')).toEqual(['Catálogo completo', 'Subtítulos: Español, English']);
   });

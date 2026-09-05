@@ -16,7 +16,7 @@ export function PlayerLoadingOverlay({
     <div
       className={cn(
         'absolute inset-0 z-20 flex items-center justify-center',
-        opaque ? 'bg-cinema-bg' : 'bg-cinema-bg/70',
+        opaque ? 'bg-cinema-bg' : 'bg-cinema-bg/70'
       )}
       style={{ backgroundColor: opaque ? '#0B0B0D' : undefined }}
       role="status"

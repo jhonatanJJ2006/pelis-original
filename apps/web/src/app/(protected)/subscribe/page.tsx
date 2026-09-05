@@ -5,7 +5,17 @@ import Link from 'next/link';
 import { useMemo, useRef, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, FreeMode } from 'swiper/modules';
-import { Crown, Check, Zap, Star, Rocket, ChevronLeft, ChevronRight, Settings, Subtitles } from 'lucide-react';
+import {
+  Crown,
+  Check,
+  Zap,
+  Star,
+  Rocket,
+  ChevronLeft,
+  ChevronRight,
+  Settings,
+  Subtitles,
+} from 'lucide-react';
 import { api } from '@pelis/db/api';
 import { useUser } from '@pelis/auth/hooks';
 import { SubscribePageSkeleton } from '@pelis/ui/features/subscribe-page-skeleton';
@@ -78,8 +88,12 @@ export default function SubscribePage() {
   const [loadingPlanId, setLoadingPlanId] = useState<string | null>(null);
   const [loadingPortal, setLoadingPortal] = useState(false);
   const plans = (useQuery(api.subscriptions.list, {}) as Plan[] | undefined) ?? [];
-  const createCheckoutSession = useAction<{ planId: string }, { url: string; upgraded: false }>(api.stripe.createCheckoutSession);
-  const createPortalSession = useAction<Record<string, never>, { url: string }>(api.stripe.createPortalSession);
+  const createCheckoutSession = useAction<{ planId: string }, { url: string; upgraded: false }>(
+    api.stripe.createCheckoutSession
+  );
+  const createPortalSession = useAction<Record<string, never>, { url: string }>(
+    api.stripe.createPortalSession
+  );
 
   const isLoading = plans === undefined;
   const hasActivePlan = !!(user?.planExpiresAt && user.planExpiresAt > Date.now());
@@ -293,15 +307,17 @@ export default function SubscribePage() {
                       </div>
 
                       <ul className="flex-1 space-y-3 mb-5">
-                        {plan.features.filter((feature) => !isPlanMediaFeature(feature)).map((feature, i) => (
-                          <li key={i} className="flex items-start gap-2 text-sm">
-                            <Check
-                              className="w-4 h-4 text-cinema-teal mt-0.5 shrink-0"
-                              aria-hidden
-                            />
-                            <span className="text-cinema-muted">{feature}</span>
-                          </li>
-                        ))}
+                        {plan.features
+                          .filter((feature) => !isPlanMediaFeature(feature))
+                          .map((feature, i) => (
+                            <li key={i} className="flex items-start gap-2 text-sm">
+                              <Check
+                                className="w-4 h-4 text-cinema-teal mt-0.5 shrink-0"
+                                aria-hidden
+                              />
+                              <span className="text-cinema-muted">{feature}</span>
+                            </li>
+                          ))}
                       </ul>
                       <PlanMediaCapabilities features={plan.features} />
 
@@ -352,7 +368,10 @@ export default function SubscribePage() {
           Términos de uso
         </Link>{' '}
         y la{' '}
-        <Link href="/privacidad" className="text-cinema-gold hover:text-cinema-gold-light underline">
+        <Link
+          href="/privacidad"
+          className="text-cinema-gold hover:text-cinema-gold-light underline"
+        >
           Política de privacidad
         </Link>
         . Los pagos los procesa Stripe.
@@ -360,7 +379,6 @@ export default function SubscribePage() {
     </div>
   );
 }
-
 
 function PlanMediaCapabilities({ features }: { features: string[] }) {
   const groups = parsePlanMediaFeatures(features);

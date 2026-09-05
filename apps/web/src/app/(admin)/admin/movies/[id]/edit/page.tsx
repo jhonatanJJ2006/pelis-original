@@ -19,19 +19,19 @@ export default function EditMoviePage() {
   const movieId = params.id;
   const [showEnrich, setShowEnrich] = useState(false);
 
-  const movie = (useQuery<MediaItem>(api.movies.getById, { id: movieId as any }) as MediaItem | null | undefined);
+  const movie = useQuery<MediaItem>(api.movies.getById, { id: movieId as any }) as
+    MediaItem | null | undefined;
   const updateMovie = useMutation(api.movies.update);
   const generateUploadUrl = useMutation(api.movies.generateUploadUrl);
 
   const genres = (useQuery(api.movies.getGenres, {}) as string[] | undefined) ?? [];
-  const classifications =
-    (useQuery(api.movies.getClassifications, {}) as string[] | undefined) ?? [
-      'G',
-      'PG',
-      'PG-13',
-      'R',
-      'NC-17',
-    ];
+  const classifications = (useQuery(api.movies.getClassifications, {}) as string[] | undefined) ?? [
+    'G',
+    'PG',
+    'PG-13',
+    'R',
+    'NC-17',
+  ];
 
   const handleUploadImage = async (file: File) => {
     const uploadUrl = (await generateUploadUrl({})) as string;
@@ -107,7 +107,11 @@ export default function EditMoviePage() {
         <h1 className="font-display text-2xl sm:text-3xl tracking-wide text-white uppercase">
           Editar película
         </h1>
-        <Button variant="secondary" className="w-full sm:w-auto" onClick={() => setShowEnrich(true)}>
+        <Button
+          variant="secondary"
+          className="w-full sm:w-auto"
+          onClick={() => setShowEnrich(true)}
+        >
           <Sparkles className="w-4 h-4" />
           Completar desde TMDB
         </Button>
