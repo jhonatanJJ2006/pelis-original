@@ -39,9 +39,7 @@ function ProtectedLayoutClient({ children }: { children: React.ReactNode }) {
       >
         {children}
       </main>
-      {showBrowserFooter && (
-        <Footer className={isTvDevice ? 'block' : 'hidden md:block'} />
-      )}
+      {showBrowserFooter && <Footer className="w-full" />}
       {showTvInstallBar && <TvInstallBar />}
       <BottomTabBar />
     </div>
