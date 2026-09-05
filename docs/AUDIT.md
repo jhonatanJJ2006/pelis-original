@@ -1,7 +1,7 @@
 # Auditoría del sitio — Pelis Original
 
 Documento vivo con el inventario de gaps, bugs e incompletitudes.  
-Última actualización: 2026-08-29.
+Última actualización: 2026-09-05.
 
 ---
 
@@ -16,7 +16,7 @@ Documento vivo con el inventario de gaps, bugs e incompletitudes.
 | TV en vivo | OK | IPTV, probe admin |
 | Auth | OK | Better Auth + Google |
 | Suscripción | Parcial | Stripe requiere keys reales |
-| PWA | Parcial | SW precache problemático |
+| PWA | Parcial | Update modal + sin install CTAs; SW precache de uploads sigue siendo ruido |
 | Imágenes | Alto | Pósters hash faltantes en clone limpio |
 | CI / calidad | Bajo | Sin CI, build ignora TS/lint |
 | Docs agentes | OK | AGENTS.md + docs/APP, ARCHITECTURE, DATA-MODEL, TESTING |
@@ -111,6 +111,12 @@ Documento vivo con el inventario de gaps, bugs e incompletitudes.
 **Archivos:** `README.md`, `TODO.md`
 
 **Estado:** Actualizados — stack Postgres + `@pelis/db`, no Convex.
+
+### 11b. Prompts PWA de instalar app
+
+**Síntoma:** Barras/modales de «instalar app» (`pwa-install-prompt`, `tv-install-bar`, `beforeinstallprompt`) y falta de consentimiento al actualizar el SW.
+
+**Estado:** Corregido 2026-09-05 — se quitaron los CTAs de instalar; `PwaRuntime` silencia el banner nativo y muestra modal Aceptar / Más tarde si cambia `version.json` o hay SW en waiting. La barra tipo Google + compartir sigue siendo chrome del navegador o TWA (`fallbackType: customtabs` si fallan Digital Asset Links), no un componente de la app.
 
 ### 11. Admin anime: providers JSON vs streaming
 
