@@ -2,9 +2,28 @@ import Stripe from 'stripe';
 import { z } from 'zod';
 import { register } from '../registry';
 
+function assertStripeTestMode(secretKey: string) {
+  if (secretKey.startsWith('sk_live_')) {
+    throw new Error(
+      'Stripe live keys are disabled. Use sk_test_… while subscriptions stay in test mode.',
+    );
+  }
+  if (!secretKey.startsWith('sk_test_')) {
+    throw new Error(
+      'STRIPE_SECRET_KEY must be a real Stripe test key (sk_test_…). Placeholder values will not work.',
+    );
+  }
+  if (secretKey.length < 40) {
+    throw new Error(
+      'STRIPE_SECRET_KEY looks like a placeholder. Paste a full sk_test_… key from the Stripe Dashboard (Test mode).',
+    );
+  }
+}
+
 function getStripe() {
   const secretKey = process.env.STRIPE_SECRET_KEY;
   if (!secretKey) throw new Error('STRIPE_SECRET_KEY is not configured');
+  assertStripeTestMode(secretKey);
   return new Stripe(secretKey);
 }
 
@@ -49,7 +68,16 @@ export const processWebhook = register({
     let event: Stripe.Event;
     try {
       const stripe = getStripe();
-      event = stripe.webhooks.constructEvent(body, signature, process.env.STRIPE_WEBHOOK_SECRET!);
+      const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+      if (!webhookSecret || !webhookSecret.startsWith('whsec_') || webhookSecret.length < 40) {
+        return {
+          ok: false as const,
+          status: 500,
+          message:
+            'STRIPE_WEBHOOK_SECRET missing or placeholder. Use a Test-mode whsec_… from Stripe CLI/Dashboard.',
+        };
+      }
+      event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
     } catch (err) {
       return {
         ok: false as const,

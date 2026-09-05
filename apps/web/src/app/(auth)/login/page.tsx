@@ -29,8 +29,22 @@ function LoginForm() {
     }
   }, [resendCooldown]);
 
-  const handleGoogleLogin = () => {
-    window.location.href = `${getAuthApiBase()}/signin/google`;
+  const handleGoogleLogin = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      const { error: googleError } = await authClient.signIn.social({
+        provider: 'google',
+        callbackURL: '/',
+      });
+      if (googleError) {
+        setError(googleError.message || 'No se pudo iniciar sesión con Google');
+      }
+    } catch {
+      setError('Error de conexión con Google. Intenta de nuevo.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleResendVerification = async () => {
@@ -105,7 +119,8 @@ function LoginForm() {
         <button
           type="button"
           onClick={handleGoogleLogin}
-          className="w-full inline-flex items-center justify-center gap-3 h-11 px-4 bg-cinema-elevated hover:bg-cinema-elevated/90 text-white font-semibold border border-cinema-border hover:border-cinema-silver/40 rounded-[10px] transition-all duration-200 active:scale-[0.97] cursor-pointer"
+          disabled={loading}
+          className="w-full inline-flex items-center justify-center gap-3 h-11 px-4 bg-cinema-elevated hover:bg-cinema-elevated/90 text-white font-semibold border border-cinema-border hover:border-cinema-silver/40 rounded-[10px] transition-all duration-200 active:scale-[0.97] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24" aria-hidden>
             <path
@@ -219,6 +234,18 @@ function LoginForm() {
           >
             Regístrate
           </Link>
+        </p>
+
+        <p className="text-center text-cinema-ash text-xs mt-4 leading-relaxed">
+          Al continuar aceptas los{' '}
+          <Link href="/terminos" className="text-cinema-gold hover:text-cinema-gold-light underline">
+            Términos
+          </Link>{' '}
+          y la{' '}
+          <Link href="/privacidad" className="text-cinema-gold hover:text-cinema-gold-light underline">
+            Privacidad
+          </Link>
+          .
         </p>
       </div>
     </div>

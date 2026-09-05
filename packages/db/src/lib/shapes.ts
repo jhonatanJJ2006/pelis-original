@@ -63,6 +63,14 @@ export function toTvChannelShape<T extends PrismaTvChannel>(c: T) {
   };
 }
 
+export function toPlanShape<T extends { id: string }>(p: T) {
+  const { id, ...rest } = p;
+  return {
+    ...rest,
+    _id: id,
+  };
+}
+
 /** Public catalog card: never leak upstream URLs or probe errors. */
 export function toPublicTvChannelShape<T extends PrismaTvChannel>(c: T) {
   const shaped = toTvChannelShape(c) as Record<string, unknown> & { _id: string };
