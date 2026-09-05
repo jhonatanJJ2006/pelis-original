@@ -18,6 +18,7 @@ interface PlanRow {
   features: string[];
   icon: string;
   months: number;
+  maxDevices?: number;
   recommended?: boolean;
   stripePriceId?: string;
   activeSubscribers: number;
@@ -129,7 +130,8 @@ export default function AdminPlansPage() {
                         {plan.name}
                       </h3>
                       <p className="text-xs text-cinema-muted mt-0.5">
-                        {plan.months} mes{plan.months > 1 ? 'es' : ''}
+                        {plan.months} mes{plan.months > 1 ? 'es' : ''} · {plan.maxDevices ?? 1}{' '}
+                        dispositivo{(plan.maxDevices ?? 1) > 1 ? 's' : ''}
                       </p>
                     </div>
                   </div>

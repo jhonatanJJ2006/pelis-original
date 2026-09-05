@@ -19,6 +19,7 @@ export interface PlanFormValues {
   featuresText: string;
   icon: string;
   months: string;
+  maxDevices: string;
   recommended: boolean;
   stripePriceId: string;
 }
@@ -36,6 +37,7 @@ const defaultValues: PlanFormValues = {
   featuresText: DEFAULT_PLAN_FEATURES_TEXT,
   icon: 'Zap',
   months: '1',
+  maxDevices: '1',
   recommended: false,
   stripePriceId: '',
 };
@@ -69,6 +71,15 @@ export function PlanForm({ initialValues, onSubmit, submitLabel = 'Guardar' }: P
     const months = Number(values.months);
     if (!values.months || !Number.isFinite(months) || months < 1) {
       nextErrors.months = 'Meses inválidos';
+    }
+    const maxDevices = Number(values.maxDevices);
+    if (
+      !values.maxDevices ||
+      !Number.isFinite(maxDevices) ||
+      maxDevices < 1 ||
+      !Number.isInteger(maxDevices)
+    ) {
+      nextErrors.maxDevices = 'Dispositivos inválidos (mínimo 1)';
     }
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
@@ -188,7 +199,7 @@ export function PlanForm({ initialValues, onSubmit, submitLabel = 'Guardar' }: P
         />
       </fieldset>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
         <Select
           label="Ícono"
           value={values.icon}
@@ -207,6 +218,15 @@ export function PlanForm({ initialValues, onSubmit, submitLabel = 'Guardar' }: P
           value={values.months}
           onChange={(e) => setField('months', e.target.value)}
           error={errors.months}
+        />
+        <Input
+          label="Máx. dispositivos / sesiones"
+          type="number"
+          min="1"
+          step="1"
+          value={values.maxDevices}
+          onChange={(e) => setField('maxDevices', e.target.value)}
+          error={errors.maxDevices}
         />
         <Input
           label="Stripe Price ID"
