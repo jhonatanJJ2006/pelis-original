@@ -286,6 +286,7 @@ Rutas de apps/web/src/app. Grupo (protected) = header/footer, NO exige login. Gr
 
 - Hace: Stripe -> stripeWebhookAction.processWebhook. Eventos: checkout.session.completed, customer.subscription.created/updated/deleted, invoice.paid / payment_succeeded / payment_failed.
 - Alta compartida: packages/db/src/lib/stripe-subscription.ts (también la usa stripe.syncCheckoutSession).
+- Host: Movies local. Stripe Dashboard debe usar `https://verpelis.pro/api/stripe/webhook` (túnel → localhost:3000). No Vercel.
 - Archivos: api/stripe/webhook/route.ts
 - Auth: firma Stripe. Datos: packages/db/src/actions/stripeWebhook.ts.
 

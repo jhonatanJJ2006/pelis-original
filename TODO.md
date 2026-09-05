@@ -38,7 +38,7 @@ Ver AGENTS.md (entrada agentes) y auditoría completa en [`docs/AUDIT.md`](docs/
 - [ ] **Unificar series** — Admin tabla `Series` vs público `Movie.mediaType = SERIES`
 - [ ] **Reproductor de video** — Conectar `movie.token` / `videoUrl` con servidor de streaming real
 - [x] **Stripe: activar plan tras checkout** — `stripe.syncCheckoutSession` + webhook (`subscription.created/updated`, `invoice.paid`). No pisar ACTIVE con `incomplete`. (2026-09-05)
-- [ ] **Stripe producción** — Configurar keys de test/live + endpoint webhook en el Dashboard (`/api/stripe/webhook`). El código ya no depende solo del webhook.
+- [ ] **Stripe en Movies** — En la máquina Movies: webhook del Dashboard → `https://verpelis.pro/api/stripe/webhook` (túnel, no Vercel); `.env` con `STRIPE_*` del mismo modo y `SITE_URL=https://verpelis.pro`; confirmar fila `subscription` ACTIVE en Postgres local. Ver docs/AUDIT.md §5b.
 - [ ] **Levantar Consumet self-hosted** — `docker compose up consumet redis` (ver `docs/ANIME-PROVIDERS.md`)
 - [ ] **TV: cron de probe automático** — Ejecutar `tv.probeAllChannels` cada 6h para auto-desactivar canales caídos (no existe hoy, ver scripts/probe-all-tv.mjs y probe-fast-tv.mjs)
 - [ ] **TV: mapear categorías del M3U** — Categorías en inglés ('Entertainment', 'News', 'Undefined', 'Religious') conviven con español. Ver scripts/map-tv-categories.mjs

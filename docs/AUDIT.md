@@ -15,7 +15,7 @@ Documento vivo con el inventario de gaps, bugs e incompletitudes.
 | Anime streaming | En reparación | IDs incorrectos + API Consumet inestable |
 | TV en vivo | OK | IPTV, probe admin |
 | Auth | OK | Better Auth + Google |
-| Suscripción | OK código | Checkout → sync/webhook → Subscription ACTIVE. Keys/webhook de prod siguen siendo ops |
+| Suscripción | OK código | Checkout → sync/webhook → ACTIVE. Ops en Movies (túnel + .env + Postgres local), no Vercel |
 | PWA | Parcial | Update modal + sin install CTAs; SW precache de uploads sigue siendo ruido |
 | Imágenes | Alto | Pósters hash faltantes en clone limpio |
 | CI / calidad | Bajo | Sin CI, build ignora TS/lint |
@@ -90,6 +90,17 @@ Documento vivo con el inventario de gaps, bugs e incompletitudes.
 - No se escuchaba `customer.subscription.created` ni `invoice.paid`.
 
 **Estado:** Corregido 2026-09-05 — `stripe.syncCheckoutSession` + alta compartida en `packages/db/src/lib/stripe-subscription.ts`. `incomplete` ya no degrada ACTIVE.
+
+**Dónde corre:** todo es local en **Movies** (`/home/det/Desktop/PELIS/pelis-original`). Prod = `pelis-web.service` en localhost:3000 + cloudflared → https://verpelis.pro. Postgres es local. No diagnosticar como si fuera un deploy Vercel.
+
+**Verificar en Movies** (tras merge a staging/main y restart de `pelis-web`):
+
+1. **Túnel vivo:** `systemctl is-active pelis-web` y cloudflared; `curl -sI https://verpelis.pro/api/stripe/webhook` no debe ser 404 del edge.
+2. **Endpoint Stripe:** Dashboard → Developers → Webhooks → URL `https://verpelis.pro/api/stripe/webhook` (mismo modo test/live que las keys). Eventos: `checkout.session.completed`, `customer.subscription.created/updated/deleted`, `invoice.paid`, `invoice.payment_failed`. El `whsec_…` de ese endpoint es el `STRIPE_WEBHOOK_SECRET` del `.env` de Movies.
+3. **`.env` local (no leerlo ni commitearlo):** `STRIPE_SECRET_KEY` / publishable del mismo modo; `SITE_URL=https://verpelis.pro` (si queda en localhost, Stripe redirige al browser del usuario y el sync no pega en Movies).
+4. **Fila `subscription` en Postgres local:** tras un pago, `userId` del comprador, `status = ACTIVE`, `endDate` futuro, `stripeSubscriptionId` y `planId` no nulos. Sin esa fila, `requireActivePlan` sigue en 403.
+5. **Logs:** `journalctl -u pelis-web` alrededor del pago (webhook 200 vs 400 firma / 500 handler). En Stripe Dashboard, deliveries de ese endpoint (no un endpoint viejo de Vercel/CLI).
+6. **Fallback success:** si el webhook falla pero el usuario aterriza en `/subscribe/success?session_id=…` con sesión iniciada, `stripe.syncCheckoutSession` debe crear la misma fila.
 
 ### 6. Build ignora errores TypeScript y ESLint
 
@@ -176,13 +187,13 @@ Documento vivo con el inventario de gaps, bugs e incompletitudes.
 
 ## Dependencias externas
 
-| Servicio                | Uso                   | Riesgo                                                                                                                         |
-| ----------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| Consumet API            | Episodios/video anime | Alta — auto-hospedar                                                                                                           |
-| AniList GraphQL         | Metadata anime        | Baja — gratis                                                                                                                  |
-| TMDB                    | Enrichment posters    | Media — requiere API key                                                                                                       |
-| Stripe                  | Pagos                 | Media — keys + endpoint webhook en Dashboard. El plan también se activa con `stripe.syncCheckoutSession` en /subscribe/success |
-| Paths locales streaming | Películas             | Alta — específico del servidor                                                                                                 |
+| Servicio                | Uso                   | Riesgo                                                                                            |
+| ----------------------- | --------------------- | ------------------------------------------------------------------------------------------------- |
+| Consumet API            | Episodios/video anime | Alta — auto-hospedar                                                                              |
+| AniList GraphQL         | Metadata anime        | Baja — gratis                                                                                     |
+| TMDB                    | Enrichment posters    | Media — requiere API key                                                                          |
+| Stripe                  | Pagos                 | Media — keys + webhook al túnel de Movies (`verpelis.pro/api/stripe/webhook`). No Vercel. Ver §5b |
+| Paths locales streaming | Películas             | Alta — específico del servidor                                                                    |
 
 ---
 

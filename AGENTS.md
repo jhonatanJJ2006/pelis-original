@@ -79,21 +79,21 @@ Archivo: apps/web/src/app/playground/page.tsx. Detalle: docs/TESTING.md.
 4. Streaming y auth: /api/stream, /api/tv/stream, /api/anime/stream pasan por denyUnlessStreamAccess (sesión + plan activo o ADMIN). No quitar esa puerta. Históricamente sin auth.
    4b. Plan entitlements — sesiones concurrentes (MVP): `Plan.maxDevices` (default 1). En Better Auth `databaseHooks.session.create` se recortan sesiones no-expiradas más viejas si el usuario supera el límite. ADMIN = ilimitado; sin plan activo = 1. Sin middleware por request en este MVP. Seed: Mensual/Básico=1, Trimestral/Estándar=2, Anual/Premium=4.
    4c. Stripe: el plan se activa por webhook **y** por `stripe.syncCheckoutSession` en `/subscribe/success`. No mapear `incomplete` a EXPIRED (un retry de `customer.subscription.updated` pisaba el ACTIVE del checkout). Lógica compartida: packages/db/src/lib/stripe-subscription.ts.
+   Todo el runtime es **local en Movies** (pelis-web + Postgres + cloudflared → verpelis.pro). No hay deploy Vercel. El webhook de Stripe debe apuntar al túnel (`https://verpelis.pro/api/stripe/webhook` → localhost:3000). Si el plan no aparece tras pagar, revisar en Movies: endpoint/eventos en el Dashboard, `.env` (`STRIPE_*`, `SITE_URL=https://verpelis.pro`), logs de `pelis-web`, fila `subscription` en Postgres local. Ver docs/AUDIT.md §5b.
 5. Posters gitignored: apps/web/public/peliculas/ y apps/web/public/uploads/. Hash MD5 32 hex -> /peliculas/peliculas/{hash}.webp. imageId -> /uploads/{id}.webp. Clone limpio = imágenes rotas.
    Ver packages/db/src/lib/resolveMovieImage.ts y scripts/audit-images.mjs.
 6. PWA: no hay prompts ni barras de «instalar app» (`beforeinstallprompt` se silencia). Nueva versión (`version.json` / SW waiting) = modal Aceptar / Más tarde, sin reload forzado. La barra tipo Google + compartir es chrome del navegador o TWA en fallback Custom Tabs (assetlinks), no un componente de la app.
 
 ## Deploy / entornos (Glob es dueño)
 
-Prod hoy: https://verpelis.pro via Cloudflare Tunnel hacia localhost:3000 (systemd pelis-web.service).
+Prod hoy: https://verpelis.pro via Cloudflare Tunnel hacia localhost:3000 (systemd pelis-web.service) en la máquina **Movies**. App, Postgres y secretos son locales. No hay Vercel de producto.
 DEPLOY.md está obsoleto (describe Convex). No seguirlo. Glob posee deploy/envs.
 
-GitHub Environments (Glob, ya existen):
+GitHub Environments (Glob, ya existen). Secretos solo en `.env` local de Movies (gitignored).
 
-- production <-> branch main (lo que corre en esta máquina; no hay rama production duplicada)
+- production <-> branch main (lo que corre en Movies; no hay rama production duplicada)
 - staging <-> branch staging
 - dev <-> branch dev
-  Secretos solo en .env local (gitignored).
 
 ## Git / flujo de ramas (Mark + Glob)
 
@@ -151,7 +151,7 @@ Pendiente ALTO:
 1. Unificar series (admin tabla Series vs Movie.mediaType SERIES).
 2. E2E login, favoritos, historial (email-verification.e2e.ts asume Convex).
 3. Posters en clones nuevos (carpetas gitignored).
-4. Stripe keys/webhook en Dashboard (el código ya activa el plan). Consumet estable. Cron probe TV. Categorias M3U en espanol.
+4. Stripe en Movies: endpoint webhook al túnel + `.env` local (el código ya activa el plan). Consumet estable. Cron probe TV. Categorias M3U en espanol.
 
 Pendiente calidad: loading/error, reduced-motion, a11y, responsive, SEO, favoritos anime, paginar episodios, validar movieSchema, CI, Sentry.
 

@@ -34,6 +34,8 @@ Checkout crea session con `metadata.convexUserId` + `planId` (y `client_referenc
 Alta de `Subscription` ACTIVE: webhook (`checkout.session.completed`, `customer.subscription.created/updated`, `invoice.paid`) **o** `stripe.syncCheckoutSession` desde `/subscribe/success`.
 `incomplete` no degrada un ACTIVE (retry de webhook). Stream: `denyUnlessStreamAccess` → `requireActivePlan` (ACTIVE + endDate futuro, o ADMIN).
 
+Runtime: **Movies local**. `pelis-web` en localhost:3000, Postgres local, `verpelis.pro` = Cloudflare Tunnel. El webhook de Stripe no va a Vercel: apunta a `https://verpelis.pro/api/stripe/webhook`. `SITE_URL` en el `.env` de Movies debe ser `https://verpelis.pro` para que success/sync peguen en esa misma app. Diagnóstico: docs/AUDIT.md §5b.
+
 ## Imagenes
 
 packages/db/src/lib/resolveMovieImage.ts:
