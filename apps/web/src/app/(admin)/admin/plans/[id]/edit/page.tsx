@@ -31,6 +31,7 @@ export default function EditPlanPage() {
         features,
         icon: values.icon,
         months: Number(values.months),
+        maxDevices: Number(values.maxDevices),
         recommended: values.recommended,
         stripePriceId: values.stripePriceId.trim() || undefined,
       });
@@ -78,6 +79,7 @@ export default function EditPlanPage() {
           featuresText: plan.features.join('\n'),
           icon: plan.icon,
           months: plan.months.toString(),
+          maxDevices: String(plan.maxDevices ?? 1),
           recommended: plan.recommended ?? false,
           stripePriceId: plan.stripePriceId ?? '',
         }}

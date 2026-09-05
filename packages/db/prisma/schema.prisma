@@ -137,6 +137,7 @@ model Plan {
   features        String[] @default([])
   icon            String   @default("Zap")
   months          Int      @default(1)
+  maxDevices      Int      @default(1)
   recommended     Boolean  @default(false)
   stripePriceId   String?  @unique
   createdAt       DateTime @default(now())

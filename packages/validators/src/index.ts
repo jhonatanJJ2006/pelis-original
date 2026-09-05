@@ -48,6 +48,7 @@ export const planSchema = z.object({
   features: z.array(z.string()).min(1, 'Debe haber al menos una característica'),
   icon: z.string(),
   months: z.number().int().positive(),
+  maxDevices: z.number().int().positive().default(1),
   recommended: z.boolean().optional(),
   stripePriceId: z.string().optional(),
 });
