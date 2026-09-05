@@ -2,8 +2,7 @@
 
 import Link from 'next/link';
 import { Film } from 'lucide-react';
-import { PwaInstallPrompt } from '@/components/pwa-install-prompt';
-import { useIsInstalledApp } from '@/hooks/use-is-installed-app';
+import { AppDownloadButtons } from '@/components/app-download-buttons';
 
 import { cn } from '@pelis/ui/utils';
 
@@ -16,8 +15,6 @@ const exploreLinks = [
 ];
 
 export function Footer({ className }: { className?: string }) {
-  const isInstalledApp = useIsInstalledApp();
-
   return (
     <footer
       className={cn(
@@ -98,7 +95,7 @@ export function Footer({ className }: { className?: string }) {
             </ul>
           </div>
 
-          {!isInstalledApp ? <PwaInstallPrompt variant="inline" webOnly /> : null}
+          <AppDownloadButtons />
         </div>
 
         <div className="mt-10 pt-8 border-t border-cinema-border flex flex-col md:flex-row items-center justify-between gap-4">

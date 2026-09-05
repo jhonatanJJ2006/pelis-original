@@ -22,6 +22,7 @@ import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';
 import { ProfilePageSkeleton } from '@pelis/ui/features/profile-page-skeleton';
 import { Button } from '@pelis/ui/components';
 import { cn } from '@pelis/ui/utils';
+import { AppDownloadButtons } from '@/components/app-download-buttons';
 
 interface Plan {
   _id: string;
@@ -181,6 +182,12 @@ export default function ProfilePage() {
               </Button>
             </Link>
           </div>
+        </div>
+      </ScrollReveal>
+
+      <ScrollReveal className="mb-8">
+        <div className="rounded-2xl border border-cinema-border bg-cinema-surface p-5 sm:p-6">
+          <AppDownloadButtons />
         </div>
       </ScrollReveal>
 

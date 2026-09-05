@@ -65,8 +65,11 @@ export function toTvChannelShape<T extends PrismaTvChannel>(c: T) {
 
 export function toPlanShape<T extends { id: string }>(p: T) {
   const { id, ...rest } = p;
+  // Keep both shapes: admin/subscribe UI prefers `_id` (Convex-era),
+  // but also leave `id` so `_id ?? id` fallbacks work if a caller skips shaping.
   return {
     ...rest,
+    id,
     _id: id,
   };
 }
