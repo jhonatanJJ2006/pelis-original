@@ -1,19 +1,20 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="80" fill="#0a0e1a"/>
-  <!-- Clapperboard body -->
-  <rect x="96" y="140" width="320" height="232" rx="20" fill="#1a2248"/>
-  <!-- Clapperboard top stripe -->
-  <rect x="96" y="140" width="320" height="64" rx="20" fill="#2a3a7a"/>
-  <!-- Clapper top triangles -->
-  <polygon points="150,204 192,140 234,204" fill="#4fc3f7"/>
-  <polygon points="234,204 276,140 318,204" fill="#4fc3f7"/>
-  <!-- Play button triangle -->
-  <polygon points="204,240 204,344 308,292" fill="#4fc3f7" opacity="0.9"/>
-  <!-- Film strip dots -->
-  <circle cx="128" cy="280" r="8" fill="#4fc3f7" opacity="0.5"/>
-  <circle cx="160" cy="280" r="8" fill="#4fc3f7" opacity="0.5"/>
-  <circle cx="192" cy="280" r="8" fill="#4fc3f7" opacity="0.5"/>
-  <circle cx="128" cy="320" r="8" fill="#4fc3f7" opacity="0.5"/>
-  <circle cx="160" cy="320" r="8" fill="#4fc3f7" opacity="0.5"/>
-  <circle cx="192" cy="320" r="8" fill="#4fc3f7" opacity="0.5"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="playGold" x1="210" y1="208" x2="310" y2="304" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#E0C98A"/>
+      <stop offset="0.45" stop-color="#F5C842"/>
+      <stop offset="1" stop-color="#C4A35A"/>
+    </linearGradient>
+  </defs>
+  <!-- Cinema-bg rounded tile -->
+  <rect width="512" height="512" rx="96" fill="#0B0B0D"/>
+  <!-- Soft velvet panel + champagne hairline -->
+  <rect x="84" y="84" width="344" height="344" rx="64" fill="#141418" stroke="#C4A35A" stroke-width="2.5"/>
+  <!-- Elevated letterbox stage -->
+  <rect x="128" y="160" width="256" height="192" rx="22" fill="#1C1C22"/>
+  <!-- Letterbox bars -->
+  <rect x="152" y="182" width="208" height="5" rx="2.5" fill="#C4A35A" opacity="0.85"/>
+  <rect x="152" y="325" width="208" height="5" rx="2.5" fill="#C4A35A" opacity="0.85"/>
+  <!-- Refined play chevron (rounded, not fat triangle) -->
+  <path d="M214 214C214 209.6 218.2 207.1 222 209.1L298 249.1C301.5 250.9 301.5 261.1 298 262.9L222 302.9C218.2 304.9 214 302.4 214 298V214Z" fill="url(#playGold)"/>
 </svg>
