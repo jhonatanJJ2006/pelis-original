@@ -1,7 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Button, Input, Select } from '@pelis/ui/components';
+import {
+  DEFAULT_PLAN_FEATURES_TEXT,
+  PLAN_AUDIO_TRACKS,
+  PLAN_FEATURE_PREFIX,
+  PLAN_SUBTITLE_LANGS,
+  PLAN_SUBTITLE_TYPES,
+  parsePrefixedFeature,
+  upsertPrefixedFeature,
+} from '@/lib/plan-features';
 
 export interface PlanFormValues {
   name: string;
@@ -24,7 +33,7 @@ const defaultValues: PlanFormValues = {
   name: '',
   price: '0',
   description: '',
-  featuresText: '',
+  featuresText: DEFAULT_PLAN_FEATURES_TEXT,
   icon: 'Zap',
   months: '1',
   recommended: false,
@@ -76,6 +85,26 @@ export function PlanForm({ initialValues, onSubmit, submitLabel = 'Guardar' }: P
     }
   };
 
+  const subtitleLangs = useMemo(
+    () => parsePrefixedFeature(values.featuresText, PLAN_FEATURE_PREFIX.subtitles),
+    [values.featuresText],
+  );
+  const subtitleTypes = useMemo(
+    () => parsePrefixedFeature(values.featuresText, PLAN_FEATURE_PREFIX.types),
+    [values.featuresText],
+  );
+  const audioTracks = useMemo(
+    () => parsePrefixedFeature(values.featuresText, PLAN_FEATURE_PREFIX.audio),
+    [values.featuresText],
+  );
+
+  const togglePrefixed = (prefix: string, option: string, selected: string[]) => {
+    const next = selected.includes(option)
+      ? selected.filter((item) => item !== option)
+      : [...selected, option];
+    setField('featuresText', upsertPrefixedFeature(values.featuresText, prefix, next));
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-5 max-w-2xl">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -118,11 +147,44 @@ export function PlanForm({ initialValues, onSubmit, submitLabel = 'Guardar' }: P
           id="features"
           value={values.featuresText}
           onChange={(e) => setField('featuresText', e.target.value)}
-          rows={5}
-          placeholder={'Acceso completo\nSin anuncios\nCalidad HD'}
+          rows={6}
+          placeholder={DEFAULT_PLAN_FEATURES_TEXT}
           className="input-field resize-y"
         />
+        <p className="mt-1.5 text-xs text-cinema-muted">
+          Las opciones de subtítulos y audio se guardan como líneas de características, por ejemplo
+          «Subtítulos: Español, English».
+        </p>
       </div>
+
+      <fieldset className="rounded-[10px] border border-cinema-border bg-cinema-surface/60 p-4 space-y-4">
+        <legend className="px-1 font-display text-sm tracking-wide text-cinema-chalk">
+          Pistas de subtítulos y audio
+        </legend>
+        <p className="text-xs text-cinema-muted">
+          Marca lo que incluye este plan. Se muestra en la página de suscripción. El reproductor
+          sigue usando las pistas reales del stream.
+        </p>
+
+        <CheckboxGroup
+          legend="Idiomas de subtítulos"
+          options={PLAN_SUBTITLE_LANGS}
+          selected={subtitleLangs}
+          onToggle={(option) => togglePrefixed(PLAN_FEATURE_PREFIX.subtitles, option, subtitleLangs)}
+        />
+        <CheckboxGroup
+          legend="Tipos de subtítulos"
+          options={PLAN_SUBTITLE_TYPES}
+          selected={subtitleTypes}
+          onToggle={(option) => togglePrefixed(PLAN_FEATURE_PREFIX.types, option, subtitleTypes)}
+        />
+        <CheckboxGroup
+          legend="Pistas de audio"
+          options={PLAN_AUDIO_TRACKS}
+          selected={audioTracks}
+          onToggle={(option) => togglePrefixed(PLAN_FEATURE_PREFIX.audio, option, audioTracks)}
+        />
+      </fieldset>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         <Select
@@ -166,5 +228,48 @@ export function PlanForm({ initialValues, onSubmit, submitLabel = 'Guardar' }: P
         {isSubmitting ? 'Guardando...' : submitLabel}
       </Button>
     </form>
+  );
+}
+
+function CheckboxGroup({
+  legend,
+  options,
+  selected,
+  onToggle,
+}: {
+  legend: string;
+  options: readonly string[];
+  selected: string[];
+  onToggle: (option: string) => void;
+}) {
+  return (
+    <fieldset>
+      <legend className="mb-2 text-xs font-medium uppercase tracking-widest text-cinema-muted">
+        {legend}
+      </legend>
+      <div className="flex flex-wrap gap-2">
+        {options.map((option) => {
+          const checked = selected.includes(option);
+          return (
+            <label
+              key={option}
+              className={`inline-flex cursor-pointer items-center gap-2 rounded-full border px-3 py-1.5 text-xs transition-colors ${
+                checked
+                  ? 'border-cinema-accent/50 bg-cinema-accent/15 text-cinema-chalk'
+                  : 'border-cinema-border bg-cinema-elevated text-cinema-muted hover:border-cinema-accent/40 hover:text-cinema-chalk'
+              }`}
+            >
+              <input
+                type="checkbox"
+                checked={checked}
+                onChange={() => onToggle(option)}
+                className="rounded border-cinema-border bg-cinema-surface text-cinema-accent focus:ring-cinema-accent/50"
+              />
+              {option}
+            </label>
+          );
+        })}
+      </div>
+    </fieldset>
   );
 }

@@ -2,8 +2,16 @@ import { z } from 'zod';
 import { prisma } from '../client';
 import { notifyChange } from '../realtime';
 import { register } from '../registry';
-import { toTvChannelShape } from '../lib/shapes';
+import { toPublicTvChannelShape, toTvChannelShape, toTvPlaylistShape } from '../lib/shapes';
 import { requireAdmin } from '../lib/requireAdmin';
+import {
+  FEATURED_CATEGORIES,
+  isPublicCatalogName,
+  mapTvCategory,
+  normalizeChannelFields,
+  normalizeCountry,
+  normalizeLanguage,
+} from '../lib/tv-taxonomy';
 
 const TVChannelCreate = z.object({
   name: z.string(),
@@ -20,29 +28,47 @@ const TVChannelCreate = z.object({
   sortOrder: z.number().optional(),
 });
 
+function applyPublicDisplay<T extends { name: string; category: string; country?: string | null; language?: string | null }>(
+  row: T,
+) {
+  const norm = normalizeChannelFields(row);
+  return {
+    ...row,
+    name: norm.name,
+    category: norm.category,
+    country: norm.country ?? undefined,
+    language: norm.language,
+  };
+}
+
+const listArgs = z
+  .object({
+    category: z.string().optional(),
+    country: z.string().optional(),
+    language: z.string().optional(),
+    search: z.string().optional(),
+    playlistId: z.string().optional(),
+    popularOnly: z.boolean().optional(),
+    streamStatus: z.enum(['online', 'offline', 'unknown']).optional(),
+    limit: z.number().optional(),
+    offset: z.number().optional(),
+  })
+  .optional();
+
 export const list = register({
   kind: 'query',
   name: 'tv.list',
   reads: ['tv_channel'],
-  args: z
-    .object({
-      category: z.string().optional(),
-      country: z.string().optional(),
-      language: z.string().optional(),
-      search: z.string().optional(),
-      playlistId: z.string().optional(),
-      popularOnly: z.boolean().optional(),
-      streamStatus: z.enum(['online', 'offline', 'unknown']).optional(),
-      limit: z.number().optional(),
-      offset: z.number().optional(),
-    })
-    .optional(),
+  args: listArgs,
   handler: async (_ctx, args) => {
     const a = args ?? {};
     const where: Record<string, unknown> = { isActive: true };
     if (a.category) where.category = a.category;
-    if (a.country) where.country = a.country;
-    if (a.language) where.language = a.language;
+    if (a.country) {
+      const country = normalizeCountry(a.country) ?? a.country;
+      where.country = country;
+    }
+    if (a.language) where.language = normalizeLanguage(a.language);
     if (a.playlistId) where.sourcePlaylistId = a.playlistId;
     if (a.popularOnly) where.isPopular = true;
     if (a.streamStatus) where.streamStatus = a.streamStatus.toUpperCase();
@@ -52,12 +78,54 @@ export const list = register({
     const total = await prisma.tVChannel.count({ where });
     const channels = await prisma.tVChannel.findMany({
       where,
+      orderBy: [{ isPopular: 'desc' }, { sortOrder: 'asc' }, { name: 'asc' }],
+      take: a.limit ?? 48,
+      skip: a.offset ?? 0,
+    });
+    const items = channels
+      .filter((c) => isPublicCatalogName(c.name))
+      .map((c) => applyPublicDisplay(toPublicTvChannelShape(c)));
+    return {
+      items,
+      total,
+      offset: a.offset ?? 0,
+      limit: a.limit ?? 48,
+      hasMore: (a.offset ?? 0) + (a.limit ?? 48) < total,
+    };
+  },
+});
+
+export const adminList = register({
+  kind: 'query',
+  name: 'tv.adminList',
+  reads: ['tv_channel'],
+  args: z
+    .object({
+      search: z.string().optional(),
+      streamStatus: z.enum(['online', 'offline', 'unknown']).optional(),
+      popularOnly: z.boolean().optional(),
+      includeInactive: z.boolean().optional(),
+      limit: z.number().optional(),
+      offset: z.number().optional(),
+    })
+    .optional(),
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const a = args ?? {};
+    const where: Record<string, unknown> = {};
+    if (!a.includeInactive) where.isActive = true;
+    if (a.popularOnly) where.isPopular = true;
+    if (a.streamStatus) where.streamStatus = a.streamStatus.toUpperCase();
+    if (a.search) where.name = { contains: a.search, mode: 'insensitive' };
+    const total = await prisma.tVChannel.count({ where });
+    const channels = await prisma.tVChannel.findMany({
+      where,
       orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
       take: a.limit ?? 48,
       skip: a.offset ?? 0,
     });
     return {
-      items: channels.map(toTvChannelShape),
+      items: channels.map((c) => applyPublicDisplay(toTvChannelShape(c))),
       total,
       offset: a.offset ?? 0,
       limit: a.limit ?? 48,
@@ -73,7 +141,21 @@ export const getById = register({
   args: z.object({ id: z.string() }),
   handler: async (_ctx, { id }) => {
     const channel = await prisma.tVChannel.findUnique({ where: { id } });
-    return channel ? toTvChannelShape(channel) : null;
+    if (!channel) return null;
+    return applyPublicDisplay(toPublicTvChannelShape(channel));
+  },
+});
+
+export const adminGetById = register({
+  kind: 'query',
+  name: 'tv.adminGetById',
+  reads: ['tv_channel'],
+  args: z.object({ id: z.string() }),
+  handler: async (ctx, { id }) => {
+    await requireAdmin(ctx);
+    const channel = await prisma.tVChannel.findUnique({ where: { id } });
+    if (!channel) return null;
+    return applyPublicDisplay(toTvChannelShape(channel));
   },
 });
 
@@ -84,8 +166,27 @@ export const getCategories = register({
   args: z.object({ popularOnly: z.boolean().optional() }).optional(),
   handler: async (_ctx, args) => {
     const where = args?.popularOnly ? { isActive: true, isPopular: true } : { isActive: true };
-    const channels = await prisma.tVChannel.findMany({ where, select: { category: true } });
-    return Array.from(new Set(channels.map((c) => c.category))).sort();
+    const channels = await prisma.tVChannel.findMany({
+      where,
+      select: { category: true, name: true },
+    });
+    const counts = new Map<string, number>();
+    for (const c of channels) {
+      if (!isPublicCatalogName(c.name)) continue;
+      const cat = mapTvCategory(c.category, c.name);
+      counts.set(cat, (counts.get(cat) ?? 0) + 1);
+    }
+    const names = new Set<string>([...FEATURED_CATEGORIES, ...counts.keys()]);
+    return Array.from(names).sort((a, b) => {
+      const ai = FEATURED_CATEGORIES.indexOf(a as (typeof FEATURED_CATEGORIES)[number]);
+      const bi = FEATURED_CATEGORIES.indexOf(b as (typeof FEATURED_CATEGORIES)[number]);
+      if (ai !== -1 || bi !== -1) {
+        if (ai === -1) return 1;
+        if (bi === -1) return -1;
+        return ai - bi;
+      }
+      return a.localeCompare(b, 'es');
+    });
   },
 });
 
@@ -100,7 +201,12 @@ export const getCountries = register({
       where,
       select: { country: true },
     });
-    return Array.from(new Set(channels.map((c) => c.country).filter(Boolean) as string[])).sort();
+    const set = new Set<string>();
+    for (const c of channels) {
+      const country = normalizeCountry(c.country);
+      if (country) set.add(country);
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b, 'es'));
   },
 });
 
@@ -115,7 +221,9 @@ export const getLanguages = register({
       where,
       select: { language: true },
     });
-    return Array.from(new Set(channels.map((c) => c.language).filter(Boolean) as string[])).sort();
+    const set = new Set<string>();
+    for (const c of channels) set.add(normalizeLanguage(c.language));
+    return Array.from(set).sort();
   },
 });
 
@@ -123,8 +231,16 @@ export const getStats = register({
   kind: 'query',
   name: 'tv.getStats',
   reads: ['tv_channel'],
-  handler: async () => {
-    const channels = await prisma.tVChannel.findMany();
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+    const channels = await prisma.tVChannel.findMany({
+      select: {
+        isActive: true,
+        isPopular: true,
+        streamStatus: true,
+        lastStreamError: true,
+      },
+    });
     let active = 0;
     let popular = 0;
     let online = 0;
@@ -150,8 +266,10 @@ export const listPlaylists = register({
   kind: 'query',
   name: 'tv.listPlaylists',
   reads: ['tv_playlist'],
-  handler: async () => {
-    return prisma.tVPlaylist.findMany();
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+    const playlists = await prisma.tVPlaylist.findMany();
+    return playlists.map(toTvPlaylistShape);
   },
 });
 
@@ -172,13 +290,14 @@ export const addChannel = register({
   args: TVChannelCreate,
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
+    const norm = normalizeChannelFields(args);
     const ch = await prisma.tVChannel.create({
       data: {
-        name: args.name,
+        name: norm.name,
         logo: args.logo,
-        category: args.category,
-        country: args.country ?? null,
-        language: args.language ?? null,
+        category: norm.category,
+        country: norm.country,
+        language: norm.language,
         streamUrl: args.streamUrl,
         source: args.source,
         sourcePlaylistId: args.sourcePlaylistId ?? null,
@@ -202,14 +321,15 @@ export const updateChannel = register({
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
     const { id, ...rest } = args;
+    const norm = normalizeChannelFields(rest);
     await prisma.tVChannel.update({
       where: { id },
       data: {
-        name: rest.name,
+        name: norm.name,
         logo: rest.logo,
-        category: rest.category,
-        country: rest.country ?? null,
-        language: rest.language ?? null,
+        category: norm.category,
+        country: norm.country,
+        language: norm.language,
         streamUrl: rest.streamUrl,
         source: rest.source,
         sourcePlaylistId: rest.sourcePlaylistId ?? null,
@@ -391,7 +511,8 @@ export const resetChannelProbe = register({
   name: 'tv.resetChannelProbe',
   writes: ['tv_channel'],
   args: z.object({ id: z.string() }),
-  handler: async (_ctx, { id }) => {
+  handler: async (ctx, { id }) => {
+    await requireAdmin(ctx);
     await prisma.tVChannel.update({
       where: { id },
       data: {
@@ -411,7 +532,8 @@ export const resetAllChannelsProbe = register({
   name: 'tv.resetAllChannelsProbe',
   writes: ['tv_channel'],
   args: z.object({ onlyPopular: z.boolean().optional() }).optional(),
-  handler: async (_ctx, args) => {
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     const where = args?.onlyPopular ? { isPopular: true } : {};
     const result = await prisma.tVChannel.updateMany({
       where,
@@ -431,7 +553,8 @@ export const dedupePopularChannels = register({
   kind: 'mutation',
   name: 'tv.dedupePopularChannels',
   writes: ['tv_channel'],
-  handler: async () => {
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
     const channels = await prisma.tVChannel.findMany();
     const popular = channels.filter((c) => c.isPopular);
     const byKey = new Map<string, typeof popular>();

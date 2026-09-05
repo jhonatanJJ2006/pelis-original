@@ -122,3 +122,36 @@ export function rewriteM3u8Manifest(
     })
     .join('\n');
 }
+
+export function parseByteRange(
+  rangeHeader: string | null | undefined,
+  fileSize: number,
+): { start: number; end: number } | null {
+  if (!rangeHeader || fileSize <= 0) return null;
+  const match = /^bytes=(\d*)-(\d*)$/i.exec(rangeHeader.trim());
+  if (!match) return null;
+
+  const hasStart = match[1] !== '';
+  const hasEnd = match[2] !== '';
+  if (!hasStart && !hasEnd) return null;
+
+  let start: number;
+  let end: number;
+
+  if (!hasStart) {
+    const suffix = Number(match[2]);
+    if (!Number.isFinite(suffix) || suffix <= 0) return null;
+    start = Math.max(0, fileSize - suffix);
+    end = fileSize - 1;
+  } else {
+    start = Number(match[1]);
+    end = hasEnd ? Number(match[2]) : fileSize - 1;
+  }
+
+  if (!Number.isFinite(start) || !Number.isFinite(end) || start < 0 || start >= fileSize || end < start) {
+    return null;
+  }
+
+  return { start, end: Math.min(end, fileSize - 1) };
+}
+

@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createReadStream } from 'fs';
-import { readFile } from 'fs/promises';
+import { readFile, stat } from 'fs/promises';
 import path from 'path';
 import {
   getOutputRoots,
+  parseByteRange,
   resolveStreamPath,
   rewriteM3u8Manifest,
 } from '@/lib/movie-stream-paths';
@@ -12,6 +13,8 @@ import { denyUnlessStreamAccess } from '@/lib/require-stream-access';
 const MIME: Record<string, string> = {
   '.m3u8': 'application/vnd.apple.mpegurl',
   '.ts': 'video/mp2t',
+  '.m4s': 'video/iso.segment',
+  '.mp4': 'video/mp4',
   '.vtt': 'text/vtt',
 };
 
@@ -57,9 +60,31 @@ async function serveStreamFile(
     }
     const content = await readFile(filePath, 'utf8');
     const rewritten = rewriteM3u8Manifest(content, raw.replace(/\\/g, '/'), getOutputRoots());
+    headers.set('Content-Length', String(Buffer.byteLength(rewritten)));
     return new NextResponse(rewritten, { status: 200, headers });
   }
 
+  const info = await stat(filePath);
+  const fileSize = info.size;
+  const range = parseByteRange(req.headers.get('range'), fileSize);
+
+  if (req.headers.get('range') && !range) {
+    headers.set('Content-Range', `bytes */${fileSize}`);
+    return new NextResponse(null, { status: 416, headers });
+  }
+
+  if (range) {
+    const chunkSize = range.end - range.start + 1;
+    headers.set('Content-Range', `bytes ${range.start}-${range.end}/${fileSize}`);
+    headers.set('Content-Length', String(chunkSize));
+    if (options?.headOnly) {
+      return new NextResponse(null, { status: 206, headers });
+    }
+    const stream = createReadStream(filePath, { start: range.start, end: range.end });
+    return new NextResponse(stream as any, { status: 206, headers });
+  }
+
+  headers.set('Content-Length', String(fileSize));
   if (options?.headOnly) {
     return new NextResponse(null, { status: 200, headers });
   }

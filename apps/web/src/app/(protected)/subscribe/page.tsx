@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useMemo, useRef, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, FreeMode } from 'swiper/modules';
-import { Crown, Check, Zap, Star, Rocket, ChevronLeft, ChevronRight, Settings } from 'lucide-react';
+import { Crown, Check, Zap, Star, Rocket, ChevronLeft, ChevronRight, Settings, Subtitles } from 'lucide-react';
 import { api } from '@pelis/db/api';
 import { useUser } from '@pelis/auth/hooks';
 import { SubscribePageSkeleton } from '@pelis/ui/features/subscribe-page-skeleton';
@@ -14,6 +14,7 @@ import { EmptyState } from '@pelis/ui/features/empty-state';
 import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';
 import { toast } from 'sonner';
 import { cn } from '@pelis/ui/utils';
+import { isPlanMediaFeature, parsePlanMediaFeatures } from '@/lib/plan-features';
 
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -291,8 +292,8 @@ export default function SubscribePage() {
                         </span>
                       </div>
 
-                      <ul className="flex-1 space-y-3 mb-8">
-                        {plan.features.map((feature, i) => (
+                      <ul className="flex-1 space-y-3 mb-5">
+                        {plan.features.filter((feature) => !isPlanMediaFeature(feature)).map((feature, i) => (
                           <li key={i} className="flex items-start gap-2 text-sm">
                             <Check
                               className="w-4 h-4 text-cinema-teal mt-0.5 shrink-0"
@@ -302,6 +303,7 @@ export default function SubscribePage() {
                           </li>
                         ))}
                       </ul>
+                      <PlanMediaCapabilities features={plan.features} />
 
                       {action === 'unavailable' && (
                         <p className="text-xs text-amber-400/90 mb-3 text-center">
@@ -355,6 +357,38 @@ export default function SubscribePage() {
         </Link>
         . Los pagos los procesa Stripe.
       </p>
+    </div>
+  );
+}
+
+
+function PlanMediaCapabilities({ features }: { features: string[] }) {
+  const groups = parsePlanMediaFeatures(features);
+  if (groups.length === 0) return null;
+
+  return (
+    <div className="mb-8 rounded-[10px] border border-cinema-accent/25 bg-cinema-bg/50 p-3">
+      <p className="mb-2.5 flex items-center gap-1.5 font-display text-xs uppercase tracking-widest text-cinema-accent">
+        <Subtitles className="h-3.5 w-3.5" aria-hidden />
+        Audio y subtítulos
+      </p>
+      <ul className="space-y-2.5">
+        {groups.map((group) => (
+          <li key={group.key}>
+            <p className="mb-1.5 text-[11px] text-cinema-muted">{group.label}</p>
+            <div className="flex flex-wrap gap-1.5">
+              {group.values.map((value) => (
+                <span
+                  key={value}
+                  className="rounded-full border border-cinema-accent/30 bg-cinema-accent/10 px-2 py-0.5 text-[11px] text-cinema-chalk"
+                >
+                  {value}
+                </span>
+              ))}
+            </div>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

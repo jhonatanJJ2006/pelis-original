@@ -2,12 +2,13 @@
 
 Lista de tareas del proyecto. Stack actual: **Next.js 14 + Postgres + `@pelis/db` + Better Auth**.
 
-Ver auditoría completa en [`docs/AUDIT.md`](docs/AUDIT.md).
+Ver AGENTS.md (entrada agentes) y auditoría completa en [`docs/AUDIT.md`](docs/AUDIT.md).
 
 ---
 
 ## Completado recientemente
 
+- [x] Documentacion de agentes: AGENTS.md, docs/APP.md, docs/ARCHITECTURE.md, docs/DATA-MODEL.md, docs/TESTING.md (2026-08-29)
 - [x] Rediseño UI cinematográfico (home, películas, series, favoritos, historial)
 - [x] Migración Convex → Postgres + Prisma (`@pelis/db`)
 - [x] Queries: trending, por género, continuar viendo, limpiar historial
@@ -49,7 +50,7 @@ Ver auditoría completa en [`docs/AUDIT.md`](docs/AUDIT.md).
 - [ ] Validar payloads con `movieSchema` de `@pelis/validators`
 - [x] Script de seed documentado (`pnpm --filter @pelis/db db:seed`)
 - [x] Import AniList (`pnpm --filter @pelis/db import:anilist`)
-- [ ] Proteger `/api/stream/*` con auth/plan activo
+- [x] /api/stream* con denyUnlessStreamAccess (sesion + plan o ADMIN; no quitar)
 
 ---
 
@@ -84,7 +85,7 @@ Ver auditoría completa en [`docs/AUDIT.md`](docs/AUDIT.md).
 - [ ] Placeholder de póster más representativo
 - [ ] Animaciones reducidas con `prefers-reduced-motion`
 - [ ] SEO: metadata por película/serie/anime (`generateMetadata`)
-- [ ] Página `not-found.tsx` custom
+- [x] Pagina not-found.tsx custom
 
 ---
 

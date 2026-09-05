@@ -19,10 +19,15 @@ const MIME: Record<string, string> = {
   '.mp4': 'video/mp4',
   '.aac': 'audio/aac',
   '.vtt': 'text/vtt',
-  '.jpg': 'video/mp2t', // segments disguised as .jpg by the CDN
-  '.html': 'video/mp2t', // segments disguised as .html
-  '.js': 'video/mp2t', // segments disguised as .js
+  '.jpg': 'video/mp2t',
+  '.jpeg': 'video/mp2t',
+  '.html': 'video/mp2t',
+  '.js': 'video/mp2t',
+  '.css': 'video/mp2t',
+  '.txt': 'video/mp2t',
   '.png': 'video/mp2t',
+  '.webp': 'video/mp2t',
+  '.gif': 'video/mp2t',
 };
 
 const PRIVATE_HOST_RE =
@@ -46,6 +51,9 @@ const ALLOWED_UPSTREAM_SUFFIXES = [
   '.anivideo.sbs',
   '.megacloud.animanga.fun',
   'megacloud.animanga.fun',
+  '.kryntal.top',
+  'cdn.kryntal.top',
+  '.megaplay.buzz',
 ];
 
 const VIDNEST_ASSET_PATH_RE = /^\/anime\/[0-9a-f]{32}\/[0-9a-f]{32}\//i;

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ANIME_CDN_HEADERS } from '@pelis/db/lib/vidnest-client';
 import {
   fetchAnimeUpstream,
+  getMimeForUrl,
   isSafeAnimeUpstreamUrl,
   looksLikeM3u8,
   rewriteAnimeManifest,
@@ -83,9 +84,14 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Segments / keys: pipe verbatim.
+    // Segments / keys: pipe verbatim. VidNest CDNs disguise TS segments as
+    // image/text assets; override those types so hls.js accepts them.
     const headers = new Headers();
-    headers.set('Content-Type', contentType || 'application/octet-stream');
+    const disguised = /\.(jpe?g|png|webp|gif|html|js|css|txt)(?:\?|$)/i.test(upstream);
+    headers.set(
+      'Content-Type',
+      disguised ? getMimeForUrl(upstream) : contentType || getMimeForUrl(upstream) || 'application/octet-stream'
+    );
     headers.set('Access-Control-Allow-Origin', '*');
     headers.set('Accept-Ranges', 'bytes');
     const contentLength = response.headers.get('content-length');

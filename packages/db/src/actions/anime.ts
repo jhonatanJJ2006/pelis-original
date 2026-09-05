@@ -156,14 +156,16 @@ export const getEpisodeStream = register({
     provider: z.string().optional(),
     dub: z.boolean().optional(),
     tryFallback: z.boolean().optional(),
+    excludeProviders: z.array(z.string()).optional(),
   }),
-  handler: async (_ctx, { animeId, episodeNumber, provider, dub, tryFallback = true }) => {
+  handler: async (_ctx, { animeId, episodeNumber, provider, dub, tryFallback = true, excludeProviders }) => {
     const anime = await prisma.anime.findUnique({ where: { id: animeId } });
     if (!anime) throw new Error('Anime no encontrado');
 
     const anilistId = await ensureAnilistId(anime);
+    const excluded = new Set(excludeProviders ?? []);
     const requestedId = provider ?? DEFAULT_ANIME_PROVIDER_ID;
-    const requested = getProviderById(requestedId);
+    const requested = excluded.has(requestedId) ? undefined : getProviderById(requestedId);
 
     if (!anilistId) {
       return {
@@ -180,37 +182,43 @@ export const getEpisodeStream = register({
     // VidNest resolves real HLS sources server-side (custom-base64 "cipher",
     // see vidnest-client). Serving them through our own proxy gives every
     // provider the same clean <video> player — no iframes, no popups.
-    if (!requested || requested.id === 'vidnest') {
+    const tryVidnestHls = async (fellBackFrom?: string | null) => {
+      if (excluded.has('vidnest')) return null;
       try {
         const data = await fetchVidnestEpisode(anilistId, episodeNumber, dub ? 'dub' : 'sub');
         const master =
           data.sources.find((s) => s.type === 'hls' || s.file.includes('.m3u8')) ??
           data.sources[0];
-        if (master?.file) {
-          return {
-            kind: 'hls' as const,
-            provider: 'vidnest',
-            sources: [
-              {
-                url: `/api/anime/stream?u=${encodeURIComponent(master.file)}`,
-                quality: 'auto',
-                isM3U8: true,
-              },
-            ],
-            subtitles: (data.tracks ?? [])
-              .filter((t) => t.kind === 'captions' && t.file)
-              .map((t) => ({
-                url: `/api/anime/stream?u=${encodeURIComponent(t.file)}`,
-                lang: t.label ?? 'Subtítulos',
-              })),
-            intro: data.intro ?? null,
-            outro: data.outro ?? null,
-            triedProviders: ['vidnest'],
-          };
-        }
+        if (!master?.file) return null;
+        return {
+          kind: 'hls' as const,
+          provider: 'vidnest',
+          sources: [
+            {
+              url: `/api/anime/stream?u=${encodeURIComponent(master.file)}`,
+              quality: 'auto',
+              isM3U8: true,
+            },
+          ],
+          subtitles: (data.tracks ?? [])
+            .filter((t) => t.kind === 'captions' && t.file)
+            .map((t) => ({
+              url: `/api/anime/stream?u=${encodeURIComponent(t.file)}`,
+              lang: t.label ?? 'Subtítulos',
+            })),
+          intro: data.intro ?? null,
+          outro: data.outro ?? null,
+          triedProviders: ['vidnest'],
+          fellBackFrom: fellBackFrom ?? null,
+        };
       } catch {
-        // VidNest backend failed — fall through to the iframe chain below.
+        return null;
       }
+    };
+
+    if (!requested || requested.id === 'vidnest') {
+      const vidnest = await tryVidnestHls();
+      if (vidnest) return vidnest;
     }
 
     if (requested?.kind === 'embed') {
@@ -272,8 +280,14 @@ export const getEpisodeStream = register({
       };
     }
 
-    // The requested source is unavailable (broken embed or failed scraper).
-    // Try the hls chain before giving up on native playback.
+    // The requested source is unavailable. VidNest HLS is the only source we
+    // have verified live — try it before the (usually dead) Consumet scrapers.
+    if (requested?.id !== 'vidnest') {
+      const vidnest = await tryVidnestHls(requested?.id ?? null);
+      if (vidnest) return vidnest;
+    }
+
+    // Try the Consumet hls chain before giving up on native playback.
     if (!hlsTried) {
       const hls = await fetchVideoByEpisodeNumber(anilistId, episodeNumber, undefined, anime.title);
       if (hls.provider && hls.video.sources.length > 0) {
@@ -295,7 +309,7 @@ export const getEpisodeStream = register({
     // backend is known unhealthy — otherwise we'd return the same broken
     // player the user just rejected.
     for (const embed of getEmbedProviders()) {
-      if (embed.id === requested?.id || failedEmbeds.has(embed.id)) continue;
+      if (embed.id === requested?.id || failedEmbeds.has(embed.id) || excluded.has(embed.id)) continue;
 
       let url: string | null = null;
       if (embed.resolveEmbedUrl) {

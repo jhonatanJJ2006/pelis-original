@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import {
   ArrowLeft,
-  Loader2,
   AlertCircle,
   Monitor,
   Crown,
@@ -22,6 +21,16 @@ import { hasActivePlan, useUser } from '@pelis/auth/hooks';
 import { Spinner } from '@pelis/ui/components';
 import { cn } from '@pelis/ui/utils';
 import { AnimeHlsPlayer } from '@/components/anime-hls-player';
+import {
+  PlayerChrome,
+  PlayerGestureHud,
+  PlayerLoadingOverlay,
+  isMobilePlayerViewport,
+  playerVideoFilter,
+  useMobileLandscapePlayer,
+  usePlayerSettings,
+  usePlayerSurfaceGestures,
+} from '@pelis/ui/features/video-player';
 
 interface ProviderInfo {
   id: string;
@@ -75,6 +84,31 @@ export default function AnimeWatchPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [embedStalled, setEmbedStalled] = useState(false);
+  const [failedProviders, setFailedProviders] = useState<string[]>([]);
+  const [embedControlsVisible, setEmbedControlsVisible] = useState(true);
+  const embedSurfaceRef = useRef<HTMLDivElement>(null);
+  const { brightness, setBrightness, volume, setVolume, muted, toggleMute } = usePlayerSettings();
+  const {
+    landscapeActive: embedLandscapeActive,
+    enter: enterEmbedLandscape,
+    exit: exitEmbedLandscape,
+    surfaceClassName: embedLandscapeClassName,
+    surfaceStyle: embedLandscapeStyle,
+  } = useMobileLandscapePlayer({
+    containerRef: embedSurfaceRef,
+    enabled: stream?.kind === 'embed',
+    enterOnMount: true,
+  });
+  const { hud: embedHud, hudVisible: embedHudVisible, didGesture: embedDidGesture } =
+    usePlayerSurfaceGestures({
+      containerRef: embedSurfaceRef,
+      brightness,
+      setBrightness,
+      volume,
+      setVolume,
+      enabled: stream?.kind === 'embed' && embedLandscapeActive,
+      volumeEnabled: false,
+    });
 
   const getEpisodeStream = useAction(api.anime.getEpisodeStream);
   const getSeasonEpisodes = useAction(api.anime.getSeasonEpisodes);
@@ -95,6 +129,10 @@ export default function AnimeWatchPage() {
     () => (providers ?? []).filter((p) => p.kind === 'embed'),
     [providers]
   );
+
+  useEffect(() => {
+    setFailedProviders([]);
+  }, [animeId, episodeNumber, provider, dub]);
 
   useEffect(() => {
     let cancelled = false;
@@ -122,8 +160,8 @@ export default function AnimeWatchPage() {
         episodeNumber,
         provider,
         dub,
-        // Manual provider switching only: never silently swap servers.
-        tryFallback: false,
+        tryFallback: true,
+        excludeProviders: failedProviders,
       })) as StreamResult;
       setStream(result);
       if (result.kind === 'none') {
@@ -133,7 +171,7 @@ export default function AnimeWatchPage() {
       setError('Error al cargar el episodio. Prueba con otro proveedor.');
     }
     setLoading(false);
-  }, [animeId, episodeNumber, provider, dub, getEpisodeStream]);
+  }, [animeId, episodeNumber, provider, dub, failedProviders, getEpisodeStream]);
 
   // `user` is a fresh object on every render, so the effect must depend on
   // stable primitives (`userId`, `entitled`) — otherwise loadStream
@@ -166,9 +204,16 @@ export default function AnimeWatchPage() {
 
   // The unified player handles every HLS stream; a fatal error here means the
   // server is down, so we surface the manual server switcher.
+  const streamRef = useRef(stream);
+  streamRef.current = stream;
   const onPlayerFatalError = useCallback(() => {
+    const current = streamRef.current && streamRef.current.kind !== 'none' ? streamRef.current.provider : provider;
+    if (current && !failedProviders.includes(current)) {
+      setFailedProviders((prev) => [...prev, current]);
+      return;
+    }
     setError('Este servidor no está disponible ahora mismo. Prueba otro servidor.');
-  }, []);
+  }, [provider, failedProviders]);
 
   const goToEpisode = (target: number) => {
     const query = new URLSearchParams(searchParams.toString());
@@ -234,9 +279,9 @@ export default function AnimeWatchPage() {
       </Link>
 
       <div className="mb-4">
-        <h1 className="text-lg md:text-xl font-semibold text-white">
+        <h1 className="font-display text-2xl text-cinema-chalk md:text-3xl">
           {series?.title ?? 'Anime'}
-          <span className="text-cinema-muted font-normal">
+          <span className="font-sans text-base font-normal text-cinema-muted md:text-lg">
             {' · '}
             {season?.seasonLabel ? `${season.seasonLabel} · ` : ''}Episodio {episodeNumber}
           </span>
@@ -264,8 +309,8 @@ export default function AnimeWatchPage() {
                   className={cn(
                     'flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all border',
                     active
-                      ? 'bg-cinema-violet text-white border-cinema-violet shadow-glow-violet'
-                      : 'bg-cinema-elevated text-cinema-silver hover:text-white border-cinema-border hover:border-cinema-violet/50'
+                      ? 'bg-cinema-accent text-cinema-bg border-cinema-accent shadow-glow'
+                      : 'bg-cinema-elevated text-cinema-silver hover:text-cinema-chalk border-cinema-border hover:border-cinema-accent/50'
                   )}
                 >
                   <span className="truncate">{p.name}</span>
@@ -281,8 +326,8 @@ export default function AnimeWatchPage() {
               className={cn(
                 'inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors',
                 dub
-                  ? 'bg-cinema-violet/15 text-cinema-violet-light border-cinema-violet/40'
-                  : 'bg-cinema-elevated text-cinema-silver hover:text-white border-cinema-border'
+                  ? 'bg-cinema-accent/15 text-cinema-accent-light border-cinema-accent/40'
+                  : 'bg-cinema-elevated text-cinema-silver hover:text-cinema-chalk border-cinema-border'
               )}
               aria-pressed={dub}
             >
@@ -296,8 +341,8 @@ export default function AnimeWatchPage() {
         </div>
       )}
 
-      <div className="rounded-2xl overflow-hidden bg-black border border-cinema-border mb-4">
-        <div className="relative aspect-video bg-black">
+      <div className="mb-4 overflow-hidden rounded-2xl border border-cinema-border bg-cinema-bg">
+        <div className="relative aspect-video bg-cinema-bg">
           {!user ? (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-8">
               <Monitor className="w-12 h-12 text-cinema-muted/40" aria-hidden />
@@ -321,19 +366,12 @@ export default function AnimeWatchPage() {
             </div>
           ) : (
             <>
-              {loading && (
-                <div className="absolute inset-0 flex items-center justify-center z-10">
-                  <div className="text-center">
-                    <Loader2 className="w-10 h-10 text-cinema-silver animate-spin mx-auto mb-3" />
-                    <p className="text-cinema-muted text-sm">Buscando fuentes...</p>
-                  </div>
-                </div>
-              )}
+              {loading && <PlayerLoadingOverlay message="Buscando fuentes…" />}
 
               {error && !loading && (
                 <div className="absolute inset-0 flex items-center justify-center z-10 p-6">
                   <div className="text-center max-w-md">
-                    <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
+                    <AlertCircle className="mx-auto mb-4 h-12 w-12 text-cinema-danger" />
                     <p className="text-cinema-muted text-sm mb-4">{error}</p>
                     <div className="flex flex-wrap justify-center gap-2">
                       {primaryProviders.map((p) => (
@@ -352,17 +390,28 @@ export default function AnimeWatchPage() {
               )}
 
               {stream?.kind === 'embed' && (
-                <>
+                <div
+                  ref={embedSurfaceRef}
+                  className={cn(
+                    'absolute inset-0 bg-cinema-bg [touch-action:none]',
+                    embedLandscapeClassName,
+                  )}
+                  style={embedLandscapeStyle}
+                  onMouseMove={() => setEmbedControlsVisible(true)}
+                  onPointerDown={() => {
+                    void enterEmbedLandscape();
+                  }}
+                  onClick={() => {
+                    embedDidGesture();
+                  }}
+                >
                   <iframe
                     key={stream.url}
                     src={stream.url}
                     title={`Episodio ${episodeNumber}`}
-                    className="absolute inset-0 w-full h-full"
+                    className="absolute inset-0 h-full w-full"
+                    style={{ filter: playerVideoFilter(brightness) }}
                     allowFullScreen
-                    // VidNest (el único servidor que funciona hoy) detecta el
-                    // atributo sandbox y se niega a reproducir ("Please
-                    // Disable Sandbox"), así que no lo usamos. El bloqueo de
-                    // popunders se deja en manos del bloqueador del usuario.
                     allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
                     referrerPolicy="origin"
                     onLoad={() => {
@@ -373,14 +422,52 @@ export default function AnimeWatchPage() {
                       setEmbedStalled(false);
                     }}
                   />
+                  <div
+                    className="absolute inset-y-0 left-0 z-[15] w-14 md:w-16"
+                    aria-hidden
+                    data-player-gesture-zone="brightness"
+                  />
+                  {embedLandscapeActive && embedHud && (
+                    <PlayerGestureHud
+                      kind={embedHud.kind}
+                      value={embedHud.value}
+                      visible={embedHudVisible}
+                    />
+                  )}
+                  <PlayerChrome
+                    playing
+                    onTogglePlay={() => {}}
+                    volume={volume}
+                    muted={muted}
+                    onVolumeChange={setVolume}
+                    onToggleMute={toggleMute}
+                    brightness={brightness}
+                    onBrightnessChange={setBrightness}
+                    fullscreen={embedLandscapeActive}
+                    onToggleFullscreen={() => {
+                      if (!isMobilePlayerViewport()) {
+                        if (document.fullscreenElement) void document.exitFullscreen();
+                        else embedSurfaceRef.current?.requestFullscreen().catch(() => {});
+                        return;
+                      }
+                      if (embedLandscapeActive) void exitEmbedLandscape();
+                      else void enterEmbedLandscape();
+                    }}
+                    visible={embedControlsVisible}
+                    title={series?.title ?? 'Anime'}
+                    subtitle={`Episodio ${episodeNumber} · brillo de la imagen (el volumen va en el reproductor embebido)`}
+                    hideSeek
+                    hidePlayback
+                    hideVolume
+                  />
                   {embedStalled && (
-                    <div className="absolute inset-x-0 bottom-0 z-10 p-3 bg-black/85 backdrop-blur-sm">
-                      <p className="text-xs text-amber-300 text-center">
+                    <div className="absolute inset-x-0 bottom-0 z-10 bg-cinema-bg/85 p-3 backdrop-blur-sm">
+                      <p className="text-center text-xs text-cinema-accent-light">
                         Este servidor tarda demasiado en responder. Cambia de servidor arriba.
                       </p>
                     </div>
                   )}
-                </>
+                </div>
               )}
 
               {stream?.kind === 'hls' && (
@@ -389,6 +476,7 @@ export default function AnimeWatchPage() {
                   subtitles={stream.subtitles}
                   intro={stream.intro ?? null}
                   outro={stream.outro ?? null}
+                  title={series?.title ?? 'Anime'}
                   episodeLabel={`Episodio ${episodeNumber}`}
                   onFatalError={onPlayerFatalError}
                 />
@@ -458,8 +546,8 @@ export default function AnimeWatchPage() {
                       className={cn(
                         'px-3 py-1.5 rounded-lg text-xs font-medium transition-all border',
                         activeProviderId === p.id
-                          ? 'bg-cinema-violet text-white border-cinema-violet'
-                          : 'bg-cinema-elevated text-cinema-silver hover:text-white border-cinema-border hover:border-cinema-violet/40'
+                          ? 'bg-cinema-accent text-cinema-bg border-cinema-accent'
+                          : 'bg-cinema-elevated text-cinema-silver hover:text-cinema-chalk border-cinema-border hover:border-cinema-accent/40'
                       )}
                     >
                       {p.name}
