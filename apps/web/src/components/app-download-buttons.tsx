@@ -82,21 +82,14 @@ export function AppDownloadButtons({ className, layout = 'stack' }: AppDownloadB
       <p className="text-cinema-silver text-sm leading-relaxed">
         Instala Pelis en tu celular o en tu Android TV / TV Box.
       </p>
-      <div
-        className={cn(
-          'flex gap-2',
-          layout === 'stack' ? 'flex-col' : 'flex-col sm:flex-row'
-        )}
-      >
+      <div className={cn('flex gap-2', layout === 'stack' ? 'flex-col' : 'flex-col sm:flex-row')}>
         {showAndroid ? (
           <a
             href={APK_DOWNLOAD_PATH}
             download="pelis.apk"
             className={champagneBtn}
             aria-label={
-              androidVersion
-                ? `Descargar app Android ${androidVersion}`
-                : 'Descargar app Android'
+              androidVersion ? `Descargar app Android ${androidVersion}` : 'Descargar app Android'
             }
           >
             <Smartphone className="w-4 h-4 shrink-0" aria-hidden />
@@ -115,17 +108,13 @@ export function AppDownloadButtons({ className, layout = 'stack' }: AppDownloadB
             download="pelis-tv.apk"
             className={secondaryBtn}
             aria-label={
-              tvVersion
-                ? `Descargar app Android TV ${tvVersion}`
-                : 'Descargar app Android TV'
+              tvVersion ? `Descargar app Android TV ${tvVersion}` : 'Descargar app Android TV'
             }
           >
             <Tv className="w-4 h-4 shrink-0" aria-hidden />
             <span className="truncate">
               Descargar app Android TV
-              {tvVersion ? (
-                <span className="font-normal opacity-80"> · {tvVersion}</span>
-              ) : null}
+              {tvVersion ? <span className="font-normal opacity-80"> · {tvVersion}</span> : null}
             </span>
           </a>
         ) : null}
