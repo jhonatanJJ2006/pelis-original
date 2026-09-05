@@ -11,7 +11,8 @@ import { AdminTableSkeleton } from '@pelis/ui/features/admin-table-skeleton';
 import { cn } from '@pelis/ui/utils';
 
 interface PlanRow {
-  _id: string;
+  _id?: string;
+  id?: string;
   name: string;
   price: number;
   description: string;
@@ -31,6 +32,12 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Rocket,
   Crown,
 };
+
+function planRowId(plan: Pick<PlanRow, '_id' | 'id'>) {
+  const id = plan._id ?? plan.id;
+  if (!id) throw new Error('Plan row missing id');
+  return id;
+}
 
 function formatPrice(price: number) {
   return new Intl.NumberFormat('es', {
@@ -63,9 +70,9 @@ export default function AdminPlansPage() {
   };
 
   const handleToggleRecommended = async (plan: PlanRow) => {
-    setBusyId(plan._id);
+    setBusyId(planRowId(plan));
     try {
-      await setRecommended({ id: plan._id as any, recommended: !plan.recommended });
+      await setRecommended({ id: planRowId(plan) as any, recommended: !plan.recommended });
       toast.success(
         plan.recommended ? 'Plan ya no es recomendado' : 'Plan marcado como recomendado'
       );
@@ -105,7 +112,7 @@ export default function AdminPlansPage() {
             const Icon = iconMap[plan.icon] ?? CreditCard;
             return (
               <article
-                key={plan._id}
+                key={planRowId(plan)}
                 className={cn(
                   'rounded-2xl border bg-cinema-surface p-5 flex flex-col gap-4',
                   plan.recommended
@@ -180,7 +187,7 @@ export default function AdminPlansPage() {
                     variant="ghost"
                     size="sm"
                     onClick={() => handleToggleRecommended(plan)}
-                    disabled={busyId === plan._id}
+                    disabled={busyId === planRowId(plan)}
                   >
                     <Star
                       className={cn(
@@ -191,7 +198,7 @@ export default function AdminPlansPage() {
                     <span className="ml-1">{plan.recommended ? 'Quitar' : 'Destacar'}</span>
                   </Button>
                   <div className="ml-auto flex gap-1">
-                    <Link href={`/admin/plans/${plan._id}/edit`}>
+                    <Link href={`/admin/plans/${planRowId(plan)}/edit`}>
                       <Button variant="ghost" size="sm" aria-label="Editar">
                         <Pencil className="w-4 h-4" />
                       </Button>
@@ -200,10 +207,10 @@ export default function AdminPlansPage() {
                       variant="ghost"
                       size="sm"
                       aria-label="Eliminar"
-                      disabled={deletingId === plan._id}
-                      onClick={() => handleDelete(plan._id, plan.name)}
+                      disabled={deletingId === planRowId(plan)}
+                      onClick={() => handleDelete(planRowId(plan), plan.name)}
                     >
-                      {deletingId === plan._id ? (
+                      {deletingId === planRowId(plan) ? (
                         <Spinner className="w-4 h-4" />
                       ) : (
                         <Trash2 className="w-4 h-4 text-red-400" />

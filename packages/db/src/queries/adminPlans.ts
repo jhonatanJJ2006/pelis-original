@@ -31,6 +31,7 @@ export const adminList = register({
         const active = subs.filter(
           (s) => s.status === 'ACTIVE' && s.endDate.getTime() > now.getTime(),
         ).length;
+        // Shape Prisma `id` → `_id` for /admin/plans edit links (avoid /admin/plans/undefined/edit).
         return { ...toPlanShape(p), activeSubscribers: active, totalSubscribers: subs.length };
       }),
     );
