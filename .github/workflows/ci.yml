@@ -1,0 +1,123 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - staging
+      - main
+  push:
+    branches:
+      - staging
+      - main
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Compile-only placeholders for Next/Prisma/turbo (no live secrets).
+# apps/web build uses dotenv -e ../../.env; prisma generate needs DATABASE_URL.
+env:
+  DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+  BETTER_AUTH_SECRET: ci-better-auth-secret-not-for-production-use
+  BETTER_AUTH_URL: http://localhost:3000
+  SITE_URL: http://localhost:3000
+  NEXT_PUBLIC_SITE_URL: http://localhost:3000
+  NEXT_PUBLIC_APP_URL: http://localhost:3000
+  STRIPE_SECRET_KEY: sk_test_ci_placeholder_not_a_real_key_xxxxxxxx
+  STRIPE_WEBHOOK_SECRET: whsec_ci_placeholder_not_a_real_secret
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_ci_placeholder
+  RESEND_API_KEY: re_ci_placeholder
+  CONSUMET_API_URL: http://localhost:3001
+
+jobs:
+  format:
+    name: format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Format check
+        run: pnpm format
+
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Unit tests
+        run: pnpm test:unit
+
+  build:
+    name: build
+    needs: [format, test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Write CI .env placeholders
+        run: |
+          for key in DATABASE_URL BETTER_AUTH_SECRET BETTER_AUTH_URL SITE_URL NEXT_PUBLIC_SITE_URL NEXT_PUBLIC_APP_URL STRIPE_SECRET_KEY STRIPE_WEBHOOK_SECRET NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY RESEND_API_KEY CONSUMET_API_URL; do
+            echo "$key=${!key}" >> .env
+          done
+      - name: Build (turbo)
+        run: pnpm build
+
+  deploy:
+    name: deploy
+    needs: [build]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Write CI .env placeholders
+        run: |
+          for key in DATABASE_URL BETTER_AUTH_SECRET BETTER_AUTH_URL SITE_URL NEXT_PUBLIC_SITE_URL NEXT_PUBLIC_APP_URL STRIPE_SECRET_KEY STRIPE_WEBHOOK_SECRET NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY RESEND_API_KEY CONSUMET_API_URL; do
+            echo "$key=${!key}" >> .env
+          done
+      - name: Deployable web build check
+        run: pnpm build:vercel
+      - name: Step summary
+        run: |
+          echo "## Deploy job" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "This job validates the deployable web artifact via pnpm build:vercel." >> "$GITHUB_STEP_SUMMARY"
+          echo "Production runtime deploy remains Movies systemd/tunnel — CI does not SSH to Movies." >> "$GITHUB_STEP_SUMMARY"
+          echo "No Stripe live secrets are required here (compile-only placeholders)." >> "$GITHUB_STEP_SUMMARY"
