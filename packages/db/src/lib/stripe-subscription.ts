@@ -285,3 +285,73 @@ export async function applyPlanUpgrade(
     forceActive: true,
   });
 }
+
+export type CheckoutLike = {
+  payment_status?: string | null;
+  status?: string | null;
+  subscription?: unknown;
+  customer?: unknown;
+  client_reference_id?: string | null;
+  metadata?: Record<string, string> | null;
+};
+
+/** User that owns a paid Checkout session. Auth is optional: session_id is the capability. */
+export function resolveCheckoutUserId(
+  session: CheckoutLike,
+  expectedUserId?: string | null
+): { userId: string } | { error: 'user_mismatch' | 'missing_user' } {
+  const metaUser = session.metadata?.convexUserId ?? session.client_reference_id ?? null;
+  if (expectedUserId && metaUser && metaUser !== expectedUserId) {
+    return { error: 'user_mismatch' };
+  }
+  const userId = expectedUserId ?? metaUser;
+  if (!userId) return { error: 'missing_user' };
+  return { userId };
+}
+
+export function isPaidCheckout(session: CheckoutLike): boolean {
+  return session.payment_status === 'paid' || session.status === 'complete';
+}
+
+export async function fulfillPaidCheckoutSession(
+  prisma: PrismaClient,
+  stripe: Stripe,
+  session: CheckoutLike,
+  expectedUserId?: string | null
+): Promise<{ activated: boolean; planExpiresAt?: number; userId?: string; reason?: string }> {
+  const who = resolveCheckoutUserId(session, expectedUserId);
+  if ('error' in who) return { activated: false, reason: who.error };
+  if (session.metadata?.type === 'plan_upgrade') {
+    if (!isPaidCheckout(session))
+      return { activated: false, reason: 'not_paid', userId: who.userId };
+    const result = await applyPlanUpgrade(prisma, stripe, {
+      ...session.metadata,
+      convexUserId: who.userId,
+    });
+    return {
+      activated: result.activated,
+      planExpiresAt: result.endDate?.getTime(),
+      userId: who.userId,
+      reason: result.reason,
+    };
+  }
+
+  const subscriptionId = getStripeObjectId(session.subscription);
+  if (!subscriptionId)
+    return { activated: false, reason: 'missing_subscription', userId: who.userId };
+  if (!isPaidCheckout(session)) return { activated: false, reason: 'not_paid', userId: who.userId };
+
+  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+  const result = await applyStripeSubscription(prisma, subscription, {
+    userId: who.userId,
+    planId: session.metadata?.planId,
+    customerId: getStripeObjectId(session.customer),
+    forceActive: true,
+  });
+  return {
+    activated: result.activated,
+    planExpiresAt: result.endDate?.getTime(),
+    userId: who.userId,
+    reason: result.reason,
+  };
+}

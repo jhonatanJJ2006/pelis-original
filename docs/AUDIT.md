@@ -96,11 +96,12 @@ Documento vivo con el inventario de gaps, bugs e incompletitudes.
 **Verificar en Movies** (tras merge a staging/main y restart de `pelis-web`):
 
 1. **Túnel vivo:** `systemctl is-active pelis-web` y cloudflared; `curl -sI https://verpelis.pro/api/stripe/webhook` no debe ser 404 del edge.
-2. **Endpoint Stripe:** Dashboard → Developers → Webhooks → URL `https://verpelis.pro/api/stripe/webhook` (mismo modo test/live que las keys). Eventos: `checkout.session.completed`, `customer.subscription.created/updated/deleted`, `invoice.paid`, `invoice.payment_failed`. El `whsec_…` de ese endpoint es el `STRIPE_WEBHOOK_SECRET` del `.env` de Movies.
+2. **Endpoint Stripe:** Dashboard → Developers → Webhooks → URL `https://verpelis.pro/api/stripe/webhook` (mismo modo test/live que las keys). Eventos: `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `customer.subscription.created/updated/deleted`, `invoice.paid`, `invoice.payment_failed`. El `whsec_…` de ese endpoint es el `STRIPE_WEBHOOK_SECRET` del `.env` de Movies.
 3. **`.env` local (no leerlo ni commitearlo):** `STRIPE_SECRET_KEY` / publishable del mismo modo; `SITE_URL=https://verpelis.pro` (si queda en localhost, Stripe redirige al browser del usuario y el sync no pega en Movies).
 4. **Fila `subscription` en Postgres local:** tras un pago, `userId` del comprador, `status = ACTIVE`, `endDate` futuro, `stripeSubscriptionId` y `planId` no nulos. Sin esa fila, `requireActivePlan` sigue en 403.
 5. **Logs:** `journalctl -u pelis-web` alrededor del pago (webhook 200 vs 400 firma / 500 handler). En Stripe Dashboard, deliveries de ese endpoint (no un endpoint viejo de Vercel/CLI).
-6. **Fallback success:** si el webhook falla pero el usuario aterriza en `/subscribe/success?session_id=…` con sesión iniciada, `stripe.syncCheckoutSession` debe crear la misma fila.
+6. **Fallback success:** `/subscribe/success` llama `POST /api/stripe/fulfill` con `session_id`. No exige cookie (el grupo `(protected)` no es muro de login; la cookie puede no volver por el túnel). Crea la misma fila vía metadata `convexUserId`.
+7. **Redirects:** si `SITE_URL` en Movies quedó en localhost, el código usa `BETTER_AUTH_URL` / `NEXT_PUBLIC_SITE_URL` públicos (`https://verpelis.pro`) para success/cancel. Confirmar que Stripe redirige a verpelis.pro, no a localhost del usuario.
 
 ### 6. Build ignora errores TypeScript y ESLint
 

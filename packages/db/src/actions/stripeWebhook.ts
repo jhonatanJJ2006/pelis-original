@@ -3,10 +3,9 @@ import { z } from 'zod';
 import { register } from '../registry';
 import { assertWebhookSecret, getStripe } from '../lib/stripe-client';
 import {
-  applyPlanUpgrade,
   applyStripeSubscription,
+  fulfillPaidCheckoutSession,
   getInvoiceSubscriptionId,
-  getStripeObjectId,
 } from '../lib/stripe-subscription';
 
 export const processWebhook = register({
@@ -39,24 +38,10 @@ export const processWebhook = register({
 
     try {
       switch (event.type) {
-        case 'checkout.session.completed': {
+        case 'checkout.session.completed':
+        case 'checkout.session.async_payment_succeeded': {
           const session = event.data.object as Stripe.Checkout.Session;
-          if (session.metadata?.type === 'plan_upgrade') {
-            if (session.payment_status !== 'paid') break;
-            await applyPlanUpgrade(prisma, getStripe(), session.metadata);
-            break;
-          }
-          const userId = session.metadata?.convexUserId ?? session.client_reference_id ?? undefined;
-          const planId = session.metadata?.planId;
-          const subscriptionId = getStripeObjectId(session.subscription);
-          if (!userId || !planId || !subscriptionId) break;
-          const subscription = await getStripe().subscriptions.retrieve(subscriptionId);
-          await applyStripeSubscription(prisma, subscription, {
-            userId,
-            planId,
-            customerId: getStripeObjectId(session.customer),
-            forceActive: session.payment_status === 'paid' || session.status === 'complete',
-          });
+          await fulfillPaidCheckoutSession(prisma, getStripe(), session);
           break;
         }
         case 'customer.subscription.created':

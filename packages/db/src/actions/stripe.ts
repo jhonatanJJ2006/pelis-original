@@ -1,14 +1,10 @@
 import Stripe from 'stripe';
 import { z } from 'zod';
 import { register } from '../registry';
-import { getStripe } from '../lib/stripe-client';
-import {
-  applyPlanUpgrade,
-  applyStripeSubscription,
-  getStripeObjectId,
-} from '../lib/stripe-subscription';
+import { getStripe, resolveStripeRedirectUrl } from '../lib/stripe-client';
+import { fulfillPaidCheckoutSession } from '../lib/stripe-subscription';
 
-const SITE_URL = process.env.SITE_URL || 'http://localhost:3000';
+const SITE_URL = resolveStripeRedirectUrl();
 
 export const createCheckoutSession = register({
   kind: 'action',
@@ -135,9 +131,9 @@ export const createPortalSession = register({
 });
 
 /**
- * Fulfill a Checkout session from the success page.
- * Durable fallback when the webhook is missing, delayed, or retried with
- * an `incomplete` subscription.updated that must not expire a paid plan.
+ * Fulfill a Checkout session from /subscribe/success or /api/stripe/fulfill.
+ * Auth is optional: Stripe session_id + metadata.convexUserId is enough.
+ * Needed on Movies when the cookie does not survive the Cloudflare tunnel redirect.
  */
 export const syncCheckoutSession = register({
   kind: 'action',
@@ -146,42 +142,16 @@ export const syncCheckoutSession = register({
   writes: ['subscription'],
   args: z.object({ sessionId: z.string().min(1) }),
   handler: async (ctx, { sessionId }) => {
-    if (!ctx.userId) throw new Error('No autenticado');
     const { prisma } = await import('../client');
     const stripe = getStripe();
     const session = await stripe.checkout.sessions.retrieve(sessionId);
-    const metaUser = session.metadata?.convexUserId ?? session.client_reference_id ?? null;
-    if (metaUser && metaUser !== ctx.userId) {
+    const result = await fulfillPaidCheckoutSession(prisma, stripe, session, ctx.userId);
+    if (result.reason === 'user_mismatch') {
       throw new Error('Esta sesión de pago no pertenece a tu cuenta');
     }
-
-    if (session.metadata?.type === 'plan_upgrade') {
-      if (session.payment_status !== 'paid') {
-        return { activated: false as const };
-      }
-      const result = await applyPlanUpgrade(prisma, stripe, session.metadata);
-      return {
-        activated: result.activated,
-        planExpiresAt: result.endDate?.getTime(),
-      };
-    }
-
-    const subscriptionId = getStripeObjectId(session.subscription);
-    if (!subscriptionId) return { activated: false as const };
-
-    const paid = session.payment_status === 'paid' || session.status === 'complete';
-    if (!paid) return { activated: false as const };
-
-    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-    const result = await applyStripeSubscription(prisma, subscription, {
-      userId: ctx.userId,
-      planId: session.metadata?.planId,
-      customerId: getStripeObjectId(session.customer),
-      forceActive: true,
-    });
     return {
       activated: result.activated,
-      planExpiresAt: result.endDate?.getTime(),
+      planExpiresAt: result.planExpiresAt,
     };
   },
 });

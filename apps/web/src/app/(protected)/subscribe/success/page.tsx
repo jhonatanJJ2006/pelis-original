@@ -4,8 +4,6 @@ import Link from 'next/link';
 import { Suspense, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { CheckCircle, Film, Loader2 } from 'lucide-react';
-import { useAction } from '@pelis/db/client';
-import { api } from '@pelis/db/api';
 import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';
 import { Button, Spinner } from '@pelis/ui/components';
 import { useAppStore } from '@pelis/auth/store';
@@ -37,6 +35,22 @@ async function fetchMe(): Promise<MeUser | null> {
   }
 }
 
+async function fulfillCheckout(sessionId: string): Promise<boolean> {
+  try {
+    const res = await fetch('/api/stripe/fulfill', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sessionId }),
+    });
+    if (!res.ok) return false;
+    const json = (await res.json()) as { activated?: boolean };
+    return json.activated === true;
+  } catch {
+    return false;
+  }
+}
+
 function stripSessionIdFromUrl() {
   const url = new URL(window.location.href);
   if (!url.searchParams.has('session_id')) return;
@@ -53,10 +67,6 @@ function SubscribeSuccessContent() {
   const setUser = useAppStore((s) => s.setUser);
   const [activating, setActivating] = useState(true);
   const [active, setActive] = useState(false);
-  const syncCheckoutSession = useAction<
-    { sessionId: string },
-    { activated: boolean; planExpiresAt?: number }
-  >(api.stripe.syncCheckoutSession);
 
   useEffect(() => {
     let cancelled = false;
@@ -87,12 +97,14 @@ function SubscribeSuccessContent() {
     const tick = async () => {
       const sessionId = sessionIdRef.current;
       if (sessionId && attempts < 3) {
-        try {
-          const result = await syncCheckoutSession({ sessionId });
-          if (cancelled) return;
-          if (result.activated && (await applyMe())) return;
-        } catch {
-          // Webhook may still land; keep polling users.me.
+        const activated = await fulfillCheckout(sessionId);
+        if (cancelled) return;
+        if (activated) {
+          if (await applyMe()) return;
+          setActive(true);
+          setActivating(false);
+          stripSessionIdFromUrl();
+          return;
         }
       }
       if (await applyMe()) return;
@@ -108,7 +120,7 @@ function SubscribeSuccessContent() {
     return () => {
       cancelled = true;
     };
-  }, [setUser, syncCheckoutSession]);
+  }, [setUser]);
 
   return (
     <ScrollReveal className="text-center max-w-lg mx-auto">

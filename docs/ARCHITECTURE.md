@@ -31,10 +31,10 @@ No hay middleware.ts de Next.
 ## Stripe / plan activo
 
 Checkout crea session con `metadata.convexUserId` + `planId` (y `client_reference_id`).
-Alta de `Subscription` ACTIVE: webhook (`checkout.session.completed`, `customer.subscription.created/updated`, `invoice.paid`) **o** `stripe.syncCheckoutSession` desde `/subscribe/success`.
+Alta de `Subscription` ACTIVE: webhook (`checkout.session.completed` / `async_payment_succeeded`, `customer.subscription.created/updated`, `invoice.paid`) **o** `POST /api/stripe/fulfill` (success page; no exige cookie).
 `incomplete` no degrada un ACTIVE (retry de webhook). Stream: `denyUnlessStreamAccess` → `requireActivePlan` (ACTIVE + endDate futuro, o ADMIN).
 
-Runtime: **Movies local**. `pelis-web` en localhost:3000, Postgres local, `verpelis.pro` = Cloudflare Tunnel. El webhook de Stripe no va a Vercel: apunta a `https://verpelis.pro/api/stripe/webhook`. `SITE_URL` en el `.env` de Movies debe ser `https://verpelis.pro` para que success/sync peguen en esa misma app. Diagnóstico: docs/AUDIT.md §5b.
+Runtime: **Movies local**. `pelis-web` en localhost:3000, Postgres local, `verpelis.pro` = Cloudflare Tunnel. El webhook de Stripe no va a Vercel: apunta a `https://verpelis.pro/api/stripe/webhook`. Redirects de Checkout usan `resolveStripeRedirectUrl` (si `SITE_URL` es localhost, gana `BETTER_AUTH_URL` público). Diagnóstico: docs/AUDIT.md §5b.
 
 ## Imagenes
 

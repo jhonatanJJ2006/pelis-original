@@ -28,3 +28,27 @@ export function getStripe(): Stripe {
 export function assertWebhookSecret(webhookSecret: string | undefined): webhookSecret is string {
   return !!webhookSecret && webhookSecret.startsWith('whsec_') && webhookSecret.length >= 40;
 }
+
+function isLocalHostUrl(url: string | undefined): boolean {
+  return !url || /localhost|127\.0\.0\.1/i.test(url);
+}
+
+/**
+ * Public origin for Stripe success/cancel redirects on Movies.
+ * If SITE_URL is still localhost but Better Auth / public URL is verpelis.pro
+ * (tunnel → pelis-web), send the customer back to the tunnel, not the laptop.
+ */
+export function resolveStripeRedirectUrl(env: NodeJS.ProcessEnv = process.env): string {
+  const site = env.SITE_URL?.trim();
+  const publicCandidates = [env.BETTER_AUTH_URL, env.NEXT_PUBLIC_SITE_URL, env.NEXT_PUBLIC_APP_URL]
+    .map((value) => value?.trim())
+    .filter((value): value is string => !!value);
+
+  if (isLocalHostUrl(site)) {
+    const published = publicCandidates.find(
+      (url) => /^https:\/\//i.test(url) && !isLocalHostUrl(url)
+    );
+    if (published) return published.replace(/\/$/, '');
+  }
+  return (site || publicCandidates[0] || 'http://localhost:3000').replace(/\/$/, '');
+}

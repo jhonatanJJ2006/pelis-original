@@ -105,9 +105,9 @@ Rutas de apps/web/src/app. Grupo (protected) = header/footer, NO exige login. Gr
 
 ### `/subscribe/success`
 
-- Hace: retorno Stripe OK. Llama `stripe.syncCheckoutSession` con `session_id` para crear/activar la Subscription (no depende solo del webhook). Luego limpia `session_id`.
+- Hace: retorno Stripe OK. POST `/api/stripe/fulfill` con `session_id` (no exige cookie; usa metadata de Stripe). Luego limpia `session_id`.
 - Archivos: (protected)/subscribe/success/page.tsx
-- Auth: sesión requerida para sincronizar el plan. Datos: stripe.syncCheckoutSession, users.me.
+- Auth: chrome only. Datos: /api/stripe/fulfill → stripe.syncCheckoutSession, users.me.
 
 ### `/subscribe/cancel`
 
@@ -284,11 +284,17 @@ Rutas de apps/web/src/app. Grupo (protected) = header/footer, NO exige login. Gr
 
 ### `/api/stripe/webhook`
 
-- Hace: Stripe -> stripeWebhookAction.processWebhook. Eventos: checkout.session.completed, customer.subscription.created/updated/deleted, invoice.paid / payment_succeeded / payment_failed.
+- Hace: Stripe -> stripeWebhookAction.processWebhook. Eventos: checkout.session.completed, checkout.session.async_payment_succeeded, customer.subscription.created/updated/deleted, invoice.paid / payment_succeeded / payment_failed.
 - Alta compartida: packages/db/src/lib/stripe-subscription.ts (también la usa stripe.syncCheckoutSession).
 - Host: Movies local. Stripe Dashboard debe usar `https://verpelis.pro/api/stripe/webhook` (túnel → localhost:3000). No Vercel.
 - Archivos: api/stripe/webhook/route.ts
 - Auth: firma Stripe. Datos: packages/db/src/actions/stripeWebhook.ts.
+
+### `/api/stripe/fulfill`
+
+- Hace: POST `{ sessionId }` → crea/activa Subscription en Postgres local de Movies. No requiere cookie (session_id + metadata.convexUserId).
+- Archivos: api/stripe/fulfill/route.ts
+- Auth: opcional. Si hay sesión y no coincide con metadata, 403.
 
 ### `/api/subscriptions/stream`
 

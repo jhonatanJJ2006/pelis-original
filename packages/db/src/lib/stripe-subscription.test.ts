@@ -7,6 +7,7 @@ import {
   getSubscriptionPeriod,
   isEntitlingSubscription,
   mapStripeStatus,
+  resolveCheckoutUserId,
   type StripeSubLike,
 } from './stripe-subscription';
 
@@ -178,6 +179,27 @@ describe('getInvoiceSubscriptionId', () => {
         parent: { subscription_details: { subscription: { id: 'sub_new' } } },
       })
     ).toBe('sub_new');
+  });
+});
+
+describe('resolveCheckoutUserId', () => {
+  it('fulfills from Stripe metadata without a login cookie (Movies tunnel)', () => {
+    expect(
+      resolveCheckoutUserId({
+        metadata: { convexUserId: 'user_1', planId: 'plan_basico' },
+        client_reference_id: 'user_1',
+      })
+    ).toEqual({ userId: 'user_1' });
+  });
+
+  it('rejects a session that belongs to another user', () => {
+    expect(resolveCheckoutUserId({ metadata: { convexUserId: 'user_1' } }, 'user_other')).toEqual({
+      error: 'user_mismatch',
+    });
+  });
+
+  it('uses the logged-in user when metadata is missing', () => {
+    expect(resolveCheckoutUserId({ metadata: {} }, 'user_1')).toEqual({ userId: 'user_1' });
   });
 });
 
