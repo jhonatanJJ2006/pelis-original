@@ -3,13 +3,15 @@ import { prisma } from '../client';
 import { notifyChange } from '../realtime';
 import { register } from '../registry';
 import { requireAdmin } from '../lib/requireAdmin';
+import { toPlanShape } from '../lib/shapes';
 
 export const list = register({
   kind: 'query',
   name: 'subscriptions.list',
   reads: ['plan'],
   handler: async () => {
-    return prisma.plan.findMany();
+    const plans = await prisma.plan.findMany();
+    return plans.map(toPlanShape);
   },
 });
 
@@ -19,7 +21,8 @@ export const getById = register({
   reads: ['plan'],
   args: z.object({ id: z.string() }),
   handler: async (_ctx, { id }) => {
-    return prisma.plan.findUnique({ where: { id } });
+    const plan = await prisma.plan.findUnique({ where: { id } });
+    return plan ? toPlanShape(plan) : null;
   },
 });
 
