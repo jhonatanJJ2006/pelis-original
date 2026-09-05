@@ -12,21 +12,30 @@ function readJsonFile<T>(relativePath: string, fallback: T): T {
 }
 
 export async function GET() {
-  const apkAvailable = existsSync(join(process.cwd(), 'public', 'downloads', 'pelis.apk'));
+  const downloadsDir = join(process.cwd(), 'public', 'downloads');
+  const apkAvailable = existsSync(join(downloadsDir, 'pelis.apk'));
+  const tvApkAvailable = existsSync(join(downloadsDir, 'pelis-tv.apk'));
 
   const webVersion = readJsonFile('version.json', { version: 'unknown', builtAt: null });
   const apkVersion = readJsonFile('downloads/app-version.json', {
     apkVersionCode: 1,
     apkVersionName: '1.0.0',
   });
+  const tvApkVersion = readJsonFile('downloads/tv-app-version.json', {
+    apkVersionCode: 0,
+    apkVersionName: '',
+  });
 
   return NextResponse.json(
     {
       apkAvailable,
+      tvApkAvailable,
       webVersion: webVersion.version,
       webBuiltAt: webVersion.builtAt,
       apkVersionCode: apkVersion.apkVersionCode,
       apkVersionName: apkVersion.apkVersionName,
+      tvApkVersionCode: tvApkAvailable ? tvApkVersion.apkVersionCode : null,
+      tvApkVersionName: tvApkAvailable ? tvApkVersion.apkVersionName || null : null,
     },
     {
       headers: {
