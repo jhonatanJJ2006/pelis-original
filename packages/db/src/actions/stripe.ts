@@ -1,33 +1,10 @@
 import Stripe from 'stripe';
 import { z } from 'zod';
 import { register } from '../registry';
+import { getStripe, resolveStripeRedirectUrl } from '../lib/stripe-client';
+import { fulfillPaidCheckoutSession } from '../lib/stripe-subscription';
 
-const SITE_URL = process.env.SITE_URL || 'http://localhost:3000';
-
-function assertStripeTestMode(secretKey: string) {
-  if (secretKey.startsWith('sk_live_')) {
-    throw new Error(
-      'Stripe live keys are disabled. Use sk_test_… while subscriptions stay in test mode.',
-    );
-  }
-  if (!secretKey.startsWith('sk_test_')) {
-    throw new Error(
-      'STRIPE_SECRET_KEY must be a real Stripe test key (sk_test_…). Placeholder values will not work.',
-    );
-  }
-  if (secretKey.length < 40) {
-    throw new Error(
-      'STRIPE_SECRET_KEY looks like a placeholder. Paste a full sk_test_… key from the Stripe Dashboard (Test mode).',
-    );
-  }
-}
-
-function getStripe() {
-  const secretKey = process.env.STRIPE_SECRET_KEY;
-  if (!secretKey) throw new Error('STRIPE_SECRET_KEY is not configured');
-  assertStripeTestMode(secretKey);
-  return new Stripe(secretKey);
-}
+const SITE_URL = resolveStripeRedirectUrl();
 
 export const createCheckoutSession = register({
   kind: 'action',
@@ -56,7 +33,7 @@ export const createCheckoutSession = register({
         throw new Error(
           plan.id === existing.plan.id
             ? 'Ya tienes este plan'
-            : 'Solo puedes mejorar a un plan superior',
+            : 'Solo puedes mejorar a un plan superior'
         );
       }
       const stripeSub = await stripe.subscriptions.retrieve(existing.stripeSubscriptionId);
@@ -87,6 +64,7 @@ export const createCheckoutSession = register({
         ],
         success_url: `${SITE_URL}/subscribe/success?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${SITE_URL}/subscribe/cancel`,
+        client_reference_id: user.id,
         metadata: {
           type: 'plan_upgrade',
           convexUserId: user.id,
@@ -123,6 +101,7 @@ export const createCheckoutSession = register({
       line_items: [{ price: plan.stripePriceId, quantity: 1 }],
       success_url: `${SITE_URL}/subscribe/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${SITE_URL}/subscribe/cancel`,
+      client_reference_id: user.id,
       metadata: { convexUserId: user.id, planId },
       subscription_data: { metadata: { convexUserId: user.id, planId } },
     } as Stripe.Checkout.SessionCreateParams);
@@ -148,5 +127,31 @@ export const createPortalSession = register({
       return_url: `${SITE_URL}/subscribe`,
     });
     return { url: portal.url };
+  },
+});
+
+/**
+ * Fulfill a Checkout session from /subscribe/success or /api/stripe/fulfill.
+ * Auth is optional: Stripe session_id + metadata.convexUserId is enough.
+ * Needed on Movies when the cookie does not survive the Cloudflare tunnel redirect.
+ */
+export const syncCheckoutSession = register({
+  kind: 'action',
+  name: 'stripe.syncCheckoutSession',
+  reads: ['plan', 'subscription'],
+  writes: ['subscription'],
+  args: z.object({ sessionId: z.string().min(1) }),
+  handler: async (ctx, { sessionId }) => {
+    const { prisma } = await import('../client');
+    const stripe = getStripe();
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    const result = await fulfillPaidCheckoutSession(prisma, stripe, session, ctx.userId);
+    if (result.reason === 'user_mismatch') {
+      throw new Error('Esta sesión de pago no pertenece a tu cuenta');
+    }
+    return {
+      activated: result.activated,
+      planExpiresAt: result.planExpiresAt,
+    };
   },
 });

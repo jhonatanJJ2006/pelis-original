@@ -9,7 +9,6 @@ Eres un modelo que acaba de aterrizar. No improvises. Este archivo manda. Si CON
 3. No Convex. No secretos en git. No renombrar cinema-*.
 4. Al terminar: seccion 6 (pruebas) y seccion 7 (actualizar doc).
 
-
 **Ruta local (máquina Movies):** `/home/det/Desktop/PELIS/pelis-original`
 **Producto:** streaming en español (películas, series, anime, TV en vivo) en https://verpelis.pro
 **Repo:** https://github.com/jhonatanJJ2006/pelis-original.git
@@ -61,12 +60,12 @@ Variables: solo .env (gitignored). Nombres en .env.example. No commitear secreto
 
 ## Tests
 
-pnpm test              # vitest unit + components
-pnpm test:unit         # node
-pnpm test:components   # jsdom packages/ui
-pnpm test:e2e          # Playwright e2e/*.e2e.ts
-pnpm test:smoke        # smoke-pages + api-smoke
-pnpm test:playground   # /playground
+pnpm test # vitest unit + components
+pnpm test:unit # node
+pnpm test:components # jsdom packages/ui
+pnpm test:e2e # Playwright e2e/*.e2e.ts
+pnpm test:smoke # smoke-pages + api-smoke
+pnpm test:playground # /playground
 
 Playground: /playground — catálogo vivo Maison Noir. Solo desarrollo (NODE_ENV production renderiza vacío).
 Archivo: apps/web/src/app/playground/page.tsx. Detalle: docs/TESTING.md.
@@ -78,33 +77,37 @@ Archivo: apps/web/src/app/playground/page.tsx. Detalle: docs/TESTING.md.
 2. Restos Convex: CONVEX.md, DEPLOY.md stale, e2e/email-verification.e2e.ts, URLs *.convex.cloud en imágenes (placeholder).
 3. ignoreBuildErrors: apps/web/next.config.mjs ignora TS y ESLint en build. Build verde no implica tipos correctos.
 4. Streaming y auth: /api/stream, /api/tv/stream, /api/anime/stream pasan por denyUnlessStreamAccess (sesión + plan activo o ADMIN). No quitar esa puerta. Históricamente sin auth.
-4b. Plan entitlements — sesiones concurrentes (MVP): `Plan.maxDevices` (default 1). En Better Auth `databaseHooks.session.create` se recortan sesiones no-expiradas más viejas si el usuario supera el límite. ADMIN = ilimitado; sin plan activo = 1. Sin middleware por request en este MVP. Seed: Mensual/Básico=1, Trimestral/Estándar=2, Anual/Premium=4.
+   4b. Plan entitlements — sesiones concurrentes (MVP): `Plan.maxDevices` (default 1). En Better Auth `databaseHooks.session.create` se recortan sesiones no-expiradas más viejas si el usuario supera el límite. ADMIN = ilimitado; sin plan activo = 1. Sin middleware por request en este MVP. Seed: Mensual/Básico=1, Trimestral/Estándar=2, Anual/Premium=4.
+   4c. Stripe: el plan se activa por webhook **y** por `POST /api/stripe/fulfill` en `/subscribe/success` (no exige cookie: `session_id` + metadata). No mapear `incomplete` a EXPIRED. Lógica: packages/db/src/lib/stripe-subscription.ts.
+   Runtime **Movies local** (pelis-web + Postgres + cloudflared → verpelis.pro). No Vercel. Webhook → `https://verpelis.pro/api/stripe/webhook`. Si `SITE_URL` es localhost, los redirects usan `BETTER_AUTH_URL` público. Diagnóstico: docs/AUDIT.md §5b.
 5. Posters gitignored: apps/web/public/peliculas/ y apps/web/public/uploads/. Hash MD5 32 hex -> /peliculas/peliculas/{hash}.webp. imageId -> /uploads/{id}.webp. Clone limpio = imágenes rotas.
    Ver packages/db/src/lib/resolveMovieImage.ts y scripts/audit-images.mjs.
 6. PWA: no hay prompts ni barras de «instalar app» (`beforeinstallprompt` se silencia). Nueva versión (`version.json` / SW waiting) = modal Aceptar / Más tarde, sin reload forzado. La barra tipo Google + compartir es chrome del navegador o TWA en fallback Custom Tabs (assetlinks), no un componente de la app.
 
 ## Deploy / entornos (Glob es dueño)
 
-Prod hoy: https://verpelis.pro via Cloudflare Tunnel hacia localhost:3000 (systemd pelis-web.service).
+Prod hoy: https://verpelis.pro via Cloudflare Tunnel hacia localhost:3000 (systemd pelis-web.service) en la máquina **Movies**. App, Postgres y secretos son locales. No hay Vercel de producto.
 DEPLOY.md está obsoleto (describe Convex). No seguirlo. Glob posee deploy/envs.
 
-GitHub Environments (Glob, ya existen):
-- production <-> branch main (lo que corre en esta máquina; no hay rama production duplicada)
+GitHub Environments (Glob, ya existen). Secretos solo en `.env` local de Movies (gitignored).
+
+- production <-> branch main (lo que corre en Movies; no hay rama production duplicada)
 - staging <-> branch staging
 - dev <-> branch dev
-Secretos solo en .env local (gitignored).
 
 ## Git / flujo de ramas (Mark + Glob)
 
 Fuente de verdad aquí (gana sobre notas viejas en `.github/BRANCHING.md` si chocan).
 
 Reglas fijas:
+
 1. **Nunca** commits directos a `main` ni a `staging`.
 2. **Sin force-push.**
 3. Toda rama nueva: desde `staging`, nombre `feat/*`, `fix/*` o `chore/*` (legacy `feature/*` aceptado en soft-gate).
 4. Abrir PR **hacia `staging`** (no hacia `main`).
 
 Quién hace qué:
+
 - **Mark:** auto-mergea PRs hacia **staging** (cuando el PR está listo / checks OK). Sin cambio de política.
 - **Glob:** **siempre** promueve **staging → main** cuando CI está verde en los jobs **`format`**, **`test`** y **`build`** (pipeline: format+test en paralelo → build → deploy). El job **`deploy`** existe pero no es gate de promote. No hace falta OK por chat por cada promote.
 
@@ -141,13 +144,14 @@ Rutas completas: docs/APP.md.
 
 ## 3. Por donde continuar
 
-Hecho: Convex migrado, Maison Noir, 404, playground, smoke e2e, vitest, stream con plan, docs base.
+Hecho: Convex migrado, Maison Noir, 404, playground, smoke e2e, vitest, stream con plan, docs base, Stripe checkout → Subscription ACTIVE (sync + webhook).
 
 Pendiente ALTO:
+
 1. Unificar series (admin tabla Series vs Movie.mediaType SERIES).
 2. E2E login, favoritos, historial (email-verification.e2e.ts asume Convex).
 3. Posters en clones nuevos (carpetas gitignored).
-4. Stripe keys reales. Consumet estable. Cron probe TV. Categorias M3U en espanol.
+4. Stripe en Movies: endpoint webhook al túnel + `.env` local (el código ya activa el plan). Consumet estable. Cron probe TV. Categorias M3U en espanol.
 
 Pendiente calidad: loading/error, reduced-motion, a11y, responsive, SEO, favoritos anime, paginar episodios, validar movieSchema, CI, Sentry.
 

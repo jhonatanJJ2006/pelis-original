@@ -1,7 +1,10 @@
 import { prisma } from '../client';
 
 export class AuthError extends Error {
-  constructor(message: string, public readonly status: number = 401) {
+  constructor(
+    message: string,
+    public readonly status: number = 401
+  ) {
     super(message);
   }
 }
@@ -16,7 +19,9 @@ export function requireUser(ctx: RequestCtx): string {
   return ctx.userId;
 }
 
-export async function requireAdmin(ctx: RequestCtx): Promise<{ userId: string; email: string; name: string }> {
+export async function requireAdmin(
+  ctx: RequestCtx
+): Promise<{ userId: string; email: string; name: string }> {
   if (!ctx.userId) throw new AuthError('No autenticado', 401);
   const user = await prisma.user.findUnique({ where: { id: ctx.userId } });
   if (!user || user.role !== 'ADMIN') {
@@ -37,11 +42,10 @@ export async function isAdmin(ctx: RequestCtx): Promise<boolean> {
 /** Same “active” meaning as users.me + client hasActivePlan: ACTIVE and endDate in the future. */
 export async function hasActivePlan(userId: string, now = Date.now()): Promise<boolean> {
   const subscription = await prisma.subscription.findFirst({
-    where: { userId, status: 'ACTIVE' },
+    where: { userId, status: 'ACTIVE', endDate: { gt: new Date(now) } },
+    orderBy: { endDate: 'desc' },
   });
-  const endDate = subscription?.endDate.getTime();
-  const hasValidExpiry = typeof endDate === 'number' && Number.isFinite(endDate) && endDate > 0;
-  return hasValidExpiry && endDate! > now;
+  return !!subscription;
 }
 
 /** Session required. ADMIN is allowed through; regular users need an active plan. */
