@@ -102,9 +102,17 @@ export function Footer({ className }: { className?: string }) {
           <p className="text-cinema-ash text-sm">
             © {new Date().getFullYear()} Pelis. Todos los derechos reservados.
           </p>
-          <p className="text-cinema-ash text-xs tracking-wide uppercase">
-            Hecho para amantes del cine
-          </p>
+          <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
+            <Link href="/terminos" className="text-cinema-ash hover:text-cinema-gold transition-colors">
+              Términos
+            </Link>
+            <Link href="/privacidad" className="text-cinema-ash hover:text-cinema-gold transition-colors">
+              Privacidad
+            </Link>
+            <span className="text-cinema-ash text-xs tracking-wide uppercase hidden sm:inline">
+              Hecho para amantes del cine
+            </span>
+          </div>
         </div>
       </div>
     </footer>

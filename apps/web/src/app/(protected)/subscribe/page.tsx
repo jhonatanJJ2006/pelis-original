@@ -343,6 +343,18 @@ export default function SubscribePage() {
           </Link>
         </div>
       )}
+
+      <p className="text-center text-cinema-ash text-xs mt-12 leading-relaxed max-w-xl mx-auto">
+        Al suscribirte aceptas los{' '}
+        <Link href="/terminos" className="text-cinema-gold hover:text-cinema-gold-light underline">
+          Términos de uso
+        </Link>{' '}
+        y la{' '}
+        <Link href="/privacidad" className="text-cinema-gold hover:text-cinema-gold-light underline">
+          Política de privacidad
+        </Link>
+        . Los pagos los procesa Stripe.
+      </p>
     </div>
   );
 }
