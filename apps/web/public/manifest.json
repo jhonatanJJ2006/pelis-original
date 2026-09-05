@@ -1,16 +1,17 @@
 {
   "id": "/",
-  "name": "Pelis — Cine y series en streaming",
+  "name": "Pelis",
   "short_name": "Pelis",
   "description": "Cine y series en streaming — experiencia cinematográfica premium",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "natural",
-  "background_color": "#0a0e1a",
-  "theme_color": "#0a0e1a",
+  "background_color": "#0B0B0D",
+  "theme_color": "#0B0B0D",
   "categories": ["entertainment", "movies", "video"],
   "lang": "es",
+  "dir": "ltr",
   "icons": [
     {
       "src": "/icons/icon-192.png",
@@ -23,6 +24,12 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
+    },
+    {
+      "src": "/icons/maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
     },
     {
       "src": "/icons/maskable-512.png",
