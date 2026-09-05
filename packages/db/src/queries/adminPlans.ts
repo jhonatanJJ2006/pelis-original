@@ -12,6 +12,7 @@ const PlanCreate = z.object({
   features: z.array(z.string()),
   icon: z.string(),
   months: z.number(),
+  maxDevices: z.number().int().positive().default(1),
   recommended: z.boolean().optional(),
   stripePriceId: z.string().optional(),
 });

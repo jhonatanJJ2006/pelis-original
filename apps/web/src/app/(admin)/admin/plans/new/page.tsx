@@ -20,6 +20,7 @@ function buildArgs(values: PlanFormValues) {
     features,
     icon: values.icon,
     months: Number(values.months),
+    maxDevices: Number(values.maxDevices),
     recommended: values.recommended,
     stripePriceId: values.stripePriceId.trim() || undefined,
   };

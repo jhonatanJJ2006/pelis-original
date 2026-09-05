@@ -78,6 +78,7 @@ Archivo: apps/web/src/app/playground/page.tsx. Detalle: docs/TESTING.md.
 2. Restos Convex: CONVEX.md, DEPLOY.md stale, e2e/email-verification.e2e.ts, URLs *.convex.cloud en imágenes (placeholder).
 3. ignoreBuildErrors: apps/web/next.config.mjs ignora TS y ESLint en build. Build verde no implica tipos correctos.
 4. Streaming y auth: /api/stream, /api/tv/stream, /api/anime/stream pasan por denyUnlessStreamAccess (sesión + plan activo o ADMIN). No quitar esa puerta. Históricamente sin auth.
+4b. Plan entitlements — sesiones concurrentes (MVP): `Plan.maxDevices` (default 1). En Better Auth `databaseHooks.session.create` se recortan sesiones no-expiradas más viejas si el usuario supera el límite. ADMIN = ilimitado; sin plan activo = 1. Sin middleware por request en este MVP. Seed: Mensual/Básico=1, Trimestral/Estándar=2, Anual/Premium=4.
 5. Posters gitignored: apps/web/public/peliculas/ y apps/web/public/uploads/. Hash MD5 32 hex -> /peliculas/peliculas/{hash}.webp. imageId -> /uploads/{id}.webp. Clone limpio = imágenes rotas.
    Ver packages/db/src/lib/resolveMovieImage.ts y scripts/audit-images.mjs.
 

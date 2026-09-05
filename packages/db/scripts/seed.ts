@@ -17,11 +17,25 @@ import { slugifyTitle } from '../src/lib/anilist.js';
 const prisma = new PrismaClient();
 const PROVIDERS = getProvidersSortedByPriority();
 
+/** Heuristic: Mensual/Básico=1, Trimestral/Estándar=2, Anual/Premium=4; else 1. */
+function maxDevicesForPlanName(name: string): number {
+  const n = name
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '');
+  if (/(anual|premium)/.test(n)) return 4;
+  if (/(trimestral|estandar)/.test(n)) return 2;
+  if (/(mensual|basico)/.test(n)) return 1;
+  return 1;
+}
+
+
 async function seedPlans() {
   const plans = [
     {
       name: 'Mensual',
       price: 5.99,
+      maxDevices: 1,
       description: 'Acceso completo durante 1 mes',
       features: [
         'Catálogo completo',
@@ -38,6 +52,7 @@ async function seedPlans() {
     {
       name: 'Trimestral',
       price: 14.99,
+      maxDevices: 2,
       description: 'Acceso completo durante 3 meses',
       features: [
         'Catálogo completo',
@@ -56,6 +71,7 @@ async function seedPlans() {
     {
       name: 'Anual',
       price: 49.99,
+      maxDevices: 4,
       description: 'Acceso completo durante 12 meses',
       features: [
         'Catálogo completo',
@@ -73,10 +89,12 @@ async function seedPlans() {
     },
   ];
   for (const plan of plans) {
+    const maxDevices = plan.maxDevices ?? maxDevicesForPlanName(plan.name);
+    const data = { ...plan, maxDevices };
     await prisma.plan.upsert({
       where: { id: `seed-${plan.name.toLowerCase()}` },
-      create: { id: `seed-${plan.name.toLowerCase()}`, ...plan },
-      update: plan,
+      create: { id: `seed-${plan.name.toLowerCase()}`, ...data },
+      update: data,
     });
   }
   console.log(`✓ Plans: ${plans.length}`);
