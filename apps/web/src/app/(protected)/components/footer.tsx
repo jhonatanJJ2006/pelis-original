@@ -29,8 +29,8 @@ export function Footer({ className }: { className?: string }) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           <div>
             <Link href="/" className="flex items-center gap-2.5 mb-4 group">
-              <div className="w-9 h-9 rounded bg-gradient-to-br from-cinema-accent to-cinema-gold flex items-center justify-center">
-                <Film className="w-5 h-5 text-cinema-bg" aria-hidden />
+              <div className="w-9 h-9 rounded bg-cinema-elevated border border-cinema-border flex items-center justify-center">
+                <Film className="w-5 h-5 text-cinema-gold" aria-hidden />
               </div>
               <span className="font-display text-2xl tracking-tight text-cinema-chalk">
                 Pelis
@@ -68,7 +68,7 @@ export function Footer({ className }: { className?: string }) {
               <li>
                 <Link
                   href="/profile"
-                  className="text-cinema-silver hover:text-white text-sm transition-colors"
+                  className="text-cinema-silver hover:text-cinema-chalk text-sm transition-colors"
                 >
                   Mi perfil
                 </Link>
@@ -76,7 +76,7 @@ export function Footer({ className }: { className?: string }) {
               <li>
                 <Link
                   href="/favorites"
-                  className="text-cinema-silver hover:text-white text-sm transition-colors"
+                  className="text-cinema-silver hover:text-cinema-chalk text-sm transition-colors"
                 >
                   Favoritos
                 </Link>
@@ -84,7 +84,7 @@ export function Footer({ className }: { className?: string }) {
               <li>
                 <Link
                   href="/history"
-                  className="text-cinema-silver hover:text-white text-sm transition-colors"
+                  className="text-cinema-silver hover:text-cinema-chalk text-sm transition-colors"
                 >
                   Historial
                 </Link>
