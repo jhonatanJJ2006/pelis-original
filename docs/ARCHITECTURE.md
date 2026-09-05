@@ -50,7 +50,7 @@ Admin: probe, cleanupNonWorking, seedPopular, playlists.
 
 ## PWA
 
-Serwist: apps/web/sw.ts -> public/sw.js. Desactivado en development. exclude /uploads/. Manifest `display: standalone`. Sin CTAs de instalar (se silencia `beforeinstallprompt`). Nueva versión (`version.json` o SW en waiting) → modal Aceptar / Más tarde. Parcial.
+Serwist: apps/web/sw.ts -> public/sw.js. Desactivado en development. exclude /uploads/ y version.json. Manifest `display: standalone`. Sin CTAs de instalar (se silencia `beforeinstallprompt`). Runtime = Movies (`pelis-web.service` + tunnel), no Vercel. Nueva versión (`/api/app/availability` lee `public/version.json` del disco, o SW en waiting) → modal Aceptar / Más tarde. `version.json` y `sw.js` van con Cache-Control no-store. Parcial.
 
 ## Trampas
 

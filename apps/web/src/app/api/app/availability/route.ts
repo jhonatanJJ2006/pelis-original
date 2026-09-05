@@ -39,7 +39,9 @@ export async function GET() {
     },
     {
       headers: {
-        'Cache-Control': 'public, max-age=300, stale-while-revalidate=600',
+        // Deploy local (Movies + tunnel): el modal de update necesita la versión
+        // fresca del disco, no un JSON cacheado 5 minutos en el borde.
+        'Cache-Control': 'no-store, must-revalidate',
       },
     }
   );

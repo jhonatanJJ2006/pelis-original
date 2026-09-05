@@ -27,6 +27,16 @@ export function parseVersionPayload(data: unknown): WebVersionPayload {
   return { version: typeof raw === 'string' ? normalizeVersion(raw) : null };
 }
 
+/** Respuesta de GET /api/app/availability (lee version.json del disco en Movies). */
+export function parseAvailabilityVersion(data: unknown): WebVersionPayload {
+  if (!data || typeof data !== 'object') {
+    return { version: null };
+  }
+
+  const raw = (data as { webVersion?: unknown }).webVersion;
+  return { version: typeof raw === 'string' ? normalizeVersion(raw) : null };
+}
+
 /**
  * Decide si hay que pedir consentimiento para actualizar.
  * Primera visita (sin versión guardada) solo memoriza; no interrumpe.

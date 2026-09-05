@@ -18,6 +18,13 @@ installSerwist({
   disableDevLogs: true,
   runtimeCaching: [
     {
+      // version.json vive en disco en Movies (prebuild). No cachear: el modal
+      // tiene que ver el archivo nuevo sin esperar a que el SW waiting se active.
+      urlPattern: /\/version\.json(?:\?.*)?$/,
+      handler: 'NetworkOnly',
+      options: { cacheName: 'web-version' },
+    },
+    {
       urlPattern: /\.(?:png|jpg|jpeg|gif|svg|webp|ico)$/,
       handler: 'CacheFirst',
       options: {

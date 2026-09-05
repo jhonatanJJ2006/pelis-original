@@ -12,7 +12,12 @@ let version = 'dev';
 try {
   version = execSync('git rev-parse --short HEAD', { cwd: root, encoding: 'utf8' }).trim();
 } catch {
-  version = process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? `build-${Date.now()}`;
+  // Fuente de verdad en Movies: git SHA del working tree. El fallback de
+  // plataforma es opcional; el runtime de prod no es Vercel.
+  version =
+    process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ??
+    process.env.GITHUB_SHA?.slice(0, 7) ??
+    `build-${Date.now()}`;
 }
 
 const payload = {

@@ -4,13 +4,36 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   DISMISSED_VERSION_KEY,
   STORED_VERSION_KEY,
+  parseAvailabilityVersion,
   parseVersionPayload,
   shouldOfferWebUpdate,
 } from '@/lib/pwa-update';
 
+/** API local (Movies): lee public/version.json del disco. El SW la trata NetworkOnly. */
+const AVAILABILITY_URL = '/api/app/availability';
 const VERSION_URL = '/version.json';
 const POLL_MS = 15 * 60 * 1000;
 const RELOAD_FALLBACK_MS = 1500;
+
+async function fetchLatestWebVersion(): Promise<string | null> {
+  try {
+    const res = await fetch(AVAILABILITY_URL, { cache: 'no-store' });
+    if (res.ok) {
+      const fromApi = parseAvailabilityVersion(await res.json());
+      if (fromApi.version) return fromApi.version;
+    }
+  } catch {
+    // Seguimos con el estático por si el RPC no responde.
+  }
+
+  try {
+    const res = await fetch(`${VERSION_URL}?t=${Date.now()}`, { cache: 'no-store' });
+    if (!res.ok) return null;
+    return parseVersionPayload(await res.json()).version;
+  } catch {
+    return null;
+  }
+}
 
 export function usePwaUpdate() {
   const [visible, setVisible] = useState(false);
@@ -46,14 +69,9 @@ export function usePwaUpdate() {
   );
 
   const checkVersion = useCallback(async () => {
-    try {
-      const res = await fetch(VERSION_URL, { cache: 'no-store' });
-      if (!res.ok) return;
-      const { version } = parseVersionPayload(await res.json());
-      evaluate({ latestVersion: version });
-    } catch {
-      // El modal no debe romper la app si version.json no responde.
-    }
+    const version = await fetchLatestWebVersion();
+    if (!version) return;
+    evaluate({ latestVersion: version });
   }, [evaluate]);
 
   useEffect(() => {

@@ -1,11 +1,26 @@
 import { describe, expect, it } from 'vitest';
-import { parseVersionPayload, shouldOfferWebUpdate } from './pwa-update';
+import { parseAvailabilityVersion, parseVersionPayload, shouldOfferWebUpdate } from './pwa-update';
 
 describe('parseVersionPayload', () => {
   it('lee version.json válido', () => {
     expect(parseVersionPayload({ version: 'abc1234', builtAt: '2026-09-05' })).toEqual({
       version: 'abc1234',
     });
+  });
+
+  it('lee webVersion de /api/app/availability', () => {
+    expect(
+      parseAvailabilityVersion({
+        webVersion: 'ec00d50',
+        webBuiltAt: '2026-09-05T00:00:00.000Z',
+        apkAvailable: true,
+      })
+    ).toEqual({ version: 'ec00d50' });
+  });
+
+  it('ignora availability sin webVersion', () => {
+    expect(parseAvailabilityVersion({ apkAvailable: true })).toEqual({ version: null });
+    expect(parseAvailabilityVersion(null)).toEqual({ version: null });
   });
 
   it('ignora payloads vacíos o mal formados', () => {
