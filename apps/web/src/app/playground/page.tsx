@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Heart, Search, Star, Tv, Play, Film, TrendingUp, X } from 'lucide-react';
+import { PwaUpdateModalView } from '@/components/pwa-update-modal';
 import { Badge } from '@pelis/ui/components';
 import { Button, Input, Select, Spinner, Skeleton } from '@pelis/ui/components';
 import { EmptyState } from '@pelis/ui/features/empty-state';
@@ -79,6 +80,7 @@ export default function PlaygroundPage() {
   const [search, setSearch] = useState('');
   const [genre, setGenre] = useState('');
   const [year, setYear] = useState('');
+  const [showUpdateModal, setShowUpdateModal] = useState(true);
 
   if (process.env.NODE_ENV === 'production') {
     return null;
@@ -249,6 +251,26 @@ export default function PlaygroundPage() {
             linkLabel="Ver todo"
           />
         </div>
+      </PlaygroundSection>
+
+      <PlaygroundSection title="Modal de actualización PWA">
+        <p className="text-cinema-muted text-sm mb-4">
+          Se muestra cuando hay un service worker en espera o cambia{' '}
+          <code className="text-cinema-chalk">version.json</code>. Aceptar activa el SW; Más tarde
+          pospone esa versión.
+        </p>
+        {showUpdateModal ? (
+          <PwaUpdateModalView
+            embedded
+            versionLabel="abc1234"
+            onAccept={() => setShowUpdateModal(false)}
+            onLater={() => setShowUpdateModal(false)}
+          />
+        ) : (
+          <Button type="button" variant="outline" onClick={() => setShowUpdateModal(true)}>
+            Mostrar modal de actualización
+          </Button>
+        )}
       </PlaygroundSection>
 
       <PlaygroundSection title="Estados vacíos">

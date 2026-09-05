@@ -5,7 +5,7 @@ Scripts en package.json raiz. Workspace Vitest: vitest.workspace.ts. Playwright:
 ## Vitest (vitest.workspace.ts)
 
 Dos proyectos:
-- unit (environment node, globals): packages/validators/src/**/*.test.ts, apps/web/src/lib/**/*.test.ts, packages/ui/src/shared/**/*.test.ts, packages/ui/src/features/**/*.test.ts, packages/auth/src/**/*.test.ts, packages/db/src/**/*.test.ts
+- unit (environment node, globals): packages/validators/src/**/*.test.ts, apps/web/src/lib/**/*.test.ts (incluye `pwa-update.test.ts`), packages/ui/src/shared/**/*.test.ts, packages/ui/src/features/**/*.test.ts, packages/auth/src/**/*.test.ts, packages/db/src/**/*.test.ts
 - components (jsdom, setupFiles ./test/setup.ts): packages/ui/src/**/*.test.tsx. Alias next/link y next/image a test/mocks.
 Exclude: node_modules, e2e, .next, .turbo.
 

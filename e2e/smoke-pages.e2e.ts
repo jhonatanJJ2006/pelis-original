@@ -96,6 +96,19 @@ test.describe('Smoke — páginas protegidas', () => {
   });
 });
 
+test.describe('Smoke — PWA chrome', () => {
+  test('no muestra prompts ni barras de instalar app', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByRole('heading', { name: /cine de sala oscura/i })).toBeVisible({
+      timeout: 20000,
+    });
+    await expect(page.getByRole('region', { name: /instalar pelis/i })).toHaveCount(0);
+    await expect(page.getByRole('dialog', { name: /nueva versión/i })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: /instalar con un toque/i })).toHaveCount(0);
+    await expect(page.getByText('Instala Pelis en tu TV Box')).toHaveCount(0);
+  });
+});
+
 test.describe('Smoke — formularios de autenticación', () => {
   test('login valida campos vacíos', async ({ page }) => {
     await page.goto('/login');
