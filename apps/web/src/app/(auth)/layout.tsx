@@ -34,8 +34,16 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         {children}
       </main>
 
-      <footer className="relative py-6 text-center text-cinema-ash text-sm z-10">
-        © {new Date().getFullYear()} Pelis. Todos los derechos reservados.
+      <footer className="relative py-6 text-center text-cinema-ash text-sm z-10 space-y-2">
+        <div className="flex items-center justify-center gap-4">
+          <Link href="/terminos" className="hover:text-cinema-gold transition-colors">
+            Términos
+          </Link>
+          <Link href="/privacidad" className="hover:text-cinema-gold transition-colors">
+            Privacidad
+          </Link>
+        </div>
+        <p>© {new Date().getFullYear()} Pelis. Todos los derechos reservados.</p>
       </footer>
     </div>
   );

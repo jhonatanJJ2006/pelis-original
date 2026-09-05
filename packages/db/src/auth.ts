@@ -52,14 +52,23 @@ export function createAuth() {
       autoSignIn: true,
       requireEmailVerification: true,
     },
-    socialProviders: process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET
-      ? {
-          google: {
-            clientId: process.env.AUTH_GOOGLE_ID,
-            clientSecret: process.env.AUTH_GOOGLE_SECRET,
-          },
-        }
-      : undefined,
+    socialProviders: (() => {
+      const clientId =
+        process.env.AUTH_GOOGLE_ID?.trim() ||
+        process.env.GOOGLE_CLIENT_ID?.trim() ||
+        '';
+      const clientSecret =
+        process.env.AUTH_GOOGLE_SECRET?.trim() ||
+        process.env.GOOGLE_CLIENT_SECRET?.trim() ||
+        '';
+      if (!clientId || !clientSecret) return undefined;
+      return {
+        google: {
+          clientId,
+          clientSecret,
+        },
+      };
+    })(),
     user: {
       additionalFields: {
         role: { type: 'string', defaultValue: 'USER', input: false },
