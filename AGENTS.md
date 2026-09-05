@@ -92,6 +92,22 @@ GitHub Environments (Glob, ya existen):
 - dev <-> branch dev
 Secretos solo en .env local (gitignored).
 
+## Git / flujo de ramas (Mark + Glob)
+
+Fuente de verdad aquí (gana sobre notas viejas en `.github/BRANCHING.md` si chocan).
+
+Reglas fijas:
+1. **Nunca** commits directos a `main` ni a `staging`.
+2. **Sin force-push.**
+3. Toda rama nueva: desde `staging`, nombre `feat/*`, `fix/*` o `chore/*` (legacy `feature/*` aceptado en soft-gate).
+4. Abrir PR **hacia `staging`** (no hacia `main`).
+
+Quién hace qué:
+- **Mark:** auto-mergea PRs hacia **staging** (cuando el PR está listo / checks OK). Sin cambio de política.
+- **Glob:** **siempre** promueve **staging → main** cuando CI está verde en **test**, **build** y **format**. No hace falta OK por chat por cada promote.
+
+Promoción a producción = merge `staging` → `main` a cargo de Glob bajo esa regla de CI. Nadie mergea a `main` desde una feature branch.
+
 ## Mapa rápido
 
 Catálogo (grupo (protected) = chrome, NO muro de login): / /movies /movies/[id] /series /anime /anime/[id] /anime/watch/[animeId]/[episodeNumber] /tv /tv/[id] /login /register /verify-email
@@ -112,12 +128,13 @@ Rutas completas: docs/APP.md.
 - docs/AUDIT.md — gaps vivos
 - TODO.md — backlog
 - CONVEX.md — legado, no usar
+- .github/BRANCHING.md — flujo de ramas (detalle; esta sección Git manda si hay conflicto)
 - DEPLOY.md — stale, Glob posee deploy
 
 ## 2. Duenos
 
-- Mark: docs, DESIGN.md, playground, e2e, UI Maison Noir.
-- Glob: environments y ramas. No toca AGENTS.md ni playground/e2e.
+- Mark: docs, DESIGN.md, playground, e2e, UI Maison Noir; auto-merge de PRs a **staging**.
+- Glob: environments y ramas; promote automático **staging → main** si CI (test/build/format) verde. No toca AGENTS.md ni playground/e2e.
 - Webos: canales y cuenta de pruebas. Sergi: reproductores. Bob: login. Leo: conectores.
 
 ## 3. Por donde continuar
