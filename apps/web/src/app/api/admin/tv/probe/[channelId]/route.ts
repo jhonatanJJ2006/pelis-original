@@ -5,10 +5,7 @@ import { probeTvStream } from '@/lib/tv-stream-proxy';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-export async function POST(
-  _req: NextRequest,
-  { params }: { params: { channelId: string } },
-) {
+export async function POST(_req: NextRequest, { params }: { params: { channelId: string } }) {
   const channelId = params.channelId;
   if (!channelId) {
     return NextResponse.json({ error: 'missing channel id' }, { status: 400 });
@@ -30,7 +27,11 @@ export async function POST(
     if (!streamUrl) {
       await prisma.tVChannel.update({
         where: { id: channelId },
-        data: { streamStatus: 'OFFLINE', lastStreamError: 'URL no válida', lastCheckedAt: new Date() },
+        data: {
+          streamStatus: 'OFFLINE',
+          lastStreamError: 'URL no válida',
+          lastCheckedAt: new Date(),
+        },
       });
       return NextResponse.json({
         channelId,
@@ -44,7 +45,11 @@ export async function POST(
     if (!isSafeUpstreamUrl(streamUrl)) {
       await prisma.tVChannel.update({
         where: { id: channelId },
-        data: { streamStatus: 'OFFLINE', lastStreamError: 'URL no válida', lastCheckedAt: new Date() },
+        data: {
+          streamStatus: 'OFFLINE',
+          lastStreamError: 'URL no válida',
+          lastCheckedAt: new Date(),
+        },
       });
       return NextResponse.json({
         channelId,

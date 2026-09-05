@@ -13,8 +13,7 @@ interface TVChannelItem extends SidebarChannel {
 
 export default function TVPage() {
   const list = useQuery(api.tv.list, { limit: 200, offset: 0 }) as
-    | { items: TVChannelItem[] }
-    | undefined;
+    { items: TVChannelItem[] } | undefined;
   const channels = (list?.items ?? []) as SidebarChannel[];
 
   const first = useMemo(() => {

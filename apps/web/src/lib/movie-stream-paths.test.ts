@@ -167,4 +167,3 @@ describe('parseByteRange', () => {
     expect(parseByteRange(null, 1000)).toBeNull();
   });
 });
-

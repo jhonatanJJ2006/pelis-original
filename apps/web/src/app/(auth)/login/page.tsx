@@ -238,11 +238,17 @@ function LoginForm() {
 
         <p className="text-center text-cinema-ash text-xs mt-4 leading-relaxed">
           Al continuar aceptas los{' '}
-          <Link href="/terminos" className="text-cinema-gold hover:text-cinema-gold-light underline">
+          <Link
+            href="/terminos"
+            className="text-cinema-gold hover:text-cinema-gold-light underline"
+          >
             Términos
           </Link>{' '}
           y la{' '}
-          <Link href="/privacidad" className="text-cinema-gold hover:text-cinema-gold-light underline">
+          <Link
+            href="/privacidad"
+            className="text-cinema-gold hover:text-cinema-gold-light underline"
+          >
             Privacidad
           </Link>
           .

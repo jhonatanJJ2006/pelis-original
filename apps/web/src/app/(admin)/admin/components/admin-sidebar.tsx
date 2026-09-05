@@ -76,9 +76,7 @@ export function AdminSidebar({ mobileOpen = false, onMobileClose }: AdminSidebar
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive =
-            item.href === '/admin'
-              ? pathname === '/admin'
-              : pathname.startsWith(item.href);
+            item.href === '/admin' ? pathname === '/admin' : pathname.startsWith(item.href);
 
           if (!item.enabled) {
             return (

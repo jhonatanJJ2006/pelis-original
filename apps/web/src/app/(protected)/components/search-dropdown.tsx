@@ -55,11 +55,15 @@ export function SearchDropdown({
   const animeResults = useQuery(
     api.anime.search,
     hasQuery ? { query: debouncedQuery.trim(), limit: 5 } : 'skip'
-  ) as Array<{ _id: string; title: string; image: string; year: number; genre: string[] }> | undefined;
+  ) as
+    Array<{ _id: string; title: string; image: string; year: number; genre: string[] }> | undefined;
 
   type SearchResult =
     | { type: 'movie'; item: MediaItem }
-    | { type: 'anime'; item: { _id: string; title: string; image: string; year: number; genre: string[] } };
+    | {
+        type: 'anime';
+        item: { _id: string; title: string; image: string; year: number; genre: string[] };
+      };
 
   const combinedResults: SearchResult[] = [
     ...(results ?? []).map((item) => ({ type: 'movie' as const, item })),
@@ -75,7 +79,11 @@ export function SearchDropdown({
   const showDropdown = isOpen && hasQuery;
   const isLoading = showDropdown && (results === undefined || animeResults === undefined);
   const hasResults = showDropdown && combinedResults.length > 0;
-  const noResults = showDropdown && results !== undefined && animeResults !== undefined && combinedResults.length === 0;
+  const noResults =
+    showDropdown &&
+    results !== undefined &&
+    animeResults !== undefined &&
+    combinedResults.length === 0;
 
   useEffect(() => {
     if (hasQuery) {
@@ -113,15 +121,11 @@ export function SearchDropdown({
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault();
-        setSelectedIndex((prev) =>
-          prev < combinedResults.length - 1 ? prev + 1 : 0
-        );
+        setSelectedIndex((prev) => (prev < combinedResults.length - 1 ? prev + 1 : 0));
         break;
       case 'ArrowUp':
         e.preventDefault();
-        setSelectedIndex((prev) =>
-          prev > 0 ? prev - 1 : combinedResults.length - 1
-        );
+        setSelectedIndex((prev) => (prev > 0 ? prev - 1 : combinedResults.length - 1));
         break;
       case 'Enter':
         e.preventDefault();
@@ -146,9 +150,17 @@ export function SearchDropdown({
   }, [selectedIndex]);
 
   return (
-    <div ref={containerRef} className="relative w-full" role="combobox" aria-expanded={showDropdown} aria-haspopup="listbox">
+    <div
+      ref={containerRef}
+      className="relative w-full"
+      role="combobox"
+      aria-expanded={showDropdown}
+      aria-haspopup="listbox"
+    >
       <form onSubmit={onSubmit} role="search" className="w-full relative">
-        <label htmlFor={id} className="sr-only">{placeholder}</label>
+        <label htmlFor={id} className="sr-only">
+          {placeholder}
+        </label>
         <Search
           className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cinema-ash pointer-events-none"
           aria-hidden
@@ -163,7 +175,9 @@ export function SearchDropdown({
             onChange(e.target.value);
             if (!e.target.value) setIsOpen(false);
           }}
-          onFocus={() => { if (value.trim()) setIsOpen(true); }}
+          onFocus={() => {
+            if (value.trim()) setIsOpen(true);
+          }}
           onKeyDown={handleKeyDown}
           className={cn(
             'w-full h-11 bg-cinema-surface border border-cinema-border rounded-[10px] pl-10 text-sm text-white placeholder-cinema-ash',
@@ -229,57 +243,61 @@ export function SearchDropdown({
                   const movie = result.item;
                   const isActorMatch = matchesByActor(movie);
                   return (
-                <button
-                  key={`movie-${movie._id}`}
-                  type="button"
-                  role="option"
-                  aria-selected={index === selectedIndex}
-                  data-result-index={index}
-                  onClick={() => navigateTo(result)}
-                  onMouseEnter={() => setSelectedIndex(index)}
-                  className={cn(
-                    'w-full flex items-start gap-3 px-3 py-2.5 text-left transition-colors duration-150',
-                    index === selectedIndex
-                      ? 'bg-cinema-violet/20'
-                      : 'hover:bg-cinema-elevated/50'
-                  )}
-                >
-                  <div className="w-10 h-14 shrink-0 rounded overflow-hidden bg-cinema-elevated">
-                    <MoviePoster
-                      src={movie.image}
-                      alt={movie.name}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-white truncate leading-tight">
-                      {movie.name}
-                    </p>
-                    <p className="text-xs text-cinema-silver mt-0.5 truncate">
-                      {movie.actors}
-                    </p>
-                    <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                      {isActorMatch && (
-                        <span className="inline-flex items-center gap-1 text-[10px] text-cinema-gold bg-cinema-gold/10 px-1.5 py-0.5 rounded">
-                          <User className="w-2.5 h-2.5" />
-                          Coincide con actor
-                        </span>
+                    <button
+                      key={`movie-${movie._id}`}
+                      type="button"
+                      role="option"
+                      aria-selected={index === selectedIndex}
+                      data-result-index={index}
+                      onClick={() => navigateTo(result)}
+                      onMouseEnter={() => setSelectedIndex(index)}
+                      className={cn(
+                        'w-full flex items-start gap-3 px-3 py-2.5 text-left transition-colors duration-150',
+                        index === selectedIndex
+                          ? 'bg-cinema-violet/20'
+                          : 'hover:bg-cinema-elevated/50'
                       )}
-                      <span className="inline-flex items-center gap-1 text-[10px] text-cinema-ash bg-cinema-elevated/80 px-1.5 py-0.5 rounded">
-                        {movie.mediaType === 'series' ? (
-                          <><Tv className="w-2.5 h-2.5" /> Serie</>
-                        ) : (
-                          <><Film className="w-2.5 h-2.5" /> Película</>
-                        )}
-                      </span>
-                      <span className="inline-flex items-center gap-1 text-[10px] text-cinema-ash bg-cinema-elevated/80 px-1.5 py-0.5 rounded">
-                        <TrendingUp className="w-2.5 h-2.5" />
-                        {movie.releaseYear}
-                      </span>
-                      <span className="ml-auto text-[10px] text-cinema-violet">{movie.classification}</span>
-                    </div>
-                  </div>
-                </button>
+                    >
+                      <div className="w-10 h-14 shrink-0 rounded overflow-hidden bg-cinema-elevated">
+                        <MoviePoster
+                          src={movie.image}
+                          alt={movie.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-white truncate leading-tight">
+                          {movie.name}
+                        </p>
+                        <p className="text-xs text-cinema-silver mt-0.5 truncate">{movie.actors}</p>
+                        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                          {isActorMatch && (
+                            <span className="inline-flex items-center gap-1 text-[10px] text-cinema-gold bg-cinema-gold/10 px-1.5 py-0.5 rounded">
+                              <User className="w-2.5 h-2.5" />
+                              Coincide con actor
+                            </span>
+                          )}
+                          <span className="inline-flex items-center gap-1 text-[10px] text-cinema-ash bg-cinema-elevated/80 px-1.5 py-0.5 rounded">
+                            {movie.mediaType === 'series' ? (
+                              <>
+                                <Tv className="w-2.5 h-2.5" /> Serie
+                              </>
+                            ) : (
+                              <>
+                                <Film className="w-2.5 h-2.5" /> Película
+                              </>
+                            )}
+                          </span>
+                          <span className="inline-flex items-center gap-1 text-[10px] text-cinema-ash bg-cinema-elevated/80 px-1.5 py-0.5 rounded">
+                            <TrendingUp className="w-2.5 h-2.5" />
+                            {movie.releaseYear}
+                          </span>
+                          <span className="ml-auto text-[10px] text-cinema-violet">
+                            {movie.classification}
+                          </span>
+                        </div>
+                      </div>
+                    </button>
                   );
                 }
 
@@ -301,11 +319,19 @@ export function SearchDropdown({
                     )}
                   >
                     <div className="w-10 h-14 shrink-0 rounded overflow-hidden bg-cinema-elevated">
-                      <img src={anime.image} alt={anime.title} className="w-full h-full object-cover" />
+                      <img
+                        src={anime.image}
+                        alt={anime.title}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-white truncate leading-tight">{anime.title}</p>
-                      <p className="text-xs text-cinema-silver mt-0.5 truncate">{anime.genre.slice(0, 2).join(', ')}</p>
+                      <p className="text-sm font-medium text-white truncate leading-tight">
+                        {anime.title}
+                      </p>
+                      <p className="text-xs text-cinema-silver mt-0.5 truncate">
+                        {anime.genre.slice(0, 2).join(', ')}
+                      </p>
                       <div className="flex items-center gap-2 mt-1.5">
                         <span className="inline-flex items-center gap-1 text-[10px] text-cinema-ash bg-cinema-elevated/80 px-1.5 py-0.5 rounded">
                           <Sparkles className="w-2.5 h-2.5" /> Anime

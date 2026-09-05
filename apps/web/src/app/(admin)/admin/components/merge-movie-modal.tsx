@@ -38,9 +38,7 @@ export function MergeMovieModal({ source, onClose, onMerged }: MergeMovieModalPr
 
   const targets = useQuery(
     api.adminMovies.adminSearchTargets,
-    debouncedQuery.length >= 2
-      ? { q: debouncedQuery, excludeId: source._id as any }
-      : 'skip'
+    debouncedQuery.length >= 2 ? { q: debouncedQuery, excludeId: source._id as any } : 'skip'
   ) as MediaItem[] | undefined;
 
   const selectedTarget = targets?.find((movie) => movie._id === selectedTargetId);
@@ -93,10 +91,16 @@ export function MergeMovieModal({ source, onClose, onMerged }: MergeMovieModalPr
             </p>
             <div className="flex gap-4 p-4 rounded-xl bg-cinema-elevated/60 border border-cinema-border">
               <div className="w-16 h-24 shrink-0 rounded overflow-hidden">
-                <MoviePoster src={source.image} alt={getAdminMovieDisplayName(source)} className="w-full h-full object-cover" />
+                <MoviePoster
+                  src={source.image}
+                  alt={getAdminMovieDisplayName(source)}
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div className="min-w-0">
-                <p className="font-medium text-white truncate">{getAdminMovieDisplayName(source)}</p>
+                <p className="font-medium text-white truncate">
+                  {getAdminMovieDisplayName(source)}
+                </p>
                 <p className="text-xs text-cinema-ash mt-1">
                   {source.genre}
                   {source.releaseYear ? ` · ${source.releaseYear}` : ''}
@@ -166,7 +170,9 @@ export function MergeMovieModal({ source, onClose, onMerged }: MergeMovieModalPr
                       <p className="text-sm font-medium text-white truncate">
                         {getAdminMovieDisplayName(movie)}
                       </p>
-                      <p className="text-xs text-cinema-ash">{movie.releaseYear} · {movie.genre}</p>
+                      <p className="text-xs text-cinema-ash">
+                        {movie.releaseYear} · {movie.genre}
+                      </p>
                     </div>
                   </button>
                 ))}
@@ -186,11 +192,7 @@ export function MergeMovieModal({ source, onClose, onMerged }: MergeMovieModalPr
           <Button type="button" variant="ghost" onClick={onClose}>
             Cancelar
           </Button>
-          <Button
-            type="button"
-            onClick={handleMerge}
-            disabled={!selectedTargetId || isMerging}
-          >
+          <Button type="button" onClick={handleMerge} disabled={!selectedTargetId || isMerging}>
             {isMerging ? 'Fusionando...' : 'Confirmar fusión'}
           </Button>
         </div>

@@ -33,8 +33,7 @@ const MIME: Record<string, string> = {
 const PRIVATE_HOST_RE =
   /^(localhost|127\.\d+\.\d+\.\d+|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+|169\.254\.\d+\.\d+|0\.0\.0\.0|\[::1\])$/i;
 
-const LOOPBACK_ORIGIN_RE =
-  /^https?:\/\/(localhost|127\.\d+\.\d+\.\d+|0\.0\.0\.0|\[::1\])(:\d+)?$/i;
+const LOOPBACK_ORIGIN_RE = /^https?:\/\/(localhost|127\.\d+\.\d+\.\d+|0\.0\.0\.0|\[::1\])(:\d+)?$/i;
 
 /**
  * Hosts we are willing to proxy. Kept tight on purpose — this endpoint would

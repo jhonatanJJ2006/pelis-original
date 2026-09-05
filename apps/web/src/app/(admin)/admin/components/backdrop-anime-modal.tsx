@@ -40,8 +40,13 @@ type PreviewResult =
     };
 
 export function BackdropAnimeModal({ anime, onClose, onApplied }: BackdropAnimeModalProps) {
-  const previewBackdrop = useAction<{ animeId: string; tmdbId?: number }, any>(api.adminAnimeEnrichment.previewAnimeBackdrop);
-  const applyBackdrop = useAction<{ animeId: string; tmdbId: number; replaceBackdrop?: boolean }, any>(api.adminAnimeEnrichment.applyAnimeBackdrop);
+  const previewBackdrop = useAction<{ animeId: string; tmdbId?: number }, any>(
+    api.adminAnimeEnrichment.previewAnimeBackdrop
+  );
+  const applyBackdrop = useAction<
+    { animeId: string; tmdbId: number; replaceBackdrop?: boolean },
+    any
+  >(api.adminAnimeEnrichment.applyAnimeBackdrop);
 
   const [preview, setPreview] = useState<PreviewResult | null>(null);
   const [loading, setLoading] = useState(true);
@@ -57,9 +62,7 @@ export function BackdropAnimeModal({ anime, onClose, onApplied }: BackdropAnimeM
         if (!cancelled) setPreview(result as PreviewResult);
       } catch (error) {
         if (!cancelled) {
-          toast.error(
-            error instanceof Error ? error.message : 'Error al buscar backdrop en TMDB'
-          );
+          toast.error(error instanceof Error ? error.message : 'Error al buscar backdrop en TMDB');
           onClose();
         }
       } finally {
@@ -125,7 +128,10 @@ export function BackdropAnimeModal({ anime, onClose, onApplied }: BackdropAnimeM
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-cinema-border shrink-0">
-          <h2 id="backdrop-anime-title" className="text-lg font-semibold text-white flex items-center gap-2">
+          <h2
+            id="backdrop-anime-title"
+            className="text-lg font-semibold text-white flex items-center gap-2"
+          >
             <Monitor className="w-5 h-5 text-cyan-400" />
             Backdrop TMDB
           </h2>

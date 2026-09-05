@@ -3,7 +3,6 @@
 import { memo, useState, type CSSProperties } from 'react';
 import { cn } from '../../shared/utils';
 
-
 interface MoviePosterProps {
   src: string;
   alt: string;
@@ -16,7 +15,12 @@ interface MoviePosterProps {
 
 function buildSrcSet(src: string): string | undefined {
   if (!src.startsWith('/peliculas/') && !src.startsWith('/uploads/')) return undefined;
-  if (!src.endsWith('.webp') && !src.endsWith('.jpg') && !src.endsWith('.jpeg') && !src.endsWith('.png')) {
+  if (
+    !src.endsWith('.webp') &&
+    !src.endsWith('.jpg') &&
+    !src.endsWith('.jpeg') &&
+    !src.endsWith('.png')
+  ) {
     return undefined;
   }
   const base = src.replace(/\.(webp|jpg|jpeg|png)$/i, '');

@@ -45,8 +45,13 @@ type PreviewResult =
     };
 
 export function PosterPickerModal({ movie, onClose, onApplied }: PosterPickerModalProps) {
-  const previewMetadata = useAction<{ movieId: string; tmdbId?: number }, any>(api.adminEnrichment.previewMetadata);
-  const enrichMovie = useAction<{ movieId: string; tmdbId: number; replaceImage?: boolean; replaceBackdrop?: boolean }, any>(api.adminEnrichment.enrichMovie);
+  const previewMetadata = useAction<{ movieId: string; tmdbId?: number }, any>(
+    api.adminEnrichment.previewMetadata
+  );
+  const enrichMovie = useAction<
+    { movieId: string; tmdbId: number; replaceImage?: boolean; replaceBackdrop?: boolean },
+    any
+  >(api.adminEnrichment.enrichMovie);
 
   const [preview, setPreview] = useState<PreviewResult | null>(null);
   const [loading, setLoading] = useState(true);
@@ -62,9 +67,7 @@ export function PosterPickerModal({ movie, onClose, onApplied }: PosterPickerMod
         if (!cancelled) setPreview(result as PreviewResult);
       } catch (error) {
         if (!cancelled) {
-          toast.error(
-            error instanceof Error ? error.message : 'Error al buscar poster en TMDB'
-          );
+          toast.error(error instanceof Error ? error.message : 'Error al buscar poster en TMDB');
           onClose();
         }
       } finally {
@@ -183,7 +186,9 @@ export function PosterPickerModal({ movie, onClose, onApplied }: PosterPickerMod
                     <div
                       className={cn(
                         'w-28 h-40 rounded-lg overflow-hidden bg-cinema-elevated border',
-                        preview.hasExistingImage ? 'border-cinema-border' : 'border-dashed border-cinema-border'
+                        preview.hasExistingImage
+                          ? 'border-cinema-border'
+                          : 'border-dashed border-cinema-border'
                       )}
                     >
                       {preview.hasExistingImage ? (

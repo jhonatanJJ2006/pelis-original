@@ -23,16 +23,23 @@ interface ContinueWatchingRowProps {
 export function ContinueWatchingRow({ items, className }: ContinueWatchingRowProps) {
   const { setRef, getEl } = useDragScroll();
 
-  const scrollBy = useCallback((dir: 1 | -1) => {
-    const el = getEl();
-    if (!el) return;
-    el.scrollBy({ left: dir * el.clientWidth * 0.8 });
-  }, [getEl]);
+  const scrollBy = useCallback(
+    (dir: 1 | -1) => {
+      const el = getEl();
+      if (!el) return;
+      el.scrollBy({ left: dir * el.clientWidth * 0.8 });
+    },
+    [getEl]
+  );
 
   if (items.length === 0) {
     return (
       <section className={cn('relative', className)} aria-busy="true">
-        <SectionHeader title="Continuar viendo" subtitle="Retoma donde lo dejaste" href="/history" />
+        <SectionHeader
+          title="Continuar viendo"
+          subtitle="Retoma donde lo dejaste"
+          href="/history"
+        />
         <div className="no-scrollbar flex gap-4 overflow-x-auto px-1 py-1">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="w-[280px] sm:w-[320px] md:w-[360px] shrink-0">

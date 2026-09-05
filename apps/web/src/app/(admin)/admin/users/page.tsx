@@ -122,14 +122,15 @@ export default function AdminUsersPage() {
       {users === undefined ? (
         <AdminTableSkeleton />
       ) : users.length === 0 ? (
-        <div className="text-center py-24 text-cinema-muted">
-          No hay usuarios con ese filtro.
-        </div>
+        <div className="text-center py-24 text-cinema-muted">No hay usuarios con ese filtro.</div>
       ) : (
         <>
           <div className="md:hidden space-y-3">
             {users.map((u) => (
-              <article key={u._id} className="rounded-2xl border border-cinema-border bg-cinema-surface p-4">
+              <article
+                key={u._id}
+                className="rounded-2xl border border-cinema-border bg-cinema-surface p-4"
+              >
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cinema-accent to-cinema-violet flex items-center justify-center shrink-0">
                     <UserIcon className="w-5 h-5 text-white" />
@@ -153,7 +154,10 @@ export default function AdminUsersPage() {
                           <Check className="w-3 h-3" /> Verificado
                         </span>
                       ) : null}
-                      {u.subscription && u.subscription.status === 'active' && u.subscription.endDate > Date.now() && u.subscription.plan ? (
+                      {u.subscription &&
+                      u.subscription.status === 'active' &&
+                      u.subscription.endDate > Date.now() &&
+                      u.subscription.plan ? (
                         <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-cinema-violet/20 text-cinema-violet-light">
                           <Crown className="w-3 h-3" /> {u.subscription.plan.name}
                         </span>
@@ -199,12 +203,19 @@ export default function AdminUsersPage() {
               <tbody>
                 {users.map((u) => {
                   const activePlan =
-                    u.subscription && u.subscription.status === 'active' && u.subscription.endDate > Date.now();
+                    u.subscription &&
+                    u.subscription.status === 'active' &&
+                    u.subscription.endDate > Date.now();
                   return (
-                    <tr key={u._id} className="border-b border-cinema-border/60 hover:bg-cinema-elevated/30 transition-colors">
+                    <tr
+                      key={u._id}
+                      className="border-b border-cinema-border/60 hover:bg-cinema-elevated/30 transition-colors"
+                    >
                       <td className="px-4 py-3">
                         <p className="font-medium text-white truncate max-w-[240px]">{u.name}</p>
-                        <p className="text-xs text-cinema-ash mt-0.5 truncate max-w-[240px]">{u.email}</p>
+                        <p className="text-xs text-cinema-ash mt-0.5 truncate max-w-[240px]">
+                          {u.email}
+                        </p>
                       </td>
                       <td className="px-4 py-3">
                         <span

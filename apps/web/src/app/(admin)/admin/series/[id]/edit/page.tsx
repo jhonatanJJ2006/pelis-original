@@ -22,14 +22,13 @@ export default function EditSeriesPage() {
   const update = useMutation(api.adminSeries.update);
 
   const moviesGenres = (useQuery(api.movies.getGenres, {}) as string[] | undefined) ?? [];
-  const classifications =
-    (useQuery(api.movies.getClassifications, {}) as string[] | undefined) ?? [
-      'G',
-      'PG',
-      'PG-13',
-      'R',
-      'NC-17',
-    ];
+  const classifications = (useQuery(api.movies.getClassifications, {}) as string[] | undefined) ?? [
+    'G',
+    'PG',
+    'PG-13',
+    'R',
+    'NC-17',
+  ];
 
   const handleSubmit = async (values: SeriesFormValues) => {
     try {
@@ -107,7 +106,9 @@ export default function EditSeriesPage() {
           season: series.season?.toString() ?? '1',
           featured: series.featured ?? false,
         }}
-        genres={moviesGenres.includes(series.genre) ? moviesGenres : [series.genre, ...moviesGenres]}
+        genres={
+          moviesGenres.includes(series.genre) ? moviesGenres : [series.genre, ...moviesGenres]
+        }
         classifications={
           classifications.includes(series.classification)
             ? classifications

@@ -17,7 +17,5 @@ export default async function HomePage() {
     preloadQuery<string[]>('movies.getGenres', {}, fakeReq),
   ]);
 
-  return (
-    <HomePageClient preloaded={{ featured, trending, movies, series, genres }} />
-  );
+  return <HomePageClient preloaded={{ featured, trending, movies, series, genres }} />;
 }

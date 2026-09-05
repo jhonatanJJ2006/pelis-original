@@ -22,7 +22,13 @@ import { notifyChange } from '@pelis/db/realtime';
 
 export interface PreviewResult {
   status: 'ok' | 'not_found' | 'nothing_to_fill' | 'no_backdrop';
-  movie?: { id: string; name: string; token?: string; image?: string; backdropImage?: string | null };
+  movie?: {
+    id: string;
+    name: string;
+    token?: string;
+    image?: string;
+    backdropImage?: string | null;
+  };
   tmdb?: {
     tmdbId: number;
     title: string;
@@ -65,9 +71,16 @@ export function gapFillPreview(movie: {
 }
 
 export function buildGapFillPatch(
-  movie: { synopsis: string; actors: string; classification: string; genre: string; image: string; imageId?: string | null },
+  movie: {
+    synopsis: string;
+    actors: string;
+    classification: string;
+    genre: string;
+    image: string;
+    imageId?: string | null;
+  },
   metadata: TmdbMetadata,
-  options?: { imageId?: string; replaceImage?: boolean },
+  options?: { imageId?: string; replaceImage?: boolean }
 ): Record<string, unknown> {
   const patch: Record<string, unknown> = {};
   const gap = gapFillPreview({
@@ -93,7 +106,7 @@ export function buildGapFillPatch(
 
 export async function previewMovieMetadata(
   movieId: string,
-  tmdbId?: number,
+  tmdbId?: number
 ): Promise<PreviewResult> {
   const movie = await prisma.movie.findUnique({ where: { id: movieId } });
   if (!movie) throw new Error('Película no encontrada');
@@ -124,11 +137,7 @@ export async function previewMovieMetadata(
   const hasExistingImage = !isMissingImage(movie.image);
   const canReplaceBackdrop = !!metadata.backdropPath;
   const hasExistingBackdrop = !isMissingBackdrop(movie.backdropImage);
-  if (
-    !Object.values(gapPreview).some(Boolean) &&
-    !canReplaceImage &&
-    !canReplaceBackdrop
-  ) {
+  if (!Object.values(gapPreview).some(Boolean) && !canReplaceImage && !canReplaceBackdrop) {
     return {
       status: 'nothing_to_fill',
       movie: { id: movie.id, name: movie.name },
@@ -170,7 +179,7 @@ export async function previewMovieMetadata(
 
 export async function previewMovieBackdrop(
   movieId: string,
-  tmdbId?: number,
+  tmdbId?: number
 ): Promise<PreviewResult> {
   const movie = await prisma.movie.findUnique({ where: { id: movieId } });
   if (!movie) throw new Error('Película no encontrada');
@@ -222,7 +231,7 @@ export async function performMovieEnrichment(
   movieId: string,
   tmdbId: number,
   replaceImage = false,
-  replaceBackdrop = false,
+  replaceBackdrop = false
 ) {
   const movie = await prisma.movie.findUnique({ where: { id: movieId } });
   if (!movie) throw new Error('Película no encontrada');
@@ -242,11 +251,7 @@ export async function performMovieEnrichment(
     }
   }
 
-  const patch = buildGapFillPatch(
-    movie,
-    metadata,
-    { imageId, replaceImage },
-  );
+  const patch = buildGapFillPatch(movie, metadata, { imageId, replaceImage });
   let fieldsToApply = Object.keys(patch);
   let updated = fieldsToApply.length > 0;
   if (updated) {
@@ -290,7 +295,7 @@ export async function performMovieEnrichment(
 export async function performMovieBackdrop(
   movieId: string,
   tmdbId: number,
-  replaceBackdrop = false,
+  replaceBackdrop = false
 ) {
   const movie = await prisma.movie.findUnique({ where: { id: movieId } });
   if (!movie) throw new Error('Película no encontrada');
@@ -316,13 +321,17 @@ export async function performMovieBackdrop(
   return { updated: true };
 }
 
-export async function bulkEnrichMovies(
-  movieIds: string[],
-): Promise<{
+export async function bulkEnrichMovies(movieIds: string[]): Promise<{
   ok: number;
   failed: number;
   skipped: number;
-  results: Array<{ movieId: string; name: string; status: 'ok' | 'failed' | 'skipped'; message?: string; fields?: string[] }>;
+  results: Array<{
+    movieId: string;
+    name: string;
+    status: 'ok' | 'failed' | 'skipped';
+    message?: string;
+    fields?: string[];
+  }>;
 }> {
   const results: Array<{
     movieId: string;
@@ -350,13 +359,23 @@ export async function bulkEnrichMovies(
       image: movie.image,
     });
     if (!Object.values(gap).some(Boolean)) {
-      results.push({ movieId, name: movie.name, status: 'skipped', message: 'Sin campos por rellenar' });
+      results.push({
+        movieId,
+        name: movie.name,
+        status: 'skipped',
+        message: 'Sin campos por rellenar',
+      });
       continue;
     }
     try {
       const search = await searchMovie(movie.name, movie.releaseYear);
       if (!search) {
-        results.push({ movieId, name: movie.name, status: 'failed', message: 'TMDB sin resultados' });
+        results.push({
+          movieId,
+          name: movie.name,
+          status: 'failed',
+          message: 'TMDB sin resultados',
+        });
         await new Promise((r) => setTimeout(r, 300));
         continue;
       }
@@ -379,15 +398,23 @@ export async function bulkEnrichMovies(
   return { ok, failed, skipped, results };
 }
 
-export async function bulkApplyBackdrops(
-  movieIds: string[],
-): Promise<{
+export async function bulkApplyBackdrops(movieIds: string[]): Promise<{
   ok: number;
   failed: number;
   skipped: number;
-  results: Array<{ movieId: string; name: string; status: 'ok' | 'failed' | 'skipped'; message?: string }>;
+  results: Array<{
+    movieId: string;
+    name: string;
+    status: 'ok' | 'failed' | 'skipped';
+    message?: string;
+  }>;
 }> {
-  const results: Array<{ movieId: string; name: string; status: 'ok' | 'failed' | 'skipped'; message?: string }> = [];
+  const results: Array<{
+    movieId: string;
+    name: string;
+    status: 'ok' | 'failed' | 'skipped';
+    message?: string;
+  }> = [];
   for (const movieId of movieIds) {
     const movie = await prisma.movie.findUnique({ where: { id: movieId } });
     if (!movie) {
@@ -405,7 +432,12 @@ export async function bulkApplyBackdrops(
     try {
       const search = await searchMovie(movie.name, movie.releaseYear);
       if (!search) {
-        results.push({ movieId, name: movie.name, status: 'failed', message: 'TMDB sin resultados' });
+        results.push({
+          movieId,
+          name: movie.name,
+          status: 'failed',
+          message: 'TMDB sin resultados',
+        });
         await new Promise((r) => setTimeout(r, 300));
         continue;
       }

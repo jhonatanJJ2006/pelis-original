@@ -103,7 +103,7 @@ export function AuthSessionSync({ children }: { children: ReactNode }) {
         applyHydratedUser({
           sessionUser: typed,
           stored: useAppStore.getState().user,
-        }),
+        })
       );
 
       const me = await fetchMeProfile();
@@ -113,7 +113,7 @@ export function AuthSessionSync({ children }: { children: ReactNode }) {
           sessionUser: typed,
           stored: useAppStore.getState().user,
           me,
-        }),
+        })
       );
     })();
 

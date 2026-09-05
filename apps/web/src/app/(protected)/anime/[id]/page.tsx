@@ -267,7 +267,9 @@ export default function AnimeDetailPage() {
                       : 'bg-cinema-surface text-cinema-silver border-cinema-border hover:text-white hover:border-cinema-violet/40'
                   )}
                 >
-                  <span className="text-sm font-medium whitespace-nowrap">{season.seasonLabel}</span>
+                  <span className="text-sm font-medium whitespace-nowrap">
+                    {season.seasonLabel}
+                  </span>
                   <span
                     className={cn(
                       'text-[11px] whitespace-nowrap',
@@ -312,7 +314,12 @@ export default function AnimeDetailPage() {
                 >
                   <div className="relative w-28 aspect-video rounded-lg overflow-hidden bg-cinema-elevated shrink-0">
                     {ep.image ? (
-                      <img src={ep.image} alt="" className="w-full h-full object-cover" loading="lazy" />
+                      <img
+                        src={ep.image}
+                        alt=""
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <Tv className="w-4 h-4 text-cinema-ash" aria-hidden />
@@ -345,7 +352,9 @@ export default function AnimeDetailPage() {
                       )}
                     </div>
                     {ep.overview && (
-                      <p className="text-[11px] text-cinema-muted line-clamp-2 mt-1.5">{ep.overview}</p>
+                      <p className="text-[11px] text-cinema-muted line-clamp-2 mt-1.5">
+                        {ep.overview}
+                      </p>
                     )}
                   </div>
                 </button>

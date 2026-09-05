@@ -2,16 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import {
-  Home,
-  Film,
-  User,
-  Crown,
-  Search,
-  Tv,
-  Radio,
-  Clapperboard,
-} from 'lucide-react';
+import { Home, Film, User, Crown, Search, Tv, Radio, Clapperboard } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { useUser } from '@pelis/auth/hooks';
 import { Button } from '@pelis/ui/components';
@@ -63,7 +54,10 @@ export function Header({ sticky = true, minimalNav = false }: HeaderProps) {
 
   return (
     <header
-      className={cn(sticky ? 'sticky top-0 z-50' : 'relative z-50', 'glass-strong border-b border-cinema-border/50')}
+      className={cn(
+        sticky ? 'sticky top-0 z-50' : 'relative z-50',
+        'glass-strong border-b border-cinema-border/50'
+      )}
     >
       <nav className="container mx-auto px-4" aria-label="Principal">
         <div className="flex items-center justify-between h-16">
@@ -71,12 +65,15 @@ export function Header({ sticky = true, minimalNav = false }: HeaderProps) {
             <div className="w-9 h-9 rounded bg-gradient-to-br from-cinema-accent to-cinema-gold flex items-center justify-center shadow-glow group-hover:scale-105 transition-transform duration-200">
               <Film className="w-5 h-5 text-cinema-bg" />
             </div>
-            <span className="font-display text-2xl tracking-tight text-cinema-chalk">
-              Pelis
-            </span>
+            <span className="font-display text-2xl tracking-tight text-cinema-chalk">Pelis</span>
           </Link>
 
-          <div className={cn('hidden lg:flex items-center gap-1 flex-1 max-w-md mx-8', minimalNav && 'lg:hidden')}>
+          <div
+            className={cn(
+              'hidden lg:flex items-center gap-1 flex-1 max-w-md mx-8',
+              minimalNav && 'lg:hidden'
+            )}
+          >
             <SearchDropdown
               value={searchQuery}
               onChange={setSearchQuery}
@@ -97,23 +94,23 @@ export function Header({ sticky = true, minimalNav = false }: HeaderProps) {
           )}
 
           {!minimalNav && (
-          <div className="hidden md:flex items-center gap-0.5">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  'flex items-center gap-1.5 px-3 py-2 rounded text-sm font-medium transition-all duration-200',
-                  isActive(item.href, item.exact)
-                    ? 'bg-cinema-accent/15 text-cinema-accent-light'
-                    : 'text-cinema-silver hover:text-cinema-chalk hover:bg-cinema-elevated/50'
-                )}
-              >
-                <item.icon className="w-4 h-4" aria-hidden />
-                <span className="hidden xl:inline">{item.label}</span>
-              </Link>
-            ))}
-          </div>
+            <div className="hidden md:flex items-center gap-0.5">
+              {navItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    'flex items-center gap-1.5 px-3 py-2 rounded text-sm font-medium transition-all duration-200',
+                    isActive(item.href, item.exact)
+                      ? 'bg-cinema-accent/15 text-cinema-accent-light'
+                      : 'text-cinema-silver hover:text-cinema-chalk hover:bg-cinema-elevated/50'
+                  )}
+                >
+                  <item.icon className="w-4 h-4" aria-hidden />
+                  <span className="hidden xl:inline">{item.label}</span>
+                </Link>
+              ))}
+            </div>
           )}
 
           <div className={cn('hidden md:flex items-center gap-3', minimalNav && 'hidden')}>

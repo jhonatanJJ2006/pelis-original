@@ -20,7 +20,7 @@ export async function POST(req: Request) {
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : 'Error en enriquecimiento masivo' },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

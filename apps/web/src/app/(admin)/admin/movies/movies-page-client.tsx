@@ -66,8 +66,12 @@ export default function AdminMoviesPageClient() {
   const [bulkBackdrops, setBulkBackdrops] = useState(false);
 
   const removeMovie = useMutation(api.movies.remove);
-  const enrichMoviesBulk = useAction<{ movieIds: string[] }, any>(api.adminEnrichment.enrichMoviesBulk);
-  const applyBackdropsBulk = useAction<{ movieIds: string[] }, any>(api.adminEnrichment.applyBackdropsBulk);
+  const enrichMoviesBulk = useAction<{ movieIds: string[] }, any>(
+    api.adminEnrichment.enrichMoviesBulk
+  );
+  const applyBackdropsBulk = useAction<{ movieIds: string[] }, any>(
+    api.adminEnrichment.applyBackdropsBulk
+  );
 
   useEffect(() => {
     const filter = searchParams.get('filter') as QualityFilter | null;
@@ -113,8 +117,7 @@ export default function AdminMoviesPageClient() {
   };
 
   const canEnrich = (movie: AdminMovie) =>
-    !movie.quality.isOrphanId &&
-    (movie.quality.isIncomplete || movie.quality.isMissingImage);
+    !movie.quality.isOrphanId && (movie.quality.isIncomplete || movie.quality.isMissingImage);
 
   const canPickPoster = (movie: AdminMovie) => !movie.quality.isOrphanId;
   const canPickBackdrop = (movie: AdminMovie) => !movie.quality.isOrphanId;
@@ -138,9 +141,7 @@ export default function AdminMoviesPageClient() {
   const handleBulkBackdrops = async () => {
     if (!movies?.length) return;
 
-    const eligible = movies.filter(
-      (m) => !m.quality.isOrphanId && m.quality.isMissingBackdrop
-    );
+    const eligible = movies.filter((m) => !m.quality.isOrphanId && m.quality.isMissingBackdrop);
     if (eligible.length === 0) {
       toast.info('No hay películas sin backdrop en esta vista');
       return;
@@ -327,62 +328,62 @@ export default function AdminMoviesPageClient() {
           </div>
 
           <div className="hidden md:block overflow-x-auto rounded-2xl border border-cinema-border bg-cinema-surface">
-          <table className="w-full min-w-[720px] lg:min-w-[900px] text-sm">
-            <thead>
-              <tr className="border-b border-cinema-border text-left text-cinema-muted">
-                <th className="px-4 py-3 font-medium">Poster</th>
-                <th className="px-4 py-3 font-medium">Película</th>
-                <th className="px-4 py-3 font-medium">Año</th>
-                <th className="px-4 py-3 font-medium">Estado</th>
-                <th className="px-4 py-3 font-medium text-right">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {movies.map((movie) => (
-                <tr
-                  key={movie._id}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => setPreviewMovie(movie)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      setPreviewMovie(movie);
-                    }
-                  }}
-                  className="border-b border-cinema-border/60 hover:bg-cinema-elevated/30 transition-colors cursor-pointer"
-                >
-                  <td className="px-4 py-3">
-                    <div className="w-10 h-14 rounded overflow-hidden bg-cinema-elevated">
-                      <MoviePoster
-                        src={movie.image}
-                        alt={getAdminMovieDisplayName(movie)}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <p
-                      className={cn(
-                        'font-medium max-w-[280px] truncate',
-                        isAdminOrphanDisplayName(movie.name, movie.token)
-                          ? 'text-cinema-muted italic'
-                          : 'text-white'
-                      )}
-                    >
-                      {getAdminMovieDisplayName(movie)}
-                    </p>
-                    <p className="text-xs text-cinema-ash mt-0.5">{movie.genre}</p>
-                  </td>
-                  <td className="px-4 py-3 text-cinema-muted">{movie.releaseYear}</td>
-                  <td className="px-4 py-3">
-                    <AdminMovieQualityBadges quality={movie.quality} />
-                  </td>
-                  <td className="px-4 py-3">{renderMovieActions(movie)}</td>
+            <table className="w-full min-w-[720px] lg:min-w-[900px] text-sm">
+              <thead>
+                <tr className="border-b border-cinema-border text-left text-cinema-muted">
+                  <th className="px-4 py-3 font-medium">Poster</th>
+                  <th className="px-4 py-3 font-medium">Película</th>
+                  <th className="px-4 py-3 font-medium">Año</th>
+                  <th className="px-4 py-3 font-medium">Estado</th>
+                  <th className="px-4 py-3 font-medium text-right">Acciones</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {movies.map((movie) => (
+                  <tr
+                    key={movie._id}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setPreviewMovie(movie)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setPreviewMovie(movie);
+                      }
+                    }}
+                    className="border-b border-cinema-border/60 hover:bg-cinema-elevated/30 transition-colors cursor-pointer"
+                  >
+                    <td className="px-4 py-3">
+                      <div className="w-10 h-14 rounded overflow-hidden bg-cinema-elevated">
+                        <MoviePoster
+                          src={movie.image}
+                          alt={getAdminMovieDisplayName(movie)}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <p
+                        className={cn(
+                          'font-medium max-w-[280px] truncate',
+                          isAdminOrphanDisplayName(movie.name, movie.token)
+                            ? 'text-cinema-muted italic'
+                            : 'text-white'
+                        )}
+                      >
+                        {getAdminMovieDisplayName(movie)}
+                      </p>
+                      <p className="text-xs text-cinema-ash mt-0.5">{movie.genre}</p>
+                    </td>
+                    <td className="px-4 py-3 text-cinema-muted">{movie.releaseYear}</td>
+                    <td className="px-4 py-3">
+                      <AdminMovieQualityBadges quality={movie.quality} />
+                    </td>
+                    <td className="px-4 py-3">{renderMovieActions(movie)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </>
       )}

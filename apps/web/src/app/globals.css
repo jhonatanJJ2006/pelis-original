@@ -35,7 +35,7 @@
   );
   --gradient-ambient: linear-gradient(
     135deg,
-    rgba(196, 163, 90, 0.10) 0%,
+    rgba(196, 163, 90, 0.1) 0%,
     transparent 45%,
     rgba(138, 154, 123, 0.06) 100%
   );
@@ -173,7 +173,7 @@
   .card-glow {
     @apply bg-cinema-surface rounded-2xl border border-cinema-border overflow-hidden transition-all duration-300 hover:border-cinema-violet/40 hover:-translate-y-0.5;
     border-radius: var(--radius-cards);
-    box-shadow: 0 4px 24px rgba(196, 163, 90, 0.10);
+    box-shadow: 0 4px 24px rgba(196, 163, 90, 0.1);
   }
 
   .card-feature {

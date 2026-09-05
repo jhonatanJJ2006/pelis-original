@@ -17,8 +17,7 @@ export default function TVChannelPage() {
 
   const channel = useQuery(api.tv.getById, { id: id as never }) as TVChannelItem | null | undefined;
   const list = useQuery(api.tv.list, { limit: 200, offset: 0 }) as
-    | { items: TVChannelItem[] }
-    | undefined;
+    { items: TVChannelItem[] } | undefined;
   const channels = (list?.items ?? []) as SidebarChannel[];
 
   const unavailable =
@@ -33,9 +32,7 @@ export default function TVChannelPage() {
       channels={channels}
       currentChannelId={unavailable ? undefined : channel?._id}
       currentChannelName={channel?.name}
-      playerMessage={
-        channel === undefined ? undefined : unavailable
-      }
+      playerMessage={channel === undefined ? undefined : unavailable}
     />
   );
 }
