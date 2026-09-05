@@ -70,7 +70,9 @@ export function ContinueWatchingCard({ movie, progress, duration }: ContinueWatc
             />
           </div>
           <div className="flex items-center justify-between text-xs text-cinema-silver mt-1.5">
-            <span>{formatDuration(progress)} de {formatDuration(duration)}</span>
+            <span>
+              {formatDuration(progress)} de {formatDuration(duration)}
+            </span>
             <span className="font-medium text-cinema-accent-light">
               {remaining > 0 ? `Faltan ${formatDuration(remaining)}` : '¡Completa!'}
             </span>

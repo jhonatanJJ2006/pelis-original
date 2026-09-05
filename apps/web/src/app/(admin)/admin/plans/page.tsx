@@ -18,6 +18,7 @@ interface PlanRow {
   features: string[];
   icon: string;
   months: number;
+  maxDevices?: number;
   recommended?: boolean;
   stripePriceId?: string;
   activeSubscribers: number;
@@ -48,7 +49,8 @@ export default function AdminPlansPage() {
   const [busyId, setBusyId] = useState<string | null>(null);
 
   const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`¿Eliminar el plan "${name}"? Las suscripciones existentes no se borrarán.`)) return;
+    if (!confirm(`¿Eliminar el plan "${name}"? Las suscripciones existentes no se borrarán.`))
+      return;
     setDeletingId(id);
     try {
       await remove({ id: id as any });
@@ -64,7 +66,9 @@ export default function AdminPlansPage() {
     setBusyId(plan._id);
     try {
       await setRecommended({ id: plan._id as any, recommended: !plan.recommended });
-      toast.success(plan.recommended ? 'Plan ya no es recomendado' : 'Plan marcado como recomendado');
+      toast.success(
+        plan.recommended ? 'Plan ya no es recomendado' : 'Plan marcado como recomendado'
+      );
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Error al actualizar');
     } finally {
@@ -94,9 +98,7 @@ export default function AdminPlansPage() {
       {plans === undefined ? (
         <AdminTableSkeleton />
       ) : plans.length === 0 ? (
-        <div className="text-center py-24 text-cinema-muted">
-          No hay planes. Crea el primero.
-        </div>
+        <div className="text-center py-24 text-cinema-muted">No hay planes. Crea el primero.</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {plans.map((plan) => {
@@ -106,7 +108,9 @@ export default function AdminPlansPage() {
                 key={plan._id}
                 className={cn(
                   'rounded-2xl border bg-cinema-surface p-5 flex flex-col gap-4',
-                  plan.recommended ? 'border-cinema-gold/40 shadow-[0_0_0_1px_rgba(245,200,66,0.2)]' : 'border-cinema-border'
+                  plan.recommended
+                    ? 'border-cinema-gold/40 shadow-[0_0_0_1px_rgba(245,200,66,0.2)]'
+                    : 'border-cinema-border'
                 )}
               >
                 <div className="flex items-start justify-between gap-2">
@@ -114,14 +118,21 @@ export default function AdminPlansPage() {
                     <div
                       className={cn(
                         'p-2.5 rounded-xl',
-                        plan.recommended ? 'bg-cinema-gold/15 text-cinema-gold' : 'bg-cinema-violet/15 text-cinema-violet-light'
+                        plan.recommended
+                          ? 'bg-cinema-gold/15 text-cinema-gold'
+                          : 'bg-cinema-violet/15 text-cinema-violet-light'
                       )}
                     >
                       <Icon className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="font-display text-lg uppercase tracking-wide text-white">{plan.name}</h3>
-                      <p className="text-xs text-cinema-muted mt-0.5">{plan.months} mes{plan.months > 1 ? 'es' : ''}</p>
+                      <h3 className="font-display text-lg uppercase tracking-wide text-white">
+                        {plan.name}
+                      </h3>
+                      <p className="text-xs text-cinema-muted mt-0.5">
+                        {plan.months} mes{plan.months > 1 ? 'es' : ''} · {plan.maxDevices ?? 1}{' '}
+                        dispositivo{(plan.maxDevices ?? 1) > 1 ? 's' : ''}
+                      </p>
                     </div>
                   </div>
                   {plan.recommended && (
@@ -152,7 +163,14 @@ export default function AdminPlansPage() {
                       {plan.activeSubscribers} activos · {plan.totalSubscribers} totales
                     </p>
                   </div>
-                  <span className={cn('text-[10px] px-2 py-0.5 rounded-full', plan.stripePriceId ? 'bg-emerald-500/15 text-emerald-300' : 'bg-cinema-elevated text-cinema-muted')}>
+                  <span
+                    className={cn(
+                      'text-[10px] px-2 py-0.5 rounded-full',
+                      plan.stripePriceId
+                        ? 'bg-emerald-500/15 text-emerald-300'
+                        : 'bg-cinema-elevated text-cinema-muted'
+                    )}
+                  >
                     {plan.stripePriceId ? 'Stripe OK' : 'Sin Stripe'}
                   </span>
                 </div>
@@ -164,7 +182,12 @@ export default function AdminPlansPage() {
                     onClick={() => handleToggleRecommended(plan)}
                     disabled={busyId === plan._id}
                   >
-                    <Star className={cn('w-4 h-4', plan.recommended && 'fill-cinema-gold text-cinema-gold')} />
+                    <Star
+                      className={cn(
+                        'w-4 h-4',
+                        plan.recommended && 'fill-cinema-gold text-cinema-gold'
+                      )}
+                    />
                     <span className="ml-1">{plan.recommended ? 'Quitar' : 'Destacar'}</span>
                   </Button>
                   <div className="ml-auto flex gap-1">

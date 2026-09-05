@@ -58,8 +58,13 @@ type PreviewResult =
     };
 
 export function BackdropPickerModal({ movie, onClose, onApplied }: BackdropPickerModalProps) {
-  const previewBackdrop = useAction<{ movieId: string; tmdbId?: number }, any>(api.adminEnrichment.previewBackdrop);
-  const applyBackdrop = useAction<{ movieId: string; tmdbId: number; replaceBackdrop?: boolean }, any>(api.adminEnrichment.applyBackdrop);
+  const previewBackdrop = useAction<{ movieId: string; tmdbId?: number }, any>(
+    api.adminEnrichment.previewBackdrop
+  );
+  const applyBackdrop = useAction<
+    { movieId: string; tmdbId: number; replaceBackdrop?: boolean },
+    any
+  >(api.adminEnrichment.applyBackdrop);
 
   const [preview, setPreview] = useState<PreviewResult | null>(null);
   const [loading, setLoading] = useState(true);
@@ -75,9 +80,7 @@ export function BackdropPickerModal({ movie, onClose, onApplied }: BackdropPicke
         if (!cancelled) setPreview(result as PreviewResult);
       } catch (error) {
         if (!cancelled) {
-          toast.error(
-            error instanceof Error ? error.message : 'Error al buscar backdrop en TMDB'
-          );
+          toast.error(error instanceof Error ? error.message : 'Error al buscar backdrop en TMDB');
           onClose();
         }
       } finally {
@@ -175,8 +178,7 @@ export function BackdropPickerModal({ movie, onClose, onApplied }: BackdropPicke
             </p>
           ) : preview?.status === 'no_backdrop' ? (
             <p className="text-cinema-muted py-8 text-center">
-              TMDB encontró &quot;{preview.tmdb.title}&quot; pero no tiene imagen ancha
-              disponible.
+              TMDB encontró &quot;{preview.tmdb.title}&quot; pero no tiene imagen ancha disponible.
             </p>
           ) : preview?.status === 'ok' ? (
             <div className="space-y-5">

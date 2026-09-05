@@ -100,7 +100,10 @@ describe('movieSchema', () => {
   });
 
   it('should accept https image URLs', () => {
-    const result = movieSchema.safeParse({ ...validMovie, image: 'https://cdn.example.com/dune.jpg' });
+    const result = movieSchema.safeParse({
+      ...validMovie,
+      image: 'https://cdn.example.com/dune.jpg',
+    });
     expect(result.success).toBe(true);
   });
 
@@ -143,6 +146,7 @@ describe('planSchema', () => {
     features: ['4K', 'Sin anuncios', '5 dispositivos'],
     icon: 'crown',
     months: 1,
+    maxDevices: 1,
   };
 
   it('should accept valid plan data', () => {
@@ -163,6 +167,18 @@ describe('planSchema', () => {
   it('should reject non-integer months', () => {
     const result = planSchema.safeParse({ ...validPlan, months: 1.5 });
     expect(result.success).toBe(false);
+  });
+
+  it('should reject non-positive maxDevices', () => {
+    expect(planSchema.safeParse({ ...validPlan, maxDevices: 0 }).success).toBe(false);
+    expect(planSchema.safeParse({ ...validPlan, maxDevices: 1.5 }).success).toBe(false);
+  });
+
+  it('should default maxDevices to 1 when omitted', () => {
+    const { maxDevices, ...rest } = validPlan;
+    const result = planSchema.safeParse(rest);
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.maxDevices).toBe(1);
   });
 
   it('should accept recommended flag and stripePriceId', () => {

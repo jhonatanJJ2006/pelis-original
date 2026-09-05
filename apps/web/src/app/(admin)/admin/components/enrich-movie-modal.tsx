@@ -81,8 +81,13 @@ type PreviewResult =
     };
 
 export function EnrichMovieModal({ movie, onClose, onEnriched }: EnrichMovieModalProps) {
-  const previewMetadata = useAction<{ movieId: string; tmdbId?: number }, any>(api.adminEnrichment.previewMetadata);
-  const enrichMovie = useAction<{ movieId: string; tmdbId: number; replaceImage?: boolean; replaceBackdrop?: boolean }, any>(api.adminEnrichment.enrichMovie);
+  const previewMetadata = useAction<{ movieId: string; tmdbId?: number }, any>(
+    api.adminEnrichment.previewMetadata
+  );
+  const enrichMovie = useAction<
+    { movieId: string; tmdbId: number; replaceImage?: boolean; replaceBackdrop?: boolean },
+    any
+  >(api.adminEnrichment.enrichMovie);
 
   const [preview, setPreview] = useState<PreviewResult | null>(null);
   const [loading, setLoading] = useState(true);
@@ -106,9 +111,7 @@ export function EnrichMovieModal({ movie, onClose, onEnriched }: EnrichMovieModa
         }
       } catch (error) {
         if (!cancelled) {
-          toast.error(
-            error instanceof Error ? error.message : 'Error al buscar en TMDB'
-          );
+          toast.error(error instanceof Error ? error.message : 'Error al buscar en TMDB');
           onClose();
         }
       } finally {
@@ -139,9 +142,7 @@ export function EnrichMovieModal({ movie, onClose, onEnriched }: EnrichMovieModa
 
   const canConfirm =
     preview?.status === 'ok' &&
-    (fieldsToApply.length > 0 ||
-      (replaceImage && preview.canReplaceImage) ||
-      willApplyBackdrop);
+    (fieldsToApply.length > 0 || (replaceImage && preview.canReplaceImage) || willApplyBackdrop);
 
   const handleConfirm = async () => {
     if (!preview || preview.status !== 'ok') return;
@@ -186,7 +187,10 @@ export function EnrichMovieModal({ movie, onClose, onEnriched }: EnrichMovieModa
         aria-labelledby="enrich-modal-title"
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-cinema-border shrink-0">
-          <h2 id="enrich-modal-title" className="text-lg font-semibold text-white flex items-center gap-2">
+          <h2
+            id="enrich-modal-title"
+            className="text-lg font-semibold text-white flex items-center gap-2"
+          >
             <Sparkles className="w-5 h-5 text-cinema-gold" />
             Completar desde TMDB
           </h2>
@@ -202,8 +206,7 @@ export function EnrichMovieModal({ movie, onClose, onEnriched }: EnrichMovieModa
 
         <div className="px-6 py-5 overflow-y-auto flex-1">
           <p className="text-sm text-cinema-muted mb-4">
-            Película local:{' '}
-            <span className="text-white">{getAdminMovieDisplayName(movie)}</span>
+            Película local: <span className="text-white">{getAdminMovieDisplayName(movie)}</span>
           </p>
 
           {loading ? (
@@ -222,9 +225,7 @@ export function EnrichMovieModal({ movie, onClose, onEnriched }: EnrichMovieModa
             <div className="space-y-5">
               {preview.canReplaceImage && (
                 <div className="rounded-xl border border-cinema-border bg-cinema-elevated/40 p-4">
-                  <p className="text-xs uppercase tracking-wide text-cinema-muted mb-3">
-                    Poster
-                  </p>
+                  <p className="text-xs uppercase tracking-wide text-cinema-muted mb-3">Poster</p>
                   <div className="flex items-center justify-center gap-4 flex-wrap">
                     <div className="text-center">
                       <p className="text-xs text-cinema-muted mb-2">Actual</p>
@@ -285,9 +286,7 @@ export function EnrichMovieModal({ movie, onClose, onEnriched }: EnrichMovieModa
                         </>
                       ) : (
                         <>
-                          <span className="text-white font-medium">
-                            Usar el poster de TMDB
-                          </span>{' '}
+                          <span className="text-white font-medium">Usar el poster de TMDB</span>{' '}
                           para completar la imagen faltante
                         </>
                       )}
@@ -299,9 +298,7 @@ export function EnrichMovieModal({ movie, onClose, onEnriched }: EnrichMovieModa
               {preview.canReplaceBackdrop && (
                 <div className="rounded-xl border border-cinema-border bg-cinema-elevated/40 p-4">
                   <div className="flex items-center justify-between gap-2 mb-3">
-                    <p className="text-xs uppercase tracking-wide text-cinema-muted">
-                      Backdrop
-                    </p>
+                    <p className="text-xs uppercase tracking-wide text-cinema-muted">Backdrop</p>
                     {willApplyBackdrop && (
                       <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
                         Se aplicará
@@ -384,9 +381,7 @@ export function EnrichMovieModal({ movie, onClose, onEnriched }: EnrichMovieModa
               <div className="min-w-0">
                 <h3 className="text-xl font-semibold text-white">{preview.tmdb.title}</h3>
                 {preview.tmdb.originalTitle !== preview.tmdb.title && (
-                  <p className="text-sm text-cinema-muted mt-0.5">
-                    {preview.tmdb.originalTitle}
-                  </p>
+                  <p className="text-sm text-cinema-muted mt-0.5">{preview.tmdb.originalTitle}</p>
                 )}
                 <p className="text-sm text-cinema-gold mt-2">{preview.tmdb.releaseYear}</p>
                 <p className="text-sm text-cinema-muted mt-1">

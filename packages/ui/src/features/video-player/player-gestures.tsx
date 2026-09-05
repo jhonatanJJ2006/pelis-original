@@ -23,7 +23,7 @@ export function classifySurfaceDrag(
   dx: number,
   dy: number,
   startX: number,
-  width: number,
+  width: number
 ): PlayerGestureKind | null {
   const absX = Math.abs(dx);
   const absY = Math.abs(dy);
@@ -39,7 +39,7 @@ export function applyVerticalDrag(kind: PlayerGestureKind, startValue: number, d
     return clamp(
       startValue + delta * (BRIGHTNESS_MAX - BRIGHTNESS_MIN),
       BRIGHTNESS_MIN,
-      BRIGHTNESS_MAX,
+      BRIGHTNESS_MAX
     );
   }
   return clamp(startValue + delta, 0, 1);
@@ -92,10 +92,7 @@ export function PlayerGestureHud({
       <div className={PLAYER_GESTURE_HUD_PILL_CLASS}>
         <Icon className="h-4 w-4 shrink-0 text-cinema-accent" aria-hidden />
         <div className={PLAYER_GESTURE_HUD_BAR_CLASS}>
-          <div
-            className={PLAYER_GESTURE_HUD_FILL_CLASS}
-            style={{ width: `${percent}%` }}
-          />
+          <div className={PLAYER_GESTURE_HUD_FILL_CLASS} style={{ width: `${percent}%` }} />
         </div>
         <span className="font-display text-sm tabular-nums text-cinema-chalk">{percent}%</span>
       </div>
@@ -232,7 +229,7 @@ export function usePlayerSurfaceGestures({
       const nextValue = applyVerticalDrag(
         session.kind,
         session.kind === 'brightness' ? session.startBrightness : session.startVolume,
-        dy,
+        dy
       );
       if (session.kind === 'brightness') setBrightnessRef.current(nextValue);
       else setVolumeRef.current(nextValue);

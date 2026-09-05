@@ -11,7 +11,9 @@ export async function POST(req: Request) {
   } catch {
     // empty
   }
-  const email = String(body.email ?? '').toLowerCase().trim();
+  const email = String(body.email ?? '')
+    .toLowerCase()
+    .trim();
   const otp = String(body.otp ?? '').trim();
   if (!email || !otp) {
     return NextResponse.json({ message: 'Correo o código inválido' }, { status: 400 });

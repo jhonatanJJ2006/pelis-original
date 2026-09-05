@@ -1,19 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
-  <rect width="192" height="192" rx="32" fill="#0a0e1a"/>
-  <!-- Clapperboard body -->
-  <rect x="36" y="52" width="120" height="88" rx="8" fill="#1a2248"/>
-  <!-- Clapperboard top stripe -->
-  <rect x="36" y="52" width="120" height="24" rx="8" fill="#2a3a7a"/>
-  <!-- Clapper top triangle -->
-  <polygon points="56,76 72,52 88,76" fill="#4fc3f7"/>
-  <polygon points="88,76 104,52 120,76" fill="#4fc3f7"/>
-  <!-- Play button triangle -->
-  <polygon points="76,90 76,130 116,110" fill="#4fc3f7" opacity="0.9"/>
-  <!-- Film strip dots -->
-  <circle cx="48" cy="106" r="3" fill="#4fc3f7" opacity="0.5"/>
-  <circle cx="60" cy="106" r="3" fill="#4fc3f7" opacity="0.5"/>
-  <circle cx="72" cy="106" r="3" fill="#4fc3f7" opacity="0.5"/>
-  <circle cx="48" cy="120" r="3" fill="#4fc3f7" opacity="0.5"/>
-  <circle cx="60" cy="120" r="3" fill="#4fc3f7" opacity="0.5"/>
-  <circle cx="72" cy="120" r="3" fill="#4fc3f7" opacity="0.5"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="playGold" x1="210" y1="208" x2="310" y2="304" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#E0C98A"/>
+      <stop offset="0.45" stop-color="#F5C842"/>
+      <stop offset="1" stop-color="#C4A35A"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="#0B0B0D"/>
+  <rect x="84" y="84" width="344" height="344" rx="64" fill="#141418" stroke="#C4A35A" stroke-width="2.5"/>
+  <rect x="128" y="160" width="256" height="192" rx="22" fill="#1C1C22"/>
+  <rect x="152" y="182" width="208" height="5" rx="2.5" fill="#C4A35A" opacity="0.85"/>
+  <rect x="152" y="325" width="208" height="5" rx="2.5" fill="#C4A35A" opacity="0.85"/>
+  <path d="M214 214C214 209.6 218.2 207.1 222 209.1L298 249.1C301.5 250.9 301.5 261.1 298 262.9L222 302.9C218.2 304.9 214 302.4 214 298V214Z" fill="url(#playGold)"/>
 </svg>

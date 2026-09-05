@@ -5,13 +5,13 @@ describe('isSafeAnimeUpstreamUrl', () => {
   it('allows the current VidNest master host and disguised segments', () => {
     expect(
       isSafeAnimeUpstreamUrl(
-        'https://cdn.kryntal.top/anime/f899139df5e1059396431415e770c6dd/61b87186ab260d05003427e16ccf5657/master.m3u8',
-      ),
+        'https://cdn.kryntal.top/anime/f899139df5e1059396431415e770c6dd/61b87186ab260d05003427e16ccf5657/master.m3u8'
+      )
     ).toBe(true);
     expect(
       isSafeAnimeUpstreamUrl(
-        'https://03nc1.livedns.my/anime/f899139df5e1059396431415e770c6dd/61b87186ab260d05003427e16ccf5657/seg-1-f1-v1-a1.jpg',
-      ),
+        'https://03nc1.livedns.my/anime/f899139df5e1059396431415e770c6dd/61b87186ab260d05003427e16ccf5657/seg-1-f1-v1-a1.jpg'
+      )
     ).toBe(true);
   });
 

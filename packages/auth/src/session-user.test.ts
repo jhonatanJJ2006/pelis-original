@@ -56,7 +56,7 @@ describe('mergeStoredAndSession', () => {
 describe('resolveUseUser', () => {
   it('returns stored user when the session snapshot is empty', () => {
     expect(resolveUseUser({ sessionUser: null, storedUser: storedWithPlan })).toEqual(
-      storedWithPlan,
+      storedWithPlan
     );
   });
 
@@ -78,7 +78,7 @@ describe('decideSessionSync', () => {
         isPending: true,
         sessionUserId: null,
         hadLiveSession: false,
-      }),
+      })
     ).toEqual({ action: 'keep' });
   });
 
@@ -88,7 +88,7 @@ describe('decideSessionSync', () => {
         isPending: false,
         sessionUserId: null,
         hadLiveSession: false,
-      }),
+      })
     ).toEqual({ action: 'clear' });
   });
 
@@ -99,7 +99,7 @@ describe('decideSessionSync', () => {
         sessionUserId: null,
         sessionError: new Error('network'),
         hadLiveSession: false,
-      }),
+      })
     ).toEqual({ action: 'keep' });
   });
 
@@ -109,7 +109,7 @@ describe('decideSessionSync', () => {
         isPending: false,
         sessionUserId: null,
         hadLiveSession: true,
-      }),
+      })
     ).toEqual({ action: 'keep' });
   });
 
@@ -119,7 +119,7 @@ describe('decideSessionSync', () => {
         isPending: false,
         sessionUserId: 'u1',
         hadLiveSession: true,
-      }),
+      })
     ).toEqual({ action: 'hydrate' });
   });
 });

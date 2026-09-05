@@ -32,9 +32,7 @@ export function Footer({ className }: { className?: string }) {
               <div className="w-9 h-9 rounded bg-cinema-elevated border border-cinema-border flex items-center justify-center">
                 <Film className="w-5 h-5 text-cinema-gold" aria-hidden />
               </div>
-              <span className="font-display text-2xl tracking-tight text-cinema-chalk">
-                Pelis
-              </span>
+              <span className="font-display text-2xl tracking-tight text-cinema-chalk">Pelis</span>
             </Link>
             <p className="text-cinema-silver text-sm leading-relaxed max-w-xs">
               Tu sala de cine en casa. Películas, series y estrenos con una experiencia pensada para
@@ -108,10 +106,16 @@ export function Footer({ className }: { className?: string }) {
             © {new Date().getFullYear()} Pelis. Todos los derechos reservados.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
-            <Link href="/terminos" className="text-cinema-ash hover:text-cinema-gold transition-colors">
+            <Link
+              href="/terminos"
+              className="text-cinema-ash hover:text-cinema-gold transition-colors"
+            >
               Términos
             </Link>
-            <Link href="/privacidad" className="text-cinema-ash hover:text-cinema-gold transition-colors">
+            <Link
+              href="/privacidad"
+              className="text-cinema-ash hover:text-cinema-gold transition-colors"
+            >
               Privacidad
             </Link>
             <span className="text-cinema-ash text-xs tracking-wide uppercase hidden sm:inline">

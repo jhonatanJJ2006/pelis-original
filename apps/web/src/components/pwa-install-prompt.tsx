@@ -306,17 +306,17 @@ export function PwaInstallPrompt({
       ? INSTALL_COPY.ios
       : mode === 'android-tv'
         ? INSTALL_COPY['android-tv']
-      : mode === 'android-apk'
-        ? INSTALL_COPY['android-apk']
-        : mode === 'manual'
-          ? INSTALL_COPY.manual
-          : mode === 'prompt' && !canInstall
-            ? detectTvDevice()
-              ? INSTALL_COPY['android-tv']
-              : isAndroid()
-              ? INSTALL_COPY['pwa-android']
-              : INSTALL_COPY['pwa-desktop']
-            : INSTALL_COPY.prompt;
+        : mode === 'android-apk'
+          ? INSTALL_COPY['android-apk']
+          : mode === 'manual'
+            ? INSTALL_COPY.manual
+            : mode === 'prompt' && !canInstall
+              ? detectTvDevice()
+                ? INSTALL_COPY['android-tv']
+                : isAndroid()
+                  ? INSTALL_COPY['pwa-android']
+                  : INSTALL_COPY['pwa-desktop']
+              : INSTALL_COPY.prompt;
 
   const showApkCta =
     apkAvailable && (mode === 'android-apk' || mode === 'android-tv' || mode === 'manual');
@@ -332,11 +332,7 @@ export function PwaInstallPrompt({
     'downloadLabel' in copy ? copy.downloadLabel : INSTALL_COPY['android-apk'].downloadLabel;
 
   const apkButton = showApkCta && (
-    <a
-      href={APK_DOWNLOAD_PATH}
-      download="pelis.apk"
-      className={apkButtonClasses}
-    >
+    <a href={APK_DOWNLOAD_PATH} download="pelis.apk" className={apkButtonClasses}>
       <Download className={variant === 'inline' ? 'w-4 h-4 mr-2' : 'w-5 h-5 mr-2'} aria-hidden />
       {downloadLabel}
     </a>
@@ -350,12 +346,12 @@ export function PwaInstallPrompt({
         <StepsList steps={copy.steps} />
         {'apkNote' in INSTALL_COPY['android-apk'] &&
           (mode === 'android-apk' || mode === 'android-tv') && (
-          <p className="text-cinema-ash text-xs mt-3">
-            {mode === 'android-tv'
-              ? INSTALL_COPY['android-tv'].apkNote
-              : INSTALL_COPY['android-apk'].apkNote}
-          </p>
-        )}
+            <p className="text-cinema-ash text-xs mt-3">
+              {mode === 'android-tv'
+                ? INSTALL_COPY['android-tv'].apkNote
+                : INSTALL_COPY['android-apk'].apkNote}
+            </p>
+          )}
       </div>
     ) : mode === 'prompt' && !canInstall ? (
       <StepsList

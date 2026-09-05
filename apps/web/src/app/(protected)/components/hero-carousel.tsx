@@ -15,7 +15,10 @@ function HeroImage({ movie, eager }: { movie: MediaItem; eager: boolean }) {
   return (
     <picture className="absolute inset-0">
       <source media="(max-width: 767px)" srcSet={source} />
-      <source media="(min-width: 768px)" srcSet={failed ? HERO_PLACEHOLDER : movie.backdropImage || poster} />
+      <source
+        media="(min-width: 768px)"
+        srcSet={failed ? HERO_PLACEHOLDER : movie.backdropImage || poster}
+      />
       <img
         src={source}
         alt=""

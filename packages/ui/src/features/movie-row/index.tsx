@@ -30,19 +30,17 @@ export function MovieRow({
 }: MovieRowProps) {
   const { setRef, getEl } = useDragScroll();
 
-  const scrollBy = useCallback((dir: 1 | -1) => {
-    const el = getEl();
-    if (!el) return;
-    el.scrollBy({ left: dir * el.clientWidth * 0.8 });
-  }, [getEl]);
+  const scrollBy = useCallback(
+    (dir: 1 | -1) => {
+      const el = getEl();
+      if (!el) return;
+      el.scrollBy({ left: dir * el.clientWidth * 0.8 });
+    },
+    [getEl]
+  );
 
   if (isLoading || movies === undefined) {
-    return (
-      <MovieRowSkeleton
-        className={className}
-        showHeader={Boolean(title)}
-      />
-    );
+    return <MovieRowSkeleton className={className} showHeader={Boolean(title)} />;
   }
 
   if (movies.length === 0) {
@@ -75,10 +73,7 @@ export function MovieRow({
           className="no-scrollbar flex gap-3 overflow-x-auto px-1 py-1 cursor-grab active:cursor-grabbing select-none"
         >
           {movies.map((movie, index) => (
-            <div
-              key={movie._id}
-              className="w-[150px] sm:w-[160px] md:w-[180px] shrink-0"
-            >
+            <div key={movie._id} className="w-[150px] sm:w-[160px] md:w-[180px] shrink-0">
               <MovieCard
                 movie={movie}
                 showFavorite={false}

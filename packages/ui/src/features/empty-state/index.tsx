@@ -24,7 +24,9 @@ export function EmptyState({
       <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-cinema-surface border border-cinema-accent/25 mb-6 shadow-[0_4px_24px_rgba(196,163,90,0.08)]">
         <Icon className="w-9 h-9 text-cinema-violet-light" aria-hidden />
       </div>
-      <h3 className="font-display text-2xl md:text-3xl tracking-tight text-cinema-chalk mb-2">{title}</h3>
+      <h3 className="font-display text-2xl md:text-3xl tracking-tight text-cinema-chalk mb-2">
+        {title}
+      </h3>
       <p className="text-cinema-muted max-w-md mx-auto mb-8">{description}</p>
       {actionLabel && actionHref && (
         <Link href={actionHref}>

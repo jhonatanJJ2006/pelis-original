@@ -78,6 +78,7 @@ Archivo: apps/web/src/app/playground/page.tsx. Detalle: docs/TESTING.md.
 2. Restos Convex: CONVEX.md, DEPLOY.md stale, e2e/email-verification.e2e.ts, URLs *.convex.cloud en imágenes (placeholder).
 3. ignoreBuildErrors: apps/web/next.config.mjs ignora TS y ESLint en build. Build verde no implica tipos correctos.
 4. Streaming y auth: /api/stream, /api/tv/stream, /api/anime/stream pasan por denyUnlessStreamAccess (sesión + plan activo o ADMIN). No quitar esa puerta. Históricamente sin auth.
+4b. Plan entitlements — sesiones concurrentes (MVP): `Plan.maxDevices` (default 1). En Better Auth `databaseHooks.session.create` se recortan sesiones no-expiradas más viejas si el usuario supera el límite. ADMIN = ilimitado; sin plan activo = 1. Sin middleware por request en este MVP. Seed: Mensual/Básico=1, Trimestral/Estándar=2, Anual/Premium=4.
 5. Posters gitignored: apps/web/public/peliculas/ y apps/web/public/uploads/. Hash MD5 32 hex -> /peliculas/peliculas/{hash}.webp. imageId -> /uploads/{id}.webp. Clone limpio = imágenes rotas.
    Ver packages/db/src/lib/resolveMovieImage.ts y scripts/audit-images.mjs.
 
@@ -104,7 +105,7 @@ Reglas fijas:
 
 Quién hace qué:
 - **Mark:** auto-mergea PRs hacia **staging** (cuando el PR está listo / checks OK). Sin cambio de política.
-- **Glob:** **siempre** promueve **staging → main** cuando CI está verde en **test**, **build** y **format**. No hace falta OK por chat por cada promote.
+- **Glob:** **siempre** promueve **staging → main** cuando CI está verde en los jobs **`format`**, **`test`** y **`build`** (pipeline: format+test en paralelo → build → deploy). El job **`deploy`** existe pero no es gate de promote. No hace falta OK por chat por cada promote.
 
 Promoción a producción = merge `staging` → `main` a cargo de Glob bajo esa regla de CI. Nadie mergea a `main` desde una feature branch.
 
@@ -134,7 +135,7 @@ Rutas completas: docs/APP.md.
 ## 2. Duenos
 
 - Mark: docs, DESIGN.md, playground, e2e, UI Maison Noir; auto-merge de PRs a **staging**.
-- Glob: environments y ramas; promote automático **staging → main** si CI (test/build/format) verde. No toca AGENTS.md ni playground/e2e.
+- Glob: environments y ramas; promote automático **staging → main** si CI jobs **`format`**+**`test`**+**`build`** verdes (`deploy` es post-merge, no gate). No toca AGENTS.md ni playground/e2e.
 - Webos: canales y cuenta de pruebas. Sergi: reproductores. Bob: login. Leo: conectores.
 
 ## 3. Por donde continuar

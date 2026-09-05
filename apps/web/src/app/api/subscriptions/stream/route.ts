@@ -24,7 +24,7 @@ function ensureTableToFns(): Map<string, string[]> {
   if (tableToFns) return tableToFns;
   const map = new Map<string, string[]>();
   for (const def of listFunctions()) {
-    const tables = def.kind === 'query' ? def.reads : def.writes ?? [];
+    const tables = def.kind === 'query' ? def.reads : (def.writes ?? []);
     for (const t of tables) {
       const arr = map.get(t) ?? [];
       arr.push(def.name);
@@ -70,9 +70,7 @@ export async function GET(req: Request) {
   const stream = new ReadableStream<Uint8Array>({
     start(controller) {
       const send = (event: string, payload: unknown) => {
-        controller.enqueue(
-          encoder.encode(`event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`),
-        );
+        controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`));
       };
 
       send('hello', { keys, tables: Array.from(tablesOfInterest) });
@@ -100,7 +98,11 @@ export async function GET(req: Request) {
       req.signal.addEventListener('abort', () => {
         if (unsubscribe) unsubscribe();
         if (heartbeat) clearInterval(heartbeat);
-        try { controller.close(); } catch { /* already closed */ }
+        try {
+          controller.close();
+        } catch {
+          /* already closed */
+        }
       });
     },
     cancel() {

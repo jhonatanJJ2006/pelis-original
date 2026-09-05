@@ -44,10 +44,9 @@ export function HomePageClient({ preloaded }: HomePageClientProps) {
   const liveTrending = useQuery<MediaItem[]>(api.movies.getTrending, {}) as MediaItem[] | undefined;
   const liveSeries = useQuery<MediaItem[]>(api.movies.listSeries, {}) as MediaItem[] | undefined;
   const liveGenres = useQuery<string[]>(api.movies.getGenres, {}) as string[] | undefined;
-  const continueWatching = useQuery<Array<{ _id: string; progress: number; duration: number; movie: MediaItem }>>(
-    api.history.getContinueWatching,
-    user ? { userId: user._id as any, limit: 10 } : 'skip'
-  );
+  const continueWatching = useQuery<
+    Array<{ _id: string; progress: number; duration: number; movie: MediaItem }>
+  >(api.history.getContinueWatching, user ? { userId: user._id as any, limit: 10 } : 'skip');
 
   const movies = liveMovies ?? preloaded.movies.data;
   const featuredMovies = liveFeatured ?? preloaded.featured.data;
@@ -69,7 +68,6 @@ export function HomePageClient({ preloaded }: HomePageClientProps) {
     return <LandingPage />;
   }
 
-
   const continueItems =
     continueWatching
       ?.filter((item) => item.movie)
@@ -82,11 +80,7 @@ export function HomePageClient({ preloaded }: HomePageClientProps) {
 
   return (
     <div className="pb-12">
-      {featuredMovies === undefined ? (
-        <HeroSkeleton />
-      ) : (
-        <HeroCarousel movies={featuredMovies} />
-      )}
+      {featuredMovies === undefined ? <HeroSkeleton /> : <HeroCarousel movies={featuredMovies} />}
 
       <div className="container mx-auto px-4 py-10 space-y-12 md:space-y-16">
         {user && continueItems.length > 0 && (

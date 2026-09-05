@@ -56,7 +56,9 @@ export async function POST(req: Request) {
   } catch {
     // empty
   }
-  const email = String(body.email ?? '').toLowerCase().trim();
+  const email = String(body.email ?? '')
+    .toLowerCase()
+    .trim();
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return NextResponse.json({ message: 'Correo inválido' }, { status: 400 });
   }
@@ -68,7 +70,10 @@ export async function POST(req: Request) {
     const { prisma } = await import('@pelis/db');
     const baUser = await prisma.user.findUnique({ where: { email } });
     if (!baUser) {
-      return NextResponse.json({ message: 'No existe una cuenta con este correo' }, { status: 404 });
+      return NextResponse.json(
+        { message: 'No existe una cuenta con este correo' },
+        { status: 404 }
+      );
     }
 
     const now = Date.now();
@@ -77,7 +82,7 @@ export async function POST(req: Request) {
       const remaining = Math.ceil((OTP_COOLDOWN_MS - (now - lastSent)) / 1000);
       return NextResponse.json(
         { message: `Vuelve a intentarlo en ${remaining} segundos` },
-        { status: 429 },
+        { status: 429 }
       );
     }
 

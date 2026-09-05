@@ -22,13 +22,13 @@ export async function POST(req: Request) {
     const result = await performMovieBackdrop(
       body.movieId,
       body.tmdbId,
-      body.replaceBackdrop ?? false,
+      body.replaceBackdrop ?? false
     );
     return NextResponse.json(result);
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : 'Error al aplicar backdrop' },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

@@ -33,7 +33,7 @@ export function createVodHlsConfig(): Partial<HlsConfig> {
 export function nextHlsSegmentUrls(
   urls: string[],
   currentIndex: number,
-  count = HLS_PREFETCH_SEGMENTS,
+  count = HLS_PREFETCH_SEGMENTS
 ): string[] {
   if (count <= 0 || urls.length === 0) return [];
   const from = currentIndex < 0 ? 0 : currentIndex + 1;
@@ -42,7 +42,7 @@ export function nextHlsSegmentUrls(
 
 export function parseHlsPlaylist(
   content: string,
-  baseUrl: string,
+  baseUrl: string
 ): { isMaster: boolean; urls: string[]; durations: number[] } {
   const isMaster = /#EXT-X-STREAM-INF/i.test(content);
   const urls: string[] = [];
@@ -75,7 +75,7 @@ export function parseHlsPlaylist(
 
 export function prefetchHlsFragmentUrls(
   urls: string[],
-  opts?: { signal?: AbortSignal; warmed?: Set<string> },
+  opts?: { signal?: AbortSignal; warmed?: Set<string> }
 ): void {
   const warmed = opts?.warmed;
   const signal = opts?.signal;

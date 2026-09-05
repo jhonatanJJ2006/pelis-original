@@ -9,9 +9,11 @@ import {
 
 function fragmentIndexAtTime(
   fragments: Array<{ start: number; duration: number; url: string }>,
-  time: number,
+  time: number
 ): number {
-  const exact = fragments.findIndex((frag) => time >= frag.start && time < frag.start + frag.duration);
+  const exact = fragments.findIndex(
+    (frag) => time >= frag.start && time < frag.start + frag.duration
+  );
   if (exact >= 0) return exact;
   return fragments.findIndex((frag) => frag.start >= time);
 }
@@ -31,19 +33,19 @@ export function attachHlsForwardPrefetch(hls: Hls, video?: HTMLVideoElement): ()
       initSegment?: { url: string } | null;
     },
     index: number,
-    includeCurrent: boolean,
+    includeCurrent: boolean
   ) => {
     if (details.initSegment?.url) warmUrls([details.initSegment.url]);
     const from = index < 0 ? 0 : includeCurrent ? index : index + 1;
     const extra = includeCurrent ? 1 : 0;
     warmUrls(
-      details.fragments.slice(from, from + HLS_PREFETCH_SEGMENTS + extra).map((frag) => frag.url),
+      details.fragments.slice(from, from + HLS_PREFETCH_SEGMENTS + extra).map((frag) => frag.url)
     );
   };
 
   const onLevelLoaded = (
     _event: unknown,
-    data: { details: { fragments: Array<{ url: string }>; initSegment?: { url: string } | null } },
+    data: { details: { fragments: Array<{ url: string }>; initSegment?: { url: string } | null } }
   ) => {
     if (data.details.initSegment?.url) warmUrls([data.details.initSegment.url]);
     warmUrls(data.details.fragments.slice(0, HLS_PREFETCH_SEGMENTS).map((frag) => frag.url));
@@ -51,12 +53,12 @@ export function attachHlsForwardPrefetch(hls: Hls, video?: HTMLVideoElement): ()
 
   const onFragChanged = (
     _event: unknown,
-    data: { frag: { sn: number | 'initSegment'; url: string; level: number } },
+    data: { frag: { sn: number | 'initSegment'; url: string; level: number } }
   ) => {
     const details = hls.levels[data.frag.level]?.details;
     if (!details) return;
     const idx = details.fragments.findIndex(
-      (frag) => frag.url === data.frag.url || frag.sn === data.frag.sn,
+      (frag) => frag.url === data.frag.url || frag.sn === data.frag.sn
     );
     warmAroundIndex(details, idx, false);
   };
@@ -124,7 +126,10 @@ export function attachNativeHlsPrefetch(video: HTMLVideoElement, manifestUrl: st
       const text = await res.text();
       const parsed = parseHlsPlaylist(text, manifestUrl);
       if (parsed.isMaster && parsed.urls[0]) {
-        const nested = await fetch(parsed.urls[0], { credentials: 'include', signal: abort.signal });
+        const nested = await fetch(parsed.urls[0], {
+          credentials: 'include',
+          signal: abort.signal,
+        });
         if (!nested.ok) return;
         const media = parseHlsPlaylist(await nested.text(), parsed.urls[0]);
         segmentUrls = media.urls;

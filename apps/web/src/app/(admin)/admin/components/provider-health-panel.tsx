@@ -70,7 +70,11 @@ export function ProviderHealthPanel() {
                   : 'border-red-500/30 bg-red-500/5 text-red-300'
               )}
             >
-              {r.ok ? <CheckCircle2 className="w-4 h-4 shrink-0" /> : <XCircle className="w-4 h-4 shrink-0" />}
+              {r.ok ? (
+                <CheckCircle2 className="w-4 h-4 shrink-0" />
+              ) : (
+                <XCircle className="w-4 h-4 shrink-0" />
+              )}
               <div className="min-w-0 flex-1">
                 <p className="font-medium truncate">
                   {r.name}
@@ -79,9 +83,7 @@ export function ProviderHealthPanel() {
                   </span>
                 </p>
                 <p className="text-[10px] opacity-70 truncate">
-                  {r.ok
-                    ? `${r.responseMs ?? '—'}ms`
-                    : r.error ?? 'Error'}
+                  {r.ok ? `${r.responseMs ?? '—'}ms` : (r.error ?? 'Error')}
                 </p>
               </div>
             </div>

@@ -3,7 +3,17 @@
 import { useQuery, useMutation, useAction } from '@pelis/db/client';
 import Link from 'next/link';
 import { useState } from 'react';
-import { Download, ImageIcon, Monitor, Pencil, Plus, Search, Sparkles, Star, Trash2 } from 'lucide-react';
+import {
+  Download,
+  ImageIcon,
+  Monitor,
+  Pencil,
+  Plus,
+  Search,
+  Sparkles,
+  Star,
+  Trash2,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@pelis/db/api';
 import { Button, Input, Spinner } from '@pelis/ui/components';
@@ -49,10 +59,15 @@ export default function AdminAnimePage() {
   const importCatalog = useAction(api.anime.importCatalogBulk);
 
   const handleImportCatalog = async () => {
-    if (!confirm('¿Importar ~200 animes populares desde AniList? Puede tardar varios minutos.')) return;
+    if (!confirm('¿Importar ~200 animes populares desde AniList? Puede tardar varios minutos.'))
+      return;
     setImportingCatalog(true);
     try {
-      const result = (await importCatalog({ limit: 200 })) as { imported: number; skipped: number; total: number };
+      const result = (await importCatalog({ limit: 200 })) as {
+        imported: number;
+        skipped: number;
+        total: number;
+      };
       toast.success(`Importados: ${result.imported}, omitidos: ${result.skipped}`);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Error al importar catálogo');
@@ -145,25 +160,33 @@ export default function AdminAnimePage() {
       {anime === undefined ? (
         <AdminTableSkeleton />
       ) : anime.length === 0 ? (
-        <div className="text-center py-24 text-cinema-muted">
-          No hay animes con ese filtro.
-        </div>
+        <div className="text-center py-24 text-cinema-muted">No hay animes con ese filtro.</div>
       ) : (
         <>
           <div className="md:hidden space-y-3">
             {anime.map((a) => (
-              <article key={a._id} className="rounded-2xl border border-cinema-border bg-cinema-surface p-4">
+              <article
+                key={a._id}
+                className="rounded-2xl border border-cinema-border bg-cinema-surface p-4"
+              >
                 <div className="flex gap-3">
                   <div className="w-14 h-20 shrink-0 rounded-lg overflow-hidden bg-cinema-elevated">
-                    <MoviePoster src={a.image} alt={a.title} className="w-full h-full object-cover" />
+                    <MoviePoster
+                      src={a.image}
+                      alt={a.title}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   <div className="min-w-0 flex-1">
                     <h3 className="font-medium text-sm leading-snug text-white">{a.title}</h3>
                     {a.alternativeTitle && (
-                      <p className="text-xs text-cinema-ash mt-0.5 truncate">{a.alternativeTitle}</p>
+                      <p className="text-xs text-cinema-ash mt-0.5 truncate">
+                        {a.alternativeTitle}
+                      </p>
                     )}
                     <p className="text-xs text-cinema-muted mt-1">
-                      {a.year} · {a.episodes} ep. · {a.status === 'ongoing' ? 'En emisión' : 'Finalizado'}
+                      {a.year} · {a.episodes} ep. ·{' '}
+                      {a.status === 'ongoing' ? 'En emisión' : 'Finalizado'}
                     </p>
                   </div>
                 </div>
@@ -230,15 +253,24 @@ export default function AdminAnimePage() {
               </thead>
               <tbody>
                 {anime.map((a) => (
-                  <tr key={a._id} className="border-b border-cinema-border/60 hover:bg-cinema-elevated/30 transition-colors">
+                  <tr
+                    key={a._id}
+                    className="border-b border-cinema-border/60 hover:bg-cinema-elevated/30 transition-colors"
+                  >
                     <td className="px-4 py-3">
                       <div className="w-10 h-14 rounded overflow-hidden bg-cinema-elevated">
-                        <MoviePoster src={a.image} alt={a.title} className="w-full h-full object-cover" />
+                        <MoviePoster
+                          src={a.image}
+                          alt={a.title}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
                     </td>
                     <td className="px-4 py-3">
                       <p className="font-medium max-w-[260px] truncate text-white">{a.title}</p>
-                      <p className="text-xs text-cinema-ash mt-0.5 truncate">{a.genre.slice(0, 3).join(', ')}</p>
+                      <p className="text-xs text-cinema-ash mt-0.5 truncate">
+                        {a.genre.slice(0, 3).join(', ')}
+                      </p>
                     </td>
                     <td className="px-4 py-3 text-cinema-muted">{a.year}</td>
                     <td className="px-4 py-3 text-cinema-muted">{a.episodes}</td>

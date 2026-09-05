@@ -22,7 +22,7 @@ export interface MeUserLike {
 
 export function hasActivePlan(
   user: { planExpiresAt?: number } | null | undefined,
-  now = Date.now(),
+  now = Date.now()
 ): boolean {
   return !!(user?.planExpiresAt && user.planExpiresAt > now);
 }
@@ -41,10 +41,7 @@ export function sessionFallbackUser(sessionUser: SessionUserLike): User {
   };
 }
 
-export function mergeStoredAndSession(
-  stored: User | null,
-  sessionUser: SessionUserLike,
-): User {
+export function mergeStoredAndSession(stored: User | null, sessionUser: SessionUserLike): User {
   const fromSession = sessionFallbackUser(sessionUser);
   if (!stored || stored._id !== fromSession._id) return fromSession;
   return {

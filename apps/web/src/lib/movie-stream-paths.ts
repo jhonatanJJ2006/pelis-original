@@ -3,13 +3,12 @@ import path from 'path';
 
 export const MANIFEST_CANDIDATES = ['playlist.m3u8', 'index.m3u8', 'master.m3u8'] as const;
 
-const DEFAULT_ROOTS = [
-  '/run/media/det/Pelis-A/output',
-  '/run/media/det/Pelis-B/output',
-];
+const DEFAULT_ROOTS = ['/run/media/det/Pelis-A/output', '/run/media/det/Pelis-B/output'];
 
 export function getOutputRoots(): string[] {
-  const multi = process.env.MOVIE_OUTPUT_ROOTS?.split(':').map((r) => r.trim()).filter(Boolean);
+  const multi = process.env.MOVIE_OUTPUT_ROOTS?.split(':')
+    .map((r) => r.trim())
+    .filter(Boolean);
   if (multi?.length) return multi;
 
   const single = process.env.MOVIE_OUTPUT_ROOT?.trim();
@@ -125,7 +124,7 @@ export function rewriteM3u8Manifest(
 
 export function parseByteRange(
   rangeHeader: string | null | undefined,
-  fileSize: number,
+  fileSize: number
 ): { start: number; end: number } | null {
   if (!rangeHeader || fileSize <= 0) return null;
   const match = /^bytes=(\d*)-(\d*)$/i.exec(rangeHeader.trim());
@@ -148,10 +147,15 @@ export function parseByteRange(
     end = hasEnd ? Number(match[2]) : fileSize - 1;
   }
 
-  if (!Number.isFinite(start) || !Number.isFinite(end) || start < 0 || start >= fileSize || end < start) {
+  if (
+    !Number.isFinite(start) ||
+    !Number.isFinite(end) ||
+    start < 0 ||
+    start >= fileSize ||
+    end < start
+  ) {
     return null;
   }
 
   return { start, end: Math.min(end, fileSize - 1) };
 }
-

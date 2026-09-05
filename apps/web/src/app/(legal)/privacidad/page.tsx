@@ -43,22 +43,22 @@ export default function PrivacidadPage() {
               estado de bloqueo.
             </li>
             <li>
-              <strong className="text-cinema-chalk">Autenticación:</strong> contraseña (gestionada por
-              Better Auth), códigos OTP temporales de verificación, sesiones (token, caducidad) y,
-              cuando Better Auth lo registra, dirección IP y user-agent de la sesión.
+              <strong className="text-cinema-chalk">Autenticación:</strong> contraseña (gestionada
+              por Better Auth), códigos OTP temporales de verificación, sesiones (token, caducidad)
+              y, cuando Better Auth lo registra, dirección IP y user-agent de la sesión.
             </li>
             <li>
-              <strong className="text-cinema-chalk">OAuth Google:</strong> identificadores y tokens de
-              cuenta vinculados al proveedor Google cuando inicias sesión con Google.
+              <strong className="text-cinema-chalk">OAuth Google:</strong> identificadores y tokens
+              de cuenta vinculados al proveedor Google cuando inicias sesión con Google.
             </li>
             <li>
-              <strong className="text-cinema-chalk">Uso del catálogo:</strong> favoritos de películas e
-              historial de reproducción (progreso y duración asociados a títulos).
+              <strong className="text-cinema-chalk">Uso del catálogo:</strong> favoritos de
+              películas e historial de reproducción (progreso y duración asociados a títulos).
             </li>
             <li>
               <strong className="text-cinema-chalk">Suscripción:</strong> plan contratado, fechas,
-              estado y referencias de Stripe (cliente, suscripción y precio) necesarias para cobrar y
-              mantener el acceso.
+              estado y referencias de Stripe (cliente, suscripción y precio) necesarias para cobrar
+              y mantener el acceso.
             </li>
             <li>
               <strong className="text-cinema-chalk">Operación:</strong> marcas de último inicio de
@@ -66,8 +66,8 @@ export default function PrivacidadPage() {
             </li>
           </ul>
           <p>
-            El catálogo (películas, series, anime, TV) es contenido del servicio; no es dato personal
-            salvo cuando se vincula a tu cuenta (favoritos, historial, plan).
+            El catálogo (películas, series, anime, TV) es contenido del servicio; no es dato
+            personal salvo cuando se vincula a tu cuenta (favoritos, historial, plan).
           </p>
         </section>
 
@@ -105,19 +105,19 @@ export default function PrivacidadPage() {
           <p>Según la configuración del proyecto, intervienen entre otros:</p>
           <ul className="list-disc pl-5 space-y-2">
             <li>
-              <strong className="text-cinema-chalk">Google</strong> — inicio de sesión OAuth (si está
-              habilitado con credenciales de cliente).
+              <strong className="text-cinema-chalk">Google</strong> — inicio de sesión OAuth (si
+              está habilitado con credenciales de cliente).
             </li>
             <li>
               <strong className="text-cinema-chalk">Stripe</strong> — pagos y portal de suscripción.
             </li>
             <li>
-              <strong className="text-cinema-chalk">Resend</strong> — envío del código de verificación
-              por email.
+              <strong className="text-cinema-chalk">Resend</strong> — envío del código de
+              verificación por email.
             </li>
             <li>
-              <strong className="text-cinema-chalk">TMDB / AniList</strong> — metadatos e imágenes de
-              catálogo (no son tu cuenta de usuario).
+              <strong className="text-cinema-chalk">TMDB / AniList</strong> — metadatos e imágenes
+              de catálogo (no son tu cuenta de usuario).
             </li>
             <li>
               <strong className="text-cinema-chalk">Proveedores de streaming de anime/TV</strong>{' '}
@@ -126,8 +126,8 @@ export default function PrivacidadPage() {
               título/episodio necesarios para la reproducción, no tu contraseña.
             </li>
             <li>
-              <strong className="text-cinema-chalk">Alojamiento / base de datos</strong> — Postgres y
-              la infraestructura donde corre la app.
+              <strong className="text-cinema-chalk">Alojamiento / base de datos</strong> — Postgres
+              y la infraestructura donde corre la app.
             </li>
           </ul>
         </section>
@@ -173,8 +173,8 @@ export default function PrivacidadPage() {
           </h2>
           <p>
             El catálogo puede incluir etiquetas de clasificación en fichas. Pelis no implementa un
-            sistema avanzado de control parental ni verificación de edad más allá de lo que exija
-            el registro ordinario. Si eres menor, usa el servicio solo con supervisión adecuada.
+            sistema avanzado de control parental ni verificación de edad más allá de lo que exija el
+            registro ordinario. Si eres menor, usa el servicio solo con supervisión adecuada.
           </p>
         </section>
 
@@ -183,7 +183,10 @@ export default function PrivacidadPage() {
           <p>
             Podemos actualizar esta política para reflejar cambios reales del producto. La fecha de
             «última actualización» se revisará en esta página. Ver también los{' '}
-            <Link href="/terminos" className="text-cinema-gold hover:text-cinema-gold-light underline">
+            <Link
+              href="/terminos"
+              className="text-cinema-gold hover:text-cinema-gold-light underline"
+            >
               Términos de uso
             </Link>
             .

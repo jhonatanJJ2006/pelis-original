@@ -50,10 +50,7 @@ function isInside(base: string, target: string): boolean {
   return targetNorm === normalize(base) || targetNorm.startsWith(baseNorm);
 }
 
-export async function GET(
-  _req: Request,
-  { params }: { params: { path: string[] } },
-) {
+export async function GET(_req: Request, { params }: { params: { path: string[] } }) {
   const segments = params.path ?? [];
   if (segments.length === 0) {
     return new NextResponse('not found', { status: 404 });

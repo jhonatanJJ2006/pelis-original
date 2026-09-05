@@ -50,9 +50,7 @@ describe('MovieCard', () => {
     const { rerender } = render(<MovieCard movie={movie} />);
     expect(screen.getByText('Película')).toBeInTheDocument();
 
-    rerender(
-      <MovieCard movie={{ ...movie, _id: 's1', mediaType: 'series', episodes: 8 }} />
-    );
+    rerender(<MovieCard movie={{ ...movie, _id: 's1', mediaType: 'series', episodes: 8 }} />);
     expect(screen.getByText('Serie')).toBeInTheDocument();
     expect(screen.getByText('8 episodios')).toBeInTheDocument();
   });

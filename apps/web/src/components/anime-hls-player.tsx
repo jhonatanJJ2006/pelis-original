@@ -366,7 +366,8 @@ export function AnimeHlsPlayer({
 
   const showSkipIntro =
     intro && currentTime >= intro.start && currentTime <= intro.end && intro.end - intro.start > 2;
-  const showSkipOutro = outro && currentTime >= outro.start && currentTime <= outro.end && duration > 0;
+  const showSkipOutro =
+    outro && currentTime >= outro.start && currentTime <= outro.end && duration > 0;
   const bufferedPercent = duration > 0 ? Math.min(100, (buffered / duration) * 100) : 0;
 
   return (
@@ -374,7 +375,7 @@ export function AnimeHlsPlayer({
       ref={containerRef}
       className={cn(
         'group relative h-full w-full select-none overflow-hidden bg-cinema-bg [touch-action:none]',
-        landscapeClassName,
+        landscapeClassName
       )}
       style={landscapeStyle}
       onMouseMove={bumpControls}
@@ -408,7 +409,9 @@ export function AnimeHlsPlayer({
           opaque={duration === 0}
         />
       )}
-      {landscapeActive && hud && <PlayerGestureHud kind={hud.kind} value={hud.value} visible={hudVisible} />}
+      {landscapeActive && hud && (
+        <PlayerGestureHud kind={hud.kind} value={hud.value} visible={hudVisible} />
+      )}
 
       {error && (
         <div className="absolute inset-0 z-20 flex items-center justify-center bg-cinema-bg/80">

@@ -8,7 +8,10 @@ import { ArrowLeft, Sparkles } from 'lucide-react';
 import { api } from '@pelis/db/api';
 import { AdminTableSkeleton } from '@pelis/ui/features/admin-table-skeleton';
 import { MoviePoster } from '@pelis/ui/features/movie-poster';
-import { AdminMovieQualityBadges, type AdminMovieListItem } from '../../components/admin-movie-list-item';
+import {
+  AdminMovieQualityBadges,
+  type AdminMovieListItem,
+} from '../../components/admin-movie-list-item';
 import { getAdminMovieDisplayName, isAdminOrphanDisplayName } from '../../lib/movie-display';
 import { cn } from '@pelis/ui/utils';
 

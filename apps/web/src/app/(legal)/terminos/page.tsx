@@ -36,7 +36,9 @@ export default function TerminosPage() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="font-display text-xl text-cinema-chalk tracking-wide">2. Cuenta y acceso</h2>
+          <h2 className="font-display text-xl text-cinema-chalk tracking-wide">
+            2. Cuenta y acceso
+          </h2>
           <ul className="list-disc pl-5 space-y-2">
             <li>
               Puedes registrarte con email y contraseña (verificación por código enviado al correo)
@@ -60,9 +62,9 @@ export default function TerminosPage() {
           </h2>
           <p>
             Los planes se muestran en la página de suscripción. Los pagos se procesan a través de{' '}
-            <strong className="text-cinema-chalk">Stripe</strong> (checkout y portal de facturación).
-            El acceso al plan se activa o actualiza según los eventos de pago/suscripción que
-            recibimos de Stripe.
+            <strong className="text-cinema-chalk">Stripe</strong> (checkout y portal de
+            facturación). El acceso al plan se activa o actualiza según los eventos de
+            pago/suscripción que recibimos de Stripe.
           </p>
           <p>
             Precios, duración y características de cada plan son los publicados en la aplicación en
@@ -89,8 +91,8 @@ export default function TerminosPage() {
           <p>
             El catálogo y las reproducciones pueden apoyarse en metadatos e infraestructura de
             terceros (por ejemplo, enriquecimiento de fichas, proveedores de anime/streaming o
-            listas de TV). Pelis no garantiza disponibilidad ininterrumpida de cada título,
-            episodio o canal, ni que todas las fuentes externas estén siempre operativas.
+            listas de TV). Pelis no garantiza disponibilidad ininterrumpida de cada título, episodio
+            o canal, ni que todas las fuentes externas estén siempre operativas.
           </p>
           <p>
             No afirmamos titularidad exclusiva sobre obras audiovisuales de terceros. Las marcas y
@@ -126,7 +128,10 @@ export default function TerminosPage() {
           <h2 className="font-display text-xl text-cinema-chalk tracking-wide">8. Privacidad</h2>
           <p>
             El tratamiento de datos personales se describe en la{' '}
-            <Link href="/privacidad" className="text-cinema-gold hover:text-cinema-gold-light underline">
+            <Link
+              href="/privacidad"
+              className="text-cinema-gold hover:text-cinema-gold-light underline"
+            >
               Política de privacidad
             </Link>
             .

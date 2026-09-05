@@ -103,17 +103,28 @@ export function createAuth() {
       session: {
         create: {
           after: async (session) => {
-            const s = session as unknown as { userId?: string; expiresAt?: string | number };
+            const s = session as unknown as {
+              id?: string;
+              userId?: string;
+              expiresAt?: string | number | Date;
+            };
             if (!s?.userId) return;
             const expiresAt =
-              typeof s.expiresAt === 'number'
-                ? new Date(s.expiresAt)
-                : s.expiresAt
+              s.expiresAt instanceof Date
+                ? s.expiresAt
+                : typeof s.expiresAt === 'number'
                   ? new Date(s.expiresAt)
-                  : new Date();
+                  : s.expiresAt
+                    ? new Date(s.expiresAt)
+                    : new Date();
             await recordLogin(s.userId, expiresAt).catch((err) =>
               console.error('[auth] recordLogin failed', err),
             );
+            if (s.id) {
+              await enforceConcurrentSessionLimit(s.id, s.userId).catch((err) =>
+                console.error('[auth] enforceConcurrentSessionLimit failed', err),
+              );
+            }
           },
         },
       },
@@ -162,6 +173,52 @@ async function recordLogin(userId: string, expiresAt: Date) {
     where: { id: userId },
     data: { lastLoginAt: new Date(), lastSessionExpiresAt: expiresAt },
   });
+}
+
+
+/**
+ * MVP concurrent session/device limit by plan.maxDevices.
+ * ADMIN: unlimited. No active plan: treat as 1. Keeps newest sessions (incl. just-created).
+ * No per-request middleware for this MVP.
+ */
+async function enforceConcurrentSessionLimit(sessionId: string, userId: string) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { role: true },
+  });
+  if (user?.role === 'ADMIN') return;
+
+  const now = new Date();
+  const activeSub = await prisma.subscription.findFirst({
+    where: {
+      userId,
+      status: 'ACTIVE',
+      endDate: { gt: now },
+    },
+    include: { plan: { select: { maxDevices: true } } },
+    orderBy: { endDate: 'desc' },
+  });
+
+  const maxDevices = Math.max(1, activeSub?.plan?.maxDevices ?? 1);
+
+  const sessions = await prisma.session.findMany({
+    where: { userId, expiresAt: { gt: now } },
+    orderBy: { createdAt: 'desc' },
+    select: { id: true, createdAt: true },
+  });
+
+  if (sessions.length <= maxDevices) return;
+
+  const keep = new Set<string>([sessionId]);
+  for (const s of sessions) {
+    if (keep.size >= maxDevices) break;
+    keep.add(s.id);
+  }
+
+  const toDelete = sessions.filter((s) => !keep.has(s.id)).map((s) => s.id);
+  if (toDelete.length === 0) return;
+
+  await prisma.session.deleteMany({ where: { id: { in: toDelete } } });
 }
 
 export type AuthInstance = ReturnType<typeof createAuth>;

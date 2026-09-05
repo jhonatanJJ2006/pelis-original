@@ -40,8 +40,13 @@ type PreviewResult =
     };
 
 export function BackdropSeriesModal({ series, onClose, onApplied }: BackdropSeriesModalProps) {
-  const previewBackdrop = useAction<{ seriesId: string; tmdbId?: number }, any>(api.adminSeriesEnrichment.previewSeriesBackdrop);
-  const applyBackdrop = useAction<{ seriesId: string; tmdbId: number; replaceBackdrop?: boolean }, any>(api.adminSeriesEnrichment.applySeriesBackdrop);
+  const previewBackdrop = useAction<{ seriesId: string; tmdbId?: number }, any>(
+    api.adminSeriesEnrichment.previewSeriesBackdrop
+  );
+  const applyBackdrop = useAction<
+    { seriesId: string; tmdbId: number; replaceBackdrop?: boolean },
+    any
+  >(api.adminSeriesEnrichment.applySeriesBackdrop);
 
   const [preview, setPreview] = useState<PreviewResult | null>(null);
   const [loading, setLoading] = useState(true);
@@ -57,9 +62,7 @@ export function BackdropSeriesModal({ series, onClose, onApplied }: BackdropSeri
         if (!cancelled) setPreview(result as PreviewResult);
       } catch (error) {
         if (!cancelled) {
-          toast.error(
-            error instanceof Error ? error.message : 'Error al buscar backdrop en TMDB'
-          );
+          toast.error(error instanceof Error ? error.message : 'Error al buscar backdrop en TMDB');
           onClose();
         }
       } finally {
@@ -125,7 +128,10 @@ export function BackdropSeriesModal({ series, onClose, onApplied }: BackdropSeri
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-cinema-border shrink-0">
-          <h2 id="backdrop-series-title" className="text-lg font-semibold text-white flex items-center gap-2">
+          <h2
+            id="backdrop-series-title"
+            className="text-lg font-semibold text-white flex items-center gap-2"
+          >
             <Monitor className="w-5 h-5 text-cyan-400" />
             Backdrop TMDB
           </h2>

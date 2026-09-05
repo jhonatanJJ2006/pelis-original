@@ -24,9 +24,7 @@ export const movieSchema = z.object({
     .min(1, 'La imagen es requerida')
     .refine(
       (value) =>
-        value.startsWith('/') ||
-        value.startsWith('http://') ||
-        value.startsWith('https://'),
+        value.startsWith('/') || value.startsWith('http://') || value.startsWith('https://'),
       'URL o ruta de imagen inválida'
     ),
   synopsis: z.string().min(10, 'La sinopsis debe tener al menos 10 caracteres'),
@@ -48,6 +46,7 @@ export const planSchema = z.object({
   features: z.array(z.string()).min(1, 'Debe haber al menos una característica'),
   icon: z.string(),
   months: z.number().int().positive(),
+  maxDevices: z.number().int().positive().default(1),
   recommended: z.boolean().optional(),
   stripePriceId: z.string().optional(),
 });

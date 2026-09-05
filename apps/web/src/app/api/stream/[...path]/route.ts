@@ -18,17 +18,11 @@ const MIME: Record<string, string> = {
   '.vtt': 'text/vtt',
 };
 
-export async function GET(
-  _req: NextRequest,
-  { params }: { params: { path: string[] } }
-) {
+export async function GET(_req: NextRequest, { params }: { params: { path: string[] } }) {
   return serveStreamFile(_req, params);
 }
 
-export async function HEAD(
-  req: NextRequest,
-  { params }: { params: { path: string[] } }
-) {
+export async function HEAD(req: NextRequest, { params }: { params: { path: string[] } }) {
   return serveStreamFile(req, params, { headOnly: true });
 }
 

@@ -220,17 +220,14 @@ export default function TVPlayer({ channelId, channelName }: TVPlayerProps) {
   return (
     <div
       ref={containerRef}
-      className={cn(
-        'relative h-full w-full bg-cinema-bg [touch-action:none]',
-        landscapeClassName,
-      )}
+      className={cn('relative h-full w-full bg-cinema-bg [touch-action:none]', landscapeClassName)}
       style={landscapeStyle}
       onMouseMove={bumpControls}
     >
-      {loading && !error && (
-        <PlayerLoadingOverlay message={`Conectando con ${channelName}…`} />
+      {loading && !error && <PlayerLoadingOverlay message={`Conectando con ${channelName}…`} />}
+      {landscapeActive && hud && (
+        <PlayerGestureHud kind={hud.kind} value={hud.value} visible={hudVisible} />
       )}
-      {landscapeActive && hud && <PlayerGestureHud kind={hud.kind} value={hud.value} visible={hudVisible} />}
 
       {error && (
         <div className="absolute inset-0 z-10 flex items-center justify-center">

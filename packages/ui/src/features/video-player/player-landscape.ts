@@ -1,6 +1,13 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState, type CSSProperties, type RefObject } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type RefObject,
+} from 'react';
 
 export type PlayerLandscapeMode = 'off' | 'native' | 'cover' | 'rotate';
 
@@ -42,11 +49,14 @@ function fallbackWindow(): MediaWindow {
 }
 
 export function isMobilePlayerViewport(
-  win: MediaWindow = typeof window === 'undefined' ? fallbackWindow() : window,
+  win: MediaWindow = typeof window === 'undefined' ? fallbackWindow() : window
 ): boolean {
   try {
     if (win.matchMedia(`(max-width: ${PLAYER_MOBILE_MAX_WIDTH_PX}px)`).matches) return true;
-    if (win.matchMedia('(pointer: coarse)').matches && win.innerWidth <= PLAYER_COARSE_MAX_WIDTH_PX) {
+    if (
+      win.matchMedia('(pointer: coarse)').matches &&
+      win.innerWidth <= PLAYER_COARSE_MAX_WIDTH_PX
+    ) {
       return true;
     }
     return false;
@@ -86,7 +96,7 @@ type LockableOrientation = {
 
 export async function requestPlayerFullscreen(
   container: HTMLElement,
-  video?: HTMLVideoElement | null,
+  video?: HTMLVideoElement | null
 ): Promise<boolean> {
   if (typeof document === 'undefined') return false;
   const doc = document as WebkitDocument;

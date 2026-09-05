@@ -215,7 +215,7 @@ Rutas de apps/web/src/app. Grupo (protected) = header/footer, NO exige login. Gr
 
 ### `/admin/plans`
 
-- Hace: CRUD planes Stripe
+- Hace: CRUD planes Stripe (incluye maxDevices)
 - Archivos: (admin)/admin/plans/page.tsx, plan-form.tsx
 - Auth: role admin. Datos: adminPlans.*.
 
@@ -238,6 +238,7 @@ Rutas de apps/web/src/app. Grupo (protected) = header/footer, NO exige login. Gr
 - Hace: Better Auth catch-all (session, sign-in, Google)
 - Archivos: api/auth/[...path]/route.ts
 - Auth: publico. Datos: auth().handler.
+- Plan entitlements: al crear sesión se aplica `Plan.maxDevices` (ADMIN ilimitado; sin plan activo = 1). Ver AGENTS.md trampas 4b.
 
 ### `/api/auth/email-otp/send-verification-otp`
 

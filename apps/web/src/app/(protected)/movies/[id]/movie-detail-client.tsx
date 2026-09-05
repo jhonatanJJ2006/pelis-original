@@ -249,7 +249,9 @@ export default function MovieDetailPageClient({ preloaded }: MovieDetailPageClie
                 ['Género', resolvedMovie.genre],
                 ['Año', resolvedMovie.releaseYear],
                 ['Actores', resolvedMovie.actors],
-                ...(isSeries && resolvedMovie.episodes ? [['Episodios', String(resolvedMovie.episodes)]] : []),
+                ...(isSeries && resolvedMovie.episodes
+                  ? [['Episodios', String(resolvedMovie.episodes)]]
+                  : []),
               ].map(([label, value]) => (
                 <div
                   key={label}
