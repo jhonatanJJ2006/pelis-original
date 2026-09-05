@@ -14,6 +14,8 @@ test.describe('Playground de componentes', () => {
     ).toBeVisible({ timeout: 20000 });
 
     const sections = [
+      'Tokens de color',
+      'Escala tipográfica',
       'Botones',
       'Badges',
       'Inputs y selects',

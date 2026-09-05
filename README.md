@@ -80,17 +80,18 @@ docker compose up -d consumet redis   # Consumet self-hosted
 
 ## Documentación
 
-- [`docs/AUDIT.md`](docs/AUDIT.md) — Auditoría de gaps del sitio
-- [`docs/ANIME-PROVIDERS.md`](docs/ANIME-PROVIDERS.md) — Setup anime/streaming
-- [`TODO.md`](TODO.md) — Backlog del proyecto
+- [`AGENTS.md`](AGENTS.md) — entrada para agentes
+- [`DESIGN.md`](DESIGN.md) — UI Maison Noir (tokens cinema-*)
+- [`docs/APP.md`](docs/APP.md) — rutas, auth, datos
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — paquetes y flujo
+- [`docs/DATA-MODEL.md`](docs/DATA-MODEL.md) — Prisma
+- [`docs/TESTING.md`](docs/TESTING.md) — Vitest + Playwright
+- [`docs/ANIME-PROVIDERS.md`](docs/ANIME-PROVIDERS.md) — anime / Consumet
+- [`docs/AUDIT.md`](docs/AUDIT.md) — gaps vivos
+- [`TODO.md`](TODO.md) — backlog
+- [`CONVEX.md`](CONVEX.md) — legado, no usar
 
 ## Deployment
 
-Ver [`DEPLOY.md`](DEPLOY.md) para instrucciones de despliegue.
+`DEPLOY.md` esta obsoleto (describe Convex). Prod hoy: https://verpelis.pro via Cloudflare Tunnel hacia localhost:3000 (systemd pelis-web.service). Glob posee deploy/envs. Ver AGENTS.md.
 
-## Tests y diseno
-
-Sistema de diseno: DESIGN.md (Maison Noir). Playground en /playground (solo desarrollo).
-
-Scripts: test, test:unit, test:components, test:e2e, test:e2e:ui, test:smoke, test:playground, test:all.
-E2E usa PLAYWRIGHT_BASE_URL (default http://localhost:3000) y reuseExistingServer fuera de CI.

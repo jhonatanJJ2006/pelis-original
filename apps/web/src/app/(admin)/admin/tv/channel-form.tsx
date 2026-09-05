@@ -36,19 +36,28 @@ const defaultValues: ChannelFormValues = {
 };
 
 const KNOWN_CATEGORIES = [
-  'General',
-  'Entretenimiento',
-  'Noticias',
+  'Fútbol',
+  'Fórmula 1',
+  'Lucha libre',
   'Deportes',
   'Infantil',
-  'Música',
+  'Anime',
+  'Animación',
+  'Noticias',
+  'Entretenimiento',
   'Películas',
   'Series',
   'Documentales',
+  'Música',
   'Cultura',
   'Religión',
-  'Anime',
-  'Animación',
+  'Educación',
+  'Legislatura',
+  'Estilo de vida',
+  'Viajes',
+  'Cocina',
+  'Clásicos',
+  'General',
 ];
 
 const KNOWN_COUNTRIES = [

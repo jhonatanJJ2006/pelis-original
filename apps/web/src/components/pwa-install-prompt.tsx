@@ -5,13 +5,14 @@ import { Download, RefreshCw, Share, Smartphone, X } from 'lucide-react';
 import { Button } from '@pelis/ui/components';
 import { cn } from '@pelis/ui/utils';
 import { APK_DOWNLOAD_PATH } from '@/lib/app-download';
+import { detectAndroidTv, detectTvDevice } from '@/lib/device-context';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
-type InstallMode = 'hidden' | 'prompt' | 'ios' | 'android-apk' | 'manual';
+type InstallMode = 'hidden' | 'prompt' | 'ios' | 'android-apk' | 'android-tv' | 'manual';
 
 interface AppAvailability {
   apkAvailable?: boolean;
@@ -43,6 +44,19 @@ const INSTALL_COPY = {
     ],
     apkNote: 'Si tu teléfono lo pide, permite instalar desde este navegador.',
     downloadLabel: 'Descargar app',
+  },
+  'android-tv': {
+    title: 'Pelis en tu televisor',
+    subtitle:
+      'En TV Box o Android TV la forma más fiable es instalar la app APK. El botón del navegador (⊕) casi nunca aparece en tele.',
+    steps: [
+      'Pulsa «Descargar app en TV» con el control remoto',
+      'Abre Descargas o un administrador de archivos y elige pelis.apk',
+      'Confirma instalar (activa «Fuentes desconocidas» si el sistema lo pide)',
+      'Abre Pelis desde el launcher de apps del televisor',
+    ],
+    apkNote: 'Si ya tienes Pelis instalada, ábrela desde inicio en lugar del navegador.',
+    downloadLabel: 'Descargar app en TV',
   },
   prompt: {
     title: 'Tu cine, siempre a mano',
@@ -136,6 +150,7 @@ function StepsList({ steps }: { steps: readonly string[] }) {
 
 function getPlatformMode(apkAvailable: boolean): InstallMode {
   if (isIos()) return 'ios';
+  if (detectAndroidTv()) return apkAvailable ? 'android-tv' : 'prompt';
   if (isAndroid()) return apkAvailable ? 'android-apk' : 'prompt';
   return apkAvailable ? 'manual' : 'prompt';
 }
@@ -247,9 +262,15 @@ function usePwaInstall() {
 interface PwaInstallPromptProps {
   variant?: 'card' | 'inline';
   className?: string;
+  /** Oculta el prompt de instalación cuando ya corre como app instalada. */
+  webOnly?: boolean;
 }
 
-export function PwaInstallPrompt({ variant = 'card', className }: PwaInstallPromptProps) {
+export function PwaInstallPrompt({
+  variant = 'card',
+  className,
+  webOnly = false,
+}: PwaInstallPromptProps) {
   const {
     mode,
     install,
@@ -263,6 +284,8 @@ export function PwaInstallPrompt({ variant = 'card', className }: PwaInstallProm
     dismissApkUpdate,
   } = usePwaInstall();
   const [dismissed, setDismissed] = useState(false);
+
+  if (webOnly && isStandalone()) return null;
 
   // Si hay actualización de APK pendiente, renderizamos un modal
   if (needsApkUpdate) {
@@ -281,17 +304,22 @@ export function PwaInstallPrompt({ variant = 'card', className }: PwaInstallProm
   const copy =
     mode === 'ios'
       ? INSTALL_COPY.ios
+      : mode === 'android-tv'
+        ? INSTALL_COPY['android-tv']
       : mode === 'android-apk'
         ? INSTALL_COPY['android-apk']
         : mode === 'manual'
           ? INSTALL_COPY.manual
           : mode === 'prompt' && !canInstall
-            ? isAndroid()
+            ? detectTvDevice()
+              ? INSTALL_COPY['android-tv']
+              : isAndroid()
               ? INSTALL_COPY['pwa-android']
               : INSTALL_COPY['pwa-desktop']
             : INSTALL_COPY.prompt;
 
-  const showApkCta = apkAvailable && (mode === 'android-apk' || mode === 'manual');
+  const showApkCta =
+    apkAvailable && (mode === 'android-apk' || mode === 'android-tv' || mode === 'manual');
 
   const apkButtonClasses = cn(
     'inline-flex items-center justify-center font-semibold transition-all duration-200',
@@ -320,12 +348,25 @@ export function PwaInstallPrompt({ variant = 'card', className }: PwaInstallProm
     ) : showApkCta && 'steps' in copy ? (
       <div>
         <StepsList steps={copy.steps} />
-        {'apkNote' in INSTALL_COPY['android-apk'] && mode === 'android-apk' && (
-          <p className="text-cinema-ash text-xs mt-3">{INSTALL_COPY['android-apk'].apkNote}</p>
+        {'apkNote' in INSTALL_COPY['android-apk'] &&
+          (mode === 'android-apk' || mode === 'android-tv') && (
+          <p className="text-cinema-ash text-xs mt-3">
+            {mode === 'android-tv'
+              ? INSTALL_COPY['android-tv'].apkNote
+              : INSTALL_COPY['android-apk'].apkNote}
+          </p>
         )}
       </div>
     ) : mode === 'prompt' && !canInstall ? (
-      <StepsList steps={isAndroid() ? INSTALL_COPY['pwa-android'].steps : INSTALL_COPY['pwa-desktop'].steps} />
+      <StepsList
+        steps={
+          detectTvDevice()
+            ? INSTALL_COPY['android-tv'].steps
+            : isAndroid()
+              ? INSTALL_COPY['pwa-android'].steps
+              : INSTALL_COPY['pwa-desktop'].steps
+        }
+      />
     ) : 'steps' in copy ? (
       <StepsList steps={copy.steps} />
     ) : null;

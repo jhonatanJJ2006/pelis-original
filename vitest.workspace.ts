@@ -18,6 +18,7 @@ export default defineWorkspace([
         'packages/validators/src/**/*.test.ts',
         'apps/web/src/lib/**/*.test.ts',
         'packages/ui/src/shared/**/*.test.ts',
+        'packages/ui/src/features/**/*.test.ts',
         'packages/auth/src/**/*.test.ts',
         'packages/db/src/**/*.test.ts',
       ],

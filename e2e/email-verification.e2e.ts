@@ -63,7 +63,8 @@ async function assertEmailSentToResend(email: string) {
 
 test.describe.configure({ mode: 'serial' });
 
-test.describe('Email verification (OTP + Resend)', () => {
+// Quarantined: still assumes Convex (npx convex data users) and the old OTP pipeline.
+test.describe.skip('Email verification (OTP + Resend)', () => {
   const email = `2jhonatanjara2+otp-e2e-${Date.now()}@gmail.com`;
   const password = 'Test123456';
 
