@@ -21,7 +21,7 @@ export function Footer({ className }: { className?: string }) {
   return (
     <footer
       className={cn(
-        'bg-cinema-surface/80 border-t border-cinema-border mt-auto backdrop-blur-sm',
+        'bg-cinema-surface/80 border-t border-cinema-border mt-auto backdrop-blur-sm pb-[calc(4.25rem+env(safe-area-inset-bottom))] md:pb-0',
         className
       )}
     >
