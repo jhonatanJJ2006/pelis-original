@@ -44,7 +44,7 @@ Workflow: `.github/workflows/ci.yml`
 | `format` | PR + push | Prettier check (`pnpm format`) |
 | `test` | PR + push | Unit tests (`pnpm test:unit`) — paralelo con format |
 | `build` | PR + push | Turbo build; needs format+test |
-| `deploy` | solo push a main/staging | Valida artefacto `pnpm build:vercel` (no SSH a Movies) |
+| `deploy` | solo push a main/staging | `prisma generate` (@pelis/db) + `pnpm build:vercel` (no SSH a Movies) |
 
 **Promote staging→main:** requiere **format + test + build** verdes. Deploy es post-merge.
 
