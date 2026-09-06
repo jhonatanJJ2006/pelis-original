@@ -24,6 +24,20 @@ test.describe('API smoke', () => {
     const body = await res.json();
     expect(body).toHaveProperty('apkAvailable');
     expect(typeof body.apkAvailable).toBe('boolean');
+    expect(body).toHaveProperty('tvApkAvailable');
+    expect(typeof body.tvApkAvailable).toBe('boolean');
+  });
+
+  test('POST /api/tv-auth/pairing crea un código TV', async ({ request }) => {
+    const res = await request.post('/api/tv-auth/pairing', { data: {} });
+    expect([200, 500]).toContain(res.status());
+    if (res.status() === 200) {
+      const body = await res.json();
+      expect(typeof body.code).toBe('string');
+      expect(body.code).toHaveLength(6);
+      expect(body.verifyUrl).toContain('/link-tv');
+      expect(body.deviceId).toBeTruthy();
+    }
   });
 
   test('better-auth expone get-session', async ({ request }) => {

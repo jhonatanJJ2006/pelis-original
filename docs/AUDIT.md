@@ -1,7 +1,7 @@
 # Auditoría del sitio — Pelis Original
 
 Documento vivo con el inventario de gaps, bugs e incompletitudes.  
-Última actualización: 2026-09-06 (sin CTAs APK in-app; movieSchema admin 2026-09-05).
+Última actualización: 2026-09-06 (Android TV Compose en git + pairing `/api/tv-auth`; movieSchema admin 2026-09-05).
 
 ---
 
@@ -17,6 +17,7 @@ Documento vivo con el inventario de gaps, bugs e incompletitudes.
 | Auth               | OK            | Better Auth + Google                                                                       |
 | Suscripción        | OK código     | Checkout → sync/webhook → ACTIVE. Ops en Movies (túnel + .env + Postgres local), no Vercel |
 | PWA                | Parcial       | Update modal + sin install/descarga in-app; SW precache de uploads sigue siendo ruido      |
+| Android TV         | Parcial       | Fuentes Compose en `apps/android-tv/app/src/` (2026-09-06). Build en máquina con SDK 35.   |
 | Imágenes           | Alto          | Pósters hash faltantes en clone limpio                                                     |
 | CI / calidad       | Bajo          | Sin CI, build ignora TS/lint                                                               |
 | Docs agentes       | OK            | AGENTS.md + docs/APP, ARCHITECTURE, DATA-MODEL, TESTING                                    |
@@ -192,6 +193,7 @@ Documento vivo con el inventario de gaps, bugs e incompletitudes.
 | Admin CRUD                | Completo                                                                                   |
 | PWA                       | Parcial                                                                                    |
 | Tests E2E                 | Parcial (login/favoritos/historial en account.e2e.ts; email-verification sigue era Convex) |
+| Android TV nativo         | Parcial (fuentes en git; pairing/QR; build Gradle en Movies/SDK)                           |
 
 ---
 

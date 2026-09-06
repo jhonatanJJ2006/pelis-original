@@ -28,6 +28,7 @@ Ver AGENTS.md (entrada agentes) y auditoría completa en [`docs/AUDIT.md`](docs/
 - [x] TV: 1807 canales OFFLINE/no-español desactivados (2026-08-23)
 - [x] TV: 35 canales populares nuevos promovidos (Pluto TV Latam, France 24, Euronews)
 - [x] TV: array POPULAR en `seedPopular.ts` reescrito con feeds verificados
+- [x] **Android TV fuentes en git** — `apps/android-tv/app/src/` Compose (`pro.verpelis.tv`), recuperado del APK + pairing real. Ver `apps/android-tv/README.md` (2026-09-06)
 
 ---
 

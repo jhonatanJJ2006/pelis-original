@@ -61,9 +61,9 @@ Rutas de apps/web/src/app. Grupo (protected) = header/footer, NO exige login. Gr
 
 ### `/login`
 
-- Hace: email/password + Google OAuth
-- Archivos: (auth)/login/page.tsx, (auth)/layout.tsx
-- Auth: publico. Datos: Better Auth /api/auth.
+- Hace: email/password + Google OAuth. En Android TV (UA o `?device=tv`) muestra login estilo Netflix (panel izquierdo + QR/código). `?next=` solo acepta paths internos.
+- Archivos: (auth)/login/page.tsx, components/tv-login-screen.tsx
+- Auth: publico. Datos: Better Auth /api/auth; TV usa /api/tv-auth/*.
 
 ### `/register`
 
@@ -81,9 +81,15 @@ Rutas de apps/web/src/app. Grupo (protected) = header/footer, NO exige login. Gr
 
 ### `/profile`
 
-- Hace: perfil, plan, logout, acceso admin si role admin. Sin CTAs de descargar APK (esos no van in-app).
+- Hace: perfil, plan, logout, acceso admin si role admin, enlace a vincular TV. Sin CTAs de descargar APK (esos no van in-app).
 - Archivos: (protected)/profile/page.tsx
 - Auth: useUser; si no hay user, CTA login. Datos: users.me, subscriptions.list.
+
+### `/link-tv`
+
+- Hace: el móvil/web aprueba el código QR que muestra la tele. Query `?code=`.
+- Archivos: (protected)/link-tv/page.tsx
+- Auth: useUser; si no hay user, CTA login con `next=/link-tv`. Datos: POST /api/tv-auth/approve.
 
 ### `/favorites`
 
@@ -328,9 +334,42 @@ Rutas de apps/web/src/app. Grupo (protected) = header/footer, NO exige login. Gr
 
 ### `/api/app/availability`
 
-- Hace: version web + APK disponible
+- Hace: version web + APK celular/TV disponible
 - Archivos: api/app/availability/route.ts
 - Auth: publico. Datos: public/version.json, public/downloads/.
+
+### `/api/tv-auth/pairing`
+
+- Hace: la tele crea un código de 6 caracteres + URL de QR. GET hace poll (`code` + `deviceId`).
+- Archivos: api/tv-auth/pairing/route.ts
+- Auth: publico. Datos: tabla `tv_pairing`.
+
+### `/api/tv-auth/approve`
+
+- Hace: el usuario logueado (móvil/web) aprueba el código.
+- Archivos: api/tv-auth/approve/route.ts
+- Auth: sesión Better Auth.
+
+### `/api/tv-auth/claim`
+
+- Hace: la tele reclama el pairing aprobado y recibe cookie de sesión **y** `{ token, cookieName }` (la app nativa persiste el token).
+- Archivos: api/tv-auth/claim/route.ts
+- Auth: pairing + deviceId. Datos: Session Better Auth.
+
+## Android TV nativo
+
+App Compose en `apps/android-tv/` (package `pro.verpelis.tv`). Build/run: `apps/android-tv/README.md`.
+
+- Cold start: sin sesión → `LoginScreen` split (QR ZXing + código). Con sesión → `HomeScreen` (canales + filas películas/series/anime).
+- Pairing: `POST /api/tv-auth/pairing` → poll GET → `POST /api/tv-auth/claim`.
+- Update: `GET /api/app/availability` vs `BuildConfig.VERSION_CODE`.
+- Stream canales: `/api/tv/stream/{id}` (misma puerta de plan).
+
+### `/api/tv-auth/qr`
+
+- Hace: SVG del QR (`?data=`).
+- Archivos: api/tv-auth/qr/route.ts
+- Auth: publico.
 
 ### `/uploads/[...path]`
 

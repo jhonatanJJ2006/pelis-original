@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Heart, Search, Star, Tv, Play, Film, TrendingUp, X } from 'lucide-react';
 import { PwaUpdateModalView } from '@/components/pwa-update-modal';
+import { TvUpdateModalView } from '@/components/tv-update-modal';
 import { Badge } from '@pelis/ui/components';
 import { Button, Input, Select, Spinner, Skeleton, PageSpinner } from '@pelis/ui/components';
 import { EmptyState, ErrorState } from '@pelis/ui/features/empty-state';
@@ -81,6 +82,7 @@ export default function PlaygroundPage() {
   const [genre, setGenre] = useState('');
   const [year, setYear] = useState('');
   const [showUpdateModal, setShowUpdateModal] = useState(true);
+  const [showTvUpdateModal, setShowTvUpdateModal] = useState(true);
 
   if (process.env.NODE_ENV === 'production') {
     return null;
@@ -270,6 +272,28 @@ export default function PlaygroundPage() {
         ) : (
           <Button type="button" variant="outline" onClick={() => setShowUpdateModal(true)}>
             Mostrar modal de actualización
+          </Button>
+        )}
+      </PlaygroundSection>
+
+      <PlaygroundSection title="Modal de actualización APK TV">
+        <p className="text-cinema-muted text-sm mb-4">
+          En Android TV se muestra cuando{' '}
+          <code className="text-cinema-chalk">/api/app/availability</code> reporta un{' '}
+          <code className="text-cinema-chalk">tvApkVersionCode</code> nuevo. Aceptar descarga{' '}
+          <code className="text-cinema-chalk">/downloads/pelis-tv.apk</code> o llama al bridge
+          nativo.
+        </p>
+        {showTvUpdateModal ? (
+          <TvUpdateModalView
+            embedded
+            versionLabel="1.2.0"
+            onAccept={() => setShowTvUpdateModal(false)}
+            onLater={() => setShowTvUpdateModal(false)}
+          />
+        ) : (
+          <Button type="button" variant="outline" onClick={() => setShowTvUpdateModal(true)}>
+            Mostrar modal de APK TV
           </Button>
         )}
       </PlaygroundSection>

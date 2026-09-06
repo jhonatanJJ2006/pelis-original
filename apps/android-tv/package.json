@@ -1,0 +1,9 @@
+{
+  "name": "@pelis/android-tv",
+  "version": "1.1.0",
+  "private": true,
+  "description": "APK Android TV nativo (Compose) — package pro.verpelis.tv",
+  "scripts": {
+    "assemble": "node ../../scripts/android-tv-build.mjs"
+  }
+}

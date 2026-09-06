@@ -77,7 +77,8 @@ Archivo: apps/web/src/app/playground/page.tsx. Detalle: docs/TESTING.md.
 2. Restos Convex: CONVEX.md, DEPLOY.md stale, e2e/email-verification.e2e.ts, URLs *.convex.cloud en imágenes (placeholder).
 3. ignoreBuildErrors: apps/web/next.config.mjs ignora TS y ESLint en build. Build verde no implica tipos correctos.
 4. Streaming y auth: /api/stream, /api/tv/stream, /api/anime/stream pasan por denyUnlessStreamAccess (sesión + plan activo o ADMIN). No quitar esa puerta. Históricamente sin auth.
-   4b. Plan entitlements — sesiones concurrentes (MVP): `Plan.maxDevices` (default 1). En Better Auth `databaseHooks.session.create` se recortan sesiones no-expiradas más viejas si el usuario supera el límite. ADMIN = ilimitado; sin plan activo = 1. Sin middleware por request en este MVP. Seed: Mensual/Básico=1, Trimestral/Estándar=2, Anual/Premium=4.
+   4b. Plan entitlements — sesiones concurrentes (MVP): `Plan.maxDevices` (default 1). En Better Auth `databaseHooks.session.create` se recortan sesiones no-expiradas más viejas si el usuario supera el límite. ADMIN = ilimitado; sin plan activo = 1. Claim de pairing TV crea otra Session y cuenta como dispositivo. Seed: Mensual/Básico=1, Trimestral/Estándar=2, Anual/Premium=4.
+   4d. Android TV nativo: fuentes en `apps/android-tv/app/src/` (package `pro.verpelis.tv`). **No** gitignorar `app/` como en el TWA (`apps/android/app/`). Build: `apps/android-tv/README.md`. Cold start sin sesión → login split + QR (`/api/tv-auth/*`); con sesión → home de canales. El navegador de tele sigue siendo la web: middleware `/` → `/tv` si UA tele o `?device=tv`. Móvil aprueba en `/link-tv`. APK: `public/downloads/pelis-tv.apk` + `tv-app-version.json`.
    4c. Stripe: el plan se activa por webhook **y** por `POST /api/stripe/fulfill` en `/subscribe/success` (no exige cookie: `session_id` + metadata). No mapear `incomplete` a EXPIRED. Lógica: packages/db/src/lib/stripe-subscription.ts.
    Runtime **Movies local** (pelis-web + Postgres + cloudflared → verpelis.pro). No Vercel. Webhook → `https://verpelis.pro/api/stripe/webhook`. Si `SITE_URL` es localhost, los redirects usan `BETTER_AUTH_URL` público. Diagnóstico: docs/AUDIT.md §5b.
 5. Posters gitignored: apps/web/public/peliculas/ y apps/web/public/uploads/. Hash MD5 32 hex -> /peliculas/peliculas/{hash}.webp. imageId -> /uploads/{id}.webp. Clone limpio = imágenes rotas.
@@ -116,7 +117,7 @@ Promoción a producción = merge `staging` → `main` a cargo de Glob bajo esa r
 ## Mapa rápido
 
 Catálogo (grupo (protected) = chrome, NO muro de login): / /movies /movies/[id] /series /anime /anime/[id] /anime/watch/[animeId]/[episodeNumber] /tv /tv/[id] /login /register /verify-email
-Cuenta (sesión en cliente): /profile /favorites /history /subscribe /subscribe/success /subscribe/cancel
+Cuenta (sesión en cliente): /profile /favorites /history /subscribe /subscribe/success /subscribe/cancel /link-tv
 Admin (role admin): /admin y subrutas movies/series/anime/tv/users/plans
 API: /api/function/[name] (RPC), /api/auth, /api/stream, /api/tv, /api/anime, /api/stripe/webhook
 

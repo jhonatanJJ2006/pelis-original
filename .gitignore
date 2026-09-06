@@ -42,7 +42,7 @@ coverage/
 out/
 .vercel
 
-# Android TWA / APK
+# Android TWA / APK (phone TWA — app/ generado por Bubblewrap, no commitear)
 apps/android/android.keystore
 apps/android/*.apk
 apps/android/app/
@@ -52,6 +52,15 @@ apps/android/local.properties
 apps/android/gradle.properties
 apps/android/manifest-checksum.txt
 apps/android/store_icon.png
+
+# Android TV nativo — SÍ trackear app/src. Solo cache/build.
+apps/android-tv/.gradle/
+apps/android-tv/**/build/
+apps/android-tv/local.properties
+apps/android-tv/**/*.apk
+apps/android-tv/**/*.aab
+apps/android-tv/**/*.iml
+apps/android-tv/.cxx/
 
 # Cursor (clones temporales al instalar skills)
 .cursor/tmp-skills/
