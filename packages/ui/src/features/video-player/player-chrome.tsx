@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
   type KeyboardEvent,
+  type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from 'react';
 import {
@@ -114,7 +115,15 @@ export function usePlayerSettings() {
     });
   }, []);
 
-  return { brightness, setBrightness, volume, setVolume, muted, setMuted, toggleMute };
+  return {
+    brightness,
+    setBrightness,
+    volume,
+    setVolume,
+    muted,
+    setMuted,
+    toggleMute,
+  };
 }
 
 export function playerVideoFilter(brightness: number): string {
@@ -268,7 +277,71 @@ export function PlayerChrome({
   live,
   onRewind,
 }: PlayerChromeProps) {
-  const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [scrubbing, setScrubbing] = useState(false);
+  const [scrubTime, setScrubTime] = useState(0);
+  const scrubbingRef = useRef(false);
+  const durationRef = useRef(duration);
+  const onSeekRef = useRef(onSeek);
+  durationRef.current = duration;
+  onSeekRef.current = onSeek;
+
+  const displayTime = scrubbing ? scrubTime : currentTime;
+  const progressPercent = duration > 0 ? (displayTime / duration) * 100 : 0;
+
+  const timeFromClientX = useCallback((clientX: number) => {
+    const el = trackRef.current;
+    const total = durationRef.current;
+    if (!el || !total) return 0;
+    const rect = el.getBoundingClientRect();
+    const ratio = rect.width > 0 ? (clientX - rect.left) / rect.width : 0;
+    return clamp(ratio * total, 0, Math.max(0, total - 0.25));
+  }, []);
+
+  const beginScrub = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      if (!onSeekRef.current || !durationRef.current) return;
+      if (event.button !== 0 && event.pointerType === 'mouse') return;
+      event.preventDefault();
+      event.stopPropagation();
+      const next = timeFromClientX(event.clientX);
+      scrubbingRef.current = true;
+      setScrubbing(true);
+      setScrubTime(next);
+      try {
+        event.currentTarget.setPointerCapture(event.pointerId);
+      } catch {
+        // Safari can throw if the element is gone
+      }
+    },
+    [timeFromClientX]
+  );
+
+  const moveScrub = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      if (!scrubbingRef.current) return;
+      event.preventDefault();
+      setScrubTime(timeFromClientX(event.clientX));
+    },
+    [timeFromClientX]
+  );
+
+  const endScrub = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      if (!scrubbingRef.current) return;
+      scrubbingRef.current = false;
+      const next = timeFromClientX(event.clientX);
+      setScrubTime(next);
+      setScrubbing(false);
+      onSeekRef.current?.(next);
+      try {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      } catch {
+        // already released
+      }
+    },
+    [timeFromClientX]
+  );
 
   const onSeekKey = (event: KeyboardEvent<HTMLDivElement>) => {
     if (!onSeek || !duration) return;
@@ -282,7 +355,7 @@ export function PlayerChrome({
       className={cn(
         'absolute inset-x-0 bottom-0 z-30 bg-gradient-to-t from-cinema-bg via-cinema-bg/80 to-transparent pt-14 transition-opacity duration-normal ease-out-expo',
         'pl-[max(0.75rem,env(safe-area-inset-left,0px))] pr-[max(0.75rem,env(safe-area-inset-right,0px))] pb-[max(0.75rem,env(safe-area-inset-bottom,0px))]',
-        visible || !playing ? 'opacity-100' : 'pointer-events-none opacity-0'
+        visible || !playing || scrubbing ? 'opacity-100' : 'pointer-events-none opacity-0'
       )}
     >
       {(title || subtitle) && (
@@ -293,7 +366,7 @@ export function PlayerChrome({
       )}
 
       {!hideSeek && (
-        <div className="relative mb-2 h-5 cursor-pointer md:h-4">
+        <div className="relative mb-2 h-5 cursor-pointer touch-none md:h-4">
           <div className="absolute top-1/2 h-1 w-full -translate-y-1/2 rounded-full bg-white/15">
             <div
               className="absolute h-full rounded-full bg-white/25"
@@ -307,21 +380,31 @@ export function PlayerChrome({
           <div
             className="absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cinema-accent-light shadow-glow"
             style={{ left: `${progressPercent}%` }}
-          />
+          >
+            {scrubbing && (
+              <div
+                className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-md border border-cinema-accent/30 bg-cinema-bg/95 px-2 py-1 font-display text-xs tabular-nums text-cinema-chalk shadow-[0_8px_24px_rgba(11,11,13,0.55)]"
+                role="status"
+                aria-live="polite"
+              >
+                {formatPlayerTime(scrubTime)}
+              </div>
+            )}
+          </div>
           <div
+            ref={trackRef}
             role="slider"
             aria-label="Progreso de reproducción"
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={duration ? Math.round(progressPercent) : 0}
+            aria-valuetext={formatPlayerTime(displayTime)}
             tabIndex={0}
             className="absolute inset-0"
-            onClick={(event) => {
-              if (!onSeek || !duration) return;
-              const rect = event.currentTarget.getBoundingClientRect();
-              const ratio = (event.clientX - rect.left) / rect.width;
-              onSeek(clamp(ratio * duration, 0, Math.max(0, duration - 0.25)));
-            }}
+            onPointerDown={beginScrub}
+            onPointerMove={moveScrub}
+            onPointerUp={endScrub}
+            onPointerCancel={endScrub}
             onKeyDown={onSeekKey}
           />
         </div>
@@ -388,7 +471,7 @@ export function PlayerChrome({
           </span>
         ) : !hideSeek ? (
           <span className="ml-1 text-xs tabular-nums text-cinema-chalk/85">
-            {formatPlayerTime(currentTime)}{' '}
+            {formatPlayerTime(displayTime)}{' '}
             <span className="text-cinema-muted">/ {formatPlayerTime(duration)}</span>
           </span>
         ) : null}

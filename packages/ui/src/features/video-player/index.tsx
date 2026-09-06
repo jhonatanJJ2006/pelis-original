@@ -75,6 +75,8 @@ export function VideoPlayer({
   const [showControls, setShowControls] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [mediaReady, setMediaReady] = useState(false);
+  const [buffering, setBuffering] = useState(false);
+  const [bufferedPercent, setBufferedPercent] = useState(0);
   const [fullscreen, setFullscreen] = useState(false);
   const lastSaved = useRef(0);
   const { brightness, setBrightness, volume, setVolume, muted, setMuted, toggleMute } =
@@ -90,6 +92,8 @@ export function VideoPlayer({
 
     setError(null);
     setMediaReady(false);
+    setBuffering(false);
+    setBufferedPercent(0);
 
     if (!isHls) {
       video.src = src;
@@ -206,7 +210,10 @@ export function VideoPlayer({
   const seek = useCallback((seconds: number) => {
     const video = videoRef.current;
     if (!video || !Number.isFinite(video.duration)) return;
-    video.currentTime = Math.min(Math.max(0, seconds), Math.max(0, video.duration - 0.25));
+    const next = Math.min(Math.max(0, seconds), Math.max(0, video.duration - 0.25));
+    setProgress(next);
+    setBuffering(true);
+    video.currentTime = next;
   }, []);
 
   const toggleFullscreen = useCallback(() => {
@@ -289,20 +296,57 @@ export function VideoPlayer({
           setDuration(e.currentTarget.duration);
           setMediaReady(true);
         }}
-        onCanPlay={() => setMediaReady(true)}
-        onTimeUpdate={(e) => {
+        onCanPlay={() => {
+          setMediaReady(true);
+          setBuffering(false);
+        }}
+        onCanPlayThrough={() => setBuffering(false)}
+        onWaiting={() => setBuffering(true)}
+        onSeeking={() => setBuffering(true)}
+        onSeeked={(e) => {
           const v = e.currentTarget;
           setProgress(v.currentTime);
+          // HAVE_CURRENT_DATA+ : frame available; otherwise waiting/canplay will clear.
+          if (v.readyState >= 2) setBuffering(false);
+        }}
+        onPlaying={() => {
+          setPlaying(true);
+          setBuffering(false);
+        }}
+        onPause={() => setPlaying(false)}
+        onProgress={(e) => {
+          const v = e.currentTarget;
+          if (!v.duration || v.buffered.length === 0) return;
+          try {
+            const end = v.buffered.end(v.buffered.length - 1);
+            setBufferedPercent(Math.min(100, (end / v.duration) * 100));
+          } catch {
+            // TimeRanges can throw while regenerating after seek
+          }
+        }}
+        onTimeUpdate={(e) => {
+          const v = e.currentTarget;
+          if (!v.seeking) setProgress(v.currentTime);
+          if (v.buffered.length > 0 && v.duration > 0) {
+            try {
+              const end = v.buffered.end(v.buffered.length - 1);
+              setBufferedPercent(Math.min(100, (end / v.duration) * 100));
+            } catch {
+              // ignore transient TimeRanges errors
+            }
+          }
           void saveProgress(v.currentTime, v.duration);
         }}
         onEnded={(e) => {
           setPlaying(false);
+          setBuffering(false);
           void saveProgress(e.currentTarget.duration, e.currentTarget.duration);
         }}
         onError={() => {
           if (!useHlsJs) {
             setError('No se pudo reproducir el video.');
             setPlaying(false);
+            setBuffering(false);
           }
         }}
         onClick={() => {
@@ -311,7 +355,13 @@ export function VideoPlayer({
         }}
         aria-label={`Reproducir ${title}`}
       />
-      {!mediaReady && !error && <PlayerLoadingOverlay poster={poster} message="Cargando…" />}
+      {(!mediaReady || buffering) && !error && (
+        <PlayerLoadingOverlay
+          poster={poster}
+          message={mediaReady && buffering ? 'Buscando…' : 'Cargando…'}
+          opaque={!mediaReady}
+        />
+      )}
       {landscapeActive && hud && (
         <PlayerGestureHud kind={hud.kind} value={hud.value} visible={hudVisible} />
       )}
@@ -327,6 +377,7 @@ export function VideoPlayer({
         currentTime={progress}
         duration={duration}
         onSeek={seek}
+        bufferedPercent={bufferedPercent}
         volume={volume}
         muted={muted}
         onVolumeChange={(value) => {
@@ -347,7 +398,7 @@ export function VideoPlayer({
         title={title}
         onRewind={() => seek(Math.max(0, progress - 10))}
       />
-      {!playing && !error && mediaReady && (
+      {!playing && !error && mediaReady && !buffering && (
         <button
           type="button"
           onClick={() => {
