@@ -20,8 +20,8 @@
     "path": "/home/det/Desktop/PELIS/pelis-original/apps/android/android.keystore",
     "alias": "android"
   },
-  "appVersionName": "2",
-  "appVersionCode": 2,
+  "appVersionName": "3",
+  "appVersionCode": 3,
   "shortcuts": [],
   "generatorApp": "bubblewrap-cli",
   "webManifestUrl": "https://verpelis.pro/manifest.json",
@@ -39,7 +39,7 @@
   "fingerprints": [
     {
       "name": "sha256_cert",
-      "value": "0A:25:7C:B4:13:6D:EB:21:73:1D:92:2B:20:3E:0B:C6:5E:EB:1A:2C:E8:14:57:23:1C:A9:38:92:3F:85:41:D3"
+      "value": "B2:9F:5C:9E:9D:F4:31:9A:75:CF:88:6C:B2:E5:6A:7B:83:C0:7A:AB:C1:CB:67:E9:C9:42:FA:43:08:24:2B:32"
     }
   ],
   "additionalTrustedOrigins": [],
@@ -48,5 +48,5 @@
   "fileHandlers": [],
   "launchHandlerClientMode": "",
   "displayOverride": [],
-  "appVersion": "2"
+  "appVersion": "3"
 }

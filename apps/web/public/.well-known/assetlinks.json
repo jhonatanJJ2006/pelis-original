@@ -1,11 +1,13 @@
 [
   {
-    "relation": ["delegate_permission/common.handle_all_urls"],
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
     "target": {
       "namespace": "android_app",
       "package_name": "pro.verpelis.twa",
       "sha256_cert_fingerprints": [
-        "0A:25:7C:B4:13:6D:EB:21:73:1D:92:2B:20:3E:0B:C6:5E:EB:1A:2C:E8:14:57:23:1C:A9:38:92:3F:85:41:D3"
+        "B2:9F:5C:9E:9D:F4:31:9A:75:CF:88:6C:B2:E5:6A:7B:83:C0:7A:AB:C1:CB:67:E9:C9:42:FA:43:08:24:2B:32"
       ]
     }
   }
