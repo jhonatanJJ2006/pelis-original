@@ -1,7 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { nextQueryState, type QueryState } from './query-state';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { isQueryLoading, nextQueryState, type QueryState } from './query-state';
 
 type UseQueryState<T> = QueryState<T>;
 
@@ -105,24 +105,39 @@ function resolveName(fnOrName: unknown): string {
   throw new Error('expected a function reference or string name');
 }
 
-export function useQuery<T = unknown>(
+export interface QueryResult<T> {
+  data: T | undefined;
+  error: Error | null;
+  isLoading: boolean;
+  refetch: () => void;
+}
+
+function useQueryController<T = unknown>(
   name: string | { name: string },
-  args?: unknown,
-): T | undefined {
+  args?: unknown
+): QueryResult<T> {
   const fnName = resolveName(name);
   const stableArgs = useStableKey(args);
+  const skipped = isSkip(args);
   const [state, setState] = useState<UseQueryState<T>>({ data: undefined, error: null });
+  const fetchRef = useRef<() => void>(() => {});
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    if (isSkip(args)) return;
+    if (skipped) {
+      fetchRef.current = () => {};
+      return;
+    }
     const client = getClient();
     const key = `${fnName}:${stableArgs}`;
     client.keys.add(key);
 
     const fetcher = async () => {
       try {
-        const res = await fetch(`/api/function/${encodeURIComponent(fnName)}`, postRequestInit(args));
+        const res = await fetch(
+          `/api/function/${encodeURIComponent(fnName)}`,
+          postRequestInit(args)
+        );
         if (!res.ok) {
           throw new Error(`useQuery(${fnName}) failed: ${res.status}`);
         }
@@ -137,6 +152,7 @@ export function useQuery<T = unknown>(
     const wrap = () => {
       if (isMounted) void fetcher();
     };
+    fetchRef.current = wrap;
 
     if (!client.listeners.has(key)) client.listeners.set(key, new Set());
     client.listeners.get(key)!.add(wrap);
@@ -145,15 +161,41 @@ export function useQuery<T = unknown>(
 
     return () => {
       isMounted = false;
+      fetchRef.current = () => {};
       client.listeners.get(key)?.delete(wrap);
       if (client.listeners.get(key)?.size === 0) {
         client.listeners.delete(key);
       }
       dropStreamIfEmpty(client);
     };
-  }, [fnName, stableArgs]);
+  }, [fnName, stableArgs, skipped]);
 
-  return state.data;
+  const refetch = useCallback(() => {
+    fetchRef.current();
+  }, []);
+
+  return {
+    data: state.data,
+    error: state.error,
+    isLoading: isQueryLoading(state, skipped),
+    refetch,
+  };
+}
+
+/** Convex-compatible: returns data or undefined while loading / skipped. */
+export function useQuery<T = unknown>(
+  name: string | { name: string },
+  args?: unknown
+): T | undefined {
+  return useQueryController<T>(name, args).data;
+}
+
+/** Same fetch as useQuery, plus error / loading / refetch for unified page states. */
+export function useQueryResult<T = unknown>(
+  name: string | { name: string },
+  args?: unknown
+): QueryResult<T> {
+  return useQueryController<T>(name, args);
 }
 
 function useStableKey(value: unknown): string {
@@ -168,7 +210,7 @@ function stableStringify(value: unknown): string {
 }
 
 export function useMutation<TArgs = unknown, TResult = unknown>(
-  name: string | { name: string },
+  name: string | { name: string }
 ): (args?: TArgs) => Promise<TResult> {
   const fnName = resolveName(name);
   return useCallback(
@@ -180,12 +222,12 @@ export function useMutation<TArgs = unknown, TResult = unknown>(
       }
       return (await res.json()) as TResult;
     },
-    [fnName],
+    [fnName]
   );
 }
 
 export function useAction<TArgs = unknown, TResult = unknown>(
-  name: string | { name: string },
+  name: string | { name: string }
 ): (args?: TArgs) => Promise<TResult> {
   const fnName = resolveName(name);
   return useCallback(
@@ -197,7 +239,7 @@ export function useAction<TArgs = unknown, TResult = unknown>(
       }
       return (await res.json()) as TResult;
     },
-    [fnName],
+    [fnName]
   );
 }
 
@@ -216,4 +258,5 @@ export type FunctionReference<TArgs = unknown, TResult = unknown> = {
   name: string;
 };
 
-export { nextQueryState } from './query-state';
+export { isQueryLoading, nextQueryState } from './query-state';
+export type { QueryState } from './query-state';

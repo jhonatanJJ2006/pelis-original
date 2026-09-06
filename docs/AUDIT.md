@@ -1,25 +1,25 @@
 # Auditoría del sitio — Pelis Original
 
 Documento vivo con el inventario de gaps, bugs e incompletitudes.  
-Última actualización: 2026-08-29.
+Última actualización: 2026-09-05.
 
 ---
 
 ## Resumen ejecutivo
 
-| Área | Estado | Notas |
-|------|--------|-------|
-| Catálogo películas | OK | Filtros, búsqueda, detalle |
-| Catálogo series | Crítico | Admin `Series` ≠ público `Movie.mediaType` |
-| Anime catálogo | OK | CRUD admin, listado |
-| Anime streaming | En reparación | IDs incorrectos + API Consumet inestable |
-| TV en vivo | OK | IPTV, probe admin |
-| Auth | OK | Better Auth + Google |
-| Suscripción | Parcial | Stripe requiere keys reales |
-| PWA | Parcial | SW precache problemático |
-| Imágenes | Alto | Pósters hash faltantes en clone limpio |
-| CI / calidad | Bajo | Sin CI, build ignora TS/lint |
-| Docs agentes | OK | AGENTS.md + docs/APP, ARCHITECTURE, DATA-MODEL, TESTING |
+| Área               | Estado        | Notas                                                   |
+| ------------------ | ------------- | ------------------------------------------------------- |
+| Catálogo películas | OK            | Filtros, búsqueda, detalle                              |
+| Catálogo series    | Crítico       | Admin `Series` ≠ público `Movie.mediaType`              |
+| Anime catálogo     | OK            | CRUD admin, listado                                     |
+| Anime streaming    | En reparación | IDs incorrectos + API Consumet inestable                |
+| TV en vivo         | OK            | IPTV, probe admin                                       |
+| Auth               | OK            | Better Auth + Google                                    |
+| Suscripción        | Parcial       | Stripe requiere keys reales                             |
+| PWA                | Parcial       | SW precache problemático                                |
+| Imágenes           | Alto          | Pósters hash faltantes en clone limpio                  |
+| CI / calidad       | Bajo          | Sin CI, build ignora TS/lint                            |
+| Docs agentes       | OK            | AGENTS.md + docs/APP, ARCHITECTURE, DATA-MODEL, TESTING |
 
 ---
 
@@ -30,6 +30,7 @@ Documento vivo con el inventario de gaps, bugs e incompletitudes.
 **Síntoma:** Al seleccionar proveedor no aparecen episodios o el video falla.
 
 **Causas:**
+
 - El frontend envía un slug del título a Consumet en lugar del AniList ID.
 - El modelo `Anime` no tenía `anilistId` persistido.
 - `api.consumet.org` público suele devolver 500.
@@ -122,48 +123,51 @@ Documento vivo con el inventario de gaps, bugs e incompletitudes.
 
 ## Bajo
 
-| Issue | Archivo | Estado |
-|-------|---------|--------|
-| not-found.tsx custom | apps/web/src/app/not-found.tsx | Corregido |
-| Sin CI en GitHub Actions | `.github/workflows/` | Pendiente |
-| Sin monitoreo Sentry activo | — | Pendiente |
-| E2E roto (referencia Convex) | `e2e/email-verification.e2e.ts` | Pendiente |
-| Sin favoritos/historial anime | schema | Pendiente |
-| Sin SEO `generateMetadata` | páginas detalle | Pendiente |
+| Issue                          | Archivo                                 | Estado                                                 |
+| ------------------------------ | --------------------------------------- | ------------------------------------------------------ |
+| not-found.tsx custom           | apps/web/src/app/not-found.tsx          | Corregido                                              |
+| Sin CI en GitHub Actions       | `.github/workflows/`                    | Pendiente                                              |
+| Sin monitoreo Sentry activo    | —                                       | Pendiente                                              |
+| E2E login/favoritos/historial  | `e2e/account.e2e.ts`, `e2e/auth.e2e.ts` | Corregido 2026-09-05                                   |
+| E2E roto (referencia Convex)   | `e2e/email-verification.e2e.ts`         | Pendiente                                              |
+| Loading/error ad-hoc           | páginas de catálogo y cuenta            | Corregido 2026-09-05 — `ErrorState` + `useQueryResult` |
+| next/image remotes incompletos | `apps/web/next.config.mjs`              | Corregido 2026-09-05                                   |
+| Sin favoritos/historial anime  | schema                                  | Pendiente                                              |
+| Sin SEO `generateMetadata`     | páginas detalle                         | Pendiente                                              |
 
 ---
 
 ## Matriz de features
 
-| Feature | Estado |
-|---------|--------|
-| Home + carruseles | Completo |
-| Catálogo películas | Completo |
-| Catálogo series | Roto/desalineado |
-| Detalle película + player | Completo |
-| Detalle serie | Parcial (sin episodios) |
-| Anime catálogo | Completo |
-| Anime reproducción | En reparación |
-| TV en vivo | Completo |
-| Favoritos / Historial | Completo (solo películas) |
-| Perfil | Completo |
-| Auth | Completo |
-| Stripe suscripción | Parcial |
-| Admin CRUD | Completo |
-| PWA | Parcial |
-| Tests E2E | Parcial (email-verification era Convex) |
+| Feature                   | Estado                                                                                     |
+| ------------------------- | ------------------------------------------------------------------------------------------ |
+| Home + carruseles         | Completo                                                                                   |
+| Catálogo películas        | Completo                                                                                   |
+| Catálogo series           | Roto/desalineado                                                                           |
+| Detalle película + player | Completo                                                                                   |
+| Detalle serie             | Parcial (sin episodios)                                                                    |
+| Anime catálogo            | Completo                                                                                   |
+| Anime reproducción        | En reparación                                                                              |
+| TV en vivo                | Completo                                                                                   |
+| Favoritos / Historial     | Completo (solo películas)                                                                  |
+| Perfil                    | Completo                                                                                   |
+| Auth                      | Completo                                                                                   |
+| Stripe suscripción        | Parcial                                                                                    |
+| Admin CRUD                | Completo                                                                                   |
+| PWA                       | Parcial                                                                                    |
+| Tests E2E                 | Parcial (login/favoritos/historial en account.e2e.ts; email-verification sigue era Convex) |
 
 ---
 
 ## Dependencias externas
 
-| Servicio | Uso | Riesgo |
-|----------|-----|--------|
-| Consumet API | Episodios/video anime | Alta — auto-hospedar |
-| AniList GraphQL | Metadata anime | Baja — gratis |
-| TMDB | Enrichment posters | Media — requiere API key |
-| Stripe | Pagos | Media — requiere config |
-| Paths locales streaming | Películas | Alta — específico del servidor |
+| Servicio                | Uso                   | Riesgo                         |
+| ----------------------- | --------------------- | ------------------------------ |
+| Consumet API            | Episodios/video anime | Alta — auto-hospedar           |
+| AniList GraphQL         | Metadata anime        | Baja — gratis                  |
+| TMDB                    | Enrichment posters    | Media — requiere API key       |
+| Stripe                  | Pagos                 | Media — requiere config        |
+| Paths locales streaming | Películas             | Alta — específico del servidor |
 
 ---
 

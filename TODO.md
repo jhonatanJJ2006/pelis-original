@@ -60,9 +60,9 @@ Ver AGENTS.md (entrada agentes) y auditoría completa en [`docs/AUDIT.md`](docs/
 - [x] Búsqueda global en header
 - [x] Búsqueda incluye anime
 - [x] Anime en bottom tab bar (móvil)
-- [ ] Estados de carga y error unificados en todas las páginas
-- [ ] `next/image` con dominios remotos si se usan URLs externas
-- [ ] Tests E2E de flujos críticos (login, favoritos, historial) — actualizar de Convex
+- [x] Estados de carga y error unificados en todas las páginas
+- [x] `next/image` con dominios remotos si se usan URLs externas
+- [x] Tests E2E de flujos críticos (login, favoritos, historial) — actualizar de Convex
 
 ---
 

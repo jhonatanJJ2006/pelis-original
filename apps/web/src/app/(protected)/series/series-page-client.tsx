@@ -4,9 +4,9 @@ import type { PreloadedQuery } from '@pelis/db/server';
 import { useMemo } from 'react';
 import { Tv } from 'lucide-react';
 import { MovieRow } from '@pelis/ui/features/movie-row';
-import { EmptyState } from '@pelis/ui/features/empty-state';
+import { EmptyState, ErrorState } from '@pelis/ui/features/empty-state';
 import { CatalogPageSkeleton } from '@pelis/ui/features/catalog-page-skeleton';
-import { useQuery } from '@pelis/db/client';
+import { useQueryResult } from '@pelis/db/client';
 import { api } from '@pelis/db/api';
 import type { MediaItem } from '@pelis/ui/types';
 
@@ -27,9 +27,14 @@ interface SeriesPageClientProps {
 }
 
 export default function SeriesPageClient({ preloaded }: SeriesPageClientProps) {
-  const liveSeries = useQuery<MediaItem[]>(api.movies.listSeries, {}) as MediaItem[] | undefined;
+  const {
+    data: liveSeries,
+    error: seriesError,
+    isLoading: seriesLoading,
+    refetch,
+  } = useQueryResult<MediaItem[]>(api.movies.listSeries, {});
   const series = liveSeries ?? preloaded.series.data;
-  const isLoading = series === undefined;
+  const isLoading = series === undefined && seriesLoading;
 
   const grouped = useMemo(() => {
     if (!series) return [];
@@ -47,6 +52,22 @@ export default function SeriesPageClient({ preloaded }: SeriesPageClientProps) {
   }, [series]);
 
   if (isLoading) {
+    return <CatalogPageSkeleton showFilters={false} />;
+  }
+
+  if (!series && seriesError) {
+    return (
+      <div className="page-shell">
+        <ErrorState
+          title="No se pudieron cargar las series"
+          description="Revisa tu conexión e inténtalo de nuevo."
+          onRetry={refetch}
+        />
+      </div>
+    );
+  }
+
+  if (!series) {
     return <CatalogPageSkeleton showFilters={false} />;
   }
 

@@ -30,10 +30,26 @@ export function FullScreenSpinner() {
       role="status"
       aria-label="Cargando"
     >
-      <div className="flex flex-col items-center gap-4">
-        <Spinner size="lg" />
-        <p className="text-cinema-muted">Cargando...</p>
-      </div>
+      <PageSpinner label="Cargando..." size="lg" />
+    </div>
+  );
+}
+
+interface PageSpinnerProps {
+  label?: string;
+  size?: SpinnerProps['size'];
+  className?: string;
+}
+
+export function PageSpinner({ label = 'Cargando…', size = 'lg', className }: PageSpinnerProps) {
+  return (
+    <div
+      className={cn('flex flex-col items-center justify-center gap-4 py-16', className)}
+      role="status"
+      aria-label={label}
+    >
+      <Spinner size={size} />
+      <p className="text-cinema-muted text-sm">{label}</p>
     </div>
   );
 }

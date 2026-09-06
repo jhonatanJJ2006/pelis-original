@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { Heart, Search, Star, Tv, Play, Film, TrendingUp, X } from 'lucide-react';
 import { Badge } from '@pelis/ui/components';
-import { Button, Input, Select, Spinner, Skeleton } from '@pelis/ui/components';
-import { EmptyState } from '@pelis/ui/features/empty-state';
+import { Button, Input, Select, Spinner, Skeleton, PageSpinner } from '@pelis/ui/components';
+import { EmptyState, ErrorState } from '@pelis/ui/features/empty-state';
 import { MovieCard } from '@pelis/ui/features/movie-card';
 import { CatalogFilterBar } from '@pelis/ui/features/catalog-filter-bar';
 import { SectionHeader } from '@pelis/ui/features/section-header';
@@ -265,6 +265,11 @@ export default function PlaygroundPage() {
             title="Sin historial"
             description="Las películas que veas aparecerán aquí."
           />
+          <ErrorState
+            title="No se pudo cargar"
+            description="Así se ve un error de catálogo o cuenta. El botón reintenta la consulta."
+            onRetry={() => undefined}
+          />
         </div>
       </PlaygroundSection>
 
@@ -273,6 +278,7 @@ export default function PlaygroundPage() {
           <Spinner size="sm" />
           <Spinner size="md" />
           <Spinner size="lg" />
+          <PageSpinner label="Cargando catálogo…" size="md" className="py-4" />
           <div className="w-32 space-y-2">
             <Skeleton className="h-40" />
             <Skeleton className="h-4 w-3/4" />

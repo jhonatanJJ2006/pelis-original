@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Heart } from 'lucide-react';
-import { EmptyState } from './index';
+import { EmptyState, ErrorState } from './index';
 
 describe('EmptyState', () => {
   it('renders title and description', () => {
@@ -58,5 +58,15 @@ describe('EmptyState', () => {
     expect(link).toBeInTheDocument();
     expect(link).toContainElement(screen.getByRole('button', { name: 'Explorar' }));
     expect(onAction).not.toHaveBeenCalled();
+  });
+
+  it('renders an error state with a retry action', async () => {
+    const user = userEvent.setup();
+    const onRetry = vi.fn();
+    render(<ErrorState onRetry={onRetry} />);
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'No se pudo cargar' })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Reintentar' }));
+    expect(onRetry).toHaveBeenCalledTimes(1);
   });
 });

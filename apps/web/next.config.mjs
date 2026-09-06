@@ -2,6 +2,7 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
 import withSerwistInit from '@serwist/next';
+import { imageRemotePatterns } from './image-remote-patterns.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -22,10 +23,7 @@ const nextConfig = {
     return config;
   },
   images: {
-    remotePatterns: [
-      { protocol: 'https', hostname: 'image.tmdb.org' },
-      { protocol: 'https', hostname: 'cdn.myanimelist.net' },
-    ],
+    remotePatterns: imageRemotePatterns,
   },
   async headers() {
     return [

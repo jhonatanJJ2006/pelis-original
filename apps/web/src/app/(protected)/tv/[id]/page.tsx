@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { useQuery } from '@pelis/db/client';
+import { useQuery, useQueryResult } from '@pelis/db/client';
 import { api } from '@pelis/db/api';
 import { TVShell } from '../_components/tv-shell';
 import type { SidebarChannel } from '../_components/channel-sidebar';
@@ -16,8 +16,12 @@ export default function TVChannelPage() {
   const id = (params?.id as string) ?? '';
 
   const channel = useQuery(api.tv.getById, { id: id as never }) as TVChannelItem | null | undefined;
-  const list = useQuery(api.tv.list, { limit: 200, offset: 0 }) as
-    { items: TVChannelItem[] } | undefined;
+  const {
+    data: list,
+    error,
+    isLoading,
+    refetch,
+  } = useQueryResult<{ items: TVChannelItem[] }>(api.tv.list, { limit: 200, offset: 0 });
   const channels = (list?.items ?? []) as SidebarChannel[];
 
   const unavailable =
@@ -33,6 +37,9 @@ export default function TVChannelPage() {
       currentChannelId={unavailable ? undefined : channel?._id}
       currentChannelName={channel?.name}
       playerMessage={channel === undefined ? undefined : unavailable}
+      channelsLoading={isLoading}
+      channelsError={error}
+      onRetryChannels={refetch}
     />
   );
 }
