@@ -5,7 +5,7 @@
   "scripts": {
     "prebuild": "node ../../scripts/write-version.mjs",
     "build": "pnpm with-env next build",
-    "build:vercel": "pnpm -w --filter @pelis/db exec prisma generate && next build",
+    "build:vercel": "pnpm --dir ../../packages/db exec prisma generate && next build",
     "clean": "git clean -xdf .cache .next .turbo node_modules",
     "dev": "node scripts/find-port.js",
     "format": "prettier --check . --ignore-path ../../.gitignore",
