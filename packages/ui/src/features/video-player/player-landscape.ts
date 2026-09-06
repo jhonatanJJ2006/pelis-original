@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   useCallback,
@@ -7,31 +7,32 @@ import {
   useState,
   type CSSProperties,
   type RefObject,
-} from 'react';
+} from "react";
 
-export type PlayerLandscapeMode = 'off' | 'native' | 'cover' | 'rotate';
+export type PlayerLandscapeMode = "off" | "native" | "cover" | "rotate";
 
 /** Tailwind max-md (767px) or a coarse pointer on a compact viewport. */
 export const PLAYER_MOBILE_MAX_WIDTH_PX = 767;
 export const PLAYER_COARSE_MAX_WIDTH_PX = 1023;
 
 export const PLAYER_LANDSCAPE_COVER_CLASS =
-  'fixed inset-0 z-[100] h-[100dvh] w-[100dvw] rounded-none border-0';
+  "fixed inset-0 z-[100] h-[100dvh] w-[100dvw] rounded-none border-0";
 
-export const PLAYER_LANDSCAPE_ROTATE_CLASS = 'fixed z-[100] rounded-none border-0';
+export const PLAYER_LANDSCAPE_ROTATE_CLASS =
+  "fixed z-[100] rounded-none border-0";
 
 /** Last-resort CSS rotate while the phone is still portrait (iOS Safari). */
 export const PLAYER_LANDSCAPE_ROTATE_STYLE: CSSProperties = {
-  position: 'fixed',
+  position: "fixed",
   zIndex: 100,
   top: 0,
-  left: '100%',
-  width: '100dvh',
-  height: '100dvw',
-  transform: 'rotate(90deg)',
-  transformOrigin: 'top left',
-  maxWidth: 'none',
-  maxHeight: 'none',
+  left: "100%",
+  width: "100dvh",
+  height: "100dvw",
+  transform: "rotate(90deg)",
+  transformOrigin: "top left",
+  maxWidth: "none",
+  maxHeight: "none",
 };
 
 type MediaWindow = {
@@ -49,12 +50,13 @@ function fallbackWindow(): MediaWindow {
 }
 
 export function isMobilePlayerViewport(
-  win: MediaWindow = typeof window === 'undefined' ? fallbackWindow() : window
+  win: MediaWindow = typeof window === "undefined" ? fallbackWindow() : window,
 ): boolean {
   try {
-    if (win.matchMedia(`(max-width: ${PLAYER_MOBILE_MAX_WIDTH_PX}px)`).matches) return true;
+    if (win.matchMedia(`(max-width: ${PLAYER_MOBILE_MAX_WIDTH_PX}px)`).matches)
+      return true;
     if (
-      win.matchMedia('(pointer: coarse)').matches &&
+      win.matchMedia("(pointer: coarse)").matches &&
       win.innerWidth <= PLAYER_COARSE_MAX_WIDTH_PX
     ) {
       return true;
@@ -65,12 +67,18 @@ export function isMobilePlayerViewport(
   }
 }
 
-export function isLandscapeViewport(size: { width: number; height: number }): boolean {
+export function isLandscapeViewport(size: {
+  width: number;
+  height: number;
+}): boolean {
   return size.width >= size.height;
 }
 
-export function pickLandscapeFallback(size: { width: number; height: number }): 'cover' | 'rotate' {
-  return isLandscapeViewport(size) ? 'cover' : 'rotate';
+export function pickLandscapeFallback(size: {
+  width: number;
+  height: number;
+}): "cover" | "rotate" {
+  return isLandscapeViewport(size) ? "cover" : "rotate";
 }
 
 type WebkitVideo = HTMLVideoElement & {
@@ -96,16 +104,17 @@ type LockableOrientation = {
 
 export async function requestPlayerFullscreen(
   container: HTMLElement,
-  video?: HTMLVideoElement | null
+  video?: HTMLVideoElement | null,
 ): Promise<boolean> {
-  if (typeof document === 'undefined') return false;
+  if (typeof document === "undefined") return false;
   const doc = document as WebkitDocument;
   if (document.fullscreenElement || doc.webkitFullscreenElement) return true;
 
   try {
-    if (typeof container.requestFullscreen === 'function') {
+    if (typeof container.requestFullscreen === "function") {
       await container.requestFullscreen();
-      if (document.fullscreenElement || doc.webkitFullscreenElement) return true;
+      if (document.fullscreenElement || doc.webkitFullscreenElement)
+        return true;
     }
   } catch {
     // iOS Safari rejects element.requestFullscreen()
@@ -116,14 +125,15 @@ export async function requestPlayerFullscreen(
   if (prefixed) {
     try {
       await prefixed.call(container);
-      if (document.fullscreenElement || doc.webkitFullscreenElement) return true;
+      if (document.fullscreenElement || doc.webkitFullscreenElement)
+        return true;
     } catch {
       // still iOS
     }
   }
 
   const wkVideo = video as WebkitVideo | null | undefined;
-  if (wkVideo && typeof wkVideo.webkitEnterFullscreen === 'function') {
+  if (wkVideo && typeof wkVideo.webkitEnterFullscreen === "function") {
     try {
       wkVideo.webkitEnterFullscreen();
       return true;
@@ -138,8 +148,8 @@ export async function requestPlayerFullscreen(
 export async function lockLandscapeOrientation(): Promise<boolean> {
   try {
     const orientation = screen.orientation as LockableOrientation | undefined;
-    if (orientation && typeof orientation.lock === 'function') {
-      await orientation.lock('landscape');
+    if (orientation && typeof orientation.lock === "function") {
+      await orientation.lock("landscape");
       return true;
     }
   } catch {
@@ -157,8 +167,10 @@ export async function unlockLandscapeOrientation(): Promise<void> {
   }
 }
 
-export async function exitPlayerFullscreen(video?: HTMLVideoElement | null): Promise<void> {
-  if (typeof document === 'undefined') return;
+export async function exitPlayerFullscreen(
+  video?: HTMLVideoElement | null,
+): Promise<void> {
+  if (typeof document === "undefined") return;
   const doc = document as WebkitDocument;
   try {
     if (document.fullscreenElement) await document.exitFullscreen();
@@ -166,7 +178,10 @@ export async function exitPlayerFullscreen(video?: HTMLVideoElement | null): Pro
     // ignore
   }
   try {
-    if (doc.webkitFullscreenElement && typeof doc.webkitExitFullscreen === 'function') {
+    if (
+      doc.webkitFullscreenElement &&
+      typeof doc.webkitExitFullscreen === "function"
+    ) {
       doc.webkitExitFullscreen();
     }
   } catch {
@@ -174,7 +189,10 @@ export async function exitPlayerFullscreen(video?: HTMLVideoElement | null): Pro
   }
   const wkVideo = video as WebkitVideo | null | undefined;
   try {
-    if (wkVideo?.webkitDisplayingFullscreen && typeof wkVideo.webkitExitFullscreen === 'function') {
+    if (
+      wkVideo?.webkitDisplayingFullscreen &&
+      typeof wkVideo.webkitExitFullscreen === "function"
+    ) {
       wkVideo.webkitExitFullscreen();
     }
   } catch {
@@ -186,11 +204,14 @@ export function landscapeSurfaceProps(mode: PlayerLandscapeMode): {
   className: string;
   style?: CSSProperties;
 } {
-  if (mode === 'cover') return { className: PLAYER_LANDSCAPE_COVER_CLASS };
-  if (mode === 'rotate') {
-    return { className: PLAYER_LANDSCAPE_ROTATE_CLASS, style: PLAYER_LANDSCAPE_ROTATE_STYLE };
+  if (mode === "cover") return { className: PLAYER_LANDSCAPE_COVER_CLASS };
+  if (mode === "rotate") {
+    return {
+      className: PLAYER_LANDSCAPE_ROTATE_CLASS,
+      style: PLAYER_LANDSCAPE_ROTATE_STYLE,
+    };
   }
-  return { className: '' };
+  return { className: "" };
 }
 
 function viewportSize(): { width: number; height: number } {
@@ -209,24 +230,24 @@ export function useMobileLandscapePlayer({
   /** TV / anime watch pages open already in the player. Movies wait for play. */
   enterOnMount?: boolean;
 }) {
-  const [mode, setMode] = useState<PlayerLandscapeMode>('off');
+  const [mode, setMode] = useState<PlayerLandscapeMode>("off");
   const wantedRef = useRef(false);
   const enteringRef = useRef(false);
 
   const applyFallback = useCallback(() => {
     if (!wantedRef.current) {
-      setMode('off');
+      setMode("off");
       return;
     }
-    if (typeof document !== 'undefined' && document.fullscreenElement) {
-      setMode('native');
+    if (typeof document !== "undefined" && document.fullscreenElement) {
+      setMode("native");
       return;
     }
     setMode(pickLandscapeFallback(viewportSize()));
   }, []);
 
   const enter = useCallback(async () => {
-    if (!enabled || typeof window === 'undefined') return;
+    if (!enabled || typeof window === "undefined") return;
     if (!isMobilePlayerViewport()) return;
     wantedRef.current = true;
     if (enteringRef.current) return;
@@ -241,7 +262,7 @@ export function useMobileLandscapePlayer({
       const gotFs = await requestPlayerFullscreen(container, video);
       const locked = await lockLandscapeOrientation();
       if (gotFs) {
-        setMode('native');
+        setMode("native");
         if (!locked && !isLandscapeViewport(viewportSize())) {
           if (!document.fullscreenElement) applyFallback();
         }
@@ -253,22 +274,32 @@ export function useMobileLandscapePlayer({
     }
   }, [applyFallback, containerRef, enabled, videoRef]);
 
+  const clearBodyLock = useCallback(() => {
+    if (typeof document === "undefined") return;
+    document.documentElement.style.overflow = "";
+    document.body.style.overflow = "";
+    document.documentElement.classList.remove("pelis-player-landscape");
+    document.body.classList.remove("pelis-player-landscape");
+  }, []);
+
   const exit = useCallback(async () => {
     wantedRef.current = false;
-    setMode('off');
+    setMode("off");
+    clearBodyLock();
     await unlockLandscapeOrientation();
     await exitPlayerFullscreen(videoRef?.current ?? null);
-  }, [videoRef]);
+  }, [clearBodyLock, videoRef]);
 
   useEffect(() => {
     if (!enabled) {
       wantedRef.current = false;
-      setMode('off');
+      setMode("off");
+      clearBodyLock();
       void unlockLandscapeOrientation();
       void exitPlayerFullscreen(videoRef?.current ?? null);
       return;
     }
-    if (typeof window === 'undefined' || !isMobilePlayerViewport()) return;
+    if (typeof window === "undefined" || !isMobilePlayerViewport()) return;
 
     const container = containerRef.current;
     const tryEnter = () => {
@@ -280,66 +311,90 @@ export function useMobileLandscapePlayer({
       applyFallback();
     }
 
-    container?.addEventListener('pointerdown', tryEnter);
+    container?.addEventListener("pointerdown", tryEnter);
     const onPlayCapture = (event: Event) => {
       const video = videoRef?.current;
       if (video && event.target === video) tryEnter();
     };
-    window.addEventListener('play', onPlayCapture, true);
+    window.addEventListener("play", onPlayCapture, true);
     const videoEl = videoRef?.current as EventTarget | null | undefined;
+    const leaveOverlay = () => {
+      wantedRef.current = false;
+      setMode("off");
+      clearBodyLock();
+      void unlockLandscapeOrientation();
+    };
     const onWebkitEnd = () => {
-      if (wantedRef.current) applyFallback();
+      // User dismissed native iOS fullscreen — do not re-open CSS cover overlay.
+      leaveOverlay();
     };
-    const onWebkitBegin = () => setMode('native');
-    videoEl?.addEventListener('webkitendfullscreen', onWebkitEnd);
-    videoEl?.addEventListener('webkitbeginfullscreen', onWebkitBegin);
+    const onWebkitBegin = () => setMode("native");
+    videoEl?.addEventListener("webkitendfullscreen", onWebkitEnd);
+    videoEl?.addEventListener("webkitbeginfullscreen", onWebkitBegin);
     const onFs = () => {
-      if (document.fullscreenElement) setMode('native');
-      else if (wantedRef.current) applyFallback();
-      else setMode('off');
+      if (document.fullscreenElement) {
+        setMode("native");
+        return;
+      }
+      // User left native fullscreen — fully clear fixed/z-index overlay.
+      if (wantedRef.current) leaveOverlay();
+      else setMode("off");
     };
-    document.addEventListener('fullscreenchange', onFs);
+    document.addEventListener("fullscreenchange", onFs);
     const onOrient = () => {
       if (!wantedRef.current) return;
       if (document.fullscreenElement) {
-        setMode('native');
+        setMode("native");
         return;
       }
       applyFallback();
     };
-    window.addEventListener('orientationchange', onOrient);
-    window.addEventListener('resize', onOrient);
+    window.addEventListener("orientationchange", onOrient);
+    window.addEventListener("resize", onOrient);
 
     return () => {
-      container?.removeEventListener('pointerdown', tryEnter);
-      window.removeEventListener('play', onPlayCapture, true);
-      videoEl?.removeEventListener('webkitendfullscreen', onWebkitEnd);
-      videoEl?.removeEventListener('webkitbeginfullscreen', onWebkitBegin);
-      document.removeEventListener('fullscreenchange', onFs);
-      window.removeEventListener('orientationchange', onOrient);
-      window.removeEventListener('resize', onOrient);
+      container?.removeEventListener("pointerdown", tryEnter);
+      window.removeEventListener("play", onPlayCapture, true);
+      videoEl?.removeEventListener("webkitendfullscreen", onWebkitEnd);
+      videoEl?.removeEventListener("webkitbeginfullscreen", onWebkitBegin);
+      document.removeEventListener("fullscreenchange", onFs);
+      window.removeEventListener("orientationchange", onOrient);
+      window.removeEventListener("resize", onOrient);
     };
-  }, [applyFallback, containerRef, enabled, enter, enterOnMount, videoRef]);
+  }, [
+    applyFallback,
+    clearBodyLock,
+    containerRef,
+    enabled,
+    enter,
+    enterOnMount,
+    videoRef,
+  ]);
 
   useEffect(() => {
     return () => {
       wantedRef.current = false;
+      clearBodyLock();
       void unlockLandscapeOrientation();
       void exitPlayerFullscreen(videoRef?.current ?? null);
     };
-  }, [videoRef]);
+  }, [clearBodyLock, videoRef]);
 
   useEffect(() => {
-    if (mode === 'off' || typeof document === 'undefined') return;
+    if (mode === "off" || typeof document === "undefined") return;
     const html = document.documentElement;
     const body = document.body;
     const prevHtml = html.style.overflow;
     const prevBody = body.style.overflow;
-    html.style.overflow = 'hidden';
-    body.style.overflow = 'hidden';
+    html.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+    html.classList.add("pelis-player-landscape");
+    body.classList.add("pelis-player-landscape");
     return () => {
       html.style.overflow = prevHtml;
       body.style.overflow = prevBody;
+      html.classList.remove("pelis-player-landscape");
+      body.classList.remove("pelis-player-landscape");
     };
   }, [mode]);
 
@@ -347,7 +402,7 @@ export function useMobileLandscapePlayer({
 
   return {
     mode,
-    landscapeActive: mode !== 'off',
+    landscapeActive: mode !== "off",
     enter,
     exit,
     surfaceClassName: surface.className,
