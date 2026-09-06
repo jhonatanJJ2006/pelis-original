@@ -3,20 +3,7 @@ import { prisma } from '../client';
 import { notifyChange } from '../realtime';
 import { register } from '../registry';
 import { requireAdmin } from '../lib/requireAdmin';
-
-const SeriesCreate = z.object({
-  name: z.string(),
-  image: z.string(),
-  synopsis: z.string(),
-  genre: z.string(),
-  token: z.string(),
-  actors: z.string(),
-  classification: z.string(),
-  releaseYear: z.string(),
-  episodes: z.number().optional(),
-  season: z.number().optional(),
-  featured: z.boolean().optional(),
-});
+import { seriesCreateSchema, seriesUpdateSchema } from '../lib/movie-payload';
 
 export const adminList = register({
   kind: 'query',
@@ -95,7 +82,7 @@ export const create = register({
   kind: 'mutation',
   name: 'adminSeries.create',
   writes: ['series'],
-  args: SeriesCreate,
+  args: seriesCreateSchema,
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
     const s = await prisma.series.create({ data: args });
@@ -108,7 +95,7 @@ export const update = register({
   kind: 'mutation',
   name: 'adminSeries.update',
   writes: ['series'],
-  args: SeriesCreate.extend({ id: z.string() }),
+  args: seriesUpdateSchema,
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
     const { id, ...rest } = args;

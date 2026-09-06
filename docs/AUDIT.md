@@ -1,7 +1,7 @@
 # Auditoría del sitio — Pelis Original
 
 Documento vivo con el inventario de gaps, bugs e incompletitudes.  
-Última actualización: 2026-09-05.
+Última actualización: 2026-09-05 (movieSchema en mutations admin).
 
 ---
 
@@ -148,6 +148,12 @@ Documento vivo con el inventario de gaps, bugs e incompletitudes.
 **Síntoma:** Campo `providers` en BD es informativo; no controla reproducción.
 
 **Acción:** Documentado en `docs/ANIME-PROVIDERS.md`. Streaming usa proveedores centralizados en `anime-providers.ts`.
+
+### 11c. Admin create/update sin `movieSchema`
+
+**Síntoma:** `movies.create` / `movies.update` (y `adminSeries.*`) aceptaban cualquier string/number; `movieSchema` de `@pelis/validators` no se usaba.
+
+**Estado:** Corregido 2026-09-05 — `packages/db/src/lib/movie-payload.ts` extiende `movieSchema`. `invoke()` sigue respondiendo 400 `Invalid args for "<name>": …`.
 
 ---
 

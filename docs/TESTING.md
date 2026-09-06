@@ -6,7 +6,7 @@ Scripts en package.json raiz. Workspace Vitest: vitest.workspace.ts. Playwright:
 
 Dos proyectos:
 
-- unit (environment node, globals): `*.test.ts` en validators, `apps/web/src/lib` (incluye `pwa-update.test.ts`), ui shared/features, auth y `packages/db` (incluye `stripe-subscription.test.ts`: checkout → ACTIVE y no clobber por `incomplete`)
+- unit (environment node, globals): `*.test.ts` en validators, `apps/web/src/lib` (incluye `pwa-update.test.ts`), ui shared/features, auth y `packages/db` (incluye `stripe-subscription.test.ts`: checkout → ACTIVE y no clobber por `incomplete`; `movie-payload.test.ts` + `invoke-movie-payload.test.ts`: create/update admin con `movieSchema`, 400 en payload inválido)
 - components (jsdom, setupFiles `./test/setup.ts`): `packages/ui` `*.test.tsx`. Alias next/link y next/image a test/mocks.
 - Exclude: node_modules, e2e, .next, .turbo.
 

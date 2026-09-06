@@ -8,7 +8,7 @@ Stack actual: Next.js 14 + Postgres/Prisma (@pelis/db) + Better Auth. NUNCA Conv
 - packages/db (@pelis/db): Prisma, registry query/mutation/action, Better Auth server, Stripe, Consumet/AniList.
 - packages/ui (@pelis/ui): primitivos shared/ui + features (MovieCard, EmptyState, etc.).
 - packages/auth (@pelis/auth): useUser, store, session-sync. No es el servidor de auth.
-- packages/validators (@pelis/validators): Zod login/register/movieSchema (movieSchema aún no se usa en mutations).
+- packages/validators (@pelis/validators): Zod login/register/movieSchema. Admin `movies.create`/`movies.update` y `adminSeries.create`/`adminSeries.update` validan con `movieSchema` (extendido en `packages/db/src/lib/movie-payload.ts`). Invoke responde 400 `Invalid args for "<name>": campo: mensaje`.
 - packages/email (@pelis/email): templates Resend.
 
 ## Flujo de datos
