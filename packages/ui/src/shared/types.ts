@@ -10,6 +10,8 @@ export interface MediaItem {
   classification: string;
   releaseYear: string;
   videoUrl?: string;
+  /** Optional subtitle tracks: [{lang, label?, path}] relative under stream output. */
+  subtitleTracks?: Array<{ lang: string; label?: string; path: string }> | null;
   mediaType?: 'movie' | 'series';
   episodes?: number;
   featured?: boolean;

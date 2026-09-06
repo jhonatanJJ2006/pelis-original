@@ -34,6 +34,15 @@ export const movieSchema = z.object({
   classification: z.string().min(1, 'La clasificación es requerida'),
   releaseYear: z.string().regex(/^\d{4}$/, 'Año inválido'),
   videoUrl: z.string().optional().or(z.literal('')),
+  subtitleTracks: z
+    .array(
+      z.object({
+        lang: z.string().min(1),
+        label: z.string().optional(),
+        path: z.string().min(1),
+      })
+    )
+    .optional(),
   mediaType: z.enum(['movie', 'series']).optional(),
   episodes: z.number().int().positive().optional(),
   featured: z.boolean().optional(),

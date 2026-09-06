@@ -106,6 +106,9 @@ model Movie {
   classification  String   @default("PG-13")
   releaseYear     String   @default("")
   videoUrl        String?
+  // Optional subtitle tracks: [{lang, label?, path}] — path relative under stream output
+  // (e.g. playlist_vtt.m3u8 or playlist0.vtt). Served via /api/stream.
+  subtitleTracks  Json?
   mediaType       MediaType @default(MOVIE)
   episodes        Int?
   featured        Boolean  @default(false)

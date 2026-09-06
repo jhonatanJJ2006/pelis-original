@@ -34,6 +34,14 @@ describe('movieCreateSchema', () => {
     expect(result.success).toBe(true);
   });
 
+  it('acepta subtitleTracks opcionales', () => {
+    const result = movieCreateSchema.safeParse({
+      ...validMovie,
+      subtitleTracks: [{ lang: 'es', label: 'Español', path: 'playlist_vtt.m3u8' }],
+    });
+    expect(result.success).toBe(true);
+  });
+
   it('rechaza sinopsis corta con mensaje de movieSchema', () => {
     const result = movieCreateSchema.safeParse({ ...validMovie, synopsis: 'Corta' });
     expect(result.success).toBe(false);

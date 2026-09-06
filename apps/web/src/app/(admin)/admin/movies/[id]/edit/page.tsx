@@ -53,6 +53,13 @@ export default function EditMoviePage() {
 
   const handleSubmit = async (values: MovieFormValues, intent?: 'save' | 'continue') => {
     try {
+      const subtitleTracks = values.subtitleTracksJson.trim()
+        ? (JSON.parse(values.subtitleTracksJson) as Array<{
+            lang: string;
+            label?: string;
+            path: string;
+          }>)
+        : undefined;
       await updateMovie({
         id: movieId as any,
         name: values.name.trim(),
@@ -65,6 +72,7 @@ export default function EditMoviePage() {
         classification: values.classification.trim(),
         releaseYear: values.releaseYear.trim(),
         videoUrl: values.videoUrl.trim() || undefined,
+        subtitleTracks,
         mediaType: values.mediaType,
         episodes: values.episodes ? Number(values.episodes) : undefined,
         featured: values.featured,
@@ -128,6 +136,9 @@ export default function EditMoviePage() {
           classification: movie.classification,
           releaseYear: movie.releaseYear,
           videoUrl: movie.videoUrl ?? '',
+          subtitleTracksJson: movie.subtitleTracks
+            ? JSON.stringify(movie.subtitleTracks, null, 2)
+            : '',
           mediaType: movie.mediaType ?? 'movie',
           episodes: movie.episodes?.toString() ?? '',
           featured: movie.featured ?? false,
