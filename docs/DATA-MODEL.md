@@ -5,9 +5,10 @@ Fuente: packages/db/prisma/schema.prisma. Shapes UI: packages/db/src/lib/shapes.
 ## Split Series (trampa)
 
 Hay DOS sitios para series:
+
 1. Movie.mediaType = SERIES — lo que lista /series (movies.listSeries). Favoritos e historial apuntan a Movie.
 2. Tabla Series — solo /admin/series. Sin relacion a Favorite/History. No aparece en el catálogo publico.
-Unificar (migrar admin -> Movie.mediaType) esta pendiente.
+   Unificar (migrar admin -> Movie.mediaType) esta pendiente.
 
 ## Better Auth
 
@@ -42,3 +43,6 @@ Agrupacion franchise: seriesKey + isSeriesMain. Ver docs/ANIME-PROVIDERS.md. Sin
 **History**: userId, movieId -> Movie cascade, progress, duration, lastWatched, unique (userId, movieId).
 No hay favoritos/historial para Anime ni tabla Series.
 
+## TV pairing
+
+**TvPairing** (`tv_pairing`): code unique (6 chars), deviceId, status PENDING|APPROVED|CLAIMED|EXPIRED, userId (tras aprobar), expiresAt (10 min). La tele crea el código; `/link-tv` aprueba; claim crea Session Better Auth.

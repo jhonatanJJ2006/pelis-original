@@ -33,7 +33,8 @@
     "test:setup": "pnpm add -D vitest @playwright/test -w && npx playwright install chromium",
     "icons:generate": "node scripts/generate-pwa-icons.mjs",
     "android:build": "node scripts/android-build.mjs",
-    "android:fingerprint": "node scripts/android-fingerprint.mjs"
+    "android:fingerprint": "node scripts/android-fingerprint.mjs",
+    "android-tv:build": "node scripts/android-tv-build.mjs"
   },
   "devDependencies": {
     "@pelis/prettier-config": "workspace:*",

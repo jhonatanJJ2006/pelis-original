@@ -38,6 +38,8 @@ Ver tambien AGENTS.md seccion 6.
 - UI de componentes: playground + test:playground + test:components
 - Pagina publica: test:smoke
 - API: test:api via test:smoke (api-smoke.e2e.ts)
+- Pairing TV: `packages/db/src/lib/tv-pairing.test.ts` + smoke `POST /api/tv-auth/pairing`
+- Android TV nativo: no hay Gradle en CI de este entorno. Build local: `apps/android-tv/README.md`. No usar `apps/android/app/` (TWA gitignorado) como plantilla de ignore.
 - Auth: e2e/auth.e2e.ts y e2e/account.e2e.ts. No uses email-verification.e2e.ts (Convex).
 - Admin: admin-movie-preview con E2E_ADMIN_EMAIL/PASSWORD en entorno, nunca en git.
 - Prod: verpelis.pro/login con cuenta de pruebas de Webos (pedir clave, no documentarla).

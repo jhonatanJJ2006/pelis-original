@@ -5,6 +5,8 @@ Stack actual: Next.js 14 + Postgres/Prisma (@pelis/db) + Better Auth. NUNCA Conv
 ## Paquetes
 
 - apps/web (@pelis/web): Next.js 14 App Router, Tailwind cinema-*, Serwist PWA.
+- apps/android-tv (@pelis/android-tv): Compose for TV, package `pro.verpelis.tv`. Fuentes en `app/src/` (trackeadas). Pairing vía `/api/tv-auth/*`.
+- apps/android (@pelis/android): TWA Bubblewrap phone (`pro.verpelis.twa`). `app/` gitignorado a propósito.
 - packages/db (@pelis/db): Prisma, registry query/mutation/action, Better Auth server, Stripe, Consumet/AniList.
 - packages/ui (@pelis/ui): primitivos shared/ui + features (MovieCard, EmptyState, etc.).
 - packages/auth (@pelis/auth): useUser, store, session-sync. No es el servidor de auth.
@@ -24,9 +26,10 @@ Mutations llaman notifyChange; el cliente SSE /api/subscriptions/stream invalida
 ## Auth
 
 Better Auth en packages/db/src/auth.ts (prismaAdapter). Handler HTTP: /api/auth/[...path].
+Pairing TV: tabla `tv_pairing` + `/api/tv-auth/*` (crear código, aprobar en móvil `/link-tv`, claim cookie+token en la tele nativa o web).
 requireUser / requireAdmin / requireActivePlan / hasActivePlan: packages/db/src/lib/requireAdmin.ts.
 Admin UI: (admin)/layout.tsx comprueba user.role === admin (minúscula en cliente; BD es ADMIN).
-No hay middleware.ts de Next.
+Middleware Next (`apps/web/src/middleware.ts`): solo `/`. Si el UA es Android TV (o `?device=tv`) redirige a `/tv`. No es muro de login.
 
 ## Stripe / plan activo
 

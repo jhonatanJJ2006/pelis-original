@@ -49,8 +49,8 @@ export function TVShell({
       <div className="relative flex-1 min-w-0 min-h-0 bg-black">
         {currentChannelName && (
           <div className="absolute top-3 left-3 z-20 pointer-events-none">
-            <p className="text-[10px] uppercase tracking-widest text-red-400 font-semibold flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
+            <p className="text-[10px] uppercase tracking-widest text-cinema-danger-light font-semibold flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-cinema-danger animate-pulse" />
               En vivo
             </p>
             <p className="text-white text-sm font-medium truncate max-w-[50vw] drop-shadow">
@@ -64,7 +64,7 @@ export function TVShell({
             <p className="text-cinema-muted max-w-md text-sm">
               Inicia sesión para ver este canal en vivo
             </p>
-            <Link href="/login" className="btn-primary px-6 py-2.5 rounded-[10px]">
+            <Link href="/login" className="btn-primary px-6 py-2.5 rounded-[10px] tv-focus">
               Iniciar sesión
             </Link>
           </div>
