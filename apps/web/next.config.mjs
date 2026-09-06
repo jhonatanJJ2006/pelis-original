@@ -2,6 +2,7 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
 import withSerwistInit from '@serwist/next';
+import { imageRemotePatterns } from './image-remote-patterns.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -9,7 +10,13 @@ const withSerwist = withSerwistInit({
   swSrc: 'sw.ts',
   swDest: 'public/sw.js',
   disable: process.env.NODE_ENV === 'development',
-  exclude: [/\/uploads\//, /\/version\.json$/, /app-version\.json$/, /tv-app-version\.json$/],
+  exclude: [
+    /\/uploads\//,
+    /\/version\.json$/,
+    /app-version\.json$/,
+    /tv-app-version\.json$/,
+    /assetlinks\.json$/,
+  ],
 });
 
 const nextConfig = {
@@ -22,10 +29,7 @@ const nextConfig = {
     return config;
   },
   images: {
-    remotePatterns: [
-      { protocol: 'https', hostname: 'image.tmdb.org' },
-      { protocol: 'https', hostname: 'cdn.myanimelist.net' },
-    ],
+    remotePatterns: imageRemotePatterns,
   },
   async headers() {
     return [
@@ -45,6 +49,15 @@ const nextConfig = {
       {
         source: '/sw.js',
         headers: [{ key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' }],
+      },
+      {
+        // Digital Asset Links: Chrome TWA exige JSON sin redirect y Content-Type correcto.
+        source: '/.well-known/assetlinks.json',
+        headers: [
+          { key: 'Content-Type', value: 'application/json; charset=utf-8' },
+          { key: 'Cache-Control', value: 'public, max-age=3600' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+        ],
       },
     ];
   },

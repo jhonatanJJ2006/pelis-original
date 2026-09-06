@@ -81,7 +81,7 @@ Rutas de apps/web/src/app. Grupo (protected) = header/footer, NO exige login. Gr
 
 ### `/profile`
 
-- Hace: perfil, plan, logout, acceso admin si role admin
+- Hace: perfil, plan, logout, acceso admin si role admin. Sin CTAs de descargar APK (esos no van in-app).
 - Archivos: (protected)/profile/page.tsx
 - Auth: useUser; si no hay user, CTA login. Datos: users.me, subscriptions.list.
 

@@ -16,7 +16,7 @@ Ver AGENTS.md (entrada agentes) y auditoría completa en [`docs/AUDIT.md`](docs/
 - [x] Conexión imágenes: hash MD5 → `/peliculas/peliculas/{hash}.webp`
 - [x] Página de perfil (`/profile`)
 - [x] Búsqueda global en header (películas/series)
-- [x] PWA (manifest standalone, SW Serwist, modal de actualización; sin prompts de instalar)
+- [x] PWA (manifest standalone, SW Serwist, modal de actualización; sin prompts de instalar ni CTAs APK en perfil/footer)
 - [x] Panel admin CRUD (movies, series, anime, TV, users, plans)
 - [x] Enrichment TMDB para películas/series/anime
 - [x] Auditoría documentada en `docs/AUDIT.md`
@@ -48,7 +48,7 @@ Ver AGENTS.md (entrada agentes) y auditoría completa en [`docs/AUDIT.md`](docs/
 ## Backend
 
 - [x] Proteger mutaciones admin con `requireAdmin`
-- [ ] Validar payloads con `movieSchema` de `@pelis/validators`
+- [x] Validar payloads con `movieSchema` de `@pelis/validators` — `movies.create` / `movies.update` y `adminSeries.create` / `adminSeries.update` (2026-09-05)
 - [x] Script de seed documentado (`pnpm --filter @pelis/db db:seed`)
 - [x] Import AniList (`pnpm --filter @pelis/db import:anilist`)
 - [x] /api/stream* con denyUnlessStreamAccess (sesion + plan o ADMIN; no quitar)
@@ -61,9 +61,9 @@ Ver AGENTS.md (entrada agentes) y auditoría completa en [`docs/AUDIT.md`](docs/
 - [x] Búsqueda global en header
 - [x] Búsqueda incluye anime
 - [x] Anime en bottom tab bar (móvil)
-- [ ] Estados de carga y error unificados en todas las páginas
-- [ ] `next/image` con dominios remotos si se usan URLs externas
-- [ ] Tests E2E de flujos críticos (login, favoritos, historial) — actualizar de Convex
+- [x] Estados de carga y error unificados en todas las páginas
+- [x] `next/image` con dominios remotos si se usan URLs externas
+- [x] Tests E2E de flujos críticos (login, favoritos, historial) — actualizar de Convex
 
 ---
 

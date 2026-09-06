@@ -1,7 +1,7 @@
 # Auditoría del sitio — Pelis Original
 
 Documento vivo con el inventario de gaps, bugs e incompletitudes.  
-Última actualización: 2026-09-05.
+Última actualización: 2026-09-06 (sin CTAs APK in-app; movieSchema admin 2026-09-05).
 
 ---
 
@@ -16,7 +16,7 @@ Documento vivo con el inventario de gaps, bugs e incompletitudes.
 | TV en vivo         | OK            | IPTV, probe admin                                                                          |
 | Auth               | OK            | Better Auth + Google                                                                       |
 | Suscripción        | OK código     | Checkout → sync/webhook → ACTIVE. Ops en Movies (túnel + .env + Postgres local), no Vercel |
-| PWA                | Parcial       | Update modal + sin install CTAs; SW precache de uploads sigue siendo ruido                 |
+| PWA                | Parcial       | Update modal + sin install/descarga in-app; SW precache de uploads sigue siendo ruido      |
 | Imágenes           | Alto          | Pósters hash faltantes en clone limpio                                                     |
 | CI / calidad       | Bajo          | Sin CI, build ignora TS/lint                                                               |
 | Docs agentes       | OK            | AGENTS.md + docs/APP, ARCHITECTURE, DATA-MODEL, TESTING                                    |
@@ -141,7 +141,7 @@ Documento vivo con el inventario de gaps, bugs e incompletitudes.
 
 **Síntoma:** Barras/modales de «instalar app» (`pwa-install-prompt`, `tv-install-bar`, `beforeinstallprompt`) y falta de consentimiento al actualizar el SW.
 
-**Estado:** Corregido 2026-09-05 — se quitaron los CTAs de instalar; `PwaRuntime` silencia el banner nativo y muestra modal Aceptar / Más tarde. En Movies el check usa `/api/app/availability` (disco) + SW waiting; `version.json`/`sw.js` no se cachean. La barra tipo Google + compartir sigue siendo chrome del navegador o TWA (`fallbackType: customtabs` si fallan Digital Asset Links), no un componente de la app. Runtime = systemd local, no Vercel.
+**Estado:** Corregido 2026-09-05 — se quitaron los CTAs de instalar; `PwaRuntime` silencia el banner nativo y muestra modal Aceptar / Más tarde. En Movies el check usa `/api/app/availability` (disco) + SW waiting; `version.json`/`sw.js` no se cachean. 2026-09-06 — también se quitaron `AppDownloadButtons` de `/profile` y footer. Package TWA alineado a `pro.verpelis.twa` (assetlinks + twa-manifest). Prod ya sirve `/.well-known/assetlinks.json` como JSON sin redirect y Google lista el statement. La barra gris URL + compartir no es un componente: es chrome de Chrome o Custom Tabs. No se oculta con CSS. TWA standalone solo si el APK instalado es `pro.verpelis.twa` firmado con el SHA256 de assetlinks; si el usuario abre una pestaña de Chrome, la barra queda. Runtime = systemd local, no Vercel.
 
 ### 11. Admin anime: providers JSON vs streaming
 
@@ -149,40 +149,49 @@ Documento vivo con el inventario de gaps, bugs e incompletitudes.
 
 **Acción:** Documentado en `docs/ANIME-PROVIDERS.md`. Streaming usa proveedores centralizados en `anime-providers.ts`.
 
+### 11c. Admin create/update sin `movieSchema`
+
+**Síntoma:** `movies.create` / `movies.update` (y `adminSeries.*`) aceptaban cualquier string/number; `movieSchema` de `@pelis/validators` no se usaba.
+
+**Estado:** Corregido 2026-09-05 — `packages/db/src/lib/movie-payload.ts` extiende `movieSchema`. `invoke()` sigue respondiendo 400 `Invalid args for "<name>": …`.
+
 ---
 
 ## Bajo
 
-| Issue                         | Archivo                         | Estado    |
-| ----------------------------- | ------------------------------- | --------- |
-| not-found.tsx custom          | apps/web/src/app/not-found.tsx  | Corregido |
-| Sin CI en GitHub Actions      | `.github/workflows/`            | Pendiente |
-| Sin monitoreo Sentry activo   | —                               | Pendiente |
-| E2E roto (referencia Convex)  | `e2e/email-verification.e2e.ts` | Pendiente |
-| Sin favoritos/historial anime | schema                          | Pendiente |
-| Sin SEO `generateMetadata`    | páginas detalle                 | Pendiente |
+| Issue                          | Archivo                                 | Estado                                                 |
+| ------------------------------ | --------------------------------------- | ------------------------------------------------------ |
+| not-found.tsx custom           | apps/web/src/app/not-found.tsx          | Corregido                                              |
+| Sin CI en GitHub Actions       | `.github/workflows/`                    | Pendiente                                              |
+| Sin monitoreo Sentry activo    | —                                       | Pendiente                                              |
+| E2E login/favoritos/historial  | `e2e/account.e2e.ts`, `e2e/auth.e2e.ts` | Corregido 2026-09-05                                   |
+| E2E roto (referencia Convex)   | `e2e/email-verification.e2e.ts`         | Pendiente                                              |
+| Loading/error ad-hoc           | páginas de catálogo y cuenta            | Corregido 2026-09-05 — `ErrorState` + `useQueryResult` |
+| next/image remotes incompletos | `apps/web/next.config.mjs`              | Corregido 2026-09-05                                   |
+| Sin favoritos/historial anime  | schema                                  | Pendiente                                              |
+| Sin SEO `generateMetadata`     | páginas detalle                         | Pendiente                                              |
 
 ---
 
 ## Matriz de features
 
-| Feature                   | Estado                                  |
-| ------------------------- | --------------------------------------- |
-| Home + carruseles         | Completo                                |
-| Catálogo películas        | Completo                                |
-| Catálogo series           | Roto/desalineado                        |
-| Detalle película + player | Completo                                |
-| Detalle serie             | Parcial (sin episodios)                 |
-| Anime catálogo            | Completo                                |
-| Anime reproducción        | En reparación                           |
-| TV en vivo                | Completo                                |
-| Favoritos / Historial     | Completo (solo películas)               |
-| Perfil                    | Completo                                |
-| Auth                      | Completo                                |
-| Stripe suscripción        | Completo (código; keys/webhook ops)     |
-| Admin CRUD                | Completo                                |
-| PWA                       | Parcial                                 |
-| Tests E2E                 | Parcial (email-verification era Convex) |
+| Feature                   | Estado                                                                                     |
+| ------------------------- | ------------------------------------------------------------------------------------------ |
+| Home + carruseles         | Completo                                                                                   |
+| Catálogo películas        | Completo                                                                                   |
+| Catálogo series           | Roto/desalineado                                                                           |
+| Detalle película + player | Completo                                                                                   |
+| Detalle serie             | Parcial (sin episodios)                                                                    |
+| Anime catálogo            | Completo                                                                                   |
+| Anime reproducción        | En reparación                                                                              |
+| TV en vivo                | Completo                                                                                   |
+| Favoritos / Historial     | Completo (solo películas)                                                                  |
+| Perfil                    | Completo                                                                                   |
+| Auth                      | Completo                                                                                   |
+| Stripe suscripción        | Completo (código; keys/webhook ops)                                                        |
+| Admin CRUD                | Completo                                                                                   |
+| PWA                       | Parcial                                                                                    |
+| Tests E2E                 | Parcial (login/favoritos/historial en account.e2e.ts; email-verification sigue era Convex) |
 
 ---
 

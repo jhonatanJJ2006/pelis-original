@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery, useMutation } from '@pelis/db/client';
+import { useQueryResult, useMutation } from '@pelis/db/client';
 import { useMemo, useState } from 'react';
 import { Heart, Film, Tv } from 'lucide-react';
 import { api } from '@pelis/db/api';
@@ -8,7 +8,7 @@ import { useUser } from '@pelis/auth/hooks';
 import { MovieGridSkeleton } from '@pelis/ui/features/movie-card';
 import { MovieSwiper } from '@pelis/ui/features/movie-swiper';
 import { MovieCard } from '@pelis/ui/features/movie-card';
-import { EmptyState } from '@pelis/ui/features/empty-state';
+import { EmptyState, ErrorState } from '@pelis/ui/features/empty-state';
 import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';
 import { cn } from '@pelis/ui/utils';
 import { toast } from 'sonner';
@@ -21,8 +21,15 @@ export default function FavoritesPage() {
   const [tab, setTab] = useState<Tab>('all');
   const removeFavorite = useMutation(api.favorites.remove);
 
-  const movies = useQuery(api.favorites.listByUser, user ? { userId: user._id as any } : 'skip') as
-    MediaItem[] | undefined;
+  const {
+    data: movies,
+    error: moviesError,
+    isLoading: moviesLoading,
+    refetch,
+  } = useQueryResult<MediaItem[]>(
+    api.favorites.listByUser,
+    user ? { userId: user._id as any } : 'skip'
+  );
 
   const filtered = useMemo(() => {
     const list = movies ?? [];
@@ -56,7 +63,7 @@ export default function FavoritesPage() {
     );
   }
 
-  const isLoading = movies === undefined;
+  const isLoading = moviesLoading;
 
   return (
     <div className="page-shell">
@@ -104,6 +111,12 @@ export default function FavoritesPage() {
 
       {isLoading ? (
         <MovieGridSkeleton />
+      ) : moviesError && !movies ? (
+        <ErrorState
+          title="No se pudieron cargar tus favoritos"
+          description="Revisa tu conexión e inténtalo de nuevo."
+          onRetry={refetch}
+        />
       ) : filtered.length === 0 ? (
         <EmptyState
           icon={tab === 'series' ? Tv : tab === 'movies' ? Film : Heart}

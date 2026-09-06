@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { useQuery } from '@pelis/db/client';
+import { useQueryResult } from '@pelis/db/client';
 import { api } from '@pelis/db/api';
 import { TVShell } from './_components/tv-shell';
 import type { SidebarChannel } from './_components/channel-sidebar';
@@ -12,8 +12,12 @@ interface TVChannelItem extends SidebarChannel {
 }
 
 export default function TVPage() {
-  const list = useQuery(api.tv.list, { limit: 200, offset: 0 }) as
-    { items: TVChannelItem[] } | undefined;
+  const {
+    data: list,
+    error,
+    isLoading,
+    refetch,
+  } = useQueryResult<{ items: TVChannelItem[] }>(api.tv.list, { limit: 200, offset: 0 });
   const channels = (list?.items ?? []) as SidebarChannel[];
 
   const first = useMemo(() => {
@@ -31,6 +35,9 @@ export default function TVPage() {
       currentChannelId={first?._id}
       currentChannelName={first?.name}
       playerMessage={list && !first ? 'No hay canales disponibles ahora.' : undefined}
+      channelsLoading={isLoading}
+      channelsError={error}
+      onRetryChannels={refetch}
     />
   );
 }

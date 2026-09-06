@@ -82,7 +82,7 @@ Archivo: apps/web/src/app/playground/page.tsx. Detalle: docs/TESTING.md.
    Runtime **Movies local** (pelis-web + Postgres + cloudflared → verpelis.pro). No Vercel. Webhook → `https://verpelis.pro/api/stripe/webhook`. Si `SITE_URL` es localhost, los redirects usan `BETTER_AUTH_URL` público. Diagnóstico: docs/AUDIT.md §5b.
 5. Posters gitignored: apps/web/public/peliculas/ y apps/web/public/uploads/. Hash MD5 32 hex -> /peliculas/peliculas/{hash}.webp. imageId -> /uploads/{id}.webp. Clone limpio = imágenes rotas.
    Ver packages/db/src/lib/resolveMovieImage.ts y scripts/audit-images.mjs.
-6. PWA: no hay prompts ni barras de «instalar app» (`beforeinstallprompt` se silencia). Nueva versión = modal Aceptar / Más tarde, sin reload forzado. La versión se lee del deploy local Movies (`/api/app/availability` → `public/version.json` escrito en prebuild, o SW waiting). No asumir Vercel. La barra tipo Google + compartir es chrome del navegador o TWA en fallback Custom Tabs (assetlinks), no un componente de la app.
+6. PWA: no hay prompts ni barras de «instalar app» (`beforeinstallprompt` se silencia). Nueva versión = modal Aceptar / Más tarde, sin reload forzado. La versión se lee del deploy local Movies (`/api/app/availability` → `public/version.json` escrito en prebuild, o SW waiting). No asumir Vercel. No montar `AppDownloadButtons` en `/profile` ni en el footer: los APK quedan en `/downloads/*.apk` (superficie pública, no in-app). Package TWA = `pro.verpelis.twa` (no el id legado `com.pelis.app`); Digital Asset Links en `public/.well-known/assetlinks.json`. La barra gris con URL + compartir es chrome de Chrome / Custom Tabs: no se puede ocultar con CSS. TWA/PWA standalone solo si el usuario abre el APK TWA verificado (package + SHA256) o «Añadir a pantalla de inicio». Si abre una pestaña de Chrome, la barra sigue.
 
 ## Deploy / entornos (Glob es dueño)
 
@@ -153,7 +153,7 @@ Pendiente ALTO:
 3. Posters en clones nuevos (carpetas gitignored).
 4. Stripe en Movies: endpoint webhook al túnel + `.env` local (el código ya activa el plan). Consumet estable. Cron probe TV. Categorias M3U en espanol.
 
-Pendiente calidad: loading/error, reduced-motion, a11y, responsive, SEO, favoritos anime, paginar episodios, validar movieSchema, CI, Sentry.
+Pendiente calidad: loading/error, reduced-motion, a11y, responsive, SEO, favoritos anime, paginar episodios, CI, Sentry.
 
 No hagas salvo pedido: reescribir players, inventar environments, redibujar forms admin.
 

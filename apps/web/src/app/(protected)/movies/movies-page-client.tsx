@@ -1,11 +1,11 @@
 'use client';
 
-import { useQuery } from '@pelis/db/client';
+import { useQueryResult } from '@pelis/db/client';
 import type { PreloadedQuery } from '@pelis/db/server';
 import { useEffect, useMemo, useState } from 'react';
 import { SlidersHorizontal } from 'lucide-react';
 import { MovieRow } from '@pelis/ui/features/movie-row';
-import { EmptyState } from '@pelis/ui/features/empty-state';
+import { EmptyState, ErrorState } from '@pelis/ui/features/empty-state';
 import { CatalogFilterBar } from '@pelis/ui/features/catalog-filter-bar';
 import { CatalogPageSkeleton } from '@pelis/ui/features/catalog-page-skeleton';
 import { api } from '@pelis/db/api';
@@ -54,18 +54,23 @@ export default function MoviesPageClient({ preloaded, initial }: MoviesPageClien
   const preloadedGenres = preloaded.genres.data as string[] | undefined;
   const preloadedYears = preloaded.years.data as string[] | undefined;
 
-  const filteredMovies = useQuery(api.movies.list, {
+  const {
+    data: filteredMovies,
+    error: moviesError,
+    isLoading: moviesLoading,
+    refetch,
+  } = useQueryResult<MediaItem[]>(api.movies.list, {
     genre: selectedGenre || undefined,
     year: selectedYear || undefined,
     search: search || undefined,
     mediaType: 'movie' as const,
-  }) as MediaItem[] | undefined;
+  });
 
   const movies = filteredMovies ?? preloadedMovies;
   const genres = preloadedGenres ?? [];
   const years = preloadedYears ?? [];
 
-  const isLoading = movies === undefined;
+  const isLoading = movies === undefined && moviesLoading;
 
   const grouped = useMemo(() => {
     if (!movies) return [];
@@ -98,6 +103,22 @@ export default function MoviesPageClient({ preloaded, initial }: MoviesPageClien
   const hasMore = !hasFilters && visibleCount_ < (movies?.length ?? 0);
 
   if (isLoading) {
+    return <CatalogPageSkeleton />;
+  }
+
+  if (!movies && moviesError) {
+    return (
+      <div className="page-shell">
+        <ErrorState
+          title="No se pudo cargar el catálogo"
+          description="Revisa tu conexión e inténtalo de nuevo."
+          onRetry={refetch}
+        />
+      </div>
+    );
+  }
+
+  if (!movies) {
     return <CatalogPageSkeleton />;
   }
 

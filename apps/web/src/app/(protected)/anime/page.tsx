@@ -1,14 +1,15 @@
 'use client';
 
-import { useQuery, useMutation } from '@pelis/db/client';
+import { useQueryResult, useMutation } from '@pelis/db/client';
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { Clapperboard, Star, Layers, Film } from 'lucide-react';
 import { api } from '@pelis/db/api';
 import { CatalogPageSkeleton } from '@pelis/ui/features/catalog-page-skeleton';
-import { EmptyState } from '@pelis/ui/features/empty-state';
+import { EmptyState, ErrorState } from '@pelis/ui/features/empty-state';
 import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';
 import { CatalogFilterBar } from '@pelis/ui/features/catalog-filter-bar';
+import { RemoteImage } from '@/components/remote-image';
 import { cn } from '@pelis/ui/utils';
 
 interface AnimeSeriesCard {
@@ -39,16 +40,20 @@ export default function AnimePage() {
   const [selectedGenre, setSelectedGenre] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('');
 
-  const seriesList = useQuery(api.anime.listSeries, {
+  const {
+    data: seriesList,
+    error: seriesError,
+    isLoading,
+    refetch,
+  } = useQueryResult<AnimeSeriesCard[]>(api.anime.listSeries, {
     search: search || undefined,
     genre: selectedGenre || undefined,
     status: (selectedStatus as 'ongoing' | 'completed' | undefined) || undefined,
-  }) as AnimeSeriesCard[] | undefined;
-  const genres = (useQuery(api.anime.getGenres, {}) as string[] | undefined) ?? [];
+  });
+  const { data: genresData } = useQueryResult<string[]>(api.anime.getGenres, {});
+  const genres = genresData ?? [];
   const seedAnime = useMutation(api.anime.seed);
   const [seeding, setSeeding] = useState(false);
-
-  const isLoading = seriesList === undefined;
 
   useEffect(() => {
     if (
@@ -86,7 +91,9 @@ export default function AnimePage() {
           {series.length > 0
             ? `${series.length} series · ${summary.totalEpisodes.toLocaleString('es')} episodios` +
               (summary.withSeasons > 0 ? ` · ${summary.withSeasons} con varias temporadas` : '')
-            : 'Cargando catálogo...'}
+            : isLoading
+              ? 'Cargando catálogo…'
+              : '0 series'}
         </p>
       </ScrollReveal>
 
@@ -128,6 +135,12 @@ export default function AnimePage() {
 
       {isLoading ? (
         <CatalogPageSkeleton rowCount={2} />
+      ) : seriesError && !seriesList ? (
+        <ErrorState
+          title="No se pudo cargar el anime"
+          description="Revisa tu conexión e inténtalo de nuevo."
+          onRetry={refetch}
+        />
       ) : series.length === 0 ? (
         <EmptyState
           icon={Clapperboard}
@@ -145,11 +158,12 @@ export default function AnimePage() {
               className="group relative flex flex-col rounded-2xl overflow-hidden bg-cinema-surface border border-cinema-border hover:border-cinema-accent/60 transition-all hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cinema-accent"
             >
               <div className="relative aspect-[3/4] overflow-hidden bg-cinema-elevated">
-                <img
+                <RemoteImage
                   src={s.image}
                   alt={s.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  loading="lazy"
+                  fill
+                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 16vw"
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent opacity-90" />
 

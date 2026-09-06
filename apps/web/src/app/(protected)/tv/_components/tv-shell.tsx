@@ -4,16 +4,15 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { Crown, Tv } from 'lucide-react';
 import { useUser } from '@pelis/auth/hooks';
+import { PageSpinner } from '@pelis/ui/components';
+import { ErrorState } from '@pelis/ui/features/empty-state';
 import { ChannelSidebar, type SidebarChannel } from './channel-sidebar';
 
 const TVPlayer = dynamic(() => import('../[id]/tv-player'), {
   ssr: false,
   loading: () => (
     <div className="absolute inset-0 flex items-center justify-center bg-black">
-      <div className="text-center">
-        <div className="w-10 h-10 border-2 border-cinema-gold border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-        <p className="text-cinema-muted text-sm">Cargando reproductor...</p>
-      </div>
+      <PageSpinner label="Cargando reproductor…" className="py-0" />
     </div>
   ),
 });
@@ -23,6 +22,9 @@ interface TVShellProps {
   currentChannelId?: string;
   currentChannelName?: string;
   playerMessage?: string;
+  channelsLoading?: boolean;
+  channelsError?: Error | null;
+  onRetryChannels?: () => void;
 }
 
 export function TVShell({
@@ -30,13 +32,20 @@ export function TVShell({
   currentChannelId,
   currentChannelName,
   playerMessage,
+  channelsLoading = false,
+  channelsError = null,
+  onRetryChannels,
 }: TVShellProps) {
   const { user } = useUser();
   const hasActivePlan = !!(user?.planExpiresAt && user.planExpiresAt > Date.now());
 
   return (
     <div className="h-full min-h-0 flex bg-black">
-      <ChannelSidebar channels={channels} currentId={currentChannelId} />
+      <ChannelSidebar
+        channels={channels}
+        currentId={currentChannelId}
+        isLoading={channelsLoading}
+      />
       <div className="relative flex-1 min-w-0 min-h-0 bg-black">
         {currentChannelName && (
           <div className="absolute top-3 left-3 z-20 pointer-events-none">
@@ -72,6 +81,14 @@ export function TVShell({
               <Crown className="w-4 h-4" aria-hidden />
               Ver planes
             </Link>
+          </div>
+        ) : channelsError && channels.length === 0 ? (
+          <div className="absolute inset-0 flex items-center justify-center p-6">
+            <ErrorState
+              title="No se pudieron cargar los canales"
+              description="Revisa tu conexión e inténtalo de nuevo."
+              onRetry={onRetryChannels}
+            />
           </div>
         ) : playerMessage ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-6 text-center">

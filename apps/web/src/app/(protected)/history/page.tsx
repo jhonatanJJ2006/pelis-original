@@ -1,12 +1,12 @@
 'use client';
 
-import { useQuery, useMutation } from '@pelis/db/client';
+import { useQueryResult, useMutation } from '@pelis/db/client';
 import Link from 'next/link';
 import { History, Play, Trash2 } from 'lucide-react';
 import { api } from '@pelis/db/api';
 import { useUser } from '@pelis/auth/hooks';
 import { ContinueWatchingRowSkeleton } from '@pelis/ui/features/continue-watching-row';
-import { EmptyState } from '@pelis/ui/features/empty-state';
+import { EmptyState, ErrorState } from '@pelis/ui/features/empty-state';
 import { MoviePoster } from '@pelis/ui/features/movie-poster';
 import { ContentSwiper } from '@pelis/ui/features/content-swiper';
 import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';
@@ -35,8 +35,15 @@ export default function HistoryPage() {
   const removeHistory = useMutation(api.history.remove);
   const clearAll = useMutation(api.history.clearAll);
 
-  const history = useQuery(api.history.listByUser, user ? { userId: user._id as any } : 'skip') as
-    HistoryItem[] | undefined;
+  const {
+    data: history,
+    error: historyError,
+    isLoading: historyLoading,
+    refetch,
+  } = useQueryResult<HistoryItem[]>(
+    api.history.listByUser,
+    user ? { userId: user._id as any } : 'skip'
+  );
 
   const continueItems = (history ?? []).filter(
     (h) => h.duration > 0 && h.progress > 0 && h.progress < h.duration * 0.95
@@ -77,7 +84,7 @@ export default function HistoryPage() {
     );
   }
 
-  const isLoading = history === undefined;
+  const isLoading = historyLoading;
 
   const recentItems =
     continueItems.length > 0
@@ -110,6 +117,12 @@ export default function HistoryPage() {
           <ContinueWatchingRowSkeleton />
           <ContinueWatchingRowSkeleton count={6} />
         </div>
+      ) : historyError && !history ? (
+        <ErrorState
+          title="No se pudo cargar el historial"
+          description="Revisa tu conexión e inténtalo de nuevo."
+          onRetry={refetch}
+        />
       ) : (history?.length ?? 0) === 0 ? (
         <EmptyState
           icon={History}
@@ -213,7 +226,7 @@ function HistoryCard({
           <button
             type="button"
             onClick={onRemove}
-            className="p-1.5 text-cinema-ash hover:text-red-400 rounded-lg hover:bg-red-500/10 shrink-0"
+            className="p-1.5 text-cinema-ash hover:text-cinema-danger-light rounded-lg hover:bg-cinema-danger/10 shrink-0"
             aria-label="Eliminar del historial"
           >
             <Trash2 className="w-4 h-4" aria-hidden />
