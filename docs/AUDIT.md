@@ -1,7 +1,7 @@
 # Auditoría del sitio — Pelis Original
 
 Documento vivo con el inventario de gaps, bugs e incompletitudes.  
-Última actualización: 2026-09-05 (movieSchema en mutations admin).
+Última actualización: 2026-09-06 (sin CTAs APK in-app; movieSchema admin 2026-09-05).
 
 ---
 
@@ -16,7 +16,7 @@ Documento vivo con el inventario de gaps, bugs e incompletitudes.
 | TV en vivo         | OK            | IPTV, probe admin                                                                          |
 | Auth               | OK            | Better Auth + Google                                                                       |
 | Suscripción        | OK código     | Checkout → sync/webhook → ACTIVE. Ops en Movies (túnel + .env + Postgres local), no Vercel |
-| PWA                | Parcial       | Update modal + sin install CTAs; SW precache de uploads sigue siendo ruido                 |
+| PWA                | Parcial       | Update modal + sin install/descarga in-app; SW precache de uploads sigue siendo ruido      |
 | Imágenes           | Alto          | Pósters hash faltantes en clone limpio                                                     |
 | CI / calidad       | Bajo          | Sin CI, build ignora TS/lint                                                               |
 | Docs agentes       | OK            | AGENTS.md + docs/APP, ARCHITECTURE, DATA-MODEL, TESTING                                    |
@@ -141,7 +141,7 @@ Documento vivo con el inventario de gaps, bugs e incompletitudes.
 
 **Síntoma:** Barras/modales de «instalar app» (`pwa-install-prompt`, `tv-install-bar`, `beforeinstallprompt`) y falta de consentimiento al actualizar el SW.
 
-**Estado:** Corregido 2026-09-05 — se quitaron los CTAs de instalar; `PwaRuntime` silencia el banner nativo y muestra modal Aceptar / Más tarde. En Movies el check usa `/api/app/availability` (disco) + SW waiting; `version.json`/`sw.js` no se cachean. La barra tipo Google + compartir sigue siendo chrome del navegador o TWA (`fallbackType: customtabs` si fallan Digital Asset Links), no un componente de la app. Runtime = systemd local, no Vercel.
+**Estado:** Corregido 2026-09-05 — se quitaron los CTAs de instalar; `PwaRuntime` silencia el banner nativo y muestra modal Aceptar / Más tarde. En Movies el check usa `/api/app/availability` (disco) + SW waiting; `version.json`/`sw.js` no se cachean. 2026-09-06 — también se quitaron `AppDownloadButtons` de `/profile` y footer. Package TWA alineado a `pro.verpelis.twa` (assetlinks + twa-manifest). Prod ya sirve `/.well-known/assetlinks.json` como JSON sin redirect y Google lista el statement. La barra gris URL + compartir no es un componente: es chrome de Chrome o Custom Tabs. No se oculta con CSS. TWA standalone solo si el APK instalado es `pro.verpelis.twa` firmado con el SHA256 de assetlinks; si el usuario abre una pestaña de Chrome, la barra queda. Runtime = systemd local, no Vercel.
 
 ### 11. Admin anime: providers JSON vs streaming
 

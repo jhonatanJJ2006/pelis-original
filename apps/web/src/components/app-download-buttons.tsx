@@ -40,6 +40,8 @@ function formatVersionLabel(name: string | null | undefined): string | null {
 /**
  * Botones permanentes de descarga APK (celular + Android TV).
  * No usa beforeinstallprompt — son enlaces directos a /downloads/*.apk.
+ * Solo para superficies públicas intencionales (p. ej. landing). No montar en
+ * /profile ni en el footer in-app: el dueño no quiere CTAs de instalar dentro de la app.
  */
 export function AppDownloadButtons({ className, layout = 'stack' }: AppDownloadButtonsProps) {
   const [availability, setAvailability] = useState<AppAvailability | null>(null);

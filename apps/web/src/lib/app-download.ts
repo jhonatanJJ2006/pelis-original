@@ -4,7 +4,8 @@ export const PRODUCTION_URL = 'https://verpelis.pro';
 export const APK_DOWNLOAD_PATH = '/downloads/pelis.apk';
 export const APK_DOWNLOAD_URL = `${PRODUCTION_URL}${APK_DOWNLOAD_PATH}`;
 export const APK_VERSION_PATH = '/downloads/app-version.json';
-export const ANDROID_PACKAGE_ID = 'com.pelis.app';
+/** Debe coincidir con apps/android/twa-manifest.json y public/.well-known/assetlinks.json. */
+export const ANDROID_PACKAGE_ID = 'pro.verpelis.twa';
 
 /** APK Android TV / TV Box. */
 export const TV_APK_DOWNLOAD_PATH = '/downloads/pelis-tv.apk';

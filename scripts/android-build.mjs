@@ -93,7 +93,7 @@ if (!hasAndroidProject()) {
   console.error('Cuando pregunte, usa estos valores:');
   console.error('  - ¿Instalar JDK? → No (ya está en .tools/)');
   console.error('  - Domain: verpelis.pro');
-  console.error('  - Package: com.pelis.app');
+  console.error('  - Package: pro.verpelis.twa');
   console.error('  - App name: Pelis');
   console.error('  - Keystore: crear uno nuevo y guarda la contraseña\n');
   console.error('Luego vuelve a ejecutar: pnpm android:build\n');

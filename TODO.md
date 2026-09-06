@@ -16,7 +16,7 @@ Ver AGENTS.md (entrada agentes) y auditoría completa en [`docs/AUDIT.md`](docs/
 - [x] Conexión imágenes: hash MD5 → `/peliculas/peliculas/{hash}.webp`
 - [x] Página de perfil (`/profile`)
 - [x] Búsqueda global en header (películas/series)
-- [x] PWA (manifest standalone, SW Serwist, modal de actualización; sin prompts de instalar)
+- [x] PWA (manifest standalone, SW Serwist, modal de actualización; sin prompts de instalar ni CTAs APK en perfil/footer)
 - [x] Panel admin CRUD (movies, series, anime, TV, users, plans)
 - [x] Enrichment TMDB para películas/series/anime
 - [x] Auditoría documentada en `docs/AUDIT.md`

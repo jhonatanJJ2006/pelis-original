@@ -6,6 +6,18 @@ import { test, expect } from '@playwright/test';
  */
 
 test.describe('API smoke', () => {
+  test('GET /.well-known/assetlinks.json declara el TWA', async ({ request }) => {
+    const res = await request.get('/.well-known/assetlinks.json');
+    expect(res.ok()).toBeTruthy();
+    expect(res.headers()['content-type']).toMatch(/application\/json/i);
+    const body = await res.json();
+    expect(body[0]?.target?.package_name).toBe('pro.verpelis.twa');
+    expect(body[0]?.relation).toContain('delegate_permission/common.handle_all_urls');
+    expect(body[0]?.target?.sha256_cert_fingerprints?.[0]).toMatch(
+      /^[0-9A-F]{2}(:[0-9A-F]{2}){31}$/
+    );
+  });
+
   test('GET /api/app/availability devuelve metadatos de la app', async ({ request }) => {
     const res = await request.get('/api/app/availability');
     expect(res.ok()).toBeTruthy();

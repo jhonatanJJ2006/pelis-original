@@ -7,6 +7,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, '..');
 const keystore = path.join(root, 'apps/android/android.keystore');
 const assetlinks = path.join(root, 'apps/web/public/.well-known/assetlinks.json');
+const twaManifestPath = path.join(root, 'apps/android/twa-manifest.json');
 
 if (!fs.existsSync(keystore)) {
   console.error('No se encontró apps/android/android.keystore');
@@ -40,10 +41,24 @@ if (!match) {
 }
 
 const fingerprint = match[1].toUpperCase();
+const twaManifest = JSON.parse(fs.readFileSync(twaManifestPath, 'utf8'));
+const packageName = twaManifest.packageId || 'pro.verpelis.twa';
+
 const json = JSON.parse(fs.readFileSync(assetlinks, 'utf8'));
-json[0].target.sha256_cert_fingerprints = [fingerprint];
+json[0] = {
+  relation: ['delegate_permission/common.handle_all_urls'],
+  target: {
+    namespace: 'android_app',
+    package_name: packageName,
+    sha256_cert_fingerprints: [fingerprint],
+  },
+};
 fs.writeFileSync(assetlinks, `${JSON.stringify(json, null, 2)}\n`);
 
+twaManifest.fingerprints = [{ name: 'sha256_cert', value: fingerprint }];
+fs.writeFileSync(twaManifestPath, `${JSON.stringify(twaManifest, null, 2)}\n`);
+
 console.log('SHA256 actualizado en apps/web/public/.well-known/assetlinks.json');
+console.log(`package_name: ${packageName}`);
 console.log(fingerprint);
 console.log('Despliega el frontend para que TWA verifique verpelis.pro.');

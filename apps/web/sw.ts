@@ -25,6 +25,13 @@ installSerwist({
       options: { cacheName: 'web-version' },
     },
     {
+      // Digital Asset Links lo consulta Play Services / Google, no el SW.
+      // NetworkOnly evita que un JSON viejo quede en cache del cliente.
+      urlPattern: /\/\.well-known\/assetlinks\.json(?:\?.*)?$/,
+      handler: 'NetworkOnly',
+      options: { cacheName: 'assetlinks' },
+    },
+    {
       urlPattern: /\.(?:png|jpg|jpeg|gif|svg|webp|ico)$/,
       handler: 'CacheFirst',
       options: {

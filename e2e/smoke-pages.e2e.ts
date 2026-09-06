@@ -106,6 +106,15 @@ test.describe('Smoke — PWA chrome', () => {
     await expect(page.getByRole('dialog', { name: /nueva versión/i })).toHaveCount(0);
     await expect(page.getByRole('button', { name: /instalar con un toque/i })).toHaveCount(0);
     await expect(page.getByText('Instala Pelis en tu TV Box')).toHaveCount(0);
+    await expect(page.getByText(/descargar app/i)).toHaveCount(0);
+  });
+
+  test('perfil y footer no muestran CTAs de descarga APK', async ({ page }) => {
+    for (const path of ['/', '/profile', '/movies'] as const) {
+      await page.goto(path, { waitUntil: 'domcontentloaded' });
+      await expect(page.getByText(/descargar app/i)).toHaveCount(0);
+      await expect(page.getByRole('link', { name: /descargar app android/i })).toHaveCount(0);
+    }
   });
 });
 

@@ -36,7 +36,12 @@
   "fullScopeUrl": "https://verpelis.pro/",
   "minSdkVersion": 23,
   "orientation": "natural",
-  "fingerprints": [],
+  "fingerprints": [
+    {
+      "name": "sha256_cert",
+      "value": "0A:25:7C:B4:13:6D:EB:21:73:1D:92:2B:20:3E:0B:C6:5E:EB:1A:2C:E8:14:57:23:1C:A9:38:92:3F:85:41:D3"
+    }
+  ],
   "additionalTrustedOrigins": [],
   "retainedBundles": [],
   "protocolHandlers": [],
