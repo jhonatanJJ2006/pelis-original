@@ -7,19 +7,19 @@ Documento vivo con el inventario de gaps, bugs e incompletitudes.
 
 ## Resumen ejecutivo
 
-| Área               | Estado        | Notas                                                   |
-| ------------------ | ------------- | ------------------------------------------------------- |
-| Catálogo películas | OK            | Filtros, búsqueda, detalle                              |
-| Catálogo series    | Crítico       | Admin `Series` ≠ público `Movie.mediaType`              |
-| Anime catálogo     | OK            | CRUD admin, listado                                     |
-| Anime streaming    | En reparación | IDs incorrectos + API Consumet inestable                |
-| TV en vivo         | OK            | IPTV, probe admin                                       |
-| Auth               | OK            | Better Auth + Google                                    |
-| Suscripción        | Parcial       | Stripe requiere keys reales                             |
-| PWA                | Parcial       | SW precache problemático                                |
-| Imágenes           | Alto          | Pósters hash faltantes en clone limpio                  |
-| CI / calidad       | Bajo          | Sin CI, build ignora TS/lint                            |
-| Docs agentes       | OK            | AGENTS.md + docs/APP, ARCHITECTURE, DATA-MODEL, TESTING |
+| Área               | Estado        | Notas                                                                                      |
+| ------------------ | ------------- | ------------------------------------------------------------------------------------------ |
+| Catálogo películas | OK            | Filtros, búsqueda, detalle                                                                 |
+| Catálogo series    | Crítico       | Admin `Series` ≠ público `Movie.mediaType`                                                 |
+| Anime catálogo     | OK            | CRUD admin, listado                                                                        |
+| Anime streaming    | En reparación | IDs incorrectos + API Consumet inestable                                                   |
+| TV en vivo         | OK            | IPTV, probe admin                                                                          |
+| Auth               | OK            | Better Auth + Google                                                                       |
+| Suscripción        | OK código     | Checkout → sync/webhook → ACTIVE. Ops en Movies (túnel + .env + Postgres local), no Vercel |
+| PWA                | Parcial       | Update modal + sin install CTAs; SW precache de uploads sigue siendo ruido                 |
+| Imágenes           | Alto          | Pósters hash faltantes en clone limpio                                                     |
+| CI / calidad       | Bajo          | Sin CI, build ignora TS/lint                                                               |
+| Docs agentes       | OK            | AGENTS.md + docs/APP, ARCHITECTURE, DATA-MODEL, TESTING                                    |
 
 ---
 
@@ -79,6 +79,30 @@ Documento vivo con el inventario de gaps, bugs e incompletitudes.
 
 **Estado:** Corregido 2026-08-29 — denyUnlessStreamAccess (requireActivePlan) en stream peliculas/TV/anime. No quitar.
 
+### 5b. Pago Stripe sin plan activo
+
+**Síntoma:** Checkout OK en Stripe, el usuario no podía ver películas (`requireActivePlan` 403).
+
+**Causas:**
+
+- `/subscribe/success` solo hacía poll de `users.me` y dependía del webhook `checkout.session.completed`.
+- `customer.subscription.updated` con `incomplete` (y sus retries) marcaba EXPIRED y pisaba el ACTIVE.
+- No se escuchaba `customer.subscription.created` ni `invoice.paid`.
+
+**Estado:** Corregido 2026-09-05 — `stripe.syncCheckoutSession` + alta compartida en `packages/db/src/lib/stripe-subscription.ts`. `incomplete` ya no degrada ACTIVE.
+
+**Dónde corre:** todo es local en **Movies** (`/home/det/Desktop/PELIS/pelis-original`). Prod = `pelis-web.service` en localhost:3000 + cloudflared → https://verpelis.pro. Postgres es local. No diagnosticar como si fuera un deploy Vercel.
+
+**Verificar en Movies** (tras merge a staging/main y restart de `pelis-web`):
+
+1. **Túnel vivo:** `systemctl is-active pelis-web` y cloudflared; `curl -sI https://verpelis.pro/api/stripe/webhook` no debe ser 404 del edge.
+2. **Endpoint Stripe:** Dashboard → Developers → Webhooks → URL `https://verpelis.pro/api/stripe/webhook` (mismo modo test/live que las keys). Eventos: `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `customer.subscription.created/updated/deleted`, `invoice.paid`, `invoice.payment_failed`. El `whsec_…` de ese endpoint es el `STRIPE_WEBHOOK_SECRET` del `.env` de Movies.
+3. **`.env` local (no leerlo ni commitearlo):** `STRIPE_SECRET_KEY` / publishable del mismo modo; `SITE_URL=https://verpelis.pro` (si queda en localhost, Stripe redirige al browser del usuario y el sync no pega en Movies).
+4. **Fila `subscription` en Postgres local:** tras un pago, `userId` del comprador, `status = ACTIVE`, `endDate` futuro, `stripeSubscriptionId` y `planId` no nulos. Sin esa fila, `requireActivePlan` sigue en 403.
+5. **Logs:** `journalctl -u pelis-web` alrededor del pago (webhook 200 vs 400 firma / 500 handler). En Stripe Dashboard, deliveries de ese endpoint (no un endpoint viejo de Vercel/CLI).
+6. **Fallback success:** `/subscribe/success` llama `POST /api/stripe/fulfill` con `session_id`. No exige cookie (el grupo `(protected)` no es muro de login; la cookie puede no volver por el túnel). Crea la misma fila vía metadata `convexUserId`.
+7. **Redirects:** si `SITE_URL` en Movies quedó en localhost, el código usa `BETTER_AUTH_URL` / `NEXT_PUBLIC_SITE_URL` públicos (`https://verpelis.pro`) para success/cancel. Confirmar que Stripe redirige a verpelis.pro, no a localhost del usuario.
+
 ### 6. Build ignora errores TypeScript y ESLint
 
 **Archivo:** `apps/web/next.config.mjs` — `ignoreBuildErrors: true`, `ignoreDuringBuilds: true`
@@ -112,6 +136,12 @@ Documento vivo con el inventario de gaps, bugs e incompletitudes.
 **Archivos:** `README.md`, `TODO.md`
 
 **Estado:** Actualizados — stack Postgres + `@pelis/db`, no Convex.
+
+### 11b. Prompts PWA de instalar app
+
+**Síntoma:** Barras/modales de «instalar app» (`pwa-install-prompt`, `tv-install-bar`, `beforeinstallprompt`) y falta de consentimiento al actualizar el SW.
+
+**Estado:** Corregido 2026-09-05 — se quitaron los CTAs de instalar; `PwaRuntime` silencia el banner nativo y muestra modal Aceptar / Más tarde. En Movies el check usa `/api/app/availability` (disco) + SW waiting; `version.json`/`sw.js` no se cachean. La barra tipo Google + compartir sigue siendo chrome del navegador o TWA (`fallbackType: customtabs` si fallan Digital Asset Links), no un componente de la app. Runtime = systemd local, no Vercel.
 
 ### 11. Admin anime: providers JSON vs streaming
 
@@ -152,7 +182,7 @@ Documento vivo con el inventario de gaps, bugs e incompletitudes.
 | Favoritos / Historial     | Completo (solo películas)                                                                  |
 | Perfil                    | Completo                                                                                   |
 | Auth                      | Completo                                                                                   |
-| Stripe suscripción        | Parcial                                                                                    |
+| Stripe suscripción        | Completo (código; keys/webhook ops)                                                        |
 | Admin CRUD                | Completo                                                                                   |
 | PWA                       | Parcial                                                                                    |
 | Tests E2E                 | Parcial (login/favoritos/historial en account.e2e.ts; email-verification sigue era Convex) |
@@ -161,13 +191,13 @@ Documento vivo con el inventario de gaps, bugs e incompletitudes.
 
 ## Dependencias externas
 
-| Servicio                | Uso                   | Riesgo                         |
-| ----------------------- | --------------------- | ------------------------------ |
-| Consumet API            | Episodios/video anime | Alta — auto-hospedar           |
-| AniList GraphQL         | Metadata anime        | Baja — gratis                  |
-| TMDB                    | Enrichment posters    | Media — requiere API key       |
-| Stripe                  | Pagos                 | Media — requiere config        |
-| Paths locales streaming | Películas             | Alta — específico del servidor |
+| Servicio                | Uso                   | Riesgo                                                                                            |
+| ----------------------- | --------------------- | ------------------------------------------------------------------------------------------------- |
+| Consumet API            | Episodios/video anime | Alta — auto-hospedar                                                                              |
+| AniList GraphQL         | Metadata anime        | Baja — gratis                                                                                     |
+| TMDB                    | Enrichment posters    | Media — requiere API key                                                                          |
+| Stripe                  | Pagos                 | Media — keys + webhook al túnel de Movies (`verpelis.pro/api/stripe/webhook`). No Vercel. Ver §5b |
+| Paths locales streaming | Películas             | Alta — específico del servidor                                                                    |
 
 ---
 

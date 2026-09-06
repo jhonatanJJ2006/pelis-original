@@ -16,7 +16,7 @@ Ver AGENTS.md (entrada agentes) y auditoría completa en [`docs/AUDIT.md`](docs/
 - [x] Conexión imágenes: hash MD5 → `/peliculas/peliculas/{hash}.webp`
 - [x] Página de perfil (`/profile`)
 - [x] Búsqueda global en header (películas/series)
-- [x] PWA parcial (manifest, SW Serwist, install prompt)
+- [x] PWA (manifest standalone, SW Serwist, modal de actualización; sin prompts de instalar)
 - [x] Panel admin CRUD (movies, series, anime, TV, users, plans)
 - [x] Enrichment TMDB para películas/series/anime
 - [x] Auditoría documentada en `docs/AUDIT.md`
@@ -37,7 +37,8 @@ Ver AGENTS.md (entrada agentes) y auditoría completa en [`docs/AUDIT.md`](docs/
 - [ ] **Imágenes de series** — Hashes de series faltantes en carpeta local
 - [ ] **Unificar series** — Admin tabla `Series` vs público `Movie.mediaType = SERIES`
 - [ ] **Reproductor de video** — Conectar `movie.token` / `videoUrl` con servidor de streaming real
-- [ ] **Stripe producción** — Configurar keys reales + webhook
+- [x] **Stripe: activar plan tras checkout** — `stripe.syncCheckoutSession` + webhook (`subscription.created/updated`, `invoice.paid`). No pisar ACTIVE con `incomplete`. (2026-09-05)
+- [ ] **Stripe en Movies** — En la máquina Movies: webhook del Dashboard → `https://verpelis.pro/api/stripe/webhook` (túnel, no Vercel); `.env` con `STRIPE_*` del mismo modo y `SITE_URL=https://verpelis.pro`; confirmar fila `subscription` ACTIVE en Postgres local. Ver docs/AUDIT.md §5b.
 - [ ] **Levantar Consumet self-hosted** — `docker compose up consumet redis` (ver `docs/ANIME-PROVIDERS.md`)
 - [ ] **TV: cron de probe automático** — Ejecutar `tv.probeAllChannels` cada 6h para auto-desactivar canales caídos (no existe hoy, ver scripts/probe-all-tv.mjs y probe-fast-tv.mjs)
 - [ ] **TV: mapear categorías del M3U** — Categorías en inglés ('Entertainment', 'News', 'Undefined', 'Religious') conviven con español. Ver scripts/map-tv-categories.mjs

@@ -53,12 +53,7 @@ export const api = {
     'movies.search',
     'movies.update',
   ]),
-  favorites: ns([
-    'favorites.add',
-    'favorites.check',
-    'favorites.listByUser',
-    'favorites.remove',
-  ]),
+  favorites: ns(['favorites.add', 'favorites.check', 'favorites.listByUser', 'favorites.remove']),
   history: ns([
     'history.clearAll',
     'history.getByUserAndMovie',
@@ -211,6 +206,7 @@ export const api = {
   stripe: ns([
     'stripe.createCheckoutSession',
     'stripe.createPortalSession',
+    'stripe.syncCheckoutSession',
   ]),
   stripeWebhookAction: ns(['stripeWebhookAction.processWebhook']),
 } as const;
