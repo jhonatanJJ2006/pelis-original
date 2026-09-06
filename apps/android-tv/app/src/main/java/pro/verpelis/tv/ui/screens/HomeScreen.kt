@@ -134,23 +134,35 @@ fun HomeScreen(
                 else -> LazyColumn(Modifier.fillMaxSize()) {
                     if (catalog.movies.isNotEmpty()) {
                         item(key = "catalog-movies") {
-                            CatalogRow("Películas", catalog.movies) { item ->
-                                openWebItem(context, apiClient, "movies", item.id)
-                            }
+                            CatalogRow(
+                                title = "Películas",
+                                items = catalog.movies,
+                                onOpen = { catalogItem ->
+                                    openWebItem(context, apiClient, "movies", catalogItem.id)
+                                },
+                            )
                         }
                     }
                     if (catalog.series.isNotEmpty()) {
                         item(key = "catalog-series") {
-                            CatalogRow("Series", catalog.series) { item ->
-                                openWebItem(context, apiClient, "movies", item.id)
-                            }
+                            CatalogRow(
+                                title = "Series",
+                                items = catalog.series,
+                                onOpen = { catalogItem ->
+                                    openWebItem(context, apiClient, "movies", catalogItem.id)
+                                },
+                            )
                         }
                     }
                     if (catalog.anime.isNotEmpty()) {
                         item(key = "catalog-anime") {
-                            CatalogRow("Anime", catalog.anime) { item ->
-                                openWebItem(context, apiClient, "anime", item.id)
-                            }
+                            CatalogRow(
+                                title = "Anime",
+                                items = catalog.anime,
+                                onOpen = { catalogItem ->
+                                    openWebItem(context, apiClient, "anime", catalogItem.id)
+                                },
+                            )
                         }
                     }
                     items(rows, key = { it.first }) { (title, channels) ->
