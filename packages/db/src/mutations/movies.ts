@@ -3,31 +3,14 @@ import { prisma } from '../client';
 import { notifyChange } from '../realtime';
 import { register } from '../registry';
 import { requireAdmin } from '../lib/requireAdmin';
+import { movieCreateSchema, movieUpdateSchema } from '../lib/movie-payload';
 import { resolveMovieImagePath } from '../lib/resolveMovieImage';
-
-const MovieCreate = z.object({
-  name: z.string(),
-  image: z.string(),
-  imageId: z.string().optional(),
-  backdropImage: z.string().optional(),
-  backdropImageId: z.string().optional(),
-  synopsis: z.string(),
-  genre: z.string(),
-  token: z.string(),
-  actors: z.string(),
-  classification: z.string(),
-  releaseYear: z.string(),
-  videoUrl: z.string().optional(),
-  mediaType: z.enum(['movie', 'series']).optional(),
-  episodes: z.number().optional(),
-  featured: z.boolean().optional(),
-});
 
 export const create = register({
   kind: 'mutation',
   name: 'movies.create',
   writes: ['movie'],
-  args: MovieCreate,
+  args: movieCreateSchema,
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
     const image = args.imageId
@@ -62,23 +45,22 @@ export const create = register({
   },
 });
 
-const MovieUpdate = MovieCreate.extend({ id: z.string() });
-
 export const update = register({
   kind: 'mutation',
   name: 'movies.update',
   writes: ['movie'],
-  args: MovieUpdate,
+  args: movieUpdateSchema,
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
     const image = args.imageId
       ? `/uploads/${args.imageId}.webp`
       : resolveMovieImagePath(args.image);
-    const backdropImage = args.backdropImage !== undefined
-      ? args.backdropImageId
-        ? `/uploads/${args.backdropImageId}.webp`
-        : resolveMovieImagePath(args.backdropImage)
-      : undefined;
+    const backdropImage =
+      args.backdropImage !== undefined
+        ? args.backdropImageId
+          ? `/uploads/${args.backdropImageId}.webp`
+          : resolveMovieImagePath(args.backdropImage)
+        : undefined;
     await prisma.movie.update({
       where: { id: args.id },
       data: {
