@@ -84,6 +84,7 @@ Archivo: apps/web/src/app/playground/page.tsx. Detalle: docs/TESTING.md.
 5. Posters gitignored: apps/web/public/peliculas/ y apps/web/public/uploads/. Hash MD5 32 hex -> /peliculas/peliculas/{hash}.webp. imageId -> /uploads/{id}.webp. Clone limpio = imágenes rotas.
    Ver packages/db/src/lib/resolveMovieImage.ts y scripts/audit-images.mjs.
 6. PWA: no hay prompts ni barras de «instalar app» (`beforeinstallprompt` se silencia). Nueva versión = modal Aceptar / Más tarde, sin reload forzado. La versión se lee del deploy local Movies (`/api/app/availability` → `public/version.json` escrito en prebuild, o SW waiting). No asumir Vercel. No montar `AppDownloadButtons` en `/profile` ni en el footer: los APK quedan en `/downloads/*.apk` (superficie pública, no in-app). Package TWA = `pro.verpelis.twa` (no el id legado `com.pelis.app`); Digital Asset Links en `public/.well-known/assetlinks.json`. La barra gris con URL + compartir es chrome de Chrome / Custom Tabs: no se puede ocultar con CSS. TWA/PWA standalone solo si el usuario abre el APK TWA verificado (package + SHA256) o «Añadir a pantalla de inicio». Si abre una pestaña de Chrome, la barra sigue.
+7. CI `deploy` / `pnpm build:vercel`: `prisma migrate deploy` no emite el cliente. Hay que correr `prisma generate` vía `@pelis/db` (o `@pelis/db#build`) **antes** de `next build`. Turbo `build:vercel` depende de `^build` por eso. El job `build` (gate de promote) ya lo hace con `turbo run build --filter=@pelis/web...`. No saltar el job `deploy`.
 
 ## Deploy / entornos (Glob es dueño)
 

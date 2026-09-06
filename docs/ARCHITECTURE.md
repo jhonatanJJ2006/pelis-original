@@ -71,3 +71,4 @@ Serwist: apps/web/sw.ts -> public/sw.js. Desactivado en development. exclude /up
 (c) apps/web/next.config.mjs: typescript.ignoreBuildErrors y eslint.ignoreDuringBuilds.
 (d) /api/stream históricamente sin auth. Hoy denyUnlessStreamAccess en stream de películas/TV/anime. No quitar.
 (e) Posters gitignored (public/peliculas y public/uploads).
+(f) `pnpm build:vercel` / job CI `deploy`: `prisma migrate deploy` no emite `.prisma/client`. Hay que `prisma generate` vía `@pelis/db` (o `@pelis/db#build`) antes de `next build`. Turbo `build:vercel` depende de `^build`.

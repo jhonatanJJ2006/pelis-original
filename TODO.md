@@ -93,6 +93,7 @@ Ver AGENTS.md (entrada agentes) y auditoría completa en [`docs/AUDIT.md`](docs/
 
 ## DevOps y calidad
 
+- [x] CI deploy: `prisma generate` (@pelis/db) antes de `pnpm build:vercel` (2026-09-06)
 - [ ] CI: `pnpm typecheck` + `pnpm lint` en PRs
 - [x] Documentar variables de entorno en `.env.example`
 - [ ] Quitar `ignoreBuildErrors` de `next.config.mjs`
