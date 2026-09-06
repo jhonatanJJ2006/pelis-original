@@ -38,7 +38,18 @@ APK de release (firmar aparte; no commitear keystores):
 ./gradlew :app:assembleRelease
 ```
 
-Package: `pro.verpelis.tv`. `versionCode` 2 / `1.1.0`.
+Package: `pro.verpelis.tv`. `versionCode` 3 / `1.2.0`.
+
+## Auth nativa (v3)
+
+Además del QR (`/api/tv-auth/*`), el panel izquierdo ofrece **Iniciar sesión** y **Registrarse** vía Better Auth:
+
+- `POST api/auth/sign-in/email` / `sign-up/email`
+- Tras registro: OTP `api/auth/email-otp/send-verification-otp` + `verify-email`, luego re-login
+- Cookie prod: `__Secure-better-auth.session_token` (CookieJar + Bearer opcional)
+- Sin Google OAuth en TV nativa
+
+Base URL por defecto: `https://verpelis.pro/`.
 
 ## Arranque en frío y pairing
 

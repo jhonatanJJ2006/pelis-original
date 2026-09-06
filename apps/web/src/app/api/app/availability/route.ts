@@ -2,6 +2,9 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { NextResponse } from 'next/server';
 
+/** Siempre leer disco: version.json / APK versions cambian en deploy sin rebuild. */
+export const dynamic = 'force-dynamic';
+
 function readJsonFile<T>(relativePath: string, fallback: T): T {
   try {
     const path = join(process.cwd(), 'public', relativePath);

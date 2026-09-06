@@ -1,7 +1,7 @@
 # Auditoría del sitio — Pelis Original
 
 Documento vivo con el inventario de gaps, bugs e incompletitudes.  
-Última actualización: 2026-09-06 (CI `build:vercel` pasa `DATABASE_URL` vía turbo `globalEnv`; Android TV Compose en git).
+Última actualización: 2026-09-06 (APK TV v3 publicado; TWA móvil code 2 DAL-ok; availability force-dynamic; probe timer + map categorías).
 
 ---
 
@@ -17,7 +17,8 @@ Documento vivo con el inventario de gaps, bugs e incompletitudes.
 | Auth               | OK            | Better Auth + Google                                                                                                   |
 | Suscripción        | OK código     | Checkout → sync/webhook → ACTIVE. Ops en Movies (túnel + .env + Postgres local), no Vercel                             |
 | PWA                | Parcial       | Update modal + sin install/descarga in-app; SW precache de uploads sigue siendo ruido                                  |
-| Android TV         | Parcial       | Fuentes Compose en `apps/android-tv/app/src/` (2026-09-06). Build en máquina con SDK 35.                               |
+| Android TV         | OK v3         | APK `pelis-tv.apk` code 3 / 1.2.0 en `/downloads` + availability. Fuentes Compose en git. Sideload debug.              |
+| TWA móvil          | OK v3         | Keystore nuevo SHA `B2:9F…`; `pnpm android:publish`. Usuarios con APK v2 deben reinstalar.                          |
 | Imágenes           | Alto          | Pósters hash faltantes en clone limpio                                                                                 |
 | CI / calidad       | Parcial       | format+test+build+deploy en GitHub Actions; `deploy` genera Prisma y pasa `DATABASE_URL` a turbo. Build ignora TS/lint |
 | Docs agentes       | OK            | AGENTS.md + docs/APP, ARCHITECTURE, DATA-MODEL, TESTING                                                                |

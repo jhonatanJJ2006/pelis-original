@@ -16,23 +16,53 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+/** Categorías canónicas en español (UI /admin + /tv). */
+const EN_TO_ES = {
+  Entertainment: 'Entretenimiento',
+  General: 'General',
+  Undefined: 'Otros',
+  Religious: 'Religión',
+  News: 'Noticias',
+  Sports: 'Deportes',
+  Movies: 'Películas',
+  Series: 'Series',
+  Music: 'Música',
+  Documentary: 'Documentales',
+  Culture: 'Cultura',
+  Education: 'Educación',
+  Legislative: 'Legislativo',
+  Weather: 'Clima',
+  Cooking: 'Cocina',
+  Travel: 'Viajes',
+  Outdoor: 'Aire libre',
+  Shop: 'Compras',
+  Business: 'Negocios',
+  Classic: 'Clásicos',
+  Comedy: 'Entretenimiento',
+  Family: 'Familiar',
+  Lifestyle: 'Estilo de vida',
+  Science: 'Ciencia',
+  Auto: 'Autos',
+};
+
 function mapCategory(c) {
   if (!c) return c;
-  const tags = c.split(';').map((t) => t.trim());
+  const tags = c.split(';').map((t) => t.trim()).filter(Boolean);
   const hasKids = tags.includes('Kids');
   const hasAnime = tags.includes('Anime');
   if (hasAnime) return 'Anime';
   if (hasKids) return 'Infantil';
-  if (c === 'Animation') return 'Animación';
+  if (tags.includes('Animation') && hasKids) return 'Infantil';
+  if (c === 'Animation' || tags[0] === 'Animation') return 'Animación';
   if (c === 'Kids') return 'Infantil';
-  if (c === 'Comedy' || c.startsWith('Comedy')) return 'Entretenimiento';
-  if (c === 'Movies') return 'Películas';
-  if (c === 'Series') return 'Series';
-  if (c === 'News') return 'Noticias';
-  if (c === 'Sports') return 'Deportes';
-  if (c === 'Music' || c.startsWith('Music')) return 'Música';
-  if (c === 'Documentary') return 'Documentales';
-  if (c === 'Entertainment' || c === 'General') return c;
+
+  // Compuestos tipo "News;Business" → primera etiqueta mapeable
+  for (const tag of tags) {
+    if (EN_TO_ES[tag]) return EN_TO_ES[tag];
+  }
+  if (c.startsWith('Comedy')) return 'Entretenimiento';
+  if (c.startsWith('Music')) return 'Música';
+  if (EN_TO_ES[c]) return EN_TO_ES[c];
   return c;
 }
 
