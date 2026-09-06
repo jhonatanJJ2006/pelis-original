@@ -1,11 +1,10 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import Link from 'next/link';
+import { useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, Star, Tv } from 'lucide-react';
-import { RemoteImage } from '@/components/remote-image';
 import { cn } from '@pelis/ui/utils';
+import { ChannelRow } from './channel-row';
 
 export interface SidebarChannel {
   _id: string;
@@ -63,9 +62,12 @@ export function ChannelSidebar({ channels, currentId, isLoading = false }: Chann
     return Object.entries(groups).sort((a, b) => a[0].localeCompare(b[0], 'es'));
   }, [filtered]);
 
-  const handleSelect = (id: string) => {
-    if (id !== currentId) router.push(`/tv/${id}`);
-  };
+  const handleSelect = useCallback(
+    (id: string) => {
+      if (id !== currentId) router.push(`/tv/${id}`);
+    },
+    [currentId, router]
+  );
 
   return (
     <aside
@@ -93,7 +95,7 @@ export function ChannelSidebar({ channels, currentId, isLoading = false }: Chann
               type="button"
               onClick={() => setChip(item.id)}
               className={cn(
-                'shrink-0 px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors',
+                'shrink-0 px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors tv-focus',
                 chip === item.id
                   ? 'bg-cinema-gold text-cinema-bg'
                   : 'bg-cinema-elevated text-cinema-silver border border-cinema-border'
@@ -125,56 +127,14 @@ export function ChannelSidebar({ channels, currentId, isLoading = false }: Chann
                 <span className="ml-1.5 text-cinema-gold/80">{items.length}</span>
               </h3>
               <ul className="px-1.5">
-                {items.map((c) => {
-                  const active = c._id === currentId;
-                  return (
-                    <li key={c._id}>
-                      <Link
-                        href={`/tv/${c._id}`}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleSelect(c._id);
-                        }}
-                        className={cn(
-                          'flex items-center gap-2 px-2 py-2 rounded-lg my-0.5 transition-colors',
-                          'hover:bg-cinema-elevated',
-                          active && 'bg-cinema-gold/10 ring-1 ring-cinema-gold/35'
-                        )}
-                        aria-current={active ? 'true' : undefined}
-                      >
-                        <div className="shrink-0 w-8 h-8 rounded-md bg-cinema-elevated border border-cinema-border flex items-center justify-center overflow-hidden">
-                          {c.logo ? (
-                            <RemoteImage
-                              src={c.logo}
-                              alt=""
-                              width={24}
-                              height={24}
-                              className="w-6 h-6 object-contain"
-                            />
-                          ) : (
-                            <Tv className="w-3.5 h-3.5 text-cinema-silver" />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs md:text-sm text-white truncate">{c.name}</p>
-                          <div className="flex items-center gap-1 mt-0.5">
-                            {active && (
-                              <span className="flex items-center gap-1 text-[9px] uppercase tracking-wider text-red-400 font-semibold">
-                                <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
-                                Viendo
-                              </span>
-                            )}
-                            {c.streamStatus === 'offline' && (
-                              <span className="text-[9px] uppercase tracking-wider text-cinema-ash">
-                                No disponible
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </Link>
-                    </li>
-                  );
-                })}
+                {items.map((c) => (
+                  <ChannelRow
+                    key={c._id}
+                    channel={c}
+                    active={c._id === currentId}
+                    onSelect={handleSelect}
+                  />
+                ))}
               </ul>
             </section>
           ))

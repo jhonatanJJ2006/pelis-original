@@ -1,0 +1,5 @@
+-keepattributes Signature, InnerClasses, EnclosingMethod, RuntimeVisibleAnnotations
+-keep class pro.verpelis.tv.data.api.** { *; }
+-dontwarn okhttp3.**
+-dontwarn retrofit2.**
+-dontwarn com.squareup.moshi.**

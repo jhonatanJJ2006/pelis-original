@@ -327,3 +327,29 @@ model History {
   @@index([lastWatched])
   @@map("history")
 }
+
+/// Pairing TV ↔ móvil/web (código + QR). La tele crea el código; el móvil aprueba.
+model TvPairing {
+  id         String          @id @default(cuid())
+  code       String          @unique
+  deviceId   String
+  status     TvPairingStatus @default(PENDING)
+  userId     String?
+  userAgent  String?
+  expiresAt  DateTime
+  approvedAt DateTime?
+  claimedAt  DateTime?
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  @@index([deviceId])
+  @@index([status, expiresAt])
+  @@map("tv_pairing")
+}
+
+enum TvPairingStatus {
+  PENDING
+  APPROVED
+  CLAIMED
+  EXPIRED
+}

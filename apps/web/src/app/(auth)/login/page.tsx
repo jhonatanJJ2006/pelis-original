@@ -7,11 +7,19 @@ import { Button, Input } from '@pelis/ui/components';
 const getAuthApiBase = () => '/api/auth';
 import { authClient } from '@pelis/auth/client';
 import { useState, useEffect, Suspense } from 'react';
+import { useIsTvDevice } from '@/hooks/use-is-tv-device';
+import { TvLoginScreen } from '@/components/tv-login-screen';
+
+function safeNextPath(raw: string | null): string | null {
+  if (!raw || !raw.startsWith('/') || raw.startsWith('//')) return null;
+  return raw;
+}
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const verified = searchParams.get('verified') === 'true';
+  const nextPath = safeNextPath(searchParams.get('next'));
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -35,7 +43,7 @@ function LoginForm() {
     try {
       const { error: googleError } = await authClient.signIn.social({
         provider: 'google',
-        callbackURL: '/',
+        callbackURL: nextPath || '/',
       });
       if (googleError) {
         setError(googleError.message || 'No se pudo iniciar sesión con Google');
@@ -95,7 +103,7 @@ function LoginForm() {
       }
       await authClient.getSession({ query: { disableCookieCache: true } });
       // Hard navigation so cookies/session are picked up reliably after sign-in.
-      window.location.assign('/');
+      window.location.assign(nextPath || '/');
     } catch {
       setError('Error de conexión. Intenta de nuevo.');
     } finally {
@@ -275,10 +283,16 @@ function LoginPageFallback() {
   );
 }
 
+function LoginSwitch() {
+  const isTv = useIsTvDevice();
+  if (isTv) return <TvLoginScreen />;
+  return <LoginForm />;
+}
+
 export default function LoginPage() {
   return (
     <Suspense fallback={<LoginPageFallback />}>
-      <LoginForm />
+      <LoginSwitch />
     </Suspense>
   );
 }

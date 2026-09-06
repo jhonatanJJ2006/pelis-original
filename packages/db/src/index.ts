@@ -5,6 +5,15 @@ export { auth } from './auth';
 export { getRequestCtx, preloadQuery, invoke } from './server';
 export type { PreloadedQuery } from './server';
 export { isAdmin, requireUser, requireAdmin, requireActivePlan, AuthError } from './lib/requireAdmin';
+export {
+  approveTvPairing,
+  buildLinkTvUrl,
+  claimTvPairing,
+  createTvPairing,
+  formatPairingCode,
+  getTvPairingForDevice,
+} from './lib/tv-pairing';
+export { issueTvSession, betterAuthSessionCookieName } from './lib/tv-session';
 export { uploadFile, deleteFile } from './storage';
 export {
   fetchTmdbMetadata,

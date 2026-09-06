@@ -7,6 +7,7 @@ import {
   User,
   Heart,
   History,
+  Tv,
   Crown,
   LogOut,
   ChevronRight,
@@ -55,6 +56,14 @@ const accountLinks = [
     icon: Crown,
     accent: 'text-cinema-gold',
     bg: 'bg-cinema-gold/15',
+  },
+  {
+    href: '/link-tv',
+    label: 'Vincular televisor',
+    description: 'Aprueba el código QR de tu Android TV',
+    icon: Tv,
+    accent: 'text-cinema-violet',
+    bg: 'bg-cinema-violet/15',
   },
 ];
 

@@ -20,9 +20,10 @@ const navItems = [
 interface HeaderProps {
   sticky?: boolean;
   minimalNav?: boolean;
+  tvMode?: boolean;
 }
 
-export function Header({ sticky = true, minimalNav = false }: HeaderProps) {
+export function Header({ sticky = true, minimalNav = false, tvMode = false }: HeaderProps) {
   const { user } = useUser();
   const router = useRouter();
   const pathname = usePathname();
@@ -61,7 +62,10 @@ export function Header({ sticky = true, minimalNav = false }: HeaderProps) {
     >
       <nav className="container mx-auto px-4" aria-label="Principal">
         <div className="flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
+          <Link
+            href={tvMode ? '/tv' : '/'}
+            className="flex items-center gap-2.5 shrink-0 group tv-focus"
+          >
             <div className="w-9 h-9 rounded bg-gradient-to-br from-cinema-accent to-cinema-gold flex items-center justify-center shadow-glow group-hover:scale-105 transition-transform duration-200">
               <Film className="w-5 h-5 text-cinema-bg" />
             </div>
@@ -71,7 +75,7 @@ export function Header({ sticky = true, minimalNav = false }: HeaderProps) {
           <div
             className={cn(
               'hidden lg:flex items-center gap-1 flex-1 max-w-md mx-8',
-              minimalNav && 'lg:hidden'
+              (minimalNav || tvMode) && 'lg:hidden'
             )}
           >
             <SearchDropdown
@@ -100,7 +104,8 @@ export function Header({ sticky = true, minimalNav = false }: HeaderProps) {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    'flex items-center gap-1.5 px-3 py-2 rounded text-sm font-medium transition-all duration-200',
+                    'flex items-center gap-1.5 px-3 py-2 rounded text-sm font-medium transition-all duration-200 tv-focus',
+                    tvMode && 'px-4 py-3 text-base',
                     isActive(item.href, item.exact)
                       ? 'bg-cinema-accent/15 text-cinema-accent-light'
                       : 'text-cinema-silver hover:text-cinema-chalk hover:bg-cinema-elevated/50'
@@ -165,7 +170,7 @@ export function Header({ sticky = true, minimalNav = false }: HeaderProps) {
             )}
           </div>
 
-          <div className="flex md:hidden items-center gap-1 shrink-0">
+          <div className={cn('flex md:hidden items-center gap-1 shrink-0', tvMode && 'hidden')}>
             {user && (
               <Link
                 href="/subscribe"
