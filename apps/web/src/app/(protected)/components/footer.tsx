@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { Film } from 'lucide-react';
-import { AppDownloadButtons } from '@/components/app-download-buttons';
 
 import { cn } from '@pelis/ui/utils';
 
@@ -23,7 +22,7 @@ export function Footer({ className }: { className?: string }) {
       )}
     >
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
           <div>
             <Link href="/" className="flex items-center gap-2.5 mb-4 group">
               <div className="w-9 h-9 rounded bg-cinema-elevated border border-cinema-border flex items-center justify-center">
@@ -94,8 +93,6 @@ export function Footer({ className }: { className?: string }) {
               </li>
             </ul>
           </div>
-
-          <AppDownloadButtons />
         </div>
 
         <div className="mt-10 pt-8 border-t border-cinema-border flex flex-col md:flex-row items-center justify-between gap-4">

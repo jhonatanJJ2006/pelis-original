@@ -59,7 +59,7 @@ Admin: probe, cleanupNonWorking, seedPopular, playlists.
 
 ## PWA
 
-Serwist: apps/web/sw.ts -> public/sw.js. Desactivado en development. exclude /uploads/ y version.json. Manifest `display: standalone`. Sin CTAs de instalar (se silencia `beforeinstallprompt`). Runtime = Movies (`pelis-web.service` + tunnel), no Vercel. Nueva versión (`/api/app/availability` lee `public/version.json` del disco, o SW en waiting) → modal Aceptar / Más tarde. `version.json` y `sw.js` van con Cache-Control no-store. Parcial.
+Serwist: apps/web/sw.ts -> public/sw.js. Desactivado en development. exclude /uploads/, version.json y assetlinks.json. Manifest `display: standalone`. Sin CTAs de instalar (se silencia `beforeinstallprompt`). Sin `AppDownloadButtons` en perfil/footer. Runtime = Movies (`pelis-web.service` + tunnel), no Vercel. Nueva versión (`/api/app/availability` lee `public/version.json` del disco, o SW en waiting) → modal Aceptar / Más tarde. `version.json` y `sw.js` van con Cache-Control no-store. TWA Bubblewrap: `apps/android` package `pro.verpelis.twa`, host `verpelis.pro`, `fallbackType: customtabs`. DAL: `public/.well-known/assetlinks.json` (package + SHA256). Si Chrome abre el sitio en pestaña/Custom Tabs, la barra de URL no se puede ocultar. Parcial.
 
 ## Trampas
 
