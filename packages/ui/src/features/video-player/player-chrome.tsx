@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   useCallback,
@@ -8,7 +8,7 @@ import {
   type KeyboardEvent,
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
-} from "react";
+} from 'react';
 import {
   Maximize,
   Minimize,
@@ -19,12 +19,12 @@ import {
   Sun,
   Volume2,
   VolumeX,
-} from "lucide-react";
-import { cn } from "../../shared/utils";
+} from 'lucide-react';
+import { cn } from '../../shared/utils';
 
-export const PLAYER_BRIGHTNESS_KEY = "pelis:player:brightness";
-export const PLAYER_VOLUME_KEY = "pelis:player:volume";
-export const PLAYER_MUTED_KEY = "pelis:player:muted";
+export const PLAYER_BRIGHTNESS_KEY = 'pelis:player:brightness';
+export const PLAYER_VOLUME_KEY = 'pelis:player:volume';
+export const PLAYER_MUTED_KEY = 'pelis:player:muted';
 
 export const BRIGHTNESS_MIN = 0.3;
 export const BRIGHTNESS_MAX = 1.7;
@@ -34,12 +34,7 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
 
-function readNumber(
-  key: string,
-  fallback: number,
-  min: number,
-  max: number,
-): number {
+function readNumber(key: string, fallback: number, min: number, max: number): number {
   try {
     const raw = localStorage.getItem(key);
     if (raw == null) return fallback;
@@ -66,16 +61,11 @@ export function usePlayerSettings() {
 
   useEffect(() => {
     setBrightnessState(
-      readNumber(
-        PLAYER_BRIGHTNESS_KEY,
-        BRIGHTNESS_DEFAULT,
-        BRIGHTNESS_MIN,
-        BRIGHTNESS_MAX,
-      ),
+      readNumber(PLAYER_BRIGHTNESS_KEY, BRIGHTNESS_DEFAULT, BRIGHTNESS_MIN, BRIGHTNESS_MAX)
     );
     setVolumeState(readNumber(PLAYER_VOLUME_KEY, 1, 0, 1));
     try {
-      setMutedState(localStorage.getItem(PLAYER_MUTED_KEY) === "1");
+      setMutedState(localStorage.getItem(PLAYER_MUTED_KEY) === '1');
     } catch {
       // ignore
     }
@@ -95,7 +85,7 @@ export function usePlayerSettings() {
     if (hydrated.current) {
       writeNumber(PLAYER_VOLUME_KEY, next);
       try {
-        localStorage.setItem(PLAYER_MUTED_KEY, next === 0 ? "1" : "0");
+        localStorage.setItem(PLAYER_MUTED_KEY, next === 0 ? '1' : '0');
       } catch {
         // ignore
       }
@@ -106,7 +96,7 @@ export function usePlayerSettings() {
     setMutedState(value);
     if (hydrated.current) {
       try {
-        localStorage.setItem(PLAYER_MUTED_KEY, value ? "1" : "0");
+        localStorage.setItem(PLAYER_MUTED_KEY, value ? '1' : '0');
       } catch {
         // ignore
       }
@@ -117,7 +107,7 @@ export function usePlayerSettings() {
     setMutedState((prev) => {
       const next = !prev;
       try {
-        localStorage.setItem(PLAYER_MUTED_KEY, next ? "1" : "0");
+        localStorage.setItem(PLAYER_MUTED_KEY, next ? '1' : '0');
       } catch {
         // ignore
       }
@@ -137,17 +127,16 @@ export function usePlayerSettings() {
 }
 
 export function playerVideoFilter(brightness: number): string {
-  return brightness === 1 ? "none" : `brightness(${brightness})`;
+  return brightness === 1 ? 'none' : `brightness(${brightness})`;
 }
 
 export function formatPlayerTime(seconds: number): string {
-  if (!Number.isFinite(seconds) || seconds < 0) return "0:00";
+  if (!Number.isFinite(seconds) || seconds < 0) return '0:00';
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
   const s = Math.floor(seconds % 60);
-  if (h > 0)
-    return `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
-  return `${m}:${String(s).padStart(2, "0")}`;
+  if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  return `${m}:${String(s).padStart(2, '0')}`;
 }
 
 interface PlayerKeyboardOptions {
@@ -175,52 +164,50 @@ export function usePlayerKeyboard({
       const target = event.target as HTMLElement | null;
       if (
         target &&
-        (target.tagName === "INPUT" ||
-          target.tagName === "TEXTAREA" ||
-          target.isContentEditable)
+        (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)
       ) {
         return;
       }
       const key = event.key;
-      if (key === " " || key === "k" || key === "K") {
+      if (key === ' ' || key === 'k' || key === 'K') {
         event.preventDefault();
         onTogglePlay();
         return;
       }
-      if (key === "m" || key === "M") {
+      if (key === 'm' || key === 'M') {
         event.preventDefault();
         onToggleMute();
         return;
       }
-      if (key === "f" || key === "F") {
+      if (key === 'f' || key === 'F') {
         event.preventDefault();
         onToggleFullscreen?.();
         return;
       }
-      if (key === "ArrowLeft") {
+      if (key === 'ArrowLeft') {
         event.preventDefault();
         onSeekDelta?.(-10);
         return;
       }
-      if (key === "ArrowRight") {
+      if (key === 'ArrowRight') {
         event.preventDefault();
         onSeekDelta?.(10);
         return;
       }
-      if (key === "ArrowUp") {
+      if (key === 'ArrowUp') {
         event.preventDefault();
         if (event.shiftKey) onBrightnessDelta(0.1);
         else onVolumeDelta(0.1);
         return;
       }
-      if (key === "ArrowDown") {
+      if (key === 'ArrowDown') {
         event.preventDefault();
         if (event.shiftKey) onBrightnessDelta(-0.1);
         else onVolumeDelta(-0.1);
       }
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
   }, [
     enabled,
     onTogglePlay,
@@ -233,7 +220,7 @@ export function usePlayerKeyboard({
 }
 
 const sliderClass =
-  "h-1 w-16 cursor-pointer appearance-none rounded-full bg-white/20 accent-cinema-accent md:w-20";
+  'h-1 w-16 cursor-pointer appearance-none rounded-full bg-white/20 accent-cinema-accent md:w-20';
 
 export interface PlayerChromeProps {
   playing: boolean;
@@ -314,7 +301,7 @@ export function PlayerChrome({
   const beginScrub = useCallback(
     (event: ReactPointerEvent<HTMLDivElement>) => {
       if (!onSeekRef.current || !durationRef.current) return;
-      if (event.button !== 0 && event.pointerType === "mouse") return;
+      if (event.button !== 0 && event.pointerType === 'mouse') return;
       event.preventDefault();
       event.stopPropagation();
       const next = timeFromClientX(event.clientX);
@@ -327,7 +314,7 @@ export function PlayerChrome({
         // Safari can throw if the element is gone
       }
     },
-    [timeFromClientX],
+    [timeFromClientX]
   );
 
   const moveScrub = useCallback(
@@ -336,7 +323,7 @@ export function PlayerChrome({
       event.preventDefault();
       setScrubTime(timeFromClientX(event.clientX));
     },
-    [timeFromClientX],
+    [timeFromClientX]
   );
 
   const endScrub = useCallback(
@@ -353,34 +340,27 @@ export function PlayerChrome({
         // already released
       }
     },
-    [timeFromClientX],
+    [timeFromClientX]
   );
 
   const onSeekKey = (event: KeyboardEvent<HTMLDivElement>) => {
     if (!onSeek || !duration) return;
-    if (event.key === "ArrowRight")
-      onSeek(Math.min(currentTime + 10, duration));
-    if (event.key === "ArrowLeft") onSeek(Math.max(currentTime - 10, 0));
+    if (event.key === 'ArrowRight') onSeek(Math.min(currentTime + 10, duration));
+    if (event.key === 'ArrowLeft') onSeek(Math.max(currentTime - 10, 0));
   };
 
   return (
     <div
       data-player-chrome
       className={cn(
-        "absolute inset-x-0 bottom-0 z-30 bg-gradient-to-t from-cinema-bg via-cinema-bg/80 to-transparent pt-14 transition-opacity duration-normal ease-out-expo",
-        "pl-[max(0.75rem,env(safe-area-inset-left,0px))] pr-[max(0.75rem,env(safe-area-inset-right,0px))] pb-[max(0.75rem,env(safe-area-inset-bottom,0px))]",
-        visible || !playing || scrubbing
-          ? "opacity-100"
-          : "pointer-events-none opacity-0",
+        'absolute inset-x-0 bottom-0 z-30 bg-gradient-to-t from-cinema-bg via-cinema-bg/80 to-transparent pt-14 transition-opacity duration-normal ease-out-expo',
+        'pl-[max(0.75rem,env(safe-area-inset-left,0px))] pr-[max(0.75rem,env(safe-area-inset-right,0px))] pb-[max(0.75rem,env(safe-area-inset-bottom,0px))]',
+        visible || !playing || scrubbing ? 'opacity-100' : 'pointer-events-none opacity-0'
       )}
     >
       {(title || subtitle) && (
         <div className="mb-3 px-0.5">
-          {title && (
-            <p className="font-display text-base text-cinema-chalk md:text-lg">
-              {title}
-            </p>
-          )}
+          {title && <p className="font-display text-base text-cinema-chalk md:text-lg">{title}</p>}
           {subtitle && <p className="text-xs text-cinema-muted">{subtitle}</p>}
         </div>
       )}
@@ -436,7 +416,7 @@ export function PlayerChrome({
             type="button"
             onClick={onTogglePlay}
             className="rounded-full bg-cinema-accent p-2.5 text-cinema-bg transition-colors hover:bg-cinema-accent-light focus-visible:ring-cinema-accent md:p-2"
-            aria-label={playing ? "Pausar" : "Reproducir"}
+            aria-label={playing ? 'Pausar' : 'Reproducir'}
           >
             {playing ? (
               <Pause className="h-4 w-4 fill-current" aria-hidden />
@@ -463,9 +443,7 @@ export function PlayerChrome({
               type="button"
               onClick={onToggleMute}
               className="rounded-full p-2.5 hover:bg-white/10 md:p-2"
-              aria-label={
-                muted || volume === 0 ? "Activar sonido" : "Silenciar"
-              }
+              aria-label={muted || volume === 0 ? 'Activar sonido' : 'Silenciar'}
             >
               {muted || volume === 0 ? (
                 <VolumeX className="h-5 w-5" aria-hidden />
@@ -488,18 +466,13 @@ export function PlayerChrome({
 
         {live ? (
           <span className="ml-1 inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-cinema-danger">
-            <span
-              className="h-1.5 w-1.5 rounded-full bg-cinema-danger"
-              aria-hidden
-            />
+            <span className="h-1.5 w-1.5 rounded-full bg-cinema-danger" aria-hidden />
             En vivo
           </span>
         ) : !hideSeek ? (
           <span className="ml-1 text-xs tabular-nums text-cinema-chalk/85">
-            {formatPlayerTime(displayTime)}{" "}
-            <span className="text-cinema-muted">
-              / {formatPlayerTime(duration)}
-            </span>
+            {formatPlayerTime(displayTime)}{' '}
+            <span className="text-cinema-muted">/ {formatPlayerTime(duration)}</span>
           </span>
         ) : null}
 
@@ -513,9 +486,7 @@ export function PlayerChrome({
                 max={BRIGHTNESS_MAX}
                 step={0.05}
                 value={brightness}
-                onChange={(event) =>
-                  onBrightnessChange(Number(event.target.value))
-                }
+                onChange={(event) => onBrightnessChange(Number(event.target.value))}
                 className={sliderClass}
                 aria-label="Brillo"
               />
@@ -540,9 +511,7 @@ export function PlayerChrome({
               type="button"
               onClick={onToggleFullscreen}
               className="rounded-full p-2.5 hover:bg-white/10 md:p-2"
-              aria-label={
-                fullscreen ? "Salir de pantalla completa" : "Pantalla completa"
-              }
+              aria-label={fullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'}
             >
               {fullscreen ? (
                 <Minimize className="h-5 w-5" aria-hidden />

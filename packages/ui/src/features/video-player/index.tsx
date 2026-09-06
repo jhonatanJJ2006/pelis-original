@@ -1,28 +1,22 @@
-"use client";
+'use client';
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useMutation } from "@pelis/db/client";
-import Hls from "hls.js";
-import { AlertCircle, Play } from "lucide-react";
-import { api } from "@pelis/db/api";
-import { cn } from "../../shared/utils";
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useMutation } from '@pelis/db/client';
+import Hls from 'hls.js';
+import { AlertCircle, Play } from 'lucide-react';
+import { api } from '@pelis/db/api';
+import { cn } from '../../shared/utils';
 import {
   PlayerChrome,
   playerVideoFilter,
   usePlayerKeyboard,
   usePlayerSettings,
-} from "./player-chrome";
-import { PlayerGestureHud, usePlayerSurfaceGestures } from "./player-gestures";
-import { PlayerLoadingOverlay } from "./player-loading";
-import {
-  isMobilePlayerViewport,
-  useMobileLandscapePlayer,
-} from "./player-landscape";
-import { createVodHlsConfig } from "./hls-config";
-import {
-  attachHlsForwardPrefetch,
-  attachNativeHlsPrefetch,
-} from "./hls-prefetch";
+} from './player-chrome';
+import { PlayerGestureHud, usePlayerSurfaceGestures } from './player-gestures';
+import { PlayerLoadingOverlay } from './player-loading';
+import { isMobilePlayerViewport, useMobileLandscapePlayer } from './player-landscape';
+import { createVodHlsConfig } from './hls-config';
+import { attachHlsForwardPrefetch, attachNativeHlsPrefetch } from './hls-prefetch';
 
 export {
   PlayerChrome,
@@ -33,29 +27,26 @@ export {
   BRIGHTNESS_DEFAULT,
   BRIGHTNESS_MAX,
   BRIGHTNESS_MIN,
-} from "./player-chrome";
+} from './player-chrome';
 export {
   PlayerGestureHud,
   applyVerticalDrag,
   classifySurfaceDrag,
   gesturePercent,
   usePlayerSurfaceGestures,
-} from "./player-gestures";
-export { PlayerLoadingOverlay } from "./player-loading";
-export { createVodHlsConfig, HLS_PREFETCH_SEGMENTS } from "./hls-config";
-export {
-  attachHlsForwardPrefetch,
-  attachNativeHlsPrefetch,
-} from "./hls-prefetch";
+} from './player-gestures';
+export { PlayerLoadingOverlay } from './player-loading';
+export { createVodHlsConfig, HLS_PREFETCH_SEGMENTS } from './hls-config';
+export { attachHlsForwardPrefetch, attachNativeHlsPrefetch } from './hls-prefetch';
 export {
   useMobileLandscapePlayer,
   isMobilePlayerViewport,
   pickLandscapeFallback,
   PLAYER_LANDSCAPE_COVER_CLASS,
-} from "./player-landscape";
+} from './player-landscape';
 
 const DEMO_VIDEO =
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
+  'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
 
 interface VideoPlayerProps {
   videoUrl?: string;
@@ -88,18 +79,11 @@ export function VideoPlayer({
   const [bufferedPercent, setBufferedPercent] = useState(0);
   const [fullscreen, setFullscreen] = useState(false);
   const lastSaved = useRef(0);
-  const {
-    brightness,
-    setBrightness,
-    volume,
-    setVolume,
-    muted,
-    setMuted,
-    toggleMute,
-  } = usePlayerSettings();
+  const { brightness, setBrightness, volume, setVolume, muted, setMuted, toggleMute } =
+    usePlayerSettings();
 
   const src = videoUrl || DEMO_VIDEO;
-  const isHls = src.includes(".m3u8");
+  const isHls = src.includes('.m3u8');
   const useHlsJs = isHls && Hls.isSupported();
 
   useEffect(() => {
@@ -132,9 +116,7 @@ export function VideoPlayer({
         switch (data.type) {
           case Hls.ErrorTypes.NETWORK_ERROR:
             if (data.details === Hls.ErrorDetails.MANIFEST_LOAD_ERROR) {
-              setError(
-                "No se pudo cargar el video. Intenta de nuevo más tarde.",
-              );
+              setError('No se pudo cargar el video. Intenta de nuevo más tarde.');
               setPlaying(false);
             } else {
               hls.startLoad();
@@ -144,7 +126,7 @@ export function VideoPlayer({
             hls.recoverMediaError();
             break;
           default:
-            setError("No se pudo cargar el video. Intenta de nuevo más tarde.");
+            setError('No se pudo cargar el video. Intenta de nuevo más tarde.');
             setPlaying(false);
         }
       });
@@ -155,8 +137,8 @@ export function VideoPlayer({
       };
     }
 
-    if (video.canPlayType("application/vnd.apple.mpegurl")) {
-      video.preload = "auto";
+    if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.preload = 'auto';
       video.src = src;
       const stopPrefetch = attachNativeHlsPrefetch(video, src);
       return () => {
@@ -228,10 +210,7 @@ export function VideoPlayer({
   const seek = useCallback((seconds: number) => {
     const video = videoRef.current;
     if (!video || !Number.isFinite(video.duration)) return;
-    const next = Math.min(
-      Math.max(0, seconds),
-      Math.max(0, video.duration - 0.25),
-    );
+    const next = Math.min(Math.max(0, seconds), Math.max(0, video.duration - 0.25));
     setProgress(next);
     setBuffering(true);
     video.currentTime = next;
@@ -254,8 +233,7 @@ export function VideoPlayer({
     const video = videoRef.current;
     if (!video) return;
     try {
-      if (document.pictureInPictureElement)
-        await document.exitPictureInPicture();
+      if (document.pictureInPictureElement) await document.exitPictureInPicture();
       else await video.requestPictureInPicture();
     } catch {
       // not supported
@@ -264,8 +242,8 @@ export function VideoPlayer({
 
   useEffect(() => {
     const onFs = () => setFullscreen(Boolean(document.fullscreenElement));
-    document.addEventListener("fullscreenchange", onFs);
-    return () => document.removeEventListener("fullscreenchange", onFs);
+    document.addEventListener('fullscreenchange', onFs);
+    return () => document.removeEventListener('fullscreenchange', onFs);
   }, []);
 
   const bumpControls = useCallback(() => {
@@ -297,11 +275,9 @@ export function VideoPlayer({
     <div
       ref={containerRef}
       className={cn(
-        "group relative overflow-hidden bg-cinema-bg shadow-[0_8px_40px_rgba(196,163,90,0.10)] [touch-action:none]",
-        landscapeActive
-          ? "aspect-auto"
-          : "aspect-video rounded-2xl border border-cinema-border",
-        landscapeClassName,
+        'group relative overflow-hidden bg-cinema-bg shadow-[0_8px_40px_rgba(196,163,90,0.10)] [touch-action:none]',
+        landscapeActive ? 'aspect-auto' : 'aspect-video rounded-2xl border border-cinema-border',
+        landscapeClassName
       )}
       style={landscapeStyle}
       onMouseMove={bumpControls}
@@ -368,7 +344,7 @@ export function VideoPlayer({
         }}
         onError={() => {
           if (!useHlsJs) {
-            setError("No se pudo reproducir el video.");
+            setError('No se pudo reproducir el video.');
             setPlaying(false);
             setBuffering(false);
           }
@@ -380,25 +356,14 @@ export function VideoPlayer({
         aria-label={`Reproducir ${title}`}
       />
       {(!mediaReady || buffering) && !error && (
-        <PlayerLoadingOverlay
-          poster={poster}
-          message="Cargando…"
-          opaque={!mediaReady}
-        />
+        <PlayerLoadingOverlay poster={poster} message="Cargando…" opaque={!mediaReady} />
       )}
       {landscapeActive && hud && (
-        <PlayerGestureHud
-          kind={hud.kind}
-          value={hud.value}
-          visible={hudVisible}
-        />
+        <PlayerGestureHud kind={hud.kind} value={hud.value} visible={hudVisible} />
       )}
       {error && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-cinema-bg/90 p-6 text-center">
-          <AlertCircle
-            className="mb-3 h-10 w-10 text-cinema-danger"
-            aria-hidden
-          />
+          <AlertCircle className="mb-3 h-10 w-10 text-cinema-danger" aria-hidden />
           <p className="text-sm text-cinema-chalk">{error}</p>
         </div>
       )}
@@ -437,8 +402,8 @@ export function VideoPlayer({
             togglePlay();
           }}
           className={cn(
-            "absolute inset-0 z-20 flex items-center justify-center bg-cinema-bg/35 transition-opacity",
-            "focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-cinema-accent/60",
+            'absolute inset-0 z-20 flex items-center justify-center bg-cinema-bg/35 transition-opacity',
+            'focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-cinema-accent/60'
           )}
           aria-label="Reproducir"
         >
