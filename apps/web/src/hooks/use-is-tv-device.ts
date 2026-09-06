@@ -1,7 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { detectTvExperience, persistDeviceOverride, readDeviceOverride } from '@/lib/device-context';
+import {
+  detectTvExperience,
+  persistDeviceOverride,
+  readDeviceOverride,
+} from '@/lib/device-context';
 
 export function useIsTvDevice(): boolean {
   const [isTv, setIsTv] = useState(() =>

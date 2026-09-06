@@ -62,7 +62,10 @@ export function Header({ sticky = true, minimalNav = false, tvMode = false }: He
     >
       <nav className="container mx-auto px-4" aria-label="Principal">
         <div className="flex items-center justify-between h-16">
-          <Link href={tvMode ? '/tv' : '/'} className="flex items-center gap-2.5 shrink-0 group tv-focus">
+          <Link
+            href={tvMode ? '/tv' : '/'}
+            className="flex items-center gap-2.5 shrink-0 group tv-focus"
+          >
             <div className="w-9 h-9 rounded bg-gradient-to-br from-cinema-accent to-cinema-gold flex items-center justify-center shadow-glow group-hover:scale-105 transition-transform duration-200">
               <Film className="w-5 h-5 text-cinema-bg" />
             </div>

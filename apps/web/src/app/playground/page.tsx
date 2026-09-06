@@ -281,7 +281,8 @@ export default function PlaygroundPage() {
           En Android TV se muestra cuando{' '}
           <code className="text-cinema-chalk">/api/app/availability</code> reporta un{' '}
           <code className="text-cinema-chalk">tvApkVersionCode</code> nuevo. Aceptar descarga{' '}
-          <code className="text-cinema-chalk">/downloads/pelis-tv.apk</code> o llama al bridge nativo.
+          <code className="text-cinema-chalk">/downloads/pelis-tv.apk</code> o llama al bridge
+          nativo.
         </p>
         {showTvUpdateModal ? (
           <TvUpdateModalView

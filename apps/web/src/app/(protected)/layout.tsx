@@ -26,7 +26,11 @@ function ProtectedLayoutClient({ children }: { children: React.ReactNode }) {
         isTV ? 'h-dvh flex flex-col overflow-hidden bg-black' : 'min-h-screen flex flex-col'
       }
     >
-      <Header minimalNav={isMobilePwa && !isTvDevice} sticky={!isHome && !isTV} tvMode={isTvDevice} />
+      <Header
+        minimalNav={isMobilePwa && !isTvDevice}
+        sticky={!isHome && !isTV}
+        tvMode={isTvDevice}
+      />
       <main
         className={
           isTV
