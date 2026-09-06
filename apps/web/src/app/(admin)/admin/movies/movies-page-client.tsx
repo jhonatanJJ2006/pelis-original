@@ -35,11 +35,11 @@ type QualityFilter =
 
 const filterTabs: { value: QualityFilter; label: string }[] = [
   { value: 'all', label: 'Todas' },
+  { value: 'missing_video', label: 'Sin video' },
   { value: 'orphan_ids', label: 'IDs huérfanos' },
   { value: 'missing_image', label: 'Sin imagen' },
   { value: 'missing_image_titled', label: 'Sin poster (con título)' },
   { value: 'missing_backdrop', label: 'Sin backdrop' },
-  { value: 'missing_video', label: 'Sin video' },
   { value: 'incomplete', label: 'Incompletas' },
 ];
 

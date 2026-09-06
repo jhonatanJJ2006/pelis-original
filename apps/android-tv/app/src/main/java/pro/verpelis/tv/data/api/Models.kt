@@ -63,20 +63,23 @@ data class CatalogItem(
     val displayName: String get() = name?.takeIf { it.isNotBlank() } ?: title.orEmpty()
 }
 
+/** Defaults prevent Moshi crash on partial/HTML/error JSON → «Error de conexión». */
 data class PairingCreateResponse(
-    val code: String,
+    val code: String = "",
     val displayCode: String? = null,
-    val deviceId: String,
+    val deviceId: String = "",
     val expiresAt: String? = null,
-    val verifyUrl: String,
+    val verifyUrl: String = "",
     val status: String? = null,
     val error: String? = null,
+    val message: String? = null,
 )
 
 data class PairingStatusResponse(
     val status: String? = null,
     val expiresAt: String? = null,
     val error: String? = null,
+    val message: String? = null,
 )
 
 data class PairingClaimResponse(
@@ -85,6 +88,7 @@ data class PairingClaimResponse(
     val token: String? = null,
     val cookieName: String? = null,
     val error: String? = null,
+    val message: String? = null,
 )
 
 data class TvApkAvailability(
@@ -92,4 +96,47 @@ data class TvApkAvailability(
     val tvApkVersionCode: Int? = null,
     val tvApkVersionName: String? = null,
     val apkDownloadUrl: String? = null,
+)
+
+data class AuthEmailResponse(
+    val user: AuthUser? = null,
+    val token: String? = null,
+    val redirect: Boolean? = null,
+    val code: String? = null,
+    val message: String? = null,
+    val error: String? = null,
+)
+
+data class AuthUser(
+    val id: String? = null,
+    val email: String? = null,
+    val name: String? = null,
+)
+
+data class AuthResult(
+    val ok: Boolean,
+    val token: String? = null,
+    val cookieName: String? = null,
+    val needsEmailVerification: Boolean = false,
+    val error: String? = null,
+)
+
+data class OtpSendResponse(
+    val success: Boolean? = null,
+    val message: String? = null,
+    val error: String? = null,
+)
+
+data class OtpVerifyResponse(
+    val status: Boolean? = null,
+    val token: String? = null,
+    val user: AuthUser? = null,
+    val message: String? = null,
+    val error: String? = null,
+)
+
+data class OtpResult(
+    val ok: Boolean,
+    val error: String? = null,
+    val cooldownSeconds: Int? = null,
 )

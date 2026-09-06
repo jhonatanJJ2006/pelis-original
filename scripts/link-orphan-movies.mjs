@@ -117,6 +117,9 @@ function hasVideoOnDisk(token) {
       if (existsSync(`${root}/${token}/${token}/${name}`)) return true;
       if (existsSync(`${root}/${token}/${name}`)) return true;
     }
+    // Progressive download / Telegram dumper mp4 (see link-telegram-dumper-videos.mjs)
+    if (existsSync(`${root}/${token}/${token}/video.mp4`)) return true;
+    if (existsSync(`${root}/${token}/video.mp4`)) return true;
   }
   return false;
 }
@@ -406,13 +409,13 @@ async function main() {
     return;
   }
 
-  console.log(`\nDesplegando y ejecutando bulkLinkOrphans (${entries.length} películas)...`);
-  const convexDir = resolve(ROOT, 'packages/convex');
-  const result = execSync(
-    `npx convex run adminMovies:bulkLinkOrphans --push "$(cat '${payloadPath}')"`,
-    { cwd: convexDir, encoding: 'utf8', maxBuffer: 10 * 1024 * 1024, shell: '/bin/bash' }
-  );
-  console.log(result);
+  // LEGACY: apply still calls Convex (removed from stack — Postgres + Prisma now).
+  // Do not revive Convex. For new videoUrl writes use scripts/link-telegram-dumper-videos.mjs
+  // (DATABASE_URL + pg) or a Postgres/Prisma path. Dry-run / payload generation still works.
+  console.error('\nERROR: apply via Convex is dead (stack is Postgres + Prisma).');
+  console.error('Payload saved at', payloadPath);
+  console.error('For dumper mp4 → catalog linking use: node scripts/link-telegram-dumper-videos.mjs --apply');
+  process.exit(1);
 }
 
 main().catch((err) => {

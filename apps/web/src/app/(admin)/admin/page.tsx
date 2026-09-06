@@ -17,6 +17,15 @@ const statCards = [
     bg: 'bg-cinema-violet/15',
   },
   {
+    key: 'missingVideo',
+    label: 'Sin video',
+    href: '/admin/movies?filter=missing_video',
+    filter: 'missing_video',
+    icon: VideoOff,
+    color: 'text-orange-300',
+    bg: 'bg-orange-500/15',
+  },
+  {
     key: 'orphanIds',
     label: 'IDs huérfanos',
     href: '/admin/movies?filter=orphan_ids',
@@ -51,15 +60,6 @@ const statCards = [
     icon: Monitor,
     color: 'text-cyan-300',
     bg: 'bg-cyan-500/15',
-  },
-  {
-    key: 'missingVideo',
-    label: 'Sin video',
-    href: '/admin/movies?filter=missing_video',
-    filter: 'missing_video',
-    icon: VideoOff,
-    color: 'text-orange-300',
-    bg: 'bg-orange-500/15',
   },
   {
     key: 'incomplete',

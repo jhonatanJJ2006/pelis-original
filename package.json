@@ -34,7 +34,11 @@
     "icons:generate": "node scripts/generate-pwa-icons.mjs",
     "android:build": "node scripts/android-build.mjs",
     "android:fingerprint": "node scripts/android-fingerprint.mjs",
-    "android-tv:build": "node scripts/android-tv-build.mjs"
+    "android:keystore": "node scripts/android-keystore-init.mjs",
+    "android:publish": "node scripts/publish-apks.mjs --mobile",
+    "android-tv:build": "node scripts/android-tv-build.mjs",
+    "android-tv:publish": "node scripts/publish-apks.mjs --tv",
+    "apks:publish": "node scripts/publish-apks.mjs --all"
   },
   "devDependencies": {
     "@pelis/prettier-config": "workspace:*",

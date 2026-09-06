@@ -1,0 +1,16 @@
+[Unit]
+Description=Pelis TV channel probe (refresh streamStatus + deactivate dead)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/det/Desktop/PELIS/pelis-original
+ExecStart=/usr/bin/node /home/det/Desktop/PELIS/pelis-original/scripts/probe-all-tv.mjs --batch=8 --deactivate
+StandardOutput=journal
+StandardError=journal
+TimeoutStartSec=3h
+Nice=10
+
+[Install]
+WantedBy=default.target

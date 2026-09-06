@@ -37,7 +37,7 @@ class SessionStore(context: Context) {
     fun persistClaim(cookieName: String?, token: String?) {
         if (!token.isNullOrBlank()) {
             sessionToken = token
-            val name = cookieName?.takeIf { it.isNotBlank() } ?: "better-auth.session_token"
+            val name = cookieName?.takeIf { it.isNotBlank() } ?: DEFAULT_COOKIE_NAME
             sessionCookie = "$name=$token"
         }
     }
@@ -54,5 +54,9 @@ class SessionStore(context: Context) {
         private const val KEY_COOKIE = "session_cookie"
         private const val KEY_TOKEN = "session_token"
         private const val KEY_DEVICE = "device_id"
+
+        /** Prod Better Auth (HTTPS). */
+        const val DEFAULT_COOKIE_NAME = "__Secure-better-auth.session_token"
+        const val FALLBACK_COOKIE_NAME = "better-auth.session_token"
     }
 }

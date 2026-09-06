@@ -188,7 +188,10 @@ export function landscapeSurfaceProps(mode: PlayerLandscapeMode): {
 } {
   if (mode === 'cover') return { className: PLAYER_LANDSCAPE_COVER_CLASS };
   if (mode === 'rotate') {
-    return { className: PLAYER_LANDSCAPE_ROTATE_CLASS, style: PLAYER_LANDSCAPE_ROTATE_STYLE };
+    return {
+      className: PLAYER_LANDSCAPE_ROTATE_CLASS,
+      style: PLAYER_LANDSCAPE_ROTATE_STYLE,
+    };
   }
   return { className: '' };
 }
@@ -253,17 +256,27 @@ export function useMobileLandscapePlayer({
     }
   }, [applyFallback, containerRef, enabled, videoRef]);
 
+  const clearBodyLock = useCallback(() => {
+    if (typeof document === 'undefined') return;
+    document.documentElement.style.overflow = '';
+    document.body.style.overflow = '';
+    document.documentElement.classList.remove('pelis-player-landscape');
+    document.body.classList.remove('pelis-player-landscape');
+  }, []);
+
   const exit = useCallback(async () => {
     wantedRef.current = false;
     setMode('off');
+    clearBodyLock();
     await unlockLandscapeOrientation();
     await exitPlayerFullscreen(videoRef?.current ?? null);
-  }, [videoRef]);
+  }, [clearBodyLock, videoRef]);
 
   useEffect(() => {
     if (!enabled) {
       wantedRef.current = false;
       setMode('off');
+      clearBodyLock();
       void unlockLandscapeOrientation();
       void exitPlayerFullscreen(videoRef?.current ?? null);
       return;
@@ -287,15 +300,26 @@ export function useMobileLandscapePlayer({
     };
     window.addEventListener('play', onPlayCapture, true);
     const videoEl = videoRef?.current as EventTarget | null | undefined;
+    const leaveOverlay = () => {
+      wantedRef.current = false;
+      setMode('off');
+      clearBodyLock();
+      void unlockLandscapeOrientation();
+    };
     const onWebkitEnd = () => {
-      if (wantedRef.current) applyFallback();
+      // User dismissed native iOS fullscreen — do not re-open CSS cover overlay.
+      leaveOverlay();
     };
     const onWebkitBegin = () => setMode('native');
     videoEl?.addEventListener('webkitendfullscreen', onWebkitEnd);
     videoEl?.addEventListener('webkitbeginfullscreen', onWebkitBegin);
     const onFs = () => {
-      if (document.fullscreenElement) setMode('native');
-      else if (wantedRef.current) applyFallback();
+      if (document.fullscreenElement) {
+        setMode('native');
+        return;
+      }
+      // User left native fullscreen — fully clear fixed/z-index overlay.
+      if (wantedRef.current) leaveOverlay();
       else setMode('off');
     };
     document.addEventListener('fullscreenchange', onFs);
@@ -319,15 +343,16 @@ export function useMobileLandscapePlayer({
       window.removeEventListener('orientationchange', onOrient);
       window.removeEventListener('resize', onOrient);
     };
-  }, [applyFallback, containerRef, enabled, enter, enterOnMount, videoRef]);
+  }, [applyFallback, clearBodyLock, containerRef, enabled, enter, enterOnMount, videoRef]);
 
   useEffect(() => {
     return () => {
       wantedRef.current = false;
+      clearBodyLock();
       void unlockLandscapeOrientation();
       void exitPlayerFullscreen(videoRef?.current ?? null);
     };
-  }, [videoRef]);
+  }, [clearBodyLock, videoRef]);
 
   useEffect(() => {
     if (mode === 'off' || typeof document === 'undefined') return;
@@ -337,9 +362,13 @@ export function useMobileLandscapePlayer({
     const prevBody = body.style.overflow;
     html.style.overflow = 'hidden';
     body.style.overflow = 'hidden';
+    html.classList.add('pelis-player-landscape');
+    body.classList.add('pelis-player-landscape');
     return () => {
       html.style.overflow = prevHtml;
       body.style.overflow = prevBody;
+      html.classList.remove('pelis-player-landscape');
+      body.classList.remove('pelis-player-landscape');
     };
   }, [mode]);
 
