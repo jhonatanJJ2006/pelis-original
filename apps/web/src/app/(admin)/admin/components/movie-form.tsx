@@ -117,8 +117,7 @@ export function MovieForm({
               typeof track.path !== 'string' ||
               !track.path
             ) {
-              nextErrors.subtitleTracksJson =
-                'Cada pista necesita lang y path (label opcional)';
+              nextErrors.subtitleTracksJson = 'Cada pista necesita lang y path (label opcional)';
               break;
             }
           }
