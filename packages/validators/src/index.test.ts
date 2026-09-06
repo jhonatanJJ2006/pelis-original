@@ -136,6 +136,25 @@ describe('movieSchema', () => {
     const result = movieSchema.safeParse({ ...validMovie, mediaType: 'series', episodes: -1 });
     expect(result.success).toBe(false);
   });
+
+  it('should accept optional subtitleTracks', () => {
+    const result = movieSchema.safeParse({
+      ...validMovie,
+      subtitleTracks: [
+        { lang: 'es', label: 'Español', path: 'playlist_vtt.m3u8' },
+        { lang: 'en', path: 'playlist0.vtt' },
+      ],
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('should reject subtitleTracks missing path', () => {
+    const result = movieSchema.safeParse({
+      ...validMovie,
+      subtitleTracks: [{ lang: 'es' }],
+    });
+    expect(result.success).toBe(false);
+  });
 });
 
 describe('planSchema', () => {

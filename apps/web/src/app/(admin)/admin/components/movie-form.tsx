@@ -14,6 +14,8 @@ export interface MovieFormValues {
   classification: string;
   releaseYear: string;
   videoUrl: string;
+  /** JSON string stub for Movie.subtitleTracks (array of {lang, label?, path}). */
+  subtitleTracksJson: string;
   mediaType: 'movie' | 'series';
   episodes: string;
   featured: boolean;
@@ -40,6 +42,7 @@ const defaultValues: MovieFormValues = {
   classification: 'PG-13',
   releaseYear: new Date().getFullYear().toString(),
   videoUrl: '',
+  subtitleTracksJson: '',
   mediaType: 'movie',
   episodes: '',
   featured: false,
@@ -95,6 +98,33 @@ export function MovieForm({
       const year = values.releaseYear.trim();
       if (year && !/^\d{4}$/.test(year)) {
         nextErrors.releaseYear = 'Año inválido (use 4 dígitos o déjelo vacío)';
+      }
+    }
+
+    const tracksRaw = values.subtitleTracksJson.trim();
+    if (tracksRaw) {
+      try {
+        const parsed = JSON.parse(tracksRaw);
+        if (!Array.isArray(parsed)) {
+          nextErrors.subtitleTracksJson = 'Debe ser un array JSON';
+        } else {
+          for (const track of parsed) {
+            if (
+              !track ||
+              typeof track !== 'object' ||
+              typeof track.lang !== 'string' ||
+              !track.lang ||
+              typeof track.path !== 'string' ||
+              !track.path
+            ) {
+              nextErrors.subtitleTracksJson =
+                'Cada pista necesita lang y path (label opcional)';
+              break;
+            }
+          }
+        }
+      } catch {
+        nextErrors.subtitleTracksJson = 'JSON inválido';
       }
     }
 
@@ -258,6 +288,30 @@ export function MovieForm({
         error={errors.videoUrl}
         placeholder="/api/stream/{token}/{token}/playlist.m3u8 o https://..."
       />
+
+      <div>
+        <label
+          htmlFor="subtitleTracksJson"
+          className="block text-sm font-medium text-cinema-muted mb-1.5"
+        >
+          subtitleTracks (JSON stub)
+        </label>
+        <textarea
+          id="subtitleTracksJson"
+          value={values.subtitleTracksJson}
+          onChange={(e) => setField('subtitleTracksJson', e.target.value)}
+          rows={3}
+          placeholder='[{"lang":"es","label":"Español","path":"playlist_vtt.m3u8"}]'
+          className="input-field resize-y min-h-[80px] font-mono text-xs"
+        />
+        <p className="mt-1 text-xs text-cinema-muted">
+          Opcional. Array de {'{lang, label?, path}'} relativo al output de stream. El player se
+          cableará después del PR de seek.
+        </p>
+        {errors.subtitleTracksJson && (
+          <p className="mt-1 text-sm text-red-400">{errors.subtitleTracksJson}</p>
+        )}
+      </div>
 
       <label className="inline-flex items-center gap-2 text-sm text-cinema-muted cursor-pointer">
         <input

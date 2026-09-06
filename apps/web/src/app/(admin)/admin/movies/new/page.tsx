@@ -42,6 +42,13 @@ export default function NewMoviePage() {
 
   const handleSubmit = async (values: MovieFormValues) => {
     try {
+      const subtitleTracks = values.subtitleTracksJson.trim()
+        ? (JSON.parse(values.subtitleTracksJson) as Array<{
+            lang: string;
+            label?: string;
+            path: string;
+          }>)
+        : undefined;
       const id = await createMovie({
         name: values.name.trim(),
         image: values.image.trim(),
@@ -53,6 +60,7 @@ export default function NewMoviePage() {
         classification: values.classification.trim(),
         releaseYear: values.releaseYear.trim(),
         videoUrl: values.videoUrl.trim() || undefined,
+        subtitleTracks,
         mediaType: values.mediaType,
         episodes: values.episodes ? Number(values.episodes) : undefined,
         featured: values.featured,
