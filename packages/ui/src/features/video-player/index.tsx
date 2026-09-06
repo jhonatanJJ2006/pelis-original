@@ -356,7 +356,11 @@ export function VideoPlayer({
         aria-label={`Reproducir ${title}`}
       />
       {(!mediaReady || buffering) && !error && (
-        <PlayerLoadingOverlay poster={poster} message="Cargando…" opaque={!mediaReady} />
+        <PlayerLoadingOverlay
+          poster={poster}
+          message={mediaReady && buffering ? 'Buscando…' : 'Cargando…'}
+          opaque={!mediaReady}
+        />
       )}
       {landscapeActive && hud && (
         <PlayerGestureHud kind={hud.kind} value={hud.value} visible={hudVisible} />
