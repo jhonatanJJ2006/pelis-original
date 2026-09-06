@@ -146,6 +146,7 @@ jobs:
       - name: Apply Prisma migrations
         run: pnpm --filter @pelis/db exec prisma migrate deploy
       # migrate deploy does not emit the client; next build needs .prisma/client.
+      # Run from @pelis/db so prisma finds packages/db/prisma/schema.prisma.
       - name: Generate Prisma client
         run: pnpm --filter @pelis/db exec prisma generate
       - name: Deployable web build check

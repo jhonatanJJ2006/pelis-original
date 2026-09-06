@@ -31,12 +31,12 @@ describe('prisma generate antes de next/build:vercel', () => {
     expect(pkg.scripts['build:vercel']).toMatch(/turbo run build:vercel --filter=@pelis\/web/);
   });
 
-  it('apps/web build:vercel genera Prisma antes de next build', () => {
+  it('apps/web build:vercel genera Prisma desde packages/db (cwd del schema)', () => {
     const pkg = JSON.parse(readRepoFile('apps/web/package.json')) as {
       scripts: Record<string, string>;
     };
     const script = pkg.scripts['build:vercel'];
-    expect(script).toMatch(/@pelis\/db/);
+    expect(script).toMatch(/--dir \.\.\/\.\.\/packages\/db/);
     expect(script).toMatch(/prisma generate/);
     expect(script.indexOf('prisma generate')).toBeLessThan(script.indexOf('next build'));
   });
