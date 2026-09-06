@@ -1,4 +1,7 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
+vi.mock('./client', () => ({ prisma: {} }));
+
 import { invoke, InvokeError } from './invoke';
 import { movieCreateSchema, movieUpdateSchema } from './lib/movie-payload';
 import { register } from './registry';

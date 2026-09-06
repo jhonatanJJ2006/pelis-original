@@ -23,11 +23,9 @@ export const movieUpdateSchema = movieCreateSchema.extend({
  * and no `videoUrl` / `mediaType`. Reuses movieSchema so create/update
  * reject the same invalid names, years, synopses, and image paths.
  */
-export const seriesCreateSchema = movieSchema
-  .omit({ videoUrl: true, mediaType: true })
-  .extend({
-    season: z.number().int().positive().optional(),
-  });
+export const seriesCreateSchema = movieSchema.omit({ videoUrl: true, mediaType: true }).extend({
+  season: z.number().int().positive().optional(),
+});
 
 export const seriesUpdateSchema = seriesCreateSchema.extend({
   id: z.string().min(1, 'El id es requerido'),
