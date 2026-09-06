@@ -83,8 +83,8 @@ apps/web/public/images/
 apps/web/public/peliculas/
 apps/web/public/uploads/
 
-# Frames temporales para identificación de películas huérfanas
-tmp/movie-frames/
+# Temp reports / frames (list-movies-without-video, link-telegram-dumper, orphan frames)
+tmp/
 
 # Telegram movie dumper (local data + session)
 tools/telegram-dumper/data/
