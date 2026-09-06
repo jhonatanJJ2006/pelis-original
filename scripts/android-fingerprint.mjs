@@ -11,15 +11,15 @@ const twaManifestPath = path.join(root, 'apps/android/twa-manifest.json');
 
 if (!fs.existsSync(keystore)) {
   console.error('No se encontró apps/android/android.keystore');
-  console.error('Genera uno con: cd apps/android && npx bubblewrap build (crea el keystore en el primer build)');
+  console.error(
+    'Genera uno con: cd apps/android && npx bubblewrap build (crea el keystore en el primer build)'
+  );
   process.exit(1);
 }
 
 const storePass = process.env.ANDROID_KEYSTORE_PASSWORD || process.env.BUBBLEWRAP_KEYSTORE_PASSWORD;
 const keyPass =
-  process.env.ANDROID_KEY_PASSWORD ||
-  process.env.BUBBLEWRAP_KEY_PASSWORD ||
-  storePass;
+  process.env.ANDROID_KEY_PASSWORD || process.env.BUBBLEWRAP_KEY_PASSWORD || storePass;
 const alias = process.env.ANDROID_KEY_ALIAS || 'android';
 
 if (!storePass) {

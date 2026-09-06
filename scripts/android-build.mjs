@@ -58,17 +58,19 @@ function ensureBubblewrapConfig() {
   }
 
   fs.mkdirSync(configDir, { recursive: true });
-  fs.writeFileSync(
-    configPath,
-    JSON.stringify({ jdkPath: jdkHome, androidSdkPath }, null, 2)
-  );
+  fs.writeFileSync(configPath, JSON.stringify({ jdkPath: jdkHome, androidSdkPath }, null, 2));
 }
 
 ensureBubblewrapConfig();
 
 function run(cmd, args, cwd = androidDir) {
   const bin = process.platform === 'win32' && !cmd.endsWith('.cmd') ? `${cmd}.cmd` : cmd;
-  const result = spawnSync(bin, args, { cwd, stdio: 'inherit', shell: process.platform === 'win32', env: buildEnv });
+  const result = spawnSync(bin, args, {
+    cwd,
+    stdio: 'inherit',
+    shell: process.platform === 'win32',
+    env: buildEnv,
+  });
   if (result.status !== 0) {
     process.exit(result.status ?? 1);
   }
@@ -86,7 +88,9 @@ if (!fs.existsSync(bubblewrap)) {
 }
 
 if (!hasAndroidProject()) {
-  console.error('\nPrimera vez: debes inicializar el proyecto TWA en tu terminal (es interactivo).\n');
+  console.error(
+    '\nPrimera vez: debes inicializar el proyecto TWA en tu terminal (es interactivo).\n'
+  );
   console.error('Ejecuta estos comandos:\n');
   console.error('  cd apps/android');
   console.error('  npx @bubblewrap/cli init --manifest=https://verpelis.pro/manifest.json\n');
@@ -119,4 +123,6 @@ fs.mkdirSync(path.dirname(apkOut), { recursive: true });
 fs.copyFileSync(built, apkOut);
 console.log(`\nAPK copiado a: ${apkOut}`);
 console.log('Descarga pública: https://verpelis.pro/downloads/pelis.apk');
-console.log('\nSiguiente paso: pnpm android:fingerprint (actualiza assetlinks.json) y vuelve a desplegar.');
+console.log(
+  '\nSiguiente paso: pnpm android:fingerprint (actualiza assetlinks.json) y vuelve a desplegar.'
+);

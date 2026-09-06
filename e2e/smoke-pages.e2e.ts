@@ -110,7 +110,8 @@ test.describe('Smoke — PWA chrome', () => {
   });
 
   test('perfil y footer no muestran CTAs de descarga APK', async ({ page }) => {
-    for (const path of ['/', '/profile', '/movies'] as const) {
+    // Páginas del grupo (protected) que no precargan catálogo (sí montan Footer).
+    for (const path of ['/profile', '/favorites', '/history'] as const) {
       await page.goto(path, { waitUntil: 'domcontentloaded' });
       await expect(page.getByText(/descargar app/i)).toHaveCount(0);
       await expect(page.getByRole('link', { name: /descargar app android/i })).toHaveCount(0);
