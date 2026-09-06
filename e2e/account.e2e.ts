@@ -49,6 +49,8 @@ test.describe('Cuenta — login, favoritos e historial', () => {
     });
     await expect(page.getByText(movie!.name).first()).toBeVisible({ timeout: 20_000 });
 
+    const favoriteCard = page.getByText(movie!.name).first();
+    await favoriteCard.hover();
     await page
       .getByRole('button', { name: /quitar de favoritos/i })
       .first()
