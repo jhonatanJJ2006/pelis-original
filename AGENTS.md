@@ -153,7 +153,7 @@ Pendiente ALTO:
 3. Posters en clones nuevos (carpetas gitignored).
 4. Stripe en Movies: endpoint webhook al túnel + `.env` local (el código ya activa el plan). Consumet estable. Cron probe TV. Categorias M3U en espanol.
 
-Pendiente calidad: loading/error, reduced-motion, a11y, responsive, SEO, favoritos anime, paginar episodios, validar movieSchema, CI, Sentry.
+Pendiente calidad: loading/error, reduced-motion, a11y, responsive, SEO, favoritos anime, paginar episodios, CI, Sentry.
 
 No hagas salvo pedido: reescribir players, inventar environments, redibujar forms admin.
 
