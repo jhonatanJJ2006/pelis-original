@@ -41,6 +41,22 @@ export function isMissingVideo(videoUrl?: string | null): boolean {
   return !videoUrl || videoUrl.trim() === '';
 }
 
+/** Playable if videoUrl is set OR an on-disk HLS manifest exists for the token. */
+export function hasPlayableVideo(
+  videoUrl: string | null | undefined,
+  hasManifest: boolean,
+): boolean {
+  return !isMissingVideo(videoUrl) || hasManifest;
+}
+
+/** Missing video for admin/catalog = no videoUrl and no manifest. */
+export function isMissingPlayableVideo(
+  videoUrl: string | null | undefined,
+  hasManifest: boolean,
+): boolean {
+  return !hasPlayableVideo(videoUrl, hasManifest);
+}
+
 export function isIncompleteMovie(movie: {
   synopsis?: string | null;
   actors?: string | null;
@@ -79,11 +95,16 @@ export function getMovieQualityFlags(movie: {
   classification?: string | null;
   genre?: string | null;
   backdropImage?: string | null;
+  /** When provided, refine isMissingVideo with on-disk HLS presence. */
+  hasManifest?: boolean;
 }): MovieQualityFlags {
   return {
     isOrphanId: isOrphanIdName(movie.name, movie.token),
     isMissingImage: isMissingImage(movie.image),
-    isMissingVideo: isMissingVideo(movie.videoUrl),
+    isMissingVideo:
+      movie.hasManifest === undefined
+        ? isMissingVideo(movie.videoUrl)
+        : isMissingPlayableVideo(movie.videoUrl, movie.hasManifest),
     isIncomplete: isIncompleteMovie(movie),
     isMissingBackdrop: isMissingBackdrop(movie.backdropImage),
   };

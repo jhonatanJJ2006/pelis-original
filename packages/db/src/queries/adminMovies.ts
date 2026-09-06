@@ -9,6 +9,7 @@ import {
   matchesQualityFilter,
   type MovieQualityFilter,
 } from '../lib/movieQuality';
+import { hasManifestForToken } from '../lib/hasManifestForToken';
 
 const qualityFilterValidator = z.enum([
   'all',
@@ -49,8 +50,18 @@ export const adminList = register({
       orderBy: { name: 'asc' },
       take: a.limit ?? 200,
     });
+
+    const enriched = await Promise.all(
+      movies.map(async (m) => {
+        const needsManifestCheck = !m.videoUrl || m.videoUrl.trim() === '';
+        const hasManifest = needsManifestCheck ? await hasManifestForToken(m.token) : true;
+        return { movie: m, hasManifest };
+      }),
+    );
+
+    let filtered = enriched;
     if (filter !== 'all') {
-      movies = movies.filter((m) =>
+      filtered = enriched.filter(({ movie: m, hasManifest }) =>
         matchesQualityFilter(
           {
             name: m.name,
@@ -62,12 +73,14 @@ export const adminList = register({
             classification: m.classification,
             genre: m.genre,
             backdropImage: m.backdropImage,
+            hasManifest,
           },
           filter,
         ),
       );
     }
-    return movies.map((movie) => ({
+
+    return filtered.map(({ movie, hasManifest }) => ({
       ...toMovieShape(movie),
       quality: getMovieQualityFlags({
         name: movie.name,
@@ -79,6 +92,7 @@ export const adminList = register({
         classification: movie.classification,
         genre: movie.genre,
         backdropImage: movie.backdropImage,
+        hasManifest,
       }),
     }));
   },
@@ -97,6 +111,8 @@ export const adminStats = register({
     let incomplete = 0;
     let missingBackdrop = 0;
     for (const movie of movies) {
+      const needsManifestCheck = !movie.videoUrl || movie.videoUrl.trim() === '';
+      const hasManifest = needsManifestCheck ? await hasManifestForToken(movie.token) : true;
       const flags = getMovieQualityFlags({
         name: movie.name,
         token: movie.token,
@@ -107,6 +123,7 @@ export const adminStats = register({
         classification: movie.classification,
         genre: movie.genre,
         backdropImage: movie.backdropImage,
+        hasManifest,
       });
       if (flags.isOrphanId) orphanIds++;
       if (flags.isMissingImage) missingImage++;

@@ -4,6 +4,32 @@ import { register } from '../registry';
 import { AuthError } from '../lib/requireAdmin';
 import { toMovieShape } from '../lib/shapes';
 
+
+import { isMissingVideo } from '../lib/movieQuality';
+import { hasManifestForToken } from '../lib/hasManifestForToken';
+
+/** Keep series as-is; movies need videoUrl or an on-disk HLS manifest. */
+async function filterPlayableCatalog<T extends { mediaType?: string | null; videoUrl?: string | null; token: string }>(
+  movies: T[],
+): Promise<T[]> {
+  const out: T[] = [];
+  for (const movie of movies) {
+    const mediaType = (movie.mediaType ?? 'MOVIE').toString().toUpperCase();
+    if (mediaType === 'SERIES') {
+      out.push(movie);
+      continue;
+    }
+    if (!isMissingVideo(movie.videoUrl)) {
+      out.push(movie);
+      continue;
+    }
+    if (await hasManifestForToken(movie.token)) {
+      out.push(movie);
+    }
+  }
+  return out;
+}
+
 const MediaTypeEnum = z.enum(['movie', 'series']);
 
 export const list = register({
@@ -42,7 +68,7 @@ export const list = register({
       take: a.limit,
       skip: a.offset,
     });
-    return movies.map(toMovieShape);
+    return (await filterPlayableCatalog(movies)).map(toMovieShape);
   },
 });
 
@@ -63,7 +89,7 @@ export const search = register({
       orderBy: { name: 'asc' },
       take: limit ?? 8,
     });
-    return movies.map(toMovieShape);
+    return (await filterPlayableCatalog(movies)).map(toMovieShape);
   },
 });
 
@@ -84,8 +110,9 @@ export const getFeatured = register({
   reads: ['movie'],
   handler: async () => {
     const featured = await prisma.movie.findMany({ where: { featured: true }, take: 10 });
-    if (featured.length > 0) return featured.map(toMovieShape);
-    return (await prisma.movie.findMany({ orderBy: { name: 'asc' }, take: 10 })).map(toMovieShape);
+    if (featured.length > 0) return (await filterPlayableCatalog(featured)).map(toMovieShape);
+    const fallback = await prisma.movie.findMany({ orderBy: { name: 'asc' }, take: 30 });
+    return (await filterPlayableCatalog(fallback)).slice(0, 10).map(toMovieShape);
   },
 });
 
@@ -95,11 +122,12 @@ export const getTrending = register({
   reads: ['movie'],
   args: z.object({ limit: z.number().optional() }).optional(),
   handler: async (_ctx, args) => {
+    const take = args?.limit ?? 12;
     const movies = await prisma.movie.findMany({
       orderBy: { releaseYear: 'desc' },
-      take: args?.limit ?? 12,
+      take: take * 3,
     });
-    return movies.map(toMovieShape);
+    return (await filterPlayableCatalog(movies)).slice(0, take).map(toMovieShape);
   },
 });
 
@@ -109,11 +137,13 @@ export const getByGenre = register({
   reads: ['movie'],
   args: z.object({ genre: z.string(), limit: z.number().optional() }),
   handler: async (_ctx, { genre, limit }) => {
-    return (await prisma.movie.findMany({
+    const take = limit ?? 12;
+    const movies = await prisma.movie.findMany({
       where: { genre },
       orderBy: { name: 'asc' },
-      take: limit ?? 12,
-    })).map(toMovieShape);
+      take: take * 3,
+    });
+    return (await filterPlayableCatalog(movies)).slice(0, take).map(toMovieShape);
   },
 });
 

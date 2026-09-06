@@ -38,3 +38,4 @@ export {
   getMovieQualityFlags,
   matchesQualityFilter,
 } from './lib/movieQuality';
+export { hasManifestForToken } from './lib/hasManifestForToken';
