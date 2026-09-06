@@ -41,6 +41,13 @@ describe('prisma generate antes de next/build:vercel', () => {
     expect(script.indexOf('prisma generate')).toBeLessThan(script.indexOf('next build'));
   });
 
+  it('turbo no recorta DATABASE_URL en build:vercel (prerender Prisma)', () => {
+    const turbo = JSON.parse(readRepoFile('turbo.json')) as {
+      globalEnv?: string[];
+    };
+    expect(turbo.globalEnv).toContain('DATABASE_URL');
+  });
+
   it('el job deploy de CI genera el cliente antes de pnpm build:vercel', () => {
     const ci = readRepoFile('.github/workflows/ci.yml');
     const deployStart = ci.indexOf('\n  deploy:');
