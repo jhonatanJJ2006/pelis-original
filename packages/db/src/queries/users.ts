@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { prisma } from '../client';
 import { register } from '../registry';
+import { isEntitlingSubscription } from '../lib/stripe-subscription';
 
 export const me = register({
   kind: 'query',
@@ -13,18 +14,13 @@ export const me = register({
     if (!user) return null;
     const now = new Date();
     const activeSubs = await prisma.subscription.findMany({
-      where: { userId: ctx.userId, status: 'ACTIVE' },
+      where: { userId: ctx.userId, status: 'ACTIVE', endDate: { gt: now } },
       orderBy: { updatedAt: 'desc' },
     });
-    // Prefer not-expired Stripe-backed ACTIVE, then any not-expired ACTIVE, then latest ACTIVE.
+    // Prefer Stripe-backed ACTIVE, then any not-expired ACTIVE.
     const subscription =
-      activeSubs.find((s) => s.endDate > now && s.stripeSubscriptionId != null) ??
-      activeSubs.find((s) => s.endDate > now) ??
-      activeSubs.find((s) => s.stripeSubscriptionId != null) ??
-      activeSubs[0] ??
-      null;
+      activeSubs.find((s) => s.stripeSubscriptionId != null) ?? activeSubs[0] ?? null;
     const endDate = subscription?.endDate.getTime();
-    const hasValidExpiry = typeof endDate === 'number' && Number.isFinite(endDate) && endDate > 0;
     return {
       _id: user.id,
       name: user.name,
@@ -32,8 +28,8 @@ export const me = register({
       image: undefined,
       role: user.role as 'USER' | 'ADMIN',
       emailVerified: user.emailVerified,
-      planId: subscription?.planId,
-      planExpiresAt: hasValidExpiry ? endDate : undefined,
+      planId: isEntitlingSubscription(subscription) ? subscription?.planId : undefined,
+      planExpiresAt: isEntitlingSubscription(subscription) ? endDate : undefined,
     };
   },
 });
@@ -116,7 +112,11 @@ export const verifyOtp = register({
         where: { id: user.id },
         data: { otp: null, otpExpiresAt: null, otpAttempts: 0, otpLastSentAt: null },
       });
-      return { ok: false as const, status: 400, message: 'El código ha expirado. Solicita uno nuevo.' };
+      return {
+        ok: false as const,
+        status: 400,
+        message: 'El código ha expirado. Solicita uno nuevo.',
+      };
     }
     const attempts = user.otpAttempts ?? 0;
     if (attempts >= 3) {

@@ -1,84 +1,12 @@
-import type { PrismaClient } from '@prisma/client';
 import Stripe from 'stripe';
 import { z } from 'zod';
 import { register } from '../registry';
-
-function assertStripeTestMode(secretKey: string) {
-  if (secretKey.startsWith('sk_live_')) {
-    throw new Error(
-      'Stripe live keys are disabled. Use sk_test_… while subscriptions stay in test mode.',
-    );
-  }
-  if (!secretKey.startsWith('sk_test_')) {
-    throw new Error(
-      'STRIPE_SECRET_KEY must be a real Stripe test key (sk_test_…). Placeholder values will not work.',
-    );
-  }
-  if (secretKey.length < 40) {
-    throw new Error(
-      'STRIPE_SECRET_KEY looks like a placeholder. Paste a full sk_test_… key from the Stripe Dashboard (Test mode).',
-    );
-  }
-}
-
-function getStripe() {
-  const secretKey = process.env.STRIPE_SECRET_KEY;
-  if (!secretKey) throw new Error('STRIPE_SECRET_KEY is not configured');
-  assertStripeTestMode(secretKey);
-  return new Stripe(secretKey);
-}
-
-function mapStripeStatus(status: Stripe.Subscription.Status): 'ACTIVE' | 'CANCELLED' | 'EXPIRED' {
-  switch (status) {
-    case 'active':
-    case 'trialing':
-      return 'ACTIVE';
-    case 'canceled':
-      return 'CANCELLED';
-    case 'past_due':
-    case 'unpaid':
-      return 'ACTIVE'; // keep active but flagged elsewhere if needed
-    case 'incomplete':
-    case 'incomplete_expired':
-    case 'paused':
-    default:
-      return 'EXPIRED';
-  }
-}
-
-function getSubscriptionPeriod(subscription: Stripe.Subscription): { startDate: Date; endDate: Date } {
-  const item = subscription.items?.data?.[0] as
-    | (Stripe.SubscriptionItem & { current_period_start?: number; current_period_end?: number })
-    | undefined;
-  const legacy = subscription as Stripe.Subscription & {
-    current_period_start?: number;
-    current_period_end?: number;
-  };
-  const startSec = item?.current_period_start ?? legacy.current_period_start ?? subscription.created;
-  const endSec = item?.current_period_end ?? legacy.current_period_end;
-  const startDate = new Date(startSec * 1000);
-  const endDate = endSec ? new Date(endSec * 1000) : new Date(startDate.getTime() + 30 * 24 * 60 * 60 * 1000);
-  return { startDate, endDate };
-}
-
-/** Mark other ACTIVE rows for the same user as EXPIRED so only the Stripe-backed sub remains. */
-async function supersedeOtherActiveSubscriptions(
-  prisma: PrismaClient,
-  userId: string,
-  keepStripeSubscriptionId: string,
-) {
-  await prisma.subscription.updateMany({
-    where: {
-      userId,
-      status: 'ACTIVE',
-      OR: [
-        { stripeSubscriptionId: null },
-        { stripeSubscriptionId: { not: keepStripeSubscriptionId } },
-      ],
-    },
-    data: { status: 'EXPIRED' },
-  });
-}
+import { assertWebhookSecret, getStripe } from '../lib/stripe-client';
+import {
+  applyStripeSubscription,
+  fulfillPaidCheckoutSession,
+  getInvoiceSubscriptionId,
+} from '../lib/stripe-subscription';
 
 export const processWebhook = register({
   kind: 'action',
@@ -89,7 +17,7 @@ export const processWebhook = register({
     try {
       const stripe = getStripe();
       const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-      if (!webhookSecret || !webhookSecret.startsWith('whsec_') || webhookSecret.length < 40) {
+      if (!assertWebhookSecret(webhookSecret)) {
         return {
           ok: false as const,
           status: 500,
@@ -110,118 +38,43 @@ export const processWebhook = register({
 
     try {
       switch (event.type) {
-        case 'checkout.session.completed': {
+        case 'checkout.session.completed':
+        case 'checkout.session.async_payment_succeeded': {
           const session = event.data.object as Stripe.Checkout.Session;
-          if (session.metadata?.type === 'plan_upgrade') {
-            if (session.payment_status !== 'paid') break;
-            const subscriptionId = session.metadata.stripeSubscriptionId;
-            const stripePriceId = session.metadata.stripePriceId;
-            const itemId = session.metadata.stripeSubscriptionItemId;
-            const planId = session.metadata.planId;
-            const userId = session.metadata.convexUserId;
-            if (!subscriptionId || !stripePriceId || !itemId || !planId) break;
-            const stripe = getStripe();
-            const current = await stripe.subscriptions.retrieve(subscriptionId);
-            const alreadyOnPrice = current.items.data[0]?.price.id === stripePriceId;
-            const updated = alreadyOnPrice
-              ? current
-              : await stripe.subscriptions.update(subscriptionId, {
-                  items: [{ id: itemId, price: stripePriceId }],
-                  proration_behavior: 'none',
-                  metadata: { convexUserId: userId ?? '', planId },
-                });
-            const { startDate, endDate } = getSubscriptionPeriod(updated);
-            await prisma.subscription.update({
-              where: { stripeSubscriptionId: updated.id },
-              data: {
-                planId,
-                stripePriceId,
-                startDate,
-                endDate,
-                status: 'ACTIVE',
-              },
-            });
-            if (userId) {
-              await supersedeOtherActiveSubscriptions(prisma, userId, updated.id);
-            }
-            break;
-          }
-          const userId = session.metadata?.convexUserId;
-          const planId = session.metadata?.planId;
-          if (!userId || !planId || !session.subscription) break;
-          const stripe = getStripe();
-          const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
-          const { startDate, endDate } = getSubscriptionPeriod(subscription);
-          const existing = await prisma.subscription.findUnique({
-            where: { stripeSubscriptionId: subscription.id },
-          });
-          if (existing) {
-            await prisma.subscription.update({
-              where: { id: existing.id },
-              data: {
-                userId,
-                planId,
-                startDate,
-                endDate,
-                status: 'ACTIVE',
-                stripeCustomerId: session.customer as string,
-                stripePriceId: subscription.items.data[0]?.price.id ?? '',
-              },
-            });
-          } else {
-            await prisma.subscription.create({
-              data: {
-                userId,
-                planId,
-                startDate,
-                endDate,
-                status: 'ACTIVE',
-                stripeSubscriptionId: subscription.id,
-                stripeCustomerId: session.customer as string,
-                stripePriceId: subscription.items.data[0]?.price.id ?? '',
-              },
-            });
-          }
-          await supersedeOtherActiveSubscriptions(prisma, userId, subscription.id);
+          await fulfillPaidCheckoutSession(prisma, getStripe(), session);
           break;
         }
+        case 'customer.subscription.created':
         case 'customer.subscription.updated': {
           const subscription = event.data.object as Stripe.Subscription;
-          const { endDate } = getSubscriptionPeriod(subscription);
-          const stripePriceId = subscription.items.data[0]?.price.id;
-          let planId: string | undefined;
-          if (stripePriceId) {
-            const plan = await prisma.plan.findUnique({ where: { stripePriceId } });
-            planId = plan?.id;
-          }
-          await prisma.subscription.update({
-            where: { stripeSubscriptionId: subscription.id },
-            data: {
-              status: mapStripeStatus(subscription.status),
-              endDate,
-              ...(stripePriceId ? { stripePriceId } : {}),
-              ...(planId ? { planId } : {}),
-            },
-          });
+          await applyStripeSubscription(prisma, subscription);
           break;
         }
         case 'customer.subscription.deleted': {
           const subscription = event.data.object as Stripe.Subscription;
-          await prisma.subscription.update({
+          await prisma.subscription.updateMany({
             where: { stripeSubscriptionId: subscription.id },
             data: { status: 'EXPIRED' },
           });
           break;
         }
+        case 'invoice.paid':
+        case 'invoice.payment_succeeded': {
+          const invoice = event.data.object as Stripe.Invoice;
+          const subId = getInvoiceSubscriptionId(invoice);
+          if (!subId) break;
+          const subscription = await getStripe().subscriptions.retrieve(subId);
+          await applyStripeSubscription(prisma, subscription, { forceActive: true });
+          break;
+        }
         case 'invoice.payment_failed': {
           const invoice = event.data.object as Stripe.Invoice;
-          const subId = (invoice as unknown as { subscription?: string }).subscription;
-          if (typeof subId === 'string') {
-            await prisma.subscription.update({
-              where: { stripeSubscriptionId: subId },
-              data: { status: 'EXPIRED' },
-            });
-          }
+          const subId = getInvoiceSubscriptionId(invoice);
+          if (!subId) break;
+          await prisma.subscription.updateMany({
+            where: { stripeSubscriptionId: subId },
+            data: { status: 'EXPIRED' },
+          });
           break;
         }
       }

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { CheckCircle, Film, Loader2 } from 'lucide-react';
 import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';
@@ -35,46 +35,80 @@ async function fetchMe(): Promise<MeUser | null> {
   }
 }
 
+async function fulfillCheckout(sessionId: string): Promise<boolean> {
+  try {
+    const res = await fetch('/api/stripe/fulfill', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sessionId }),
+    });
+    if (!res.ok) return false;
+    const json = (await res.json()) as { activated?: boolean };
+    return json.activated === true;
+  } catch {
+    return false;
+  }
+}
+
+function stripSessionIdFromUrl() {
+  const url = new URL(window.location.href);
+  if (!url.searchParams.has('session_id')) return;
+  url.searchParams.delete('session_id');
+  window.history.replaceState({}, '', url.toString());
+}
+
 function SubscribeSuccessContent() {
   const searchParams = useSearchParams();
-  const sessionId = searchParams.get('session_id');
+  const sessionIdFromUrl = searchParams.get('session_id');
+  const sessionIdRef = useRef(sessionIdFromUrl);
+  if (sessionIdFromUrl) sessionIdRef.current = sessionIdFromUrl;
+
   const setUser = useAppStore((s) => s.setUser);
   const [activating, setActivating] = useState(true);
   const [active, setActive] = useState(false);
-
-  useEffect(() => {
-    if (sessionId) {
-      const url = new URL(window.location.href);
-      url.searchParams.delete('session_id');
-      window.history.replaceState({}, '', url.toString());
-    }
-  }, [sessionId]);
 
   useEffect(() => {
     let cancelled = false;
     let attempts = 0;
     const maxAttempts = 12;
 
-    const tick = async () => {
-      attempts += 1;
+    const applyMe = async () => {
       const me = await fetchMe();
-      if (cancelled) return;
-      const ok = !!(me?.planExpiresAt && me.planExpiresAt > Date.now());
-      if (ok && me) {
-        const prev = useAppStore.getState().user;
-        setUser({
-          _id: me._id,
-          name: me.name,
-          email: me.email,
-          role: me.role === 'ADMIN' ? 'admin' : 'user',
-          planId: me.planId,
-          planExpiresAt: me.planExpiresAt,
-          image: prev?.image,
-        });
-        setActive(true);
-        setActivating(false);
-        return;
+      if (cancelled || !me) return false;
+      const ok = !!(me.planExpiresAt && me.planExpiresAt > Date.now());
+      if (!ok) return false;
+      const prev = useAppStore.getState().user;
+      setUser({
+        _id: me._id,
+        name: me.name,
+        email: me.email,
+        role: me.role === 'ADMIN' ? 'admin' : 'user',
+        planId: me.planId,
+        planExpiresAt: me.planExpiresAt,
+        image: prev?.image,
+      });
+      setActive(true);
+      setActivating(false);
+      stripSessionIdFromUrl();
+      return true;
+    };
+
+    const tick = async () => {
+      const sessionId = sessionIdRef.current;
+      if (sessionId && attempts < 3) {
+        const activated = await fulfillCheckout(sessionId);
+        if (cancelled) return;
+        if (activated) {
+          if (await applyMe()) return;
+          setActive(true);
+          setActivating(false);
+          stripSessionIdFromUrl();
+          return;
+        }
       }
+      if (await applyMe()) return;
+      attempts += 1;
       if (attempts >= maxAttempts) {
         setActivating(false);
         return;

@@ -23,6 +23,7 @@ test.describe('Playground de componentes', () => {
       'Tarjetas de película',
       'Posters',
       'Headers de sección',
+      'Modal de actualización PWA',
       'Estados vacíos',
       'Spinners y skeletons',
     ];

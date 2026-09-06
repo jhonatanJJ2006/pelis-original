@@ -14,11 +14,11 @@ Stack actual: Next.js 14 + Postgres/Prisma (@pelis/db) + Better Auth. NUNCA Conv
 ## Flujo de datos
 
 Cliente (RSC preloadQuery o hooks useQuery/useMutation/useAction)
-  -> POST /api/function/<name> (getRequestCtx lee cookie Better Auth)
-  -> invoke() + registry (packages/db/src/registry.ts)
-  -> handler en queries/ mutations/ actions/
-  -> Prisma -> Postgres
-  -> toMovieShape/toAnimeShape (_id, enums minúsculas, enrichMovieImage)
+-> POST /api/function/<name> (getRequestCtx lee cookie Better Auth)
+-> invoke() + registry (packages/db/src/registry.ts)
+-> handler en queries/ mutations/ actions/
+-> Prisma -> Postgres
+-> toMovieShape/toAnimeShape (_id, enums minúsculas, enrichMovieImage)
 Mutations llaman notifyChange; el cliente SSE /api/subscriptions/stream invalida queries.
 
 ## Auth
@@ -28,14 +28,23 @@ requireUser / requireAdmin / requireActivePlan / hasActivePlan: packages/db/src/
 Admin UI: (admin)/layout.tsx comprueba user.role === admin (minúscula en cliente; BD es ADMIN).
 No hay middleware.ts de Next.
 
+## Stripe / plan activo
+
+Checkout crea session con `metadata.convexUserId` + `planId` (y `client_reference_id`).
+Alta de `Subscription` ACTIVE: webhook (`checkout.session.completed` / `async_payment_succeeded`, `customer.subscription.created/updated`, `invoice.paid`) **o** `POST /api/stripe/fulfill` (success page; no exige cookie).
+`incomplete` no degrada un ACTIVE (retry de webhook). Stream: `denyUnlessStreamAccess` → `requireActivePlan` (ACTIVE + endDate futuro, o ADMIN).
+
+Runtime: **Movies local**. `pelis-web` en localhost:3000, Postgres local, `verpelis.pro` = Cloudflare Tunnel. El webhook de Stripe no va a Vercel: apunta a `https://verpelis.pro/api/stripe/webhook`. Redirects de Checkout usan `resolveStripeRedirectUrl` (si `SITE_URL` es localhost, gana `BETTER_AUTH_URL` público). Diagnóstico: docs/AUDIT.md §5b.
+
 ## Imagenes
 
 packages/db/src/lib/resolveMovieImage.ts:
+
 - hash MD5 32 hex -> /peliculas/peliculas/{hash}.webp
 - slug -> /peliculas/{slug}.webp
 - imageId / backdropImageId -> /uploads/{id}.webp
 - URL *.convex.cloud/api/storage -> placeholder /peliculas/placeholder.webp
-Carpetas gitignored. /uploads se sirve por route handler para no reiniciar pelis-web.
+  Carpetas gitignored. /uploads se sirve por route handler para no reiniciar pelis-web.
 
 ## Anime
 
@@ -50,7 +59,7 @@ Admin: probe, cleanupNonWorking, seedPopular, playlists.
 
 ## PWA
 
-Serwist: apps/web/sw.ts -> public/sw.js. Desactivado en development. exclude /uploads/. Manifest + install prompt. Parcial.
+Serwist: apps/web/sw.ts -> public/sw.js. Desactivado en development. exclude /uploads/ y version.json. Manifest `display: standalone`. Sin CTAs de instalar (se silencia `beforeinstallprompt`). Runtime = Movies (`pelis-web.service` + tunnel), no Vercel. Nueva versión (`/api/app/availability` lee `public/version.json` del disco, o SW en waiting) → modal Aceptar / Más tarde. `version.json` y `sw.js` van con Cache-Control no-store. Parcial.
 
 ## Trampas
 
