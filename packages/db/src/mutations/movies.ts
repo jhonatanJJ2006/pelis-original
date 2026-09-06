@@ -55,11 +55,12 @@ export const update = register({
     const image = args.imageId
       ? `/uploads/${args.imageId}.webp`
       : resolveMovieImagePath(args.image);
-    const backdropImage = args.backdropImage !== undefined
-      ? args.backdropImageId
-        ? `/uploads/${args.backdropImageId}.webp`
-        : resolveMovieImagePath(args.backdropImage)
-      : undefined;
+    const backdropImage =
+      args.backdropImage !== undefined
+        ? args.backdropImageId
+          ? `/uploads/${args.backdropImageId}.webp`
+          : resolveMovieImagePath(args.backdropImage)
+        : undefined;
     await prisma.movie.update({
       where: { id: args.id },
       data: {
