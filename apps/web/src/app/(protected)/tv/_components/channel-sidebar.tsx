@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Search, Star, Tv } from 'lucide-react';
+import { RemoteImage } from '@/components/remote-image';
 import { cn } from '@pelis/ui/utils';
 
 export interface SidebarChannel {
@@ -30,9 +31,10 @@ const CHIPS = [
 interface ChannelSidebarProps {
   channels: SidebarChannel[];
   currentId?: string;
+  isLoading?: boolean;
 }
 
-export function ChannelSidebar({ channels, currentId }: ChannelSidebarProps) {
+export function ChannelSidebar({ channels, currentId, isLoading = false }: ChannelSidebarProps) {
   const [search, setSearch] = useState('');
   const [chip, setChip] = useState<string>('');
   const router = useRouter();
@@ -112,7 +114,7 @@ export function ChannelSidebar({ channels, currentId }: ChannelSidebarProps) {
           <div className="flex flex-col items-center justify-center text-center px-4 py-12">
             <Tv className="w-8 h-8 text-cinema-muted/30 mb-2" />
             <p className="text-xs text-cinema-muted">
-              {channels.length === 0 ? 'Cargando canales...' : 'Sin resultados.'}
+              {isLoading ? 'Cargando canales…' : 'Sin resultados.'}
             </p>
           </div>
         ) : (
@@ -142,12 +144,12 @@ export function ChannelSidebar({ channels, currentId }: ChannelSidebarProps) {
                       >
                         <div className="shrink-0 w-8 h-8 rounded-md bg-cinema-elevated border border-cinema-border flex items-center justify-center overflow-hidden">
                           {c.logo ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
+                            <RemoteImage
                               src={c.logo}
                               alt=""
+                              width={24}
+                              height={24}
                               className="w-6 h-6 object-contain"
-                              loading="lazy"
                             />
                           ) : (
                             <Tv className="w-3.5 h-3.5 text-cinema-silver" />

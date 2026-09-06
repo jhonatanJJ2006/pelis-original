@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery, useMutation } from '@pelis/db/client';
+import { useQuery, useQueryResult, useMutation } from '@pelis/db/client';
 import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Calendar, Crown, Heart, Play, Tag, User } from 'lucide-react';
@@ -11,7 +11,7 @@ import { Badge, Skeleton } from '@pelis/ui/components';
 import { VideoPlayer } from '@pelis/ui/features/video-player';
 import { MoviePoster } from '@pelis/ui/features/movie-poster';
 import { MovieRow } from '@pelis/ui/features/movie-row';
-import { EmptyState } from '@pelis/ui/features/empty-state';
+import { EmptyState, ErrorState } from '@pelis/ui/features/empty-state';
 import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';
 import { toast } from 'sonner';
 import { cn } from '@pelis/ui/utils';
@@ -35,7 +35,11 @@ export default function MovieDetailPageClient({ preloaded }: MovieDetailPageClie
   const preloadedMovie = preloaded?.movie?.data;
   const preloadedRelated = preloaded?.related?.data;
 
-  const movie = useQuery(api.movies.getById, { id } as any) as MediaItem | undefined | null;
+  const {
+    data: movie,
+    error: movieError,
+    refetch,
+  } = useQueryResult<MediaItem | null>(api.movies.getById, { id } as any);
   const resolvedMovie = movie ?? preloadedMovie;
   const related = useQuery(
     api.movies.getByGenre,
@@ -73,6 +77,15 @@ export default function MovieDetailPageClient({ preloaded }: MovieDetailPageClie
   };
 
   if (resolvedMovie === undefined) {
+    if (movieError) {
+      return (
+        <ErrorState
+          title="No se pudo cargar este título"
+          description="Revisa tu conexión e inténtalo de nuevo."
+          onRetry={refetch}
+        />
+      );
+    }
     return <MovieDetailSkeleton />;
   }
 

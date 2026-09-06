@@ -20,7 +20,9 @@ import { api } from '@pelis/db/api';
 import { useUser } from '@pelis/auth/hooks';
 import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';
 import { ProfilePageSkeleton } from '@pelis/ui/features/profile-page-skeleton';
+import { EmptyState } from '@pelis/ui/features/empty-state';
 import { Button } from '@pelis/ui/components';
+import { RemoteImage } from '@/components/remote-image';
 import { cn } from '@pelis/ui/utils';
 import { AppDownloadButtons } from '@/components/app-download-buttons';
 
@@ -77,18 +79,13 @@ export default function ProfilePage() {
 
   if (!user) {
     return (
-      <div className="page-shell min-h-[50vh] flex flex-col items-center justify-center text-center">
-        <div className="w-16 h-16 rounded-2xl bg-cinema-elevated border border-cinema-border flex items-center justify-center mb-5">
-          <User className="w-8 h-8 text-cinema-silver" aria-hidden />
-        </div>
-        <h1 className="font-display text-3xl tracking-tight text-cinema-chalk mb-3">Mi perfil</h1>
-        <p className="text-cinema-muted mb-6 max-w-md">
-          Inicia sesión para ver tus favoritos, historial y suscripción.
-        </p>
-        <Link href="/login">
-          <Button>Iniciar sesión</Button>
-        </Link>
-      </div>
+      <EmptyState
+        icon={User}
+        title="Mi perfil"
+        description="Inicia sesión para ver tus favoritos, historial y suscripción."
+        actionLabel="Iniciar sesión"
+        actionHref="/login"
+      />
     );
   }
 
@@ -97,9 +94,11 @@ export default function ProfilePage() {
       <ScrollReveal className="mb-10">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
           {user.image ? (
-            <img
+            <RemoteImage
               src={user.image}
               alt=""
+              width={80}
+              height={80}
               className="w-20 h-20 rounded-full ring-2 ring-cinema-accent/50 object-cover"
             />
           ) : (

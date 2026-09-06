@@ -153,36 +153,39 @@ Documento vivo con el inventario de gaps, bugs e incompletitudes.
 
 ## Bajo
 
-| Issue                         | Archivo                         | Estado    |
-| ----------------------------- | ------------------------------- | --------- |
-| not-found.tsx custom          | apps/web/src/app/not-found.tsx  | Corregido |
-| Sin CI en GitHub Actions      | `.github/workflows/`            | Pendiente |
-| Sin monitoreo Sentry activo   | —                               | Pendiente |
-| E2E roto (referencia Convex)  | `e2e/email-verification.e2e.ts` | Pendiente |
-| Sin favoritos/historial anime | schema                          | Pendiente |
-| Sin SEO `generateMetadata`    | páginas detalle                 | Pendiente |
+| Issue                          | Archivo                                 | Estado                                                 |
+| ------------------------------ | --------------------------------------- | ------------------------------------------------------ |
+| not-found.tsx custom           | apps/web/src/app/not-found.tsx          | Corregido                                              |
+| Sin CI en GitHub Actions       | `.github/workflows/`                    | Pendiente                                              |
+| Sin monitoreo Sentry activo    | —                                       | Pendiente                                              |
+| E2E login/favoritos/historial  | `e2e/account.e2e.ts`, `e2e/auth.e2e.ts` | Corregido 2026-09-05                                   |
+| E2E roto (referencia Convex)   | `e2e/email-verification.e2e.ts`         | Pendiente                                              |
+| Loading/error ad-hoc           | páginas de catálogo y cuenta            | Corregido 2026-09-05 — `ErrorState` + `useQueryResult` |
+| next/image remotes incompletos | `apps/web/next.config.mjs`              | Corregido 2026-09-05                                   |
+| Sin favoritos/historial anime  | schema                                  | Pendiente                                              |
+| Sin SEO `generateMetadata`     | páginas detalle                         | Pendiente                                              |
 
 ---
 
 ## Matriz de features
 
-| Feature                   | Estado                                  |
-| ------------------------- | --------------------------------------- |
-| Home + carruseles         | Completo                                |
-| Catálogo películas        | Completo                                |
-| Catálogo series           | Roto/desalineado                        |
-| Detalle película + player | Completo                                |
-| Detalle serie             | Parcial (sin episodios)                 |
-| Anime catálogo            | Completo                                |
-| Anime reproducción        | En reparación                           |
-| TV en vivo                | Completo                                |
-| Favoritos / Historial     | Completo (solo películas)               |
-| Perfil                    | Completo                                |
-| Auth                      | Completo                                |
-| Stripe suscripción        | Completo (código; keys/webhook ops)     |
-| Admin CRUD                | Completo                                |
-| PWA                       | Parcial                                 |
-| Tests E2E                 | Parcial (email-verification era Convex) |
+| Feature                   | Estado                                                                                     |
+| ------------------------- | ------------------------------------------------------------------------------------------ |
+| Home + carruseles         | Completo                                                                                   |
+| Catálogo películas        | Completo                                                                                   |
+| Catálogo series           | Roto/desalineado                                                                           |
+| Detalle película + player | Completo                                                                                   |
+| Detalle serie             | Parcial (sin episodios)                                                                    |
+| Anime catálogo            | Completo                                                                                   |
+| Anime reproducción        | En reparación                                                                              |
+| TV en vivo                | Completo                                                                                   |
+| Favoritos / Historial     | Completo (solo películas)                                                                  |
+| Perfil                    | Completo                                                                                   |
+| Auth                      | Completo                                                                                   |
+| Stripe suscripción        | Completo (código; keys/webhook ops)                                                        |
+| Admin CRUD                | Completo                                                                                   |
+| PWA                       | Parcial                                                                                    |
+| Tests E2E                 | Parcial (login/favoritos/historial en account.e2e.ts; email-verification sigue era Convex) |
 
 ---
 

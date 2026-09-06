@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery, useAction } from '@pelis/db/client';
+import { useQueryResult, useAction } from '@pelis/db/client';
 import Link from 'next/link';
 import { useMemo, useRef, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -20,7 +20,7 @@ import { api } from '@pelis/db/api';
 import { useUser } from '@pelis/auth/hooks';
 import { SubscribePageSkeleton } from '@pelis/ui/features/subscribe-page-skeleton';
 import { Button } from '@pelis/ui/components';
-import { EmptyState } from '@pelis/ui/features/empty-state';
+import { EmptyState, ErrorState } from '@pelis/ui/features/empty-state';
 import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';
 import { toast } from 'sonner';
 import { cn } from '@pelis/ui/utils';
@@ -87,7 +87,13 @@ export default function SubscribePage() {
   const nextRef = useRef<HTMLButtonElement>(null);
   const [loadingPlanId, setLoadingPlanId] = useState<string | null>(null);
   const [loadingPortal, setLoadingPortal] = useState(false);
-  const plans = (useQuery(api.subscriptions.list, {}) as Plan[] | undefined) ?? [];
+  const {
+    data: plansData,
+    error: plansError,
+    isLoading,
+    refetch,
+  } = useQueryResult<Plan[]>(api.subscriptions.list, {});
+  const plans = plansData ?? [];
   const createCheckoutSession = useAction<{ planId: string }, { url: string; upgraded: false }>(
     api.stripe.createCheckoutSession
   );
@@ -95,7 +101,6 @@ export default function SubscribePage() {
     api.stripe.createPortalSession
   );
 
-  const isLoading = plans === undefined;
   const hasActivePlan = !!(user?.planExpiresAt && user.planExpiresAt > Date.now());
 
   const sortedPlans = useMemo(() => [...plans].sort((a, b) => a.price - b.price), [plans]);
@@ -200,6 +205,12 @@ export default function SubscribePage() {
 
       {isLoading ? (
         <SubscribePageSkeleton />
+      ) : plansError && !plansData ? (
+        <ErrorState
+          title="No se pudieron cargar los planes"
+          description="Revisa tu conexión e inténtalo de nuevo."
+          onRetry={refetch}
+        />
       ) : sortedPlans.length === 0 ? (
         <EmptyState
           icon={Crown}

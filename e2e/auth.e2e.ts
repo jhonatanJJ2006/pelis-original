@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { canProvisionTestUser, ensureLoggedIn } from './helpers/session';
 
 test.describe('Registration Flow', () => {
   const testUser = {
@@ -85,5 +86,11 @@ test.describe('Login Flow', () => {
     await page.getByRole('button', { name: /iniciar sesión/i }).click();
 
     await expect(page.getByText(/debes verificar tu email/i)).toBeVisible();
+  });
+
+  test('should sign in a verified user without Google OAuth', async ({ page }) => {
+    test.skip(!canProvisionTestUser(), 'Set PELIS_TEST_USER_* / E2E_USER_* or DATABASE_URL');
+    await ensureLoggedIn(page);
+    await expect(page).not.toHaveURL(/\/login/);
   });
 });
