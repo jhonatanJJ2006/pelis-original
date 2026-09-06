@@ -26,7 +26,7 @@ export function getStripe(): Stripe {
 }
 
 export function assertWebhookSecret(webhookSecret: string | undefined): webhookSecret is string {
-  return !!webhookSecret && webhookSecret.startsWith('whsec_') && webhookSecret.length >= 40;
+  return !!webhookSecret && webhookSecret.startsWith('whsec_') && webhookSecret.length >= 38;
 }
 
 function isLocalHostUrl(url: string | undefined): boolean {

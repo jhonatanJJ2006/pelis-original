@@ -1,26 +1,26 @@
 # Auditoría del sitio — Pelis Original
 
 Documento vivo con el inventario de gaps, bugs e incompletitudes.  
-Última actualización: 2026-09-06 (CI deploy genera Prisma antes de `build:vercel`; Android TV Compose en git + pairing `/api/tv-auth`).
+Última actualización: 2026-09-06 (CI `build:vercel` pasa `DATABASE_URL` vía turbo `globalEnv`; Android TV Compose en git).
 
 ---
 
 ## Resumen ejecutivo
 
-| Área               | Estado        | Notas                                                                                                            |
-| ------------------ | ------------- | ---------------------------------------------------------------------------------------------------------------- |
-| Catálogo películas | OK            | Filtros, búsqueda, detalle                                                                                       |
-| Catálogo series    | Crítico       | Admin `Series` ≠ público `Movie.mediaType`                                                                       |
-| Anime catálogo     | OK            | CRUD admin, listado                                                                                              |
-| Anime streaming    | En reparación | IDs incorrectos + API Consumet inestable                                                                         |
-| TV en vivo         | OK            | IPTV, probe admin                                                                                                |
-| Auth               | OK            | Better Auth + Google                                                                                             |
-| Suscripción        | OK código     | Checkout → sync/webhook → ACTIVE. Ops en Movies (túnel + .env + Postgres local), no Vercel                       |
-| PWA                | Parcial       | Update modal + sin install/descarga in-app; SW precache de uploads sigue siendo ruido                            |
-| Android TV         | Parcial       | Fuentes Compose en `apps/android-tv/app/src/` (2026-09-06). Build en máquina con SDK 35.                         |
-| Imágenes           | Alto          | Pósters hash faltantes en clone limpio                                                                           |
-| CI / calidad       | Parcial       | format+test+build+deploy en GitHub Actions; `deploy` genera Prisma antes de `build:vercel`. Build ignora TS/lint |
-| Docs agentes       | OK            | AGENTS.md + docs/APP, ARCHITECTURE, DATA-MODEL, TESTING                                                          |
+| Área               | Estado        | Notas                                                                                                                  |
+| ------------------ | ------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Catálogo películas | OK            | Filtros, búsqueda, detalle                                                                                             |
+| Catálogo series    | Crítico       | Admin `Series` ≠ público `Movie.mediaType`                                                                             |
+| Anime catálogo     | OK            | CRUD admin, listado                                                                                                    |
+| Anime streaming    | En reparación | IDs incorrectos + API Consumet inestable                                                                               |
+| TV en vivo         | OK            | IPTV, probe admin                                                                                                      |
+| Auth               | OK            | Better Auth + Google                                                                                                   |
+| Suscripción        | OK código     | Checkout → sync/webhook → ACTIVE. Ops en Movies (túnel + .env + Postgres local), no Vercel                             |
+| PWA                | Parcial       | Update modal + sin install/descarga in-app; SW precache de uploads sigue siendo ruido                                  |
+| Android TV         | Parcial       | Fuentes Compose en `apps/android-tv/app/src/` (2026-09-06). Build en máquina con SDK 35.                               |
+| Imágenes           | Alto          | Pósters hash faltantes en clone limpio                                                                                 |
+| CI / calidad       | Parcial       | format+test+build+deploy en GitHub Actions; `deploy` genera Prisma y pasa `DATABASE_URL` a turbo. Build ignora TS/lint |
+| Docs agentes       | OK            | AGENTS.md + docs/APP, ARCHITECTURE, DATA-MODEL, TESTING                                                                |
 
 ---
 
@@ -160,17 +160,17 @@ Documento vivo con el inventario de gaps, bugs e incompletitudes.
 
 ## Bajo
 
-| Issue                          | Archivo                                 | Estado                                                                                                |
-| ------------------------------ | --------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| not-found.tsx custom           | apps/web/src/app/not-found.tsx          | Corregido                                                                                             |
-| CI GitHub Actions              | `.github/workflows/ci.yml`              | format+test+build (gate). `deploy` (post-merge) corre `prisma generate` + `build:vercel` (2026-09-06) |
-| Sin monitoreo Sentry activo    | —                                       | Pendiente                                                                                             |
-| E2E login/favoritos/historial  | `e2e/account.e2e.ts`, `e2e/auth.e2e.ts` | Corregido 2026-09-05                                                                                  |
-| E2E roto (referencia Convex)   | `e2e/email-verification.e2e.ts`         | Pendiente                                                                                             |
-| Loading/error ad-hoc           | páginas de catálogo y cuenta            | Corregido 2026-09-05 — `ErrorState` + `useQueryResult`                                                |
-| next/image remotes incompletos | `apps/web/next.config.mjs`              | Corregido 2026-09-05                                                                                  |
-| Sin favoritos/historial anime  | schema                                  | Pendiente                                                                                             |
-| Sin SEO `generateMetadata`     | páginas detalle                         | Pendiente                                                                                             |
+| Issue                          | Archivo                                 | Estado                                                                                                          |
+| ------------------------------ | --------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| not-found.tsx custom           | apps/web/src/app/not-found.tsx          | Corregido                                                                                                       |
+| CI GitHub Actions              | `.github/workflows/ci.yml`              | format+test+build (gate). `deploy` genera Prisma y `turbo.json` `globalEnv` incluye `DATABASE_URL` (2026-09-06) |
+| Sin monitoreo Sentry activo    | —                                       | Pendiente                                                                                                       |
+| E2E login/favoritos/historial  | `e2e/account.e2e.ts`, `e2e/auth.e2e.ts` | Corregido 2026-09-05                                                                                            |
+| E2E roto (referencia Convex)   | `e2e/email-verification.e2e.ts`         | Pendiente                                                                                                       |
+| Loading/error ad-hoc           | páginas de catálogo y cuenta            | Corregido 2026-09-05 — `ErrorState` + `useQueryResult`                                                          |
+| next/image remotes incompletos | `apps/web/next.config.mjs`              | Corregido 2026-09-05                                                                                            |
+| Sin favoritos/historial anime  | schema                                  | Pendiente                                                                                                       |
+| Sin SEO `generateMetadata`     | páginas detalle                         | Pendiente                                                                                                       |
 
 ---
 
