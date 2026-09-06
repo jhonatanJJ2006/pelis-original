@@ -13,11 +13,11 @@ Política vigente (2026-09-05). Si choca con otra nota, gana `AGENTS.md`.
 
 ## Entornos GitHub
 
-| Entorno     | Rama      |
-|-------------|-----------|
-| Production  | `main`    |
-| Staging     | `staging` |
-| Dev         | `dev`     |
+| Entorno    | Rama      |
+| ---------- | --------- |
+| Production | `main`    |
+| Staging    | `staging` |
+| Dev        | `dev`     |
 
 ## Nombres de rama
 
@@ -39,11 +39,11 @@ El workflow `.github/workflows/branch-gate.yml` valida el destino del PR:
 
 Workflow: `.github/workflows/ci.yml`
 
-| Job | Cuándo | Rol |
-|-----|--------|-----|
-| `format` | PR + push | Prettier check (`pnpm format`) |
-| `test` | PR + push | Unit tests (`pnpm test:unit`) — paralelo con format |
-| `build` | PR + push | Turbo build; needs format+test |
+| Job      | Cuándo                   | Rol                                                                   |
+| -------- | ------------------------ | --------------------------------------------------------------------- |
+| `format` | PR + push                | Prettier check (`pnpm format`)                                        |
+| `test`   | PR + push                | Unit tests (`pnpm test:unit`) — paralelo con format                   |
+| `build`  | PR + push                | Turbo build; needs format+test                                        |
 | `deploy` | solo push a main/staging | `prisma generate` (@pelis/db) + `pnpm build:vercel` (no SSH a Movies) |
 
 **Promote staging→main:** requiere **format + test + build** verdes. Deploy es post-merge.

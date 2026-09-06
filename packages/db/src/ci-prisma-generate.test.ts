@@ -24,11 +24,11 @@ describe('prisma generate antes de next/build:vercel', () => {
     expect(turbo.tasks['build:vercel']?.dependsOn).toContain('^build');
   });
 
-  it('el script raíz build:vercel incluye dependencias del workspace', () => {
+  it('el script raíz build:vercel corre el pipeline turbo de @pelis/web', () => {
     const pkg = JSON.parse(readRepoFile('package.json')) as {
       scripts: Record<string, string>;
     };
-    expect(pkg.scripts['build:vercel']).toMatch(/--filter=@pelis\/web\.\.\./);
+    expect(pkg.scripts['build:vercel']).toMatch(/turbo run build:vercel --filter=@pelis\/web/);
   });
 
   it('apps/web build:vercel genera Prisma antes de next build', () => {
