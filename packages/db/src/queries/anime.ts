@@ -48,7 +48,9 @@ function toSeriesCard(key: string, members: Anime[]) {
     year: Math.min(...ordered.map((m) => m.year)),
     latestYear: Math.max(...ordered.map((m) => m.year)),
     rating: ratings.length > 0 ? Math.max(...ratings) : undefined,
-    status: ordered.some((m) => m.status === 'ONGOING') ? ('ongoing' as const) : ('completed' as const),
+    status: ordered.some((m) => m.status === 'ONGOING')
+      ? ('ongoing' as const)
+      : ('completed' as const),
     seasonCount: seasons.length,
     extrasCount: extras.length,
     entryCount: ordered.length,
@@ -65,6 +67,7 @@ export const list = register({
       genre: z.string().optional(),
       status: StatusEnum.optional(),
       search: z.string().optional(),
+      limit: z.number().optional(),
     })
     .optional(),
   handler: async (_ctx, args) => {
@@ -73,13 +76,20 @@ export const list = register({
     if (a.status) where.status = a.status === 'ongoing' ? 'ONGOING' : 'COMPLETED';
     if (a.genre) where.genre = { has: a.genre };
     if (a.search) {
-      const q = a.search.toLowerCase();
+      const q = a.search.trim().toLowerCase();
       where.OR = [
         { title: { contains: q, mode: 'insensitive' } },
         { alternativeTitle: { contains: q, mode: 'insensitive' } },
+        { seriesTitle: { contains: q, mode: 'insensitive' } },
       ];
     }
-    return (await prisma.anime.findMany({ where, orderBy: { title: 'asc' } })).map(toAnimeShape);
+    return (
+      await prisma.anime.findMany({
+        where,
+        orderBy: { title: 'asc' },
+        ...(a.limit != null ? { take: a.limit } : {}),
+      })
+    ).map(toAnimeShape);
   },
 });
 
@@ -222,6 +232,7 @@ export const search = register({
         OR: [
           { title: { contains: q, mode: 'insensitive' } },
           { alternativeTitle: { contains: q, mode: 'insensitive' } },
+          { seriesTitle: { contains: q, mode: 'insensitive' } },
         ],
       },
       orderBy: { title: 'asc' },
