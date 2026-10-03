@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  channelMatchesCategory,
   cleanTvTitle,
   isPublicCatalogName,
   mapTvCategory,
@@ -83,5 +84,28 @@ describe('normalizeChannelFields', () => {
     expect(row.category).toBe('Infantil');
     expect(row.country).toBe('España');
     expect(row.language).toBe('es');
+  });
+});
+
+describe('channelMatchesCategory', () => {
+  it('matches display category even when DB still has English tags', () => {
+    expect(
+      channelMatchesCategory({ name: 'Euronews', category: 'News' }, 'Noticias'),
+    ).toBe(true);
+    expect(
+      channelMatchesCategory({ name: 'Random', category: 'News' }, 'Deportes'),
+    ).toBe(false);
+  });
+
+  it('matches name-derived featured categories', () => {
+    expect(
+      channelMatchesCategory({ name: 'FIFA+ Spain', category: 'Deportes' }, 'Fútbol'),
+    ).toBe(true);
+    expect(
+      channelMatchesCategory({ name: 'WWE Raw', category: 'Deportes' }, 'Lucha libre'),
+    ).toBe(true);
+    expect(
+      channelMatchesCategory({ name: 'Disney Channel LatAm', category: 'Undefined' }, 'Infantil'),
+    ).toBe(true);
   });
 });

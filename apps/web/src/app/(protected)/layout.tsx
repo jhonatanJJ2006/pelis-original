@@ -31,16 +31,14 @@ function ProtectedLayoutClient({ children }: { children: React.ReactNode }) {
         sticky={!isHome && !isTV}
         tvMode={isTvDevice}
       />
-      <main
-        className={
-          isTV
-            ? 'flex-1 min-h-0 pb-0'
-            : 'flex-1 pb-[calc(4.25rem+env(safe-area-inset-bottom))] md:pb-0'
-        }
-      >
-        {children}
-      </main>
+      <main className={isTV ? 'flex-1 min-h-0' : 'flex-1'}>{children}</main>
       {showBrowserFooter && <Footer className="w-full" />}
+      {!isTvDevice && (
+        <div
+          className="h-[calc(4.25rem+env(safe-area-inset-bottom))] shrink-0 md:hidden"
+          aria-hidden
+        />
+      )}
       {!isTvDevice && <BottomTabBar />}
     </div>
   );

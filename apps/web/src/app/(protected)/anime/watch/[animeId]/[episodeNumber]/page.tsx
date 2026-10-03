@@ -169,6 +169,8 @@ export default function AnimeWatchPage() {
       setStream(result);
       if (result.kind === 'none') {
         setError(result.error ?? 'No se encontraron fuentes para este episodio.');
+      } else if (result.kind === 'hls' && !result.sources.some((source) => source.url)) {
+        setError('No se encontraron fuentes para este episodio.');
       }
     } catch {
       setError('Error al cargar el episodio. Prueba con otro proveedor.');
@@ -399,7 +401,8 @@ export default function AnimeWatchPage() {
                 <div
                   ref={embedSurfaceRef}
                   className={cn(
-                    'absolute inset-0 bg-cinema-bg [touch-action:none]',
+                    'absolute inset-0 bg-cinema-bg',
+                    embedLandscapeActive ? '[touch-action:none]' : 'touch-pan-y',
                     embedLandscapeClassName
                   )}
                   style={embedLandscapeStyle}
@@ -476,15 +479,16 @@ export default function AnimeWatchPage() {
                 </div>
               )}
 
-              {stream?.kind === 'hls' && (
+              {stream?.kind === 'hls' && stream.sources[0]?.url && (
                 <AnimeHlsPlayer
-                  source={stream.sources[0] ?? { url: '' }}
+                  source={stream.sources[0]}
                   subtitles={stream.subtitles}
                   intro={stream.intro ?? null}
                   outro={stream.outro ?? null}
                   title={series?.title ?? 'Anime'}
                   episodeLabel={`Episodio ${episodeNumber}`}
                   onFatalError={onPlayerFatalError}
+                  onNextEpisode={nextEpisode != null ? () => goToEpisode(nextEpisode) : undefined}
                 />
               )}
             </>

@@ -108,27 +108,29 @@ export default function MovieDetailPageClient({ preloaded }: MovieDetailPageClie
 
   return (
     <div className="pb-12">
-      <div className="relative h-[420px] md:h-[520px] overflow-hidden">
-        <MoviePoster
-          src={heroImage}
-          alt=""
-          className="w-full h-full object-cover"
-          loading="eager"
-          fetchPriority="high"
-        />
-        <div className="absolute inset-0 hero-gradient-right" />
-        <div className="absolute inset-0 hero-gradient-bottom" />
-        <div className="absolute inset-0 hero-gradient-accent" />
+      <div className="relative overflow-hidden md:h-[520px]">
+        <div className="relative h-64 md:absolute md:inset-0 md:h-auto">
+          <MoviePoster
+            src={heroImage}
+            alt=""
+            className="w-full h-full object-cover"
+            loading="eager"
+            fetchPriority="high"
+          />
+          <div className="absolute inset-0 hero-gradient-right" />
+          <div className="absolute inset-0 hero-gradient-bottom" />
+          <div className="absolute inset-0 hero-gradient-accent" />
 
-        <Link
-          href={isSeries ? '/series' : '/movies'}
-          className="absolute top-4 left-4 md:top-6 md:left-6 z-10 inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-white bg-black/40 hover:bg-black/60 backdrop-blur-sm border border-white/10 transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" aria-hidden />
-          Volver
-        </Link>
+          <Link
+            href={isSeries ? '/series' : '/movies'}
+            className="absolute top-4 left-4 md:top-6 md:left-6 z-10 inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-white bg-black/40 hover:bg-black/60 backdrop-blur-sm border border-white/10 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" aria-hidden />
+            Volver
+          </Link>
+        </div>
 
-        <div className="absolute bottom-0 left-0 right-0 p-8 md:p-14">
+        <div className="relative px-4 py-6 md:absolute md:inset-x-0 md:bottom-0 md:p-14">
           <div className="container mx-auto">
             <div className="flex flex-wrap gap-2 mb-4">
               <Badge variant="primary">{resolvedMovie.classification}</Badge>
@@ -148,9 +150,9 @@ export default function MovieDetailPageClient({ preloaded }: MovieDetailPageClie
             </p>
 
             <div className="flex flex-wrap gap-4 md:gap-6 text-sm text-cinema-silver mb-8">
-              <div className="flex items-center gap-1.5">
-                <User className="w-4 h-4" aria-hidden />
-                <span>{resolvedMovie.actors}</span>
+              <div className="flex min-w-0 max-w-full items-start gap-1.5">
+                <User className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+                <span className="min-w-0 break-words">{resolvedMovie.actors}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <Tag className="w-4 h-4" aria-hidden />

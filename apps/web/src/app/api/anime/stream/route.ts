@@ -6,6 +6,7 @@ import {
   isSafeAnimeUpstreamUrl,
   looksLikeM3u8,
   rewriteAnimeManifest,
+  sanitizeAnimeReferer,
 } from '@/lib/anime-stream-proxy';
 import { denyUnlessStreamAccess } from '@/lib/require-stream-access';
 
@@ -35,21 +36,33 @@ export async function GET(request: NextRequest) {
   }
 
   const range = request.headers.get('range');
+  const referer = sanitizeAnimeReferer(request.nextUrl.searchParams.get('r'));
+  const upstreamHeaders: Record<string, string> = { ...ANIME_CDN_HEADERS };
+  if (referer) {
+    upstreamHeaders.Referer = referer;
+    upstreamHeaders.Origin = referer.replace(/\/$/, '');
+  }
   const isManifestUrl = upstream.toLowerCase().includes('.m3u8');
   const isSubtitleUrl = upstream.toLowerCase().includes('.vtt');
 
   try {
-    const response = await fetchAnimeUpstream(upstream, ANIME_CDN_HEADERS, { range });
+    const response = await fetchAnimeUpstream(upstream, upstreamHeaders, { range });
 
     if (!response.ok && response.status !== 206) {
       return NextResponse.json({ error: `Upstream respondió ${response.status}` }, { status: 502 });
     }
 
     const contentType = response.headers.get('content-type') ?? '';
+    // Buffer so we can sniff playlists and TS that the CDN labels as images
+    // (Aniwave serves both `image/jpeg` with no file extension).
+    const body = Buffer.from(await response.arrayBuffer());
+    const head = body.subarray(0, 32).toString('utf8');
+    const isPlaylist =
+      isManifestUrl || contentType.includes('mpegurl') || head.startsWith('#EXTM3U');
 
     // Manifests: rewrite every nested reference back through this route.
-    if (isManifestUrl || contentType.includes('mpegurl')) {
-      const text = await response.text();
+    if (isPlaylist) {
+      const text = body.toString('utf8');
       if (!looksLikeM3u8(text, contentType, upstream)) {
         // Usually a Cloudflare challenge page — surface it as upstream failure.
         return NextResponse.json(
@@ -57,7 +70,7 @@ export async function GET(request: NextRequest) {
           { status: 502 }
         );
       }
-      const rewritten = rewriteAnimeManifest(text, upstream, resolveOrigin(request));
+      const rewritten = rewriteAnimeManifest(text, upstream, resolveOrigin(request), referer);
       return new NextResponse(rewritten, {
         status: 200,
         headers: {
@@ -69,9 +82,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Subtitles: text passthrough with a proper type for <track>.
-    if (isSubtitleUrl) {
-      const text = await response.text();
-      return new NextResponse(text, {
+    if (isSubtitleUrl || head.startsWith('WEBVTT')) {
+      return new NextResponse(body, {
         status: 200,
         headers: {
           'Content-Type': 'text/vtt; charset=utf-8',
@@ -81,25 +93,27 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Segments / keys: pipe verbatim. VidNest CDNs disguise TS segments as
-    // image/text assets; override those types so hls.js accepts them.
+    // Segments / keys. VidNest CDNs disguise MPEG-TS as images (or omit the
+    // extension entirely). A leading 0x47 sync byte is a transport packet.
     const headers = new Headers();
-    const disguised = /\.(jpe?g|png|webp|gif|html|js|css|txt)(?:\?|$)/i.test(upstream);
+    const disguisedExt = /\.(jpe?g|png|webp|gif|html|js|css|txt)(?:\?|$)/i.test(upstream);
+    const isTransportStream = body.length > 0 && body[0] === 0x47;
     headers.set(
       'Content-Type',
-      disguised
-        ? getMimeForUrl(upstream)
-        : contentType || getMimeForUrl(upstream) || 'application/octet-stream'
+      isTransportStream
+        ? 'video/mp2t'
+        : disguisedExt
+          ? getMimeForUrl(upstream)
+          : contentType || getMimeForUrl(upstream) || 'application/octet-stream'
     );
     headers.set('Access-Control-Allow-Origin', '*');
     headers.set('Accept-Ranges', 'bytes');
-    const contentLength = response.headers.get('content-length');
-    if (contentLength) headers.set('Content-Length', contentLength);
+    headers.set('Content-Length', String(body.length));
     const contentRange = response.headers.get('content-range');
     if (contentRange) headers.set('Content-Range', contentRange);
     headers.set('Cache-Control', response.headers.get('cache-control') ?? 'public, max-age=86400');
 
-    return new NextResponse(response.body, { status: response.status, headers });
+    return new NextResponse(body, { status: response.status, headers });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Error desconocido';
     return NextResponse.json({ error: message }, { status: 502 });

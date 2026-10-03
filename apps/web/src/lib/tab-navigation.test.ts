@@ -15,8 +15,18 @@ describe('getTabIndex', () => {
 
   it('maps nested paths under a tab route to the same tab', () => {
     expect(getTabIndex('/movies/123')).toBe(TAB_ROUTES.indexOf('/movies'));
+    expect(getTabIndex('/series/abc')).toBe(TAB_ROUTES.indexOf('/series'));
     expect(getTabIndex('/anime/watch/9/1')).toBe(TAB_ROUTES.indexOf('/anime'));
     expect(getTabIndex('/tv/disney')).toBe(TAB_ROUTES.indexOf('/tv'));
+  });
+
+  it('places series between movies and anime, matching the desktop order', () => {
+    const movies = TAB_ROUTES.indexOf('/movies');
+    const series = TAB_ROUTES.indexOf('/series');
+    const anime = TAB_ROUTES.indexOf('/anime');
+    expect(series).toBeGreaterThan(movies);
+    expect(series).toBeLessThan(anime);
+    expect(TAB_ROUTES.indexOf('/tv')).toBeGreaterThan(series);
   });
 
   it('returns -1 for unknown routes', () => {
@@ -29,6 +39,7 @@ describe('isTabSwipeEnabled', () => {
   it('enables swipe on list and home pages', () => {
     expect(isTabSwipeEnabled('/')).toBe(true);
     expect(isTabSwipeEnabled('/movies')).toBe(true);
+    expect(isTabSwipeEnabled('/series')).toBe(true);
     expect(isTabSwipeEnabled('/anime')).toBe(true);
     expect(isTabSwipeEnabled('/tv')).toBe(true);
     expect(isTabSwipeEnabled('/profile')).toBe(true);

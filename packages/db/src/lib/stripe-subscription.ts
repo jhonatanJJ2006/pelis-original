@@ -199,6 +199,43 @@ async function resolveUserId(
   return existing?.userId ?? null;
 }
 
+/**
+ * `invoice.payment_failed` must not revoke a plan the customer already paid for.
+ * Stripe does not order webhooks: a failed attempt (or a retried failure delivery)
+ * often arrives after `checkout.session.completed` / `invoice.paid` have activated
+ * the subscription. Expiring by invoice id alone leaves them unable to watch.
+ *
+ * - `active` / `trialing`: keep or restore the entitlement (retrieve-current status).
+ * - `incomplete`: do not create a row, and do not clobber one checkout already wrote.
+ * - otherwise (`past_due`, `unpaid`, `canceled`, `incomplete_expired`, …): expire,
+ *   same as the previous failure handler.
+ */
+export async function applyInvoicePaymentFailed(
+  prisma: PrismaClient,
+  subscription: StripeSubLike
+): Promise<{ ok: boolean; activated: boolean; reason?: string; id?: string; endDate?: Date }> {
+  if (subscription.status === 'active' || subscription.status === 'trialing') {
+    return applyStripeSubscription(prisma, subscription, { forceActive: true });
+  }
+  if (subscription.status === 'incomplete') {
+    const existing = await prisma.subscription.findUnique({
+      where: { stripeSubscriptionId: subscription.id },
+    });
+    if (!existing) return { ok: true, activated: false, reason: 'incomplete_no_row' };
+    return {
+      ok: true,
+      activated: isEntitlingSubscription(existing),
+      id: existing.id,
+      endDate: existing.endDate,
+    };
+  }
+  await prisma.subscription.updateMany({
+    where: { stripeSubscriptionId: subscription.id },
+    data: { status: 'EXPIRED' },
+  });
+  return { ok: true, activated: false, reason: 'payment_failed' };
+}
+
 export async function applyStripeSubscription(
   prisma: PrismaClient,
   subscription: StripeSubLike,

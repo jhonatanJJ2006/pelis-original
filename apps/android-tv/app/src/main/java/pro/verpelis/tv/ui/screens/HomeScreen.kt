@@ -232,9 +232,10 @@ private suspend fun loadHomeRows(api: PelisApi): List<Pair<String, List<TvChanne
 
     val used = linkedSetOf<String>()
     val preferred = listOf(
-        PreferredRow("Fútbol", "Futbol", null),
+        // Keys must match canonical Spanish labels from tv.getCategories (accents included).
+        PreferredRow("Fútbol", "Fútbol", "Fútbol"),
         PreferredRow("Infantil", "Infantil", null),
-        PreferredRow("Fórmula 1", "Formula 1", "Fórmula"),
+        PreferredRow("Fórmula 1", "Fórmula 1", "Fórmula"),
         PreferredRow("Lucha libre", "Lucha libre", "Lucha"),
     )
     preferred.map { pref ->
@@ -272,8 +273,14 @@ private suspend fun loadHomeRows(api: PelisApi): List<Pair<String, List<TvChanne
     result
 }
 
+private fun foldAscii(value: String): String =
+    java.text.Normalizer.normalize(value, java.text.Normalizer.Form.NFD)
+        .replace(Regex("\\p{Mn}+"), "")
+        .lowercase()
+
 private fun matchCategory(cats: List<String>, key: String): String? {
-    val needle = key.lowercase()
+    val needle = foldAscii(key)
     return cats.firstOrNull { it.equals(key, ignoreCase = true) }
-        ?: cats.firstOrNull { it.lowercase().contains(needle) }
+        ?: cats.firstOrNull { foldAscii(it) == needle }
+        ?: cats.firstOrNull { foldAscii(it).contains(needle) }
 }

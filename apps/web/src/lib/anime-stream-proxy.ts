@@ -39,9 +39,9 @@ const LOOPBACK_ORIGIN_RE = /^https?:\/\/(localhost|127\.\d+\.\d+\.\d+|0\.0\.0\.0
  * Hosts we are willing to proxy. Kept tight on purpose — this endpoint would
  * otherwise be an open relay. VidNest CDN hostnames rotate across a few zones
  * (`*.watching.onl`, `*.livedns.my`, `*.cloudbuzz.lol`, `*.anivideo.sbs`, …),
- * so beyond the known suffixes we also accept any host whose path matches the
- * exact asset layout those CDNs use (`/anime/<32hex>/<32hex>/…`). Everything
- * else is rejected.
+ * so beyond the known suffixes we also accept hosts whose path matches a
+ * known asset layout (`/anime/<32hex>/<32hex>/`, `/<32hex>/<32hex>/`, or
+ * Aniwave `/cdn/<hex>`). Everything else is rejected.
  */
 const ALLOWED_UPSTREAM_SUFFIXES = [
   '.watching.onl',
@@ -49,13 +49,37 @@ const ALLOWED_UPSTREAM_SUFFIXES = [
   '.cloudbuzz.lol',
   '.anivideo.sbs',
   '.megacloud.animanga.fun',
-  'megacloud.animanga.fun',
   '.kryntal.top',
-  'cdn.kryntal.top',
   '.megaplay.buzz',
+  // Current Aniwave HLS zone (VidNest `aniwave_hls`). Hostnames rotate inside
+  // the zone (`px.dpopdrop89.store`, …); the path check below covers a move
+  // to a brand-new zone.
+  '.dpopdrop89.store',
 ];
 
-const VIDNEST_ASSET_PATH_RE = /^\/anime\/[0-9a-f]{32}\/[0-9a-f]{32}\//i;
+/**
+ * VidNest asset layouts we have actually seen:
+ * - `/anime/<32hex>/<32hex>/…` (subtitles and older CDNs)
+ * - `/<32hex>/<32hex>/…` (master playlists that dropped the `/anime` prefix)
+ * - `/cdn/<64+ hex>` (Aniwave; variants and segments have no file extension
+ *   and are served as `image/jpeg` even when the body is MPEG-TS or m3u8)
+ */
+const VIDNEST_ASSET_PATH_RE = /^\/(?:anime\/)?[0-9a-f]{32}\/[0-9a-f]{32}\//i;
+const ANIWAVE_CDN_PATH_RE = /^\/cdn\/[0-9a-f]{32,}/i;
+
+/** Referers we will forward. Anything else is ignored so `r` is not an open header. */
+export const ALLOWED_ANIME_REFERERS = [
+  'https://megaplay.buzz/',
+  'https://play.echovideo.ru/',
+  'https://vidnest.fun/',
+  'https://aniwaves.ru/',
+];
+
+function hostMatchesSuffix(host: string, suffix: string): boolean {
+  const dotted = suffix.startsWith('.') ? suffix : `.${suffix}`;
+  const bare = dotted.slice(1);
+  return host === bare || host.endsWith(dotted);
+}
 
 export function isSafeAnimeUpstreamUrl(raw: string): boolean {
   try {
@@ -63,12 +87,25 @@ export function isSafeAnimeUpstreamUrl(raw: string): boolean {
     if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return false;
     if (PRIVATE_HOST_RE.test(parsed.hostname)) return false;
     const host = parsed.hostname.toLowerCase();
-    const knownZone = ALLOWED_UPSTREAM_SUFFIXES.some(
-      (suffix) => host === suffix.slice(1) || host.endsWith(suffix)
+    const knownZone = ALLOWED_UPSTREAM_SUFFIXES.some((suffix) => hostMatchesSuffix(host, suffix));
+    return (
+      knownZone ||
+      VIDNEST_ASSET_PATH_RE.test(parsed.pathname) ||
+      ANIWAVE_CDN_PATH_RE.test(parsed.pathname)
     );
-    return knownZone || VIDNEST_ASSET_PATH_RE.test(parsed.pathname);
   } catch {
     return false;
+  }
+}
+
+export function sanitizeAnimeReferer(raw: string | null | undefined): string | undefined {
+  if (!raw) return undefined;
+  try {
+    const parsed = new URL(raw);
+    const origin = `${parsed.protocol}//${parsed.host}/`;
+    return ALLOWED_ANIME_REFERERS.includes(origin) ? origin : undefined;
+  } catch {
+    return undefined;
   }
 }
 
@@ -78,8 +115,11 @@ export function getMimeForUrl(url: string): string {
   return MIME[ext] || 'application/octet-stream';
 }
 
-export function buildAnimeProxyUrl(upstreamUrl: string, origin?: string): string {
-  const path = `/api/anime/stream?u=${encodeURIComponent(upstreamUrl)}`;
+export function buildAnimeProxyUrl(upstreamUrl: string, origin?: string, referer?: string): string {
+  const params = new URLSearchParams({ u: upstreamUrl });
+  const safeReferer = sanitizeAnimeReferer(referer);
+  if (safeReferer) params.set('r', safeReferer);
+  const path = `/api/anime/stream?${params.toString()}`;
   if (!origin || LOOPBACK_ORIGIN_RE.test(origin)) return path;
   return `${origin.replace(/\/$/, '')}${path}`;
 }
@@ -92,7 +132,8 @@ export function buildAnimeProxyUrl(upstreamUrl: string, origin?: string): string
 export function rewriteAnimeManifest(
   content: string,
   manifestUrl: string,
-  origin?: string
+  origin?: string,
+  referer?: string
 ): string {
   const base = new URL(manifestUrl);
 
@@ -102,7 +143,7 @@ export function rewriteAnimeManifest(
     try {
       const absolute = new URL(trimmed, base).href;
       if (!isSafeAnimeUpstreamUrl(absolute)) return trimmed;
-      return buildAnimeProxyUrl(absolute, origin);
+      return buildAnimeProxyUrl(absolute, origin, referer);
     } catch {
       return trimmed;
     }

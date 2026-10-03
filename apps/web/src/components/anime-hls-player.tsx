@@ -39,6 +39,8 @@ interface AnimeHlsPlayerProps {
   title?: string;
   /** Called when the stream fails hard, so the parent can suggest other servers. */
   onFatalError?: () => void;
+  /** Advance to the next episode. Used by the outro button (seeking is not enough). */
+  onNextEpisode?: () => void;
 }
 
 const SUBTITLE_LANG_CODES: Array<[RegExp, string]> = [
@@ -65,6 +67,7 @@ export function AnimeHlsPlayer({
   episodeLabel,
   title,
   onFatalError,
+  onNextEpisode,
 }: AnimeHlsPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -88,6 +91,8 @@ export function AnimeHlsPlayer({
     usePlayerSettings();
   const onFatalErrorRef = useRef(onFatalError);
   onFatalErrorRef.current = onFatalError;
+  const onNextEpisodeRef = useRef(onNextEpisode);
+  onNextEpisodeRef.current = onNextEpisode;
 
   const isHlsSource = useMemo(
     () => Boolean(source.isM3U8) || source.url.includes('.m3u8') || source.url.includes('m3u8'),
@@ -145,6 +150,8 @@ export function AnimeHlsPlayer({
         setActiveLevel(hls.autoLevelEnabled ? -1 : data.level);
       });
 
+      let networkRetries = 0;
+      let mediaRetries = 0;
       hls.on(Hls.Events.ERROR, (_event, data) => {
         if (!data.fatal) {
           if (data.details === Hls.ErrorDetails.BUFFER_STALLED_ERROR) {
@@ -153,15 +160,28 @@ export function AnimeHlsPlayer({
           return;
         }
         switch (data.type) {
-          case Hls.ErrorTypes.NETWORK_ERROR:
-            if (data.details === Hls.ErrorDetails.MANIFEST_LOAD_ERROR) {
+          case Hls.ErrorTypes.NETWORK_ERROR: {
+            const manifestDead =
+              data.details === Hls.ErrorDetails.MANIFEST_LOAD_ERROR ||
+              data.details === Hls.ErrorDetails.MANIFEST_LOAD_TIMEOUT ||
+              data.details === Hls.ErrorDetails.MANIFEST_PARSING_ERROR;
+            if (manifestDead || networkRetries >= 1) {
               onFatal('No se pudo cargar el video. El servidor puede estar bloqueado o caído.');
             } else {
+              networkRetries += 1;
               hls.startLoad();
             }
             break;
+          }
           case Hls.ErrorTypes.MEDIA_ERROR:
-            hls.recoverMediaError();
+            // recoverMediaError() re-fires a fatal error when it cannot repair
+            // the pipeline. One attempt, then surface the failure.
+            if (mediaRetries >= 1) {
+              onFatal('Error al reproducir. Prueba con otro servidor.');
+            } else {
+              mediaRetries += 1;
+              hls.recoverMediaError();
+            }
             break;
           default:
             onFatal('Error al reproducir. Prueba con otro servidor.');
@@ -374,7 +394,8 @@ export function AnimeHlsPlayer({
     <div
       ref={containerRef}
       className={cn(
-        'group relative h-full w-full select-none overflow-hidden bg-cinema-bg [touch-action:none]',
+        'group relative h-full w-full select-none overflow-hidden bg-cinema-bg',
+        landscapeActive ? '[touch-action:none]' : 'touch-pan-y',
         landscapeClassName
       )}
       style={landscapeStyle}
@@ -426,7 +447,17 @@ export function AnimeHlsPlayer({
         <button
           type="button"
           data-player-no-gesture
-          onClick={() => seek((showSkipIntro ? intro! : outro!).end + 0.5)}
+          onClick={() => {
+            if (showSkipIntro && intro) {
+              seek(intro.end + 0.5);
+              return;
+            }
+            if (onNextEpisodeRef.current) {
+              onNextEpisodeRef.current();
+              return;
+            }
+            if (outro) seek(outro.end + 0.5);
+          }}
           className="absolute bottom-24 right-4 z-30 inline-flex items-center gap-2 rounded-[10px] bg-cinema-accent px-4 py-2 text-sm font-semibold text-cinema-bg hover:bg-cinema-accent-light"
         >
           {showSkipIntro ? (

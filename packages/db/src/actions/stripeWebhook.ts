@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { register } from '../registry';
 import { assertWebhookSecret, getStripe } from '../lib/stripe-client';
 import {
+  applyInvoicePaymentFailed,
   applyStripeSubscription,
   fulfillPaidCheckoutSession,
   getInvoiceSubscriptionId,
@@ -71,10 +72,10 @@ export const processWebhook = register({
           const invoice = event.data.object as Stripe.Invoice;
           const subId = getInvoiceSubscriptionId(invoice);
           if (!subId) break;
-          await prisma.subscription.updateMany({
-            where: { stripeSubscriptionId: subId },
-            data: { status: 'EXPIRED' },
-          });
+          // Retrieve current status. The event can be delivered after the
+          // customer has already paid; expiring by id would wipe that plan.
+          const subscription = await getStripe().subscriptions.retrieve(subId);
+          await applyInvoicePaymentFailed(prisma, subscription);
           break;
         }
       }

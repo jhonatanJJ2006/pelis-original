@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { PrismaClient } from '@prisma/client';
 import {
+  applyInvoicePaymentFailed,
   applyStripeSubscription,
   getInvoiceSubscriptionId,
   getStripeObjectId,
@@ -63,14 +64,21 @@ function createMemoryPrisma(seed?: {
         data,
       }: {
         where: {
-          userId: string;
-          status: string;
+          userId?: string;
+          status?: string;
+          stripeSubscriptionId?: string;
           OR?: Array<{ stripeSubscriptionId: string | null | { not: string } }>;
         };
         data: Partial<Row>;
       }) => {
         let count = 0;
         for (const row of subscriptions) {
+          if (where.stripeSubscriptionId && !where.userId) {
+            if (row.stripeSubscriptionId !== where.stripeSubscriptionId) continue;
+            Object.assign(row, data, { updatedAt: new Date() });
+            count += 1;
+            continue;
+          }
           if (row.userId !== where.userId || row.status !== where.status) continue;
           const or = where.OR;
           if (or) {
@@ -291,5 +299,57 @@ describe('applyStripeSubscription', () => {
       { planId: 'plan_no_existe' }
     );
     expect(missingPlan).toMatchObject({ ok: false, reason: 'missing_plan' });
+  });
+});
+
+describe('applyInvoicePaymentFailed', () => {
+  it('keeps an ACTIVE plan when a stale failure arrives after the subscription is active', async () => {
+    const { prisma, subscriptions } = createMemoryPrisma();
+    await applyStripeSubscription(prisma, paidSub(), { forceActive: true });
+    expect(subscriptions[0]?.status).toBe('ACTIVE');
+
+    const result = await applyInvoicePaymentFailed(prisma, paidSub({ status: 'active' }));
+    expect(result.activated).toBe(true);
+    expect(subscriptions).toHaveLength(1);
+    expect(subscriptions[0]?.status).toBe('ACTIVE');
+    expect(isEntitlingSubscription(subscriptions[0])).toBe(true);
+  });
+
+  it('does not expire a plan checkout already activated while Stripe still says incomplete', async () => {
+    const { prisma, subscriptions } = createMemoryPrisma();
+    await applyStripeSubscription(prisma, paidSub(), { forceActive: true });
+
+    const result = await applyInvoicePaymentFailed(prisma, paidSub({ status: 'incomplete' }));
+    expect(result.activated).toBe(true);
+    expect(subscriptions[0]?.status).toBe('ACTIVE');
+    expect(isEntitlingSubscription(subscriptions[0])).toBe(true);
+  });
+
+  it('does not create a plan for a failed payment that never activated', async () => {
+    const { prisma, subscriptions } = createMemoryPrisma();
+    const result = await applyInvoicePaymentFailed(prisma, paidSub({ status: 'incomplete' }));
+    expect(result).toMatchObject({ ok: true, activated: false, reason: 'incomplete_no_row' });
+    expect(subscriptions).toHaveLength(0);
+  });
+
+  it('still expires the row when Stripe says the renewal failed (past_due)', async () => {
+    const { prisma, subscriptions } = createMemoryPrisma();
+    await applyStripeSubscription(prisma, paidSub(), { forceActive: true });
+    const result = await applyInvoicePaymentFailed(prisma, paidSub({ status: 'past_due' }));
+    expect(result.activated).toBe(false);
+    expect(subscriptions[0]?.status).toBe('EXPIRED');
+    expect(isEntitlingSubscription(subscriptions[0])).toBe(false);
+  });
+
+  it('restores a plan that a previous failure expired once Stripe reports active', async () => {
+    const { prisma, subscriptions } = createMemoryPrisma();
+    await applyStripeSubscription(prisma, paidSub(), { forceActive: true });
+    await applyInvoicePaymentFailed(prisma, paidSub({ status: 'past_due' }));
+    expect(subscriptions[0]?.status).toBe('EXPIRED');
+
+    const restored = await applyInvoicePaymentFailed(prisma, paidSub({ status: 'active' }));
+    expect(restored.activated).toBe(true);
+    expect(subscriptions[0]?.status).toBe('ACTIVE');
+    expect(isEntitlingSubscription(subscriptions[0])).toBe(true);
   });
 });
