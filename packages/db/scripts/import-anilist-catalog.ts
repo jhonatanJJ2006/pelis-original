@@ -2,6 +2,7 @@
  * Import anime titles from AniList into Postgres.
  *
  * Existing rows with the same anilistId are skipped. Nothing is updated or deleted.
+ * A new row whose slug is already taken gets a unique slug instead of aborting the run.
  *
  * Usage:
  *   pnpm --filter @pelis/db import:anilist -- --limit 200
