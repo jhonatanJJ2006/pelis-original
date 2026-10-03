@@ -410,7 +410,7 @@ export function PlayerChrome({
         </div>
       )}
 
-      <div className="flex items-center gap-1.5 text-cinema-chalk md:gap-2">
+      <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-cinema-chalk md:flex-nowrap md:gap-2">
         {!hidePlayback && (
           <button
             type="button"
@@ -476,7 +476,7 @@ export function PlayerChrome({
           </span>
         ) : null}
 
-        <div className="ml-auto flex items-center gap-1">
+        <div className="ml-auto flex shrink-0 items-center gap-1">
           {!hideBrightness && (
             <div className="hidden items-center gap-1.5 md:flex">
               <Sun className="h-4 w-4 text-cinema-accent" aria-hidden />

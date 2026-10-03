@@ -1,4 +1,4 @@
-export const TAB_ROUTES = ['/', '/movies', '/anime', '/tv', '/profile'] as const;
+export const TAB_ROUTES = ['/', '/movies', '/series', '/tv', '/anime', '/profile'] as const;
 
 export type TabRoute = (typeof TAB_ROUTES)[number];
 

@@ -374,7 +374,8 @@ export function AnimeHlsPlayer({
     <div
       ref={containerRef}
       className={cn(
-        'group relative h-full w-full select-none overflow-hidden bg-cinema-bg [touch-action:none]',
+        'group relative h-full w-full select-none overflow-hidden bg-cinema-bg',
+        landscapeActive ? '[touch-action:none]' : 'touch-pan-y',
         landscapeClassName
       )}
       style={landscapeStyle}

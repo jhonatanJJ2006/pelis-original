@@ -220,7 +220,11 @@ export default function TVPlayer({ channelId, channelName }: TVPlayerProps) {
   return (
     <div
       ref={containerRef}
-      className={cn('relative h-full w-full bg-cinema-bg [touch-action:none]', landscapeClassName)}
+      className={cn(
+        'relative h-full w-full bg-cinema-bg',
+        landscapeActive ? '[touch-action:none]' : 'touch-pan-y',
+        landscapeClassName
+      )}
       style={landscapeStyle}
       onMouseMove={bumpControls}
     >
