@@ -17,6 +17,7 @@ export default defineWorkspace([
       include: [
         'packages/validators/src/**/*.test.ts',
         'apps/web/src/lib/**/*.test.ts',
+        'apps/web/src/hooks/**/*.test.ts',
         'packages/ui/src/shared/**/*.test.ts',
         'packages/ui/src/features/**/*.test.ts',
         'packages/auth/src/**/*.test.ts',

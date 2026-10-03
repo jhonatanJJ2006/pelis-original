@@ -3,38 +3,58 @@
 import { useEffect, useState } from 'react';
 
 async function resolveByToken(token: string): Promise<string | null> {
-  const res = await fetch(`/api/stream/resolve?token=${encodeURIComponent(token)}`);
-  if (!res.ok) return null;
-  const data = (await res.json()) as { url?: string | null };
-  return data.url ?? null;
+  try {
+    const res = await fetch(`/api/stream/resolve?token=${encodeURIComponent(token)}`);
+    if (!res.ok) return null;
+    const data = (await res.json()) as { url?: string | null };
+    return data.url ?? null;
+  } catch {
+    return null;
+  }
 }
 
-async function resolveVideoUrl(
+async function headOk(url: string): Promise<boolean> {
+  try {
+    const res = await fetch(url, { method: 'HEAD' });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+function isFlatLegacyStream(url: string): boolean {
+  return (
+    /\/api\/stream\/[^/]+\/[^/]+\.m3u8$/.test(url) &&
+    !/\/api\/stream\/[^/]+\/[^/]+\/[^/]+\.m3u8$/.test(url)
+  );
+}
+
+export async function resolveVideoUrl(
   videoUrl: string | undefined,
   token: string | undefined
 ): Promise<string | null> {
   const trimmed = videoUrl?.trim();
+  let tokenPromise: Promise<string | null> | null = null;
+  const lookupToken = () => {
+    if (!token) return Promise.resolve(null);
+    if (!tokenPromise) tokenPromise = resolveByToken(token);
+    return tokenPromise;
+  };
 
   if (trimmed?.includes('/api/stream/') && trimmed.includes('.m3u8')) {
-    // URL plana legacy (/api/stream/{token}/playlist.m3u8) → resolver por token
-    const isFlatLegacy =
-      /\/api\/stream\/[^/]+\/[^/]+\.m3u8$/.test(trimmed) &&
-      !/\/api\/stream\/[^/]+\/[^/]+\/[^/]+\.m3u8$/.test(trimmed);
-
-    if (isFlatLegacy && token) {
-      return resolveByToken(token);
+    // Flat legacy URLs (/api/stream/{token}/playlist.m3u8) prefer the on-disk
+    // manifest, but a missing token folder must not drop a URL that still 200s.
+    if (isFlatLegacyStream(trimmed) && token) {
+      const resolved = await lookupToken();
+      if (resolved) return resolved;
     }
 
-    const res = await fetch(trimmed, { method: 'HEAD' });
-    if (res.ok) return trimmed;
+    if (await headOk(trimmed)) return trimmed;
   } else if (trimmed) {
     return trimmed;
   }
 
-  if (token) {
-    return resolveByToken(token);
-  }
-
+  if (token) return lookupToken();
   return null;
 }
 
@@ -68,5 +88,3 @@ export function useResolvedVideoUrl(videoUrl: string | undefined, token: string 
 
   return { resolvedUrl, loading, error };
 }
-
-export { resolveVideoUrl };

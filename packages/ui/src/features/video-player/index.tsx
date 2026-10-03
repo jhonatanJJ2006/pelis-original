@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useMutation } from '@pelis/db/client';
+import { useMutation, useQueryResult } from '@pelis/db/client';
 import Hls from 'hls.js';
 import { AlertCircle, Play } from 'lucide-react';
 import { api } from '@pelis/db/api';
@@ -17,6 +17,7 @@ import { PlayerLoadingOverlay } from './player-loading';
 import { isMobilePlayerViewport, useMobileLandscapePlayer } from './player-landscape';
 import { createVodHlsConfig } from './hls-config';
 import { attachHlsForwardPrefetch, attachNativeHlsPrefetch } from './hls-prefetch';
+import { resumeSeekSeconds, shouldWritePlaybackProgress } from './resume';
 
 export {
   PlayerChrome,
@@ -78,7 +79,16 @@ export function VideoPlayer({
   const [buffering, setBuffering] = useState(false);
   const [bufferedPercent, setBufferedPercent] = useState(0);
   const [fullscreen, setFullscreen] = useState(false);
+  const [metadataTick, setMetadataTick] = useState(0);
   const lastSaved = useRef(0);
+  const resumeSettledRef = useRef(false);
+  const resumeTargetRef = useRef<number | null>(null);
+  const didResumeRef = useRef(false);
+  const metadataSrcRef = useRef<string | null>(null);
+  const savedHistory = useQueryResult<{ progress: number; duration: number } | null>(
+    api.history.getByUserAndMovie,
+    userId && movieId ? { movieId } : 'skip'
+  );
   const { brightness, setBrightness, volume, setVolume, muted, setMuted, toggleMute } =
     usePlayerSettings();
 
@@ -155,7 +165,17 @@ export function VideoPlayer({
   }, [volume, muted]);
 
   const saveProgress = async (current: number, total: number) => {
-    if (!userId || total <= 0) return;
+    if (
+      !userId ||
+      !shouldWritePlaybackProgress({
+        current,
+        total,
+        resumeSettled: resumeSettledRef.current,
+        resumeTarget: resumeTargetRef.current,
+      })
+    ) {
+      return;
+    }
     const now = Date.now();
     if (now - lastSaved.current < 5000 && current < total * 0.95) return;
     lastSaved.current = now;
@@ -172,6 +192,33 @@ export function VideoPlayer({
     if (!video || !autoPlay || error) return;
     video.play().catch(() => setPlaying(false));
   }, [autoPlay, error]);
+
+  useEffect(() => {
+    didResumeRef.current = false;
+    resumeSettledRef.current = false;
+    resumeTargetRef.current = null;
+  }, [movieId, src]);
+
+  useEffect(() => {
+    // Only seek once metadata belongs to this src. A previous file's
+    // duration is still on the element until loadedmetadata fires again.
+    if (savedHistory.isLoading || didResumeRef.current) return;
+    if (metadataSrcRef.current !== src) return;
+    const video = videoRef.current;
+    if (!video) return;
+    const target = resumeSeekSeconds(savedHistory.data ?? null, video.duration);
+    resumeTargetRef.current = target;
+    if (target != null && Number.isFinite(video.duration) && video.duration > 0) {
+      const next = Math.min(target, Math.max(0, video.duration - 0.25));
+      if (Math.abs(video.currentTime - next) > 0.75) {
+        setProgress(next);
+        setBuffering(true);
+        video.currentTime = next;
+      }
+    }
+    didResumeRef.current = true;
+    resumeSettledRef.current = true;
+  }, [savedHistory.isLoading, savedHistory.data, movieId, src, metadataTick]);
 
   const {
     landscapeActive,
@@ -293,8 +340,10 @@ export function VideoPlayer({
         preload="auto"
         muted={muted}
         onLoadedMetadata={(e) => {
+          metadataSrcRef.current = src;
           setDuration(e.currentTarget.duration);
           setMediaReady(true);
+          setMetadataTick((tick) => tick + 1);
         }}
         onCanPlay={() => {
           setMediaReady(true);
