@@ -37,7 +37,9 @@ export function TVShell({
   onRetryChannels,
 }: TVShellProps) {
   const { user } = useUser();
-  const hasActivePlan = !!(user?.planExpiresAt && user.planExpiresAt > Date.now());
+  // Match requireActivePlan: ADMIN bypasses subscription gate.
+  const hasActivePlan =
+    user?.role === 'admin' || !!(user?.planExpiresAt && user.planExpiresAt > Date.now());
 
   return (
     <div className="h-full min-h-0 flex bg-black">

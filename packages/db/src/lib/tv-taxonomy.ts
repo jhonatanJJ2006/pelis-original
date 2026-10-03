@@ -294,6 +294,17 @@ export function languageLabel(code: string): string {
   return code;
 }
 
+
+/** True when the channel's public/display category equals `wanted` (after mapTvCategory). */
+export function channelMatchesCategory(
+  channel: { name?: string | null; category?: string | null },
+  wanted: string,
+): boolean {
+  const target = wanted.trim();
+  if (!target) return true;
+  return mapTvCategory(channel.category, channel.name) === target;
+}
+
 export function normalizeChannelFields(input: {
   name?: string | null;
   category?: string | null;
