@@ -31,9 +31,18 @@ interface ChannelSidebarProps {
   channels: SidebarChannel[];
   currentId?: string;
   isLoading?: boolean;
+  /** Phone: list is an overlay. Desktop ignores this and stays in the column. */
+  mobileOpen?: boolean;
+  onNavigate?: () => void;
 }
 
-export function ChannelSidebar({ channels, currentId, isLoading = false }: ChannelSidebarProps) {
+export function ChannelSidebar({
+  channels,
+  currentId,
+  isLoading = false,
+  mobileOpen = false,
+  onNavigate,
+}: ChannelSidebarProps) {
   const [search, setSearch] = useState('');
   const [chip, setChip] = useState<string>('');
   const router = useRouter();
@@ -65,13 +74,19 @@ export function ChannelSidebar({ channels, currentId, isLoading = false }: Chann
   const handleSelect = useCallback(
     (id: string) => {
       if (id !== currentId) router.push(`/tv/${id}`);
+      onNavigate?.();
     },
-    [currentId, router]
+    [currentId, onNavigate, router]
   );
 
   return (
     <aside
-      className="h-full w-[42%] max-w-[18rem] md:w-72 md:max-w-none shrink-0 bg-cinema-bg border-r border-cinema-border flex flex-col"
+      className={cn(
+        'h-full w-[min(18rem,85vw)] shrink-0 flex-col bg-cinema-bg border-r border-cinema-border',
+        'md:static md:flex md:w-72 md:max-w-none',
+        'max-md:absolute max-md:inset-y-0 max-md:left-0 max-md:z-30',
+        mobileOpen ? 'flex' : 'hidden md:flex'
+      )}
       aria-label="Lista de canales"
     >
       <div className="px-3 pt-3 pb-2 border-b border-cinema-border">

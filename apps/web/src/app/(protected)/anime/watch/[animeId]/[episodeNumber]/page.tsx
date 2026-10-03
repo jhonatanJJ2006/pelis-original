@@ -401,7 +401,8 @@ export default function AnimeWatchPage() {
                 <div
                   ref={embedSurfaceRef}
                   className={cn(
-                    'absolute inset-0 bg-cinema-bg [touch-action:none]',
+                    'absolute inset-0 bg-cinema-bg',
+                    embedLandscapeActive ? '[touch-action:none]' : 'touch-pan-y',
                     embedLandscapeClassName
                   )}
                   style={embedLandscapeStyle}

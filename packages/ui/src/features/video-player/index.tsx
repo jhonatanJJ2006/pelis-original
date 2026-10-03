@@ -322,8 +322,10 @@ export function VideoPlayer({
     <div
       ref={containerRef}
       className={cn(
-        'group relative overflow-hidden bg-cinema-bg shadow-[0_8px_40px_rgba(196,163,90,0.10)] [touch-action:none]',
-        landscapeActive ? 'aspect-auto' : 'aspect-video rounded-2xl border border-cinema-border',
+        'group relative overflow-hidden bg-cinema-bg shadow-[0_8px_40px_rgba(196,163,90,0.10)]',
+        landscapeActive
+          ? 'aspect-auto [touch-action:none]'
+          : 'aspect-video touch-pan-y rounded-2xl border border-cinema-border',
         landscapeClassName
       )}
       style={landscapeStyle}

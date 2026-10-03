@@ -2,7 +2,8 @@
 
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { Crown, Tv } from 'lucide-react';
+import { useState } from 'react';
+import { Crown, List, Tv } from 'lucide-react';
 import { useUser } from '@pelis/auth/hooks';
 import { PageSpinner } from '@pelis/ui/components';
 import { ErrorState } from '@pelis/ui/features/empty-state';
@@ -40,15 +41,35 @@ export function TVShell({
   // Match requireActivePlan: ADMIN bypasses subscription gate.
   const hasActivePlan =
     user?.role === 'admin' || !!(user?.planExpiresAt && user.planExpiresAt > Date.now());
+  const [channelsOpen, setChannelsOpen] = useState(false);
 
   return (
-    <div className="h-full min-h-0 flex bg-black">
+    <div className="relative h-full min-h-0 flex bg-black">
+      {channelsOpen && (
+        <button
+          type="button"
+          className="absolute inset-0 z-20 bg-black/60 md:hidden"
+          aria-label="Cerrar lista de canales"
+          onClick={() => setChannelsOpen(false)}
+        />
+      )}
       <ChannelSidebar
         channels={channels}
         currentId={currentChannelId}
         isLoading={channelsLoading}
+        mobileOpen={channelsOpen}
+        onNavigate={() => setChannelsOpen(false)}
       />
       <div className="relative flex-1 min-w-0 min-h-0 bg-black">
+        <button
+          type="button"
+          className="absolute top-3 right-3 z-20 inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-black/70 px-2.5 py-1.5 text-xs font-medium text-white md:hidden"
+          onClick={() => setChannelsOpen(true)}
+          aria-expanded={channelsOpen}
+        >
+          <List className="h-3.5 w-3.5" aria-hidden />
+          Canales
+        </button>
         {currentChannelName && (
           <div className="absolute top-3 left-3 z-20 pointer-events-none">
             <p className="text-[10px] uppercase tracking-widest text-cinema-danger-light font-semibold flex items-center gap-1.5">
