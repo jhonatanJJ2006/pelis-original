@@ -63,10 +63,14 @@ export default function MoviesPageClient({ preloaded, initial }: MoviesPageClien
     genre: selectedGenre || undefined,
     year: selectedYear || undefined,
     search: search || undefined,
-    mediaType: 'movie' as const,
+    // A text search (header "ver todos" lands here) must include series.
+    // Genre/year browsing stays movies-only.
+    mediaType: search.trim() ? undefined : ('movie' as const),
   });
 
-  const movies = filteredMovies ?? preloadedMovies;
+  // Preload is the unfiltered movie list. Using it while a filter is active
+  // made search/genre look ignored until (or unless) the filtered query resolved.
+  const movies = hasFilters ? filteredMovies : (filteredMovies ?? preloadedMovies);
   const genres = preloadedGenres ?? [];
   const years = preloadedYears ?? [];
 

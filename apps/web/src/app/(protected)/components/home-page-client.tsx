@@ -108,7 +108,14 @@ export function HomePageClient({ preloaded }: HomePageClientProps) {
         />
 
         {topGenres.map((genre, idx) => {
-          const genreMovies = (movies ?? []).filter((m) => m.genre === genre).slice(0, 12);
+          const genreMovies = (movies ?? [])
+            .filter((m) =>
+              (m.genre ?? '')
+                .split(',')
+                .map((g) => g.trim())
+                .includes(genre)
+            )
+            .slice(0, 12);
           if (genreMovies.length === 0 && movies !== undefined) return null;
           return (
             <div

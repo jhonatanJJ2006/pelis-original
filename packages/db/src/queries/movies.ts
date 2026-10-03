@@ -3,15 +3,14 @@ import { prisma } from '../client';
 import { register } from '../registry';
 import { AuthError } from '../lib/requireAdmin';
 import { toMovieShape } from '../lib/shapes';
-
-
 import { isMissingVideo } from '../lib/movieQuality';
 import { hasManifestForToken } from '../lib/hasManifestForToken';
+import { genreTokenWhere, movieMatchesGenre, splitMovieGenres } from '../lib/movieGenre';
 
 /** Keep series as-is; movies need videoUrl or an on-disk HLS manifest. */
-async function filterPlayableCatalog<T extends { mediaType?: string | null; videoUrl?: string | null; token: string }>(
-  movies: T[],
-): Promise<T[]> {
+async function filterPlayableCatalog<
+  T extends { mediaType?: string | null; videoUrl?: string | null; token: string },
+>(movies: T[]): Promise<T[]> {
   const out: T[] = [];
   for (const movie of movies) {
     const mediaType = (movie.mediaType ?? 'MOVIE').toString().toUpperCase();
@@ -32,6 +31,31 @@ async function filterPlayableCatalog<T extends { mediaType?: string | null; vide
 
 const MediaTypeEnum = z.enum(['movie', 'series']);
 
+/**
+ * When a limit is set, over-fetch before the playable filter so Android TV /
+ * search are not left with an empty page because the first N rows lacked video.
+ */
+async function findPlayableMovies(opts: {
+  where: Record<string, unknown>;
+  orderBy: Record<string, 'asc' | 'desc'> | Array<Record<string, 'asc' | 'desc'>>;
+  limit?: number;
+  offset?: number;
+}) {
+  const { where, orderBy, limit, offset = 0 } = opts;
+  if (limit == null) {
+    const movies = await prisma.movie.findMany({ where, orderBy });
+    return filterPlayableCatalog(movies);
+  }
+  const batch = await prisma.movie.findMany({
+    where,
+    orderBy,
+    // Pull enough rows to cover skip+take after dropping unplayable movies.
+    take: Math.min((offset + limit) * 4, 2000),
+  });
+  const playable = await filterPlayableCatalog(batch);
+  return playable.slice(offset, offset + limit);
+}
+
 export const list = register({
   kind: 'query',
   name: 'movies.list',
@@ -51,24 +75,44 @@ export const list = register({
     const a = args ?? {};
     const where: Record<string, unknown> = {};
     if (a.mediaType) where.mediaType = a.mediaType === 'movie' ? 'MOVIE' : 'SERIES';
-    if (a.genre) where.genre = a.genre;
     if (a.year) where.releaseYear = a.year;
     if (a.classification) where.classification = a.classification;
-    if (a.search) {
-      const q = a.search.toLowerCase();
+
+    const genre = a.genre?.trim();
+    const search = a.search?.trim();
+
+    if (genre && search) {
+      const q = search.toLowerCase();
+      where.AND = [
+        genreTokenWhere(genre),
+        {
+          OR: [
+            { name: { contains: q, mode: 'insensitive' } },
+            { actors: { contains: q, mode: 'insensitive' } },
+            { genre: { contains: q, mode: 'insensitive' } },
+          ],
+        },
+      ];
+    } else if (genre) {
+      Object.assign(where, genreTokenWhere(genre));
+    } else if (search) {
+      const q = search.toLowerCase();
       where.OR = [
         { name: { contains: q, mode: 'insensitive' } },
         { actors: { contains: q, mode: 'insensitive' } },
         { genre: { contains: q, mode: 'insensitive' } },
       ];
     }
-    const movies = await prisma.movie.findMany({
+
+    const movies = await findPlayableMovies({
       where,
       orderBy: { name: 'asc' },
-      take: a.limit,
-      skip: a.offset,
+      limit: a.limit,
+      offset: a.offset,
     });
-    return (await filterPlayableCatalog(movies)).map(toMovieShape);
+
+    const refined = genre ? movies.filter((m) => movieMatchesGenre(m.genre, genre)) : movies;
+    return refined.map(toMovieShape);
   },
 });
 
@@ -78,18 +122,21 @@ export const search = register({
   reads: ['movie'],
   args: z.object({ q: z.string(), limit: z.number().optional() }),
   handler: async (_ctx, { q, limit }) => {
-    const ql = q.toLowerCase();
-    const movies = await prisma.movie.findMany({
+    const ql = q.trim().toLowerCase();
+    if (!ql) return [];
+    const take = limit ?? 8;
+    const movies = await findPlayableMovies({
       where: {
         OR: [
           { name: { contains: ql, mode: 'insensitive' } },
           { actors: { contains: ql, mode: 'insensitive' } },
+          { genre: { contains: ql, mode: 'insensitive' } },
         ],
       },
       orderBy: { name: 'asc' },
-      take: limit ?? 8,
+      limit: take,
     });
-    return (await filterPlayableCatalog(movies)).map(toMovieShape);
+    return movies.map(toMovieShape);
   },
 });
 
@@ -138,12 +185,15 @@ export const getByGenre = register({
   args: z.object({ genre: z.string(), limit: z.number().optional() }),
   handler: async (_ctx, { genre, limit }) => {
     const take = limit ?? 12;
+    const wanted = genre.trim();
+    if (!wanted) return [];
     const movies = await prisma.movie.findMany({
-      where: { genre },
+      where: genreTokenWhere(wanted),
       orderBy: { name: 'asc' },
-      take: take * 3,
+      take: take * 4,
     });
-    return (await filterPlayableCatalog(movies)).slice(0, take).map(toMovieShape);
+    const matched = movies.filter((m) => movieMatchesGenre(m.genre, wanted));
+    return (await filterPlayableCatalog(matched)).slice(0, take).map(toMovieShape);
   },
 });
 
@@ -156,13 +206,11 @@ export const listSeries = register({
       where: { mediaType: 'SERIES' },
       orderBy: { name: 'asc' },
     });
-    if (series.length > 0) return series.map(toMovieShape);
-    const all = await prisma.movie.findMany({ orderBy: { name: 'asc' } });
-    return all.filter((_, i) => i % 3 === 0).map((m) => ({
-      ...toMovieShape(m),
-      mediaType: 'series' as const,
-      episodes: m.episodes ?? 8,
-    }));
+    // Public catalog uses Movie.mediaType = SERIES (favorites/history/detail too).
+    // Do NOT invent fake series from random movies when the table is empty —
+    // that polluted /series and the home "Series" row with mislabeled films.
+    // Admin `Series` rows are a separate table (see TODO "Unificar series").
+    return series.map(toMovieShape);
   },
 });
 
@@ -172,7 +220,11 @@ export const getGenres = register({
   reads: ['movie'],
   handler: async () => {
     const movies = await prisma.movie.findMany({ select: { genre: true } });
-    return Array.from(new Set(movies.map((m) => m.genre).filter(Boolean))).sort();
+    const set = new Set<string>();
+    for (const m of movies) {
+      for (const g of splitMovieGenres(m.genre)) set.add(g);
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b, 'es'));
   },
 });
 
