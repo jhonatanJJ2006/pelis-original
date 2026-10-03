@@ -6,6 +6,7 @@ import { toPublicTvChannelShape, toTvChannelShape, toTvPlaylistShape } from '../
 import { requireAdmin } from '../lib/requireAdmin';
 import {
   FEATURED_CATEGORIES,
+  channelMatchesCategory,
   isPublicCatalogName,
   mapTvCategory,
   normalizeChannelFields,
@@ -63,7 +64,8 @@ export const list = register({
   handler: async (_ctx, args) => {
     const a = args ?? {};
     const where: Record<string, unknown> = { isActive: true };
-    if (a.category) where.category = a.category;
+    // Category is matched via mapTvCategory (same as getCategories / UI), not raw DB equality.
+    const categoryFilter = a.category?.trim() || undefined;
     if (a.country) {
       const country = normalizeCountry(a.country) ?? a.country;
       where.country = country;
@@ -75,12 +77,35 @@ export const list = register({
     if (a.search) {
       where.name = { contains: a.search, mode: 'insensitive' };
     }
+    const limit = a.limit ?? 48;
+    const offset = a.offset ?? 0;
+
+    if (categoryFilter) {
+      const channels = await prisma.tVChannel.findMany({
+        where,
+        orderBy: [{ isPopular: 'desc' }, { sortOrder: 'asc' }, { name: 'asc' }],
+      });
+      const items = channels
+        .filter((c) => isPublicCatalogName(c.name))
+        .filter((c) => channelMatchesCategory(c, categoryFilter))
+        .map((c) => applyPublicDisplay(toPublicTvChannelShape(c)));
+      const total = items.length;
+      const page = items.slice(offset, offset + limit);
+      return {
+        items: page,
+        total,
+        offset,
+        limit,
+        hasMore: offset + limit < total,
+      };
+    }
+
     const total = await prisma.tVChannel.count({ where });
     const channels = await prisma.tVChannel.findMany({
       where,
       orderBy: [{ isPopular: 'desc' }, { sortOrder: 'asc' }, { name: 'asc' }],
-      take: a.limit ?? 48,
-      skip: a.offset ?? 0,
+      take: limit,
+      skip: offset,
     });
     const items = channels
       .filter((c) => isPublicCatalogName(c.name))
@@ -88,9 +113,9 @@ export const list = register({
     return {
       items,
       total,
-      offset: a.offset ?? 0,
-      limit: a.limit ?? 48,
-      hasMore: (a.offset ?? 0) + (a.limit ?? 48) < total,
+      offset,
+      limit,
+      hasMore: offset + limit < total,
     };
   },
 });
