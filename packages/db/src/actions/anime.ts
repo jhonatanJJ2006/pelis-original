@@ -158,7 +158,10 @@ export const getEpisodeStream = register({
     tryFallback: z.boolean().optional(),
     excludeProviders: z.array(z.string()).optional(),
   }),
-  handler: async (_ctx, { animeId, episodeNumber, provider, dub, tryFallback = true, excludeProviders }) => {
+  handler: async (
+    _ctx,
+    { animeId, episodeNumber, provider, dub, tryFallback = true, excludeProviders }
+  ) => {
     const anime = await prisma.anime.findUnique({ where: { id: animeId } });
     if (!anime) throw new Error('Anime no encontrado');
 
@@ -187,21 +190,22 @@ export const getEpisodeStream = register({
       try {
         const data = await fetchVidnestEpisode(anilistId, episodeNumber, dub ? 'dub' : 'sub');
         const master =
-          data.sources.find((s) => s.type === 'hls' || s.file.includes('.m3u8')) ??
-          data.sources[0];
+          data.sources.find((s) => s.type === 'hls' || s.file.includes('.m3u8')) ?? data.sources[0];
         if (!master?.file) return null;
+        const proxyParams = new URLSearchParams({ u: master.file });
+        if (master.referer) proxyParams.set('r', master.referer);
         return {
           kind: 'hls' as const,
           provider: 'vidnest',
           sources: [
             {
-              url: `/api/anime/stream?u=${encodeURIComponent(master.file)}`,
+              url: `/api/anime/stream?${proxyParams.toString()}`,
               quality: 'auto',
               isM3U8: true,
             },
           ],
           subtitles: (data.tracks ?? [])
-            .filter((t) => t.kind === 'captions' && t.file)
+            .filter((t) => (t.kind === 'captions' || t.kind === 'subtitles') && t.file)
             .map((t) => ({
               url: `/api/anime/stream?u=${encodeURIComponent(t.file)}`,
               lang: t.label ?? 'Subtítulos',
@@ -249,7 +253,7 @@ export const getEpisodeStream = register({
         anilistId,
         episodeNumber,
         requested.id,
-        anime.title,
+        anime.title
       );
       if (result.provider && result.video.sources.length > 0) {
         return {
@@ -309,7 +313,8 @@ export const getEpisodeStream = register({
     // backend is known unhealthy — otherwise we'd return the same broken
     // player the user just rejected.
     for (const embed of getEmbedProviders()) {
-      if (embed.id === requested?.id || failedEmbeds.has(embed.id) || excluded.has(embed.id)) continue;
+      if (embed.id === requested?.id || failedEmbeds.has(embed.id) || excluded.has(embed.id))
+        continue;
 
       let url: string | null = null;
       if (embed.resolveEmbedUrl) {
@@ -388,7 +393,11 @@ export const getEpisodes = register({
 export const getVideoUrl = register({
   kind: 'action',
   name: 'anime.getVideoUrl',
-  args: z.object({ episodeId: z.string(), provider: z.string(), tryFallback: z.boolean().optional() }),
+  args: z.object({
+    episodeId: z.string(),
+    provider: z.string(),
+    tryFallback: z.boolean().optional(),
+  }),
   handler: async (_ctx, { episodeId, provider, tryFallback }) => {
     if (tryFallback === false) {
       const { fetchVideoFromProvider } = await import('../lib/consumet-client');
@@ -421,12 +430,14 @@ export const importFromAnilist = register({
     const title = media.title.english || media.title.romaji || media.title.native || 'Sin título';
     const { slugifyTitle, mapAnilistStatus, stripHtml } = await import('../lib/anilist');
     const { deriveSeriesFields } = await import('../lib/anime-series');
-    const providers = getProvidersSortedByPriority().slice(0, 3).map((p) => ({
-      name: p.name,
-      url: p.baseUrl,
-      language: p.language === 'sub/dub' ? 'sub' : p.language,
-      isActive: true,
-    }));
+    const providers = getProvidersSortedByPriority()
+      .slice(0, 3)
+      .map((p) => ({
+        name: p.name,
+        url: p.baseUrl,
+        language: p.language === 'sub/dub' ? 'sub' : p.language,
+        isActive: true,
+      }));
 
     const series = deriveSeriesFields(title, media.format);
     const seriesMainExists = await prisma.anime.count({
@@ -440,7 +451,8 @@ export const importFromAnilist = register({
         slug: slugifyTitle(title),
         anilistId: media.id,
         malId: media.idMal ?? null,
-        image: media.coverImage?.extraLarge || media.coverImage?.large || '/peliculas/placeholder.webp',
+        image:
+          media.coverImage?.extraLarge || media.coverImage?.large || '/peliculas/placeholder.webp',
         synopsis: stripHtml(media.description),
         genre: media.genres ?? [],
         episodes: media.episodes ?? 0,
