@@ -8,7 +8,7 @@ import {
   clampAnilistImportLimit,
   collectAnilistMedia,
   type CollectAnilistMediaOptions,
-} from './anilist-import';
+} from './anilist-catalog';
 
 function media(id: number): AnilistMedia {
   return { id, title: { romaji: `Anime ${id}` } };
