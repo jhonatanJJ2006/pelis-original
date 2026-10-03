@@ -1,17 +1,36 @@
 /**
  * Shared AniList catalog import logic (CLI + admin action).
+ * Paging and limit math live in anilist-catalog.ts so unit tests do not load Prisma.
  */
 import { PrismaClient } from '@prisma/client';
 import { getProvidersSortedByPriority } from './anime-providers';
 import { deriveSeriesFields } from './anime-series';
 import {
-  fetchAnilistCatalog,
   mapAnilistStatus,
   pickAnilistTitle,
   slugifyTitle,
   stripHtml,
   type AnilistMedia,
 } from './anilist';
+import {
+  ANILIST_CATALOG_DEFAULT_LIMIT,
+  ANILIST_CATALOG_MAX_LIMIT,
+  ANILIST_CATALOG_PAGE_DELAY_MS,
+  catalogSeasonYears,
+  clampAnilistImportLimit,
+  collectAnilistMedia,
+  type CollectAnilistMediaOptions,
+} from './anilist-catalog';
+
+export {
+  ANILIST_CATALOG_DEFAULT_LIMIT,
+  ANILIST_CATALOG_MAX_LIMIT,
+  ANILIST_CATALOG_PAGE_DELAY_MS,
+  catalogSeasonYears,
+  clampAnilistImportLimit,
+  collectAnilistMedia,
+  type CollectAnilistMediaOptions,
+};
 
 const IMPORT_DELAY_MS = 500;
 
@@ -22,19 +41,24 @@ export interface ImportCatalogResult {
 }
 
 function defaultProviders() {
-  return getProvidersSortedByPriority().slice(0, 3).map((p) => ({
-    name: p.name,
-    url: p.baseUrl,
-    language: p.language === 'sub/dub' ? 'sub' : p.language,
-    isActive: true,
-  }));
+  return getProvidersSortedByPriority()
+    .slice(0, 3)
+    .map((p) => ({
+      name: p.name,
+      url: p.baseUrl,
+      language: p.language === 'sub/dub' ? 'sub' : p.language,
+      isActive: true,
+    }));
 }
 
 async function sleep(ms: number) {
   await new Promise((r) => setTimeout(r, ms));
 }
 
-async function upsertAnimeFromMedia(prisma: PrismaClient, media: AnilistMedia): Promise<'imported' | 'skipped'> {
+async function upsertAnimeFromMedia(
+  prisma: PrismaClient,
+  media: AnilistMedia
+): Promise<'imported' | 'skipped'> {
   const existing = await prisma.anime.findUnique({ where: { anilistId: media.id } });
   if (existing) return 'skipped';
 
@@ -52,7 +76,8 @@ async function upsertAnimeFromMedia(prisma: PrismaClient, media: AnilistMedia): 
       slug: slugifyTitle(title),
       anilistId: media.id,
       malId: media.idMal ?? null,
-      image: media.coverImage?.extraLarge || media.coverImage?.large || '/peliculas/placeholder.webp',
+      image:
+        media.coverImage?.extraLarge || media.coverImage?.large || '/peliculas/placeholder.webp',
       synopsis: stripHtml(media.description),
       genre: media.genres ?? [],
       episodes: media.episodes ?? 0,
@@ -67,56 +92,16 @@ async function upsertAnimeFromMedia(prisma: PrismaClient, media: AnilistMedia): 
   return 'imported';
 }
 
-export async function collectAnilistMedia(limit: number): Promise<AnilistMedia[]> {
-  const seen = new Set<number>();
-  const collected: AnilistMedia[] = [];
-
-  const addBatch = (items: AnilistMedia[]) => {
-    for (const item of items) {
-      if (seen.has(item.id)) continue;
-      seen.add(item.id);
-      collected.push(item);
-      if (collected.length >= limit) break;
-    }
-  };
-
-  addBatch(await fetchAnilistCatalog({ sort: 'POPULARITY_DESC', perPage: 50, page: 1 }));
-  if (collected.length < limit) {
-    addBatch(await fetchAnilistCatalog({ sort: 'TRENDING_DESC', perPage: 30, page: 1 }));
-  }
-
-  const genres = ['Action', 'Romance', 'Isekai', 'Slice of Life', 'Horror', 'Sports'];
-  for (const genre of genres) {
-    if (collected.length >= limit) break;
-    addBatch(await fetchAnilistCatalog({ sort: 'POPULARITY_DESC', genre, perPage: 5, page: 1 }));
-    await sleep(IMPORT_DELAY_MS);
-  }
-
-  if (collected.length < limit) {
-    addBatch(await fetchAnilistCatalog({ sort: 'POPULARITY_DESC', seasonYear: 1999, perPage: 20, page: 1 }));
-  }
-  if (collected.length < limit) {
-    addBatch(await fetchAnilistCatalog({ sort: 'POPULARITY_DESC', status: 'RELEASING', perPage: 20, page: 1 }));
-  }
-  if (collected.length < limit) {
-    addBatch(
-      await fetchAnilistCatalog({
-        sort: 'POPULARITY_DESC',
-        perPage: 20,
-        page: 2,
-      }),
-    );
-  }
-
-  return collected.slice(0, limit);
-}
-
-export async function runAnilistImport(limit: number, prisma?: PrismaClient): Promise<ImportCatalogResult> {
+export async function runAnilistImport(
+  limit: number,
+  prisma?: PrismaClient
+): Promise<ImportCatalogResult> {
   const client = prisma ?? new PrismaClient();
   const shouldDisconnect = !prisma;
+  const capped = clampAnilistImportLimit(limit);
 
   try {
-    const mediaList = await collectAnilistMedia(limit);
+    const mediaList = await collectAnilistMedia(capped);
     let imported = 0;
     let skipped = 0;
 
