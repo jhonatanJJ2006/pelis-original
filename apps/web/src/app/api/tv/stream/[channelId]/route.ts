@@ -14,7 +14,8 @@ export const runtime = 'nodejs';
 
 async function getChannelStreamUrl(channelId: string): Promise<string | null> {
   const channel = await prisma.tVChannel.findUnique({ where: { id: channelId } });
-  if (!channel?.isActive || channel.streamStatus !== 'ONLINE') return null;
+  // Active + not proven OFFLINE: UNKNOWN (pre-probe / reset) must still be playable.
+  if (!channel?.isActive || channel.streamStatus === 'OFFLINE') return null;
   const streamUrl = channel.streamUrl?.trim();
   if (!streamUrl || !isSafeUpstreamUrl(streamUrl)) return null;
   return streamUrl;

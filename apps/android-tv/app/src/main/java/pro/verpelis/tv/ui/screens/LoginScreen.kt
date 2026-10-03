@@ -49,6 +49,8 @@ import pro.verpelis.tv.LocalApiClient
 import pro.verpelis.tv.LocalSessionStore
 import pro.verpelis.tv.LocalUiSounds
 import pro.verpelis.tv.data.api.PairingCreateResponse
+import pro.verpelis.tv.BuildConfig
+import pro.verpelis.tv.data.qr.PairingVerifyUrl
 import pro.verpelis.tv.data.qr.QrBitmap
 import pro.verpelis.tv.ui.components.TvFocusButton
 import pro.verpelis.tv.ui.theme.MaisonNoir
@@ -95,7 +97,7 @@ fun LoginScreen(
                 }
                 session.deviceId = created.deviceId.ifBlank { session.deviceId }
                 pairing = created
-                qr = QrBitmap.encode(created.verifyUrl.ifBlank { "https://verpelis.pro/link-tv?code=${created.code}" })
+                qr = QrBitmap.encode(PairingVerifyUrl.resolve(created.verifyUrl, created.code, BuildConfig.API_BASE_URL))
                 statusText = "Esperando confirmación en el celular…"
             } catch (ex: Exception) {
                 error = ex.message ?: "Error de conexión. Reintenta."
