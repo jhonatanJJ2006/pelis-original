@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.navigation.compose.rememberNavController
+import pro.verpelis.tv.ui.components.ApkUpdateHost
 import pro.verpelis.tv.ui.navigation.PelisTvNavHost
 import pro.verpelis.tv.ui.theme.PelisTvTheme
 
@@ -27,7 +28,9 @@ class MainActivity : ComponentActivity() {
                     } else {
                         pro.verpelis.tv.ui.navigation.Routes.Login
                     }
-                    PelisTvNavHost(navController = navController, startDestination = start)
+                    ApkUpdateHost {
+                        PelisTvNavHost(navController = navController, startDestination = start)
+                    }
                 }
             }
         }

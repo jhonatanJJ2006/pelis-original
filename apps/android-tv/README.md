@@ -38,7 +38,7 @@ APK de release (firmar aparte; no commitear keystores):
 ./gradlew :app:assembleRelease
 ```
 
-Package: `pro.verpelis.tv`. `versionCode` 3 / `1.2.0`.
+Package: `pro.verpelis.tv`. `versionCode` 4 / `1.3.0`.
 
 ## Auth nativa (v3)
 
@@ -60,13 +60,13 @@ Base URL por defecto: `https://verpelis.pro/`.
 
 ## Modal de update
 
-Compara `BuildConfig.VERSION_CODE` con `GET /api/app/availability` (`tvApkVersionCode`). CTA Aceptar abre `/downloads/pelis-tv.apk`. Más tarde silencia esa versión.
+En cualquier pantalla (login o home), compara `BuildConfig.VERSION_CODE` con `GET /api/app/availability` (`tvApkVersionCode`). El aviso sale solo si el código del servidor es mayor y el APK está publicado. **Actualizar** descarga `downloads/pelis-tv.apk` y lo entrega al instalador del sistema (`ACTION_VIEW`); no se instala en silencio. Si hace falta, pide el permiso de orígenes desconocidos. **Más tarde** silencia esa versión. D-pad: los dos botones se quedan con el foco.
 
 ## Cómo probar en la tele
 
 1. Cold open sin sesión → login Netflix + QR visible (no “PROXIMAMENTE”).
 2. Aprobar desde el celular en `/link-tv` → la tele entra a canales.
-3. Subir `tv-app-version.json` por encima del `versionCode` instalado → modal Aceptar / Más tarde.
+3. Subir `tv-app-version.json` por encima del `versionCode` instalado → modal Actualizar / Más tarde (instalador del sistema).
 4. Home: filas de catálogo + canales. Scroll D-pad sin refetch de todas las categorías (máx. 8 extra, 3 en paralelo, 24 ítems/fila).
 5. Reproductor de canal: `/api/tv/stream/{id}` (exige plan, igual que la web).
 
