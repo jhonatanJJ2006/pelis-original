@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Despliega cambios en verpelis.pro (Postgres + Next.js producción).
 # Uso:
-#   ./scripts/deploy-prod.sh           # db migrate + build + restart (default)
-#   ./scripts/deploy-prod.sh --web     # solo build + restart (sin migraciones)
-#   ./scripts/deploy-prod.sh --db-only # solo migraciones Prisma
+#   ./scripts/deploy-prod.sh           # migrate + prisma generate + build + restart
+#   ./scripts/deploy-prod.sh --web     # prisma generate + build + restart
+#   ./scripts/deploy-prod.sh --db-only # migraciones y prisma generate
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -33,6 +33,13 @@ if [[ "$MODE" == "--all" || "$MODE" == "--db-only" ]]; then
   pnpm --filter @pelis/db db:deploy
   echo "✓ Migraciones aplicadas"
 fi
+
+# migrate deploy no regenera el cliente. Sin este paso el servidor sigue
+# con el cliente viejo y las columnas nuevas revientan en runtime.
+echo "→ Regenerando el cliente de Prisma..."
+cd "$ROOT"
+pnpm --filter @pelis/db db:generate
+echo "✓ Cliente de Prisma regenerado"
 
 if [[ "$MODE" == "--web" || "$MODE" == "--all" ]]; then
   echo "→ Build Next.js (apps/web)..."
