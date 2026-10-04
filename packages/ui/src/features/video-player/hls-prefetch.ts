@@ -83,9 +83,7 @@ export function attachHlsForwardPrefetch(hls: Hls, video?: HTMLVideoElement): ()
     if (data.details.initSegment?.url) warmUrls([data.details.initSegment.url]);
     // hls.js already downloads fragment 0. Prefetching it again doubles a
     // multi-megabyte VOD segment and the playhead never leaves 0:00.
-    warmUrls(
-      data.details.fragments.slice(1, 1 + HLS_PREFETCH_SEGMENTS).map((frag) => frag.url)
-    );
+    warmUrls(data.details.fragments.slice(1, 1 + HLS_PREFETCH_SEGMENTS).map((frag) => frag.url));
   };
 
   const onFragChanged = (
