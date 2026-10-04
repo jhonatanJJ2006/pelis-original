@@ -72,8 +72,7 @@ Archivo: apps/web/src/app/playground/page.tsx. Detalle: docs/TESTING.md.
 
 ## Trampas
 
-1. Series partidas. /admin/series escribe tabla Prisma Series. /series lee Movie.mediaType=SERIES (movies.listSeries). Crear en admin NO aparece en /series.
-   Si no hay filas SERIES, listSeries finge series (cada 3ª película).
+1. Series partidas. /series lee solo Movie.mediaType=SERIES (movies.listSeries). /admin/series escribe la tabla Series y, al crear o editar, copia la ficha a Movie si el token no es ya una película. listSeries ya no inventa series a partir de películas. Catálogo: `pnpm --filter @pelis/db import:tmdb-series -- --limit 40` (solo inserta; no borra usuarios ni películas).
 2. Restos Convex: CONVEX.md, DEPLOY.md stale, e2e/email-verification.e2e.ts, URLs *.convex.cloud en imágenes (placeholder).
 3. ignoreBuildErrors: apps/web/next.config.mjs ignora TS y ESLint en build. Build verde no implica tipos correctos.
 4. Streaming y auth: /api/stream, /api/tv/stream, /api/anime/stream pasan por denyUnlessStreamAccess (sesión + plan activo o ADMIN). No quitar esa puerta. Históricamente sin auth.
@@ -150,7 +149,7 @@ Hecho: Convex migrado, Maison Noir, 404, playground, smoke e2e, vitest, stream c
 
 Pendiente ALTO:
 
-1. Unificar series (admin tabla Series vs Movie.mediaType SERIES).
+1. Unificar series del todo (el alta admin ya copia a Movie.mediaType SERIES; borrar en admin no quita la ficha pública a propósito).
 2. E2E login, favoritos, historial (email-verification.e2e.ts asume Convex).
 3. Posters en clones nuevos (carpetas gitignored).
 4. Stripe en Movies: endpoint webhook al túnel + `.env` local (el código ya activa el plan). Consumet estable. Cron probe TV. Categorias M3U en espanol.

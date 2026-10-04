@@ -7,8 +7,7 @@ Fuente: packages/db/prisma/schema.prisma. Shapes UI: packages/db/src/lib/shapes.
 Hay DOS sitios para series:
 
 1. Movie.mediaType = SERIES — lo que lista /series (movies.listSeries). Favoritos e historial apuntan a Movie.
-2. Tabla Series — solo /admin/series. Sin relacion a Favorite/History. No aparece en el catálogo publico.
-   Unificar (migrar admin -> Movie.mediaType) esta pendiente.
+2. Tabla Series — /admin/series. Sin relacion a Favorite/History. Crear/editar copia la ficha a Movie.mediaType=SERIES si el token no pertenece ya a una película (`import:tmdb-series` hace el mismo alta aditiva para filas viejas y para TMDB). Borrar en admin no borra la fila Movie.
 
 ## Better Auth
 

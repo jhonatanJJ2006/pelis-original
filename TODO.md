@@ -41,7 +41,7 @@ Ver AGENTS.md (entrada agentes) y auditoría completa en [`docs/AUDIT.md`](docs/
 
 - [ ] **Copiar pósters en entornos nuevos** — Las imágenes no van en Git. Ver `scripts/audit-images.mjs`
 - [ ] **Imágenes de series** — Hashes de series faltantes en carpeta local
-- [ ] **Unificar series** — Admin tabla `Series` vs público `Movie.mediaType = SERIES`
+- [ ] **Unificar series** — Admin tabla `Series` vs público `Movie.mediaType = SERIES`. Alta/edición ya copian a Movie; `pnpm --filter @pelis/db import:tmdb-series -- --limit 40` inserta sin borrar. Falta decidir el borrado público.
 - [ ] **Reproductor de video** — Conectar `movie.token` / `videoUrl` con servidor de streaming real
 - [x] **Stripe: activar plan tras checkout** — `stripe.syncCheckoutSession` + webhook (`subscription.created/updated`, `invoice.paid`). No pisar ACTIVE con `incomplete`. (2026-09-05)
 - [ ] **Stripe en Movies** — En la máquina Movies: webhook del Dashboard → `https://verpelis.pro/api/stripe/webhook` (túnel, no Vercel); `.env` con `STRIPE_*` del mismo modo y `SITE_URL=https://verpelis.pro`; confirmar fila `subscription` ACTIVE en Postgres local. Ver docs/AUDIT.md §5b.
