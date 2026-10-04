@@ -27,11 +27,8 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
-import pro.verpelis.tv.BuildConfig
 import pro.verpelis.tv.LocalApiClient
 import pro.verpelis.tv.LocalUiSounds
-import pro.verpelis.tv.LocalUpdateStore
-import pro.verpelis.tv.data.UpdateStore
 import pro.verpelis.tv.data.api.CatalogItem
 import pro.verpelis.tv.data.api.CatalogListArgs
 import pro.verpelis.tv.data.api.PelisApi
@@ -41,7 +38,6 @@ import pro.verpelis.tv.data.api.TvListArgs
 import pro.verpelis.tv.ui.components.CatalogRow
 import pro.verpelis.tv.ui.components.CategoryRow
 import pro.verpelis.tv.ui.components.TvFocusButton
-import pro.verpelis.tv.ui.components.UpdateModal
 import pro.verpelis.tv.ui.theme.MaisonNoir
 
 private data class PreferredRow(val label: String, val categoryKey: String?, val search: String?)
@@ -61,17 +57,12 @@ fun HomeScreen(
 ) {
     val apiClient = LocalApiClient.current
     val uiSounds = LocalUiSounds.current
-    val updateStore = LocalUpdateStore.current
     val context = LocalContext.current
 
     var rows by remember { mutableStateOf<List<Pair<String, List<TvChannel>>>>(emptyList()) }
     var catalog by remember { mutableStateOf(HomeCatalog()) }
     var loading by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
-    var offerUpdate by remember { mutableStateOf(false) }
-    var latestName by remember { mutableStateOf<String?>(null) }
-    var latestKey by remember { mutableStateOf<String?>(null) }
-
     LaunchedEffect(Unit) {
         loading = true
         error = null
@@ -82,25 +73,6 @@ fun HomeScreen(
             error = ex.message ?: "No se pudo cargar el catálogo"
         } finally {
             loading = false
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        val installedKey = UpdateStore.versionKey(BuildConfig.VERSION_CODE, BuildConfig.VERSION_NAME)
-        updateStore.rememberInstalled(installedKey)
-        try {
-            val availability = apiClient.apkAvailability()
-            val remoteKey = availability.tvApkVersionCode?.let { UpdateStore.versionKey(it, availability.tvApkVersionName) }
-            latestName = availability.tvApkVersionName
-            latestKey = remoteKey
-            offerUpdate = UpdateStore.shouldOffer(
-                storedVersion = updateStore.storedVersion(),
-                latestVersion = remoteKey,
-                dismissedVersion = updateStore.dismissedVersion(),
-                apkAvailable = availability.tvApkAvailable,
-            )
-        } catch (_: Exception) {
-            offerUpdate = false
         }
     }
 
@@ -174,21 +146,6 @@ fun HomeScreen(
                     }
                 }
             }
-        }
-
-        if (offerUpdate && latestKey != null) {
-            UpdateModal(
-                versionName = latestName,
-                downloadUrl = apiClient.apkDownloadUrl(),
-                onAccept = {
-                    latestKey?.let { updateStore.markCurrent(it) }
-                    offerUpdate = false
-                },
-                onLater = {
-                    latestKey?.let { updateStore.dismiss(it) }
-                    offerUpdate = false
-                },
-            )
         }
     }
 }
