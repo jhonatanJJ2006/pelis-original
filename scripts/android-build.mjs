@@ -84,6 +84,85 @@ function ensureBubblewrapConfig() {
 
 ensureBubblewrapConfig();
 
+function findApksigner() {
+  const homes = [
+    buildEnv.ANDROID_HOME,
+    buildEnv.ANDROID_SDK_ROOT,
+    process.env.ANDROID_HOME,
+    process.env.ANDROID_SDK_ROOT,
+  ].filter(Boolean);
+  const seen = new Set();
+  for (const home of homes) {
+    if (seen.has(home)) continue;
+    seen.add(home);
+    const buildTools = path.join(home, 'build-tools');
+    if (!fs.existsSync(buildTools)) continue;
+    const versions = fs
+      .readdirSync(buildTools, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name)
+      .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+      .reverse();
+    for (const version of versions) {
+      const name = process.platform === 'win32' ? 'apksigner.bat' : 'apksigner';
+      const bin = path.join(buildTools, version, name);
+      if (fs.existsSync(bin)) return bin;
+    }
+  }
+  return null;
+}
+
+function apksignerCommand(bin) {
+  if (process.platform !== 'win32') return { cmd: bin, prefix: [] };
+  const jar = path.join(path.dirname(bin), 'lib', 'apksigner.jar');
+  const java = jdkHome ? path.join(jdkHome, 'bin', 'java.exe') : 'java';
+  return { cmd: fs.existsSync(java) ? java : 'java', prefix: ['-Xmx1024M', '-jar', jar] };
+}
+
+function verifyApk(apksigner, apkPath) {
+  const { cmd, prefix } = apksignerCommand(apksigner);
+  const result = spawnSync(cmd, [...prefix, 'verify', apkPath], {
+    cwd: androidDir,
+    stdio: 'inherit',
+    shell: false,
+    env: buildEnv,
+  });
+  return result.status === 0;
+}
+
+function signApk(apksigner, input, output) {
+  const { cmd, prefix } = apksignerCommand(apksigner);
+  const keystore = path.join(androidDir, 'android.keystore');
+  const result = spawnSync(
+    cmd,
+    [
+      ...prefix,
+      'sign',
+      '--ks',
+      keystore,
+      '--ks-key-alias',
+      keystoreEnv.alias,
+      '--ks-pass',
+      `pass:${keystoreEnv.storePass}`,
+      '--key-pass',
+      `pass:${keystoreEnv.keyPass}`,
+      '--out',
+      output,
+      input,
+    ],
+    {
+      cwd: androidDir,
+      stdio: 'inherit',
+      shell: false,
+      env: buildEnv,
+    },
+  );
+  if (result.status !== 0) {
+    console.error('\nNo se pudo firmar el APK. Revisa el keystore y las contraseñas del entorno.');
+    process.exit(result.status ?? 1);
+  }
+}
+
 function run(cmd, args, cwd = androidDir) {
   const bin = process.platform === 'win32' && !cmd.endsWith('.cmd') ? `${cmd}.cmd` : cmd;
   const result = spawnSync(bin, args, {
@@ -121,23 +200,45 @@ if (!fs.existsSync(path.join(androidDir, 'android.keystore'))) {
 console.log('\nAplicando aviso de actualización del APK...');
 applyTwaApkUpdate(androidDir);
 
-console.log('\nCompilando APK firmado (Gradle release)...');
+console.log('\nCompilando APK (Gradle release)...');
 run('./gradlew', [':app:assembleRelease', '--no-daemon']);
 
-const candidates = [
-  path.join(androidDir, 'app/build/outputs/apk/release/app-release.apk'),
-  path.join(androidDir, 'app/build/outputs/apk/release/app-release-unsigned.apk'),
-  path.join(androidDir, 'app-release-signed.apk'),
-  path.join(androidDir, 'app/build/outputs/apk/release/app-release-signed.apk'),
-];
+// Bubblewrap's app/build.gradle has no signingConfig. assembleRelease therefore
+// writes app-release-unsigned.apk (no META-INF/MANIFEST.MF). Signing is a
+// separate apksigner step; never publish the unsigned file.
+const unsignedApk = path.join(
+  androidDir,
+  'app/build/outputs/apk/release/app-release-unsigned.apk',
+);
+const gradleReleaseApk = path.join(androidDir, 'app/build/outputs/apk/release/app-release.apk');
+const signedApk = path.join(androidDir, 'app-release-signed.apk');
 
-const built = candidates.find((p) => fs.existsSync(p));
-if (!built) {
-  console.error('\nNo se encontró el APK generado.');
+const apksigner = findApksigner();
+if (!apksigner) {
+  console.error(
+    'No se encontró apksigner en ANDROID_HOME/build-tools. Instala Android build-tools.',
+  );
+  process.exit(1);
+}
+
+let built;
+if (fs.existsSync(unsignedApk)) {
+  console.log('\nFirmando APK con apps/android/android.keystore...');
+  signApk(apksigner, unsignedApk, signedApk);
+  built = signedApk;
+} else if (fs.existsSync(gradleReleaseApk)) {
+  built = gradleReleaseApk;
+} else {
+  console.error('\nNo se encontró el APK de release.');
+  process.exit(1);
+}
+
+if (!verifyApk(apksigner, built)) {
+  console.error('\nEl APK no tiene una firma válida. No se publica.');
   process.exit(1);
 }
 
 fs.mkdirSync(path.dirname(apkOut), { recursive: true });
 fs.copyFileSync(built, apkOut);
-console.log(`\nAPK copiado a: ${apkOut}`);
+console.log(`\nAPK firmado copiado a: ${apkOut}`);
 console.log('Descarga pública: https://verpelis.pro/downloads/pelis.apk');
