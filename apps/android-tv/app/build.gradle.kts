@@ -17,8 +17,8 @@ android {
         applicationId = "pro.verpelis.tv"
         minSdk = 21
         targetSdk = 35
-        versionCode = 3
-        versionName = "1.2.0"
+        versionCode = 4
+        versionName = "1.3.0"
         buildConfigField("String", "API_BASE_URL", "\"$apiBase\"")
     }
 
@@ -50,6 +50,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.foundation:foundation")
     implementation("androidx.activity:activity-compose:1.9.3")
+    implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.navigation:navigation-compose:2.8.5")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
     implementation("androidx.tv:tv-foundation:1.0.0-alpha11")
@@ -72,4 +73,5 @@ dependencies {
     implementation("com.google.zxing:core:3.5.3")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
+    testImplementation("junit:junit:4.13.2")
 }

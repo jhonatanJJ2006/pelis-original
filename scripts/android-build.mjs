@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { androidKeystoreEnv, loadEnv } from './lib/load-env.mjs';
+import { applyTwaApkUpdate } from './apply-twa-apk-update.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, '..');
@@ -195,6 +196,9 @@ if (!fs.existsSync(path.join(androidDir, 'android.keystore'))) {
   console.error('No hay android.keystore. Ejecuta: node scripts/android-keystore-init.mjs');
   process.exit(1);
 }
+
+console.log('\nAplicando aviso de actualización del APK...');
+applyTwaApkUpdate(androidDir);
 
 console.log('\nCompilando APK (Gradle release)...');
 run('./gradlew', [':app:assembleRelease', '--no-daemon']);
