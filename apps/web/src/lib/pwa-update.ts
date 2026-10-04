@@ -38,27 +38,11 @@ export function parseAvailabilityVersion(data: unknown): WebVersionPayload {
 }
 
 /**
- * Decide si hay que pedir consentimiento para actualizar.
- * Primera visita (sin versión guardada) solo memoriza; no interrumpe.
- * «Más tarde» silencia esa misma versión hasta que aparezca otra.
+ * El sitio (verpelis.pro) no muestra el aviso «Hay una nueva versión».
+ * Las apps Android móvil y Android TV comparan su versionCode con
+ * GET /api/app/availability y siguen ofreciendo Actualizar / Más tarde.
+ * version.json se sigue publicando para esa API; aquí no hay prompt web.
  */
-export function shouldOfferWebUpdate({
-  storedVersion,
-  latestVersion,
-  dismissedVersion,
-  hasWaitingWorker,
-}: ShouldOfferWebUpdateInput): boolean {
-  const stored = normalizeVersion(storedVersion);
-  const latest = normalizeVersion(latestVersion);
-  const dismissed = normalizeVersion(dismissedVersion);
-
-  if (latest && dismissed === latest) {
-    return false;
-  }
-
-  if (hasWaitingWorker) {
-    return true;
-  }
-
-  return Boolean(stored && latest && stored !== latest);
+export function shouldOfferWebUpdate(_input: ShouldOfferWebUpdateInput): boolean {
+  return false;
 }

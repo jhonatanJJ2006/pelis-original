@@ -119,16 +119,8 @@ export function PwaUpdateModalView({
 }
 
 export function PwaUpdateModal() {
-  const { visible, updating, versionLabel, accept, dismiss } = usePwaUpdate();
-
-  if (!visible) return null;
-
-  return (
-    <PwaUpdateModalView
-      versionLabel={versionLabel}
-      updating={updating}
-      onAccept={accept}
-      onLater={dismiss}
-    />
-  );
+  // Mantiene el service worker (registro y comprobación), pero nunca pinta
+  // el diálogo. El aviso de actualización vive solo en las apps Android.
+  usePwaUpdate();
+  return null;
 }
