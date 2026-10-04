@@ -4,6 +4,65 @@ import { notifyChange } from '../realtime';
 import { register } from '../registry';
 import { requireAdmin } from '../lib/requireAdmin';
 import { seriesCreateSchema, seriesUpdateSchema } from '../lib/movie-payload';
+import {
+  addSeriesMovies,
+  createMovieSeriesStore,
+  movieInsertFromAdminSeries,
+} from '../lib/tmdb-series-import';
+
+/**
+ * /series reads Movie.mediaType = SERIES, not the admin `series` table.
+ * Copy the ficha across when the token is new. If that token already belongs
+ * to a film, leave the film alone. If it already belongs to a series movie,
+ * refresh the ficha. Never delete users, movies, or subscriptions.
+ */
+async function mirrorSeriesToPublicCatalog(series: {
+  name: string;
+  image: string;
+  backdropImage: string | null;
+  synopsis: string;
+  genre: string;
+  token: string;
+  actors: string;
+  classification: string;
+  releaseYear: string;
+  episodes: number | null;
+  featured: boolean;
+}) {
+  const mapped = movieInsertFromAdminSeries(series);
+  if (!mapped) return;
+  const existing = await prisma.movie.findUnique({
+    where: { token: mapped.token },
+    select: { id: true, mediaType: true },
+  });
+  if (!existing) {
+    const result = await addSeriesMovies([mapped], createMovieSeriesStore(prisma));
+    if (result.imported === 0) return;
+    const created = await prisma.movie.findUnique({
+      where: { token: mapped.token },
+      select: { id: true },
+    });
+    if (created) await notifyChange('movie', 'insert', created.id);
+    return;
+  }
+  if (existing.mediaType !== 'SERIES') return;
+  await prisma.movie.update({
+    where: { id: existing.id },
+    data: {
+      name: mapped.name,
+      image: mapped.image,
+      backdropImage: mapped.backdropImage,
+      synopsis: mapped.synopsis,
+      genre: mapped.genre,
+      actors: mapped.actors,
+      classification: mapped.classification,
+      releaseYear: mapped.releaseYear,
+      episodes: mapped.episodes,
+      featured: mapped.featured,
+    },
+  });
+  await notifyChange('movie', 'update', existing.id);
+}
 
 export const adminList = register({
   kind: 'query',
@@ -81,12 +140,13 @@ export const getById = register({
 export const create = register({
   kind: 'mutation',
   name: 'adminSeries.create',
-  writes: ['series'],
+  writes: ['series', 'movie'],
   args: seriesCreateSchema,
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
     const s = await prisma.series.create({ data: args });
     await notifyChange('series', 'insert', s.id);
+    await mirrorSeriesToPublicCatalog(s);
     return s.id;
   },
 });
@@ -94,13 +154,15 @@ export const create = register({
 export const update = register({
   kind: 'mutation',
   name: 'adminSeries.update',
-  writes: ['series'],
+  writes: ['series', 'movie'],
   args: seriesUpdateSchema,
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
     const { id, ...rest } = args;
     await prisma.series.update({ where: { id }, data: rest });
     await notifyChange('series', 'update', id);
+    const updated = await prisma.series.findUnique({ where: { id } });
+    if (updated) await mirrorSeriesToPublicCatalog(updated);
     return id;
   },
 });
@@ -112,6 +174,7 @@ export const remove = register({
   args: z.object({ id: z.string() }),
   handler: async (ctx, { id }) => {
     await requireAdmin(ctx);
+    // Public /series rows stay. Deleting the Movie would also drop favorites/history.
     await prisma.series.delete({ where: { id } });
     await notifyChange('series', 'delete', id);
     return id;

@@ -66,7 +66,7 @@ Serwist: apps/web/sw.ts -> public/sw.js. Desactivado en development. exclude /up
 
 ## Trampas
 
-(a) Admin tabla Series vs publico Movie.mediaType=SERIES. /admin/series no llena /series. listSeries fallback cada 3ª película.
+(a) Admin tabla Series vs publico Movie.mediaType=SERIES. Alta admin copia a Movie; listSeries ya no finge series. Import aditivo: `import:tmdb-series`.
 (b) Restos Convex: CONVEX.md, DEPLOY.md, e2e/email-verification.e2e.ts, shapes _id, URLs convex.cloud.
 (c) apps/web/next.config.mjs: typescript.ignoreBuildErrors y eslint.ignoreDuringBuilds.
 (d) /api/stream históricamente sin auth. Hoy denyUnlessStreamAccess en stream de películas/TV/anime. No quitar.

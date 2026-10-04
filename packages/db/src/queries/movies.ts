@@ -209,7 +209,8 @@ export const listSeries = register({
     // Public catalog uses Movie.mediaType = SERIES (favorites/history/detail too).
     // Do NOT invent fake series from random movies when the table is empty —
     // that polluted /series and the home "Series" row with mislabeled films.
-    // Admin `Series` rows are a separate table (see TODO "Unificar series").
+    // Admin `series` rows are a separate table. adminSeries.create mirrors a new
+    // token into this Movie row; import:tmdb-series does the same additively.
     return series.map(toMovieShape);
   },
 });
