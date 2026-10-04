@@ -278,11 +278,8 @@ export default function PlaygroundPage() {
 
       <PlaygroundSection title="Modal de actualización APK TV">
         <p className="text-cinema-muted text-sm mb-4">
-          En Android TV se muestra cuando{' '}
-          <code className="text-cinema-chalk">/api/app/availability</code> reporta un{' '}
-          <code className="text-cinema-chalk">tvApkVersionCode</code> nuevo. Aceptar descarga{' '}
-          <code className="text-cinema-chalk">/downloads/pelis-tv.apk</code> o llama al bridge
-          nativo.
+          Vista del aviso que usa la app de Android TV cuando hay una versión nueva. En la web no se
+          ofrece la descarga: el instalador vive en la app.
         </p>
         {showTvUpdateModal ? (
           <TvUpdateModalView

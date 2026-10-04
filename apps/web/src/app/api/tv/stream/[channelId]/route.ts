@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@pelis/db';
 import {
+  contentTypeForTvUpstream,
   fetchUpstream,
-  getMimeForUrl,
+  isHlsManifestResponse,
   isSafeUpstreamUrl,
   resolvePublicOrigin,
   rewriteTvManifest,
@@ -88,17 +89,9 @@ export async function GET(req: NextRequest, { params }: { params: { channelId: s
   }
 
   const finalUrl = upstreamResp.url || upstreamUrl;
-  const contentType =
-    upstreamResp.headers.get('content-type') ??
-    getMimeForUrl(finalUrl) ??
-    'application/octet-stream';
+  const upstreamType = upstreamResp.headers.get('content-type');
 
-  const isManifest =
-    contentType.includes('mpegurl') ||
-    contentType.includes('x-mpegURL') ||
-    finalUrl.toLowerCase().includes('.m3u8');
-
-  if (isManifest) {
+  if (isHlsManifestResponse(finalUrl, upstreamType)) {
     const text = await upstreamResp.text();
     const proxyOrigin = resolvePublicOrigin(req.headers);
     const rewritten = rewriteTvManifest(text, finalUrl, channelId, proxyOrigin ?? undefined);
@@ -113,7 +106,7 @@ export async function GET(req: NextRequest, { params }: { params: { channelId: s
   }
 
   const headers = new Headers();
-  headers.set('Content-Type', contentType);
+  headers.set('Content-Type', contentTypeForTvUpstream(finalUrl, upstreamType));
   headers.set('Cache-Control', 'no-store');
   headers.set('Access-Control-Allow-Origin', '*');
 

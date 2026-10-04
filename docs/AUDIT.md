@@ -18,7 +18,7 @@ Documento vivo con el inventario de gaps, bugs e incompletitudes.
 | Suscripción        | OK código     | Checkout → sync/webhook → ACTIVE. Ops en Movies (túnel + .env + Postgres local), no Vercel                             |
 | PWA                | Parcial       | Update modal + sin install/descarga in-app; SW precache de uploads sigue siendo ruido                                  |
 | Android TV         | OK v3         | APK `pelis-tv.apk` code 3 / 1.2.0 en `/downloads` + availability. Fuentes Compose en git. Sideload debug.              |
-| TWA móvil          | OK v3         | Keystore nuevo SHA `B2:9F…`; `pnpm android:publish`. Usuarios con APK v2 deben reinstalar.                          |
+| TWA móvil          | OK v3         | Keystore nuevo SHA `B2:9F…`; `pnpm android:publish`. Usuarios con APK v2 deben reinstalar.                             |
 | Imágenes           | Alto          | Pósters hash faltantes en clone limpio                                                                                 |
 | CI / calidad       | Parcial       | format+test+build+deploy en GitHub Actions; `deploy` genera Prisma y pasa `DATABASE_URL` a turbo. Build ignora TS/lint |
 | Docs agentes       | OK            | AGENTS.md + docs/APP, ARCHITECTURE, DATA-MODEL, TESTING                                                                |
@@ -45,11 +45,11 @@ Documento vivo con el inventario de gaps, bugs e incompletitudes.
 
 **Síntoma:** Series creadas en `/admin/series` no aparecen en `/series` público.
 
-**Causa:** Admin usa tabla `Series`; frontend usa `Movie` con `mediaType: SERIES`. Fallback: cada 3ª película se muestra como serie fake.
+**Causa:** Admin usa tabla `Series`; `/series` usa `Movie` con `mediaType: SERIES`. El fallback que mostraba cada 3ª película como serie ya no existe.
 
-**Archivos:** `packages/db/src/queries/movies.ts` (listSeries), `packages/db/src/queries/adminSeries.ts`
+**Archivos:** `packages/db/src/queries/movies.ts` (listSeries), `packages/db/src/queries/adminSeries.ts`, `packages/db/scripts/import-tmdb-series.ts`
 
-**Acción pendiente:** Unificar fuente de verdad (migrar admin → `Movie.mediaType = SERIES`).
+**Estado:** Alta y edición admin copian la ficha a `Movie` (no pisan una película con el mismo token). El catálogo público sigue vacío hasta correr el import aditivo. Borrar en admin no borra la fila pública.
 
 ### 3. Pósters hash faltantes en entornos nuevos
 

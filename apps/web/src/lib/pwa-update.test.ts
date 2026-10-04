@@ -32,69 +32,52 @@ describe('parseVersionPayload', () => {
 });
 
 describe('shouldOfferWebUpdate', () => {
-  it('no interrumpe la primera visita', () => {
-    expect(
-      shouldOfferWebUpdate({
-        storedVersion: null,
-        latestVersion: 'aaa1111',
-        dismissedVersion: null,
-        hasWaitingWorker: false,
-      })
-    ).toBe(false);
-  });
+  const cases = [
+    {
+      name: 'primera visita',
+      storedVersion: null,
+      latestVersion: 'aaa1111',
+      dismissedVersion: null,
+      hasWaitingWorker: false,
+    },
+    {
+      name: 'version.json cambió',
+      storedVersion: 'aaa1111',
+      latestVersion: 'bbb2222',
+      dismissedVersion: null,
+      hasWaitingWorker: false,
+    },
+    {
+      name: 'service worker en waiting',
+      storedVersion: 'aaa1111',
+      latestVersion: 'aaa1111',
+      dismissedVersion: null,
+      hasWaitingWorker: true,
+    },
+    {
+      name: 'versión pospuesta y worker en waiting',
+      storedVersion: 'aaa1111',
+      latestVersion: 'bbb2222',
+      dismissedVersion: 'bbb2222',
+      hasWaitingWorker: true,
+    },
+    {
+      name: 'otra versión después de posponer',
+      storedVersion: 'aaa1111',
+      latestVersion: 'ccc3333',
+      dismissedVersion: 'bbb2222',
+      hasWaitingWorker: false,
+    },
+    {
+      name: 'versión guardada ya coincide',
+      storedVersion: 'aaa1111',
+      latestVersion: 'aaa1111',
+      dismissedVersion: null,
+      hasWaitingWorker: false,
+    },
+  ] as const;
 
-  it('ofrece actualizar si version.json cambió', () => {
-    expect(
-      shouldOfferWebUpdate({
-        storedVersion: 'aaa1111',
-        latestVersion: 'bbb2222',
-        dismissedVersion: null,
-        hasWaitingWorker: false,
-      })
-    ).toBe(true);
-  });
-
-  it('ofrece actualizar si hay un service worker en waiting', () => {
-    expect(
-      shouldOfferWebUpdate({
-        storedVersion: 'aaa1111',
-        latestVersion: 'aaa1111',
-        dismissedVersion: null,
-        hasWaitingWorker: true,
-      })
-    ).toBe(true);
-  });
-
-  it('respeta «Más tarde» para esa misma versión', () => {
-    expect(
-      shouldOfferWebUpdate({
-        storedVersion: 'aaa1111',
-        latestVersion: 'bbb2222',
-        dismissedVersion: 'bbb2222',
-        hasWaitingWorker: true,
-      })
-    ).toBe(false);
-  });
-
-  it('vuelve a ofrecer si aparece otra versión después de posponer', () => {
-    expect(
-      shouldOfferWebUpdate({
-        storedVersion: 'aaa1111',
-        latestVersion: 'ccc3333',
-        dismissedVersion: 'bbb2222',
-        hasWaitingWorker: false,
-      })
-    ).toBe(true);
-  });
-
-  it('no ofrece si la versión guardada ya coincide', () => {
-    expect(
-      shouldOfferWebUpdate({
-        storedVersion: 'aaa1111',
-        latestVersion: 'aaa1111',
-        dismissedVersion: null,
-        hasWaitingWorker: false,
-      })
-    ).toBe(false);
+  it.each(cases)('no muestra el aviso web ($name)', (input) => {
+    expect(shouldOfferWebUpdate(input)).toBe(false);
   });
 });

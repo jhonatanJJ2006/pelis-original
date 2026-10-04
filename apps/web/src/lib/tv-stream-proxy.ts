@@ -67,6 +67,44 @@ export function getMimeForUrl(url: string): string {
   return MIME[ext] || 'application/octet-stream';
 }
 
+const MEDIA_PATH_RE = /\.(ts|m4s|mp4|m4a|m4v|aac|vtt|key)$/i;
+
+/**
+ * Some CDNs (Pluto/Ora) label AES-128 MPEG-TS segments as application/x-mpegURL.
+ * Treating those as playlists decodes the ciphertext as text and the picture stays black.
+ * A real media extension is never a manifest. Extensionless URLs still follow Content-Type.
+ */
+export function isHlsManifestResponse(
+  finalUrl: string,
+  contentType: string | null | undefined
+): boolean {
+  let pathname = finalUrl.split('?')[0] ?? finalUrl;
+  try {
+    pathname = new URL(finalUrl).pathname;
+  } catch {
+    // keep the query-stripped string
+  }
+  if (MEDIA_PATH_RE.test(pathname)) return false;
+  if (pathname.toLowerCase().endsWith('.m3u8')) return true;
+  return (contentType ?? '').toLowerCase().includes('mpegurl');
+}
+
+export function contentTypeForTvUpstream(
+  finalUrl: string,
+  upstreamType: string | null | undefined
+): string {
+  if (isHlsManifestResponse(finalUrl, upstreamType)) return 'application/vnd.apple.mpegurl';
+  let byExt = 'application/octet-stream';
+  try {
+    byExt = getMimeForUrl(finalUrl);
+  } catch {
+    // invalid URL: fall through to the upstream type
+  }
+  const raw = upstreamType?.split(';')[0]?.trim();
+  if (!raw || raw.toLowerCase().includes('mpegurl')) return byExt;
+  return raw;
+}
+
 export function isSafeUpstreamUrl(raw: string): boolean {
   try {
     const parsed = new URL(raw);

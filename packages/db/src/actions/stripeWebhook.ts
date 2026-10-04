@@ -5,6 +5,7 @@ import { assertWebhookSecret, getStripe } from '../lib/stripe-client';
 import {
   applyInvoicePaymentFailed,
   applyStripeSubscription,
+  applySubscriptionDeleted,
   fulfillPaidCheckoutSession,
   getInvoiceSubscriptionId,
 } from '../lib/stripe-subscription';
@@ -53,10 +54,8 @@ export const processWebhook = register({
         }
         case 'customer.subscription.deleted': {
           const subscription = event.data.object as Stripe.Subscription;
-          await prisma.subscription.updateMany({
-            where: { stripeSubscriptionId: subscription.id },
-            data: { status: 'EXPIRED' },
-          });
+          // Terminal state is CANCELLED (Stripe status `canceled`), not EXPIRED.
+          await applySubscriptionDeleted(prisma, subscription);
           break;
         }
         case 'invoice.paid':

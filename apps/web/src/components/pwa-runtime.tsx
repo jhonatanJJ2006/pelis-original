@@ -5,7 +5,7 @@ import { PwaUpdateModal } from './pwa-update-modal';
 
 /**
  * Silencia el banner nativo de Chrome («Instalar app») y no muestra CTAs propios.
- * El único UI de PWA que montamos es el modal de actualización con consentimiento.
+ * El modal de «nueva versión» no se muestra en la web; solo en las apps Android.
  */
 function useSuppressWebInstallPrompt() {
   useEffect(() => {

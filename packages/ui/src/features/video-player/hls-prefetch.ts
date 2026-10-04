@@ -7,6 +7,29 @@ import {
   prefetchHlsFragmentUrls,
 } from './hls-config';
 
+const SEEK_RESTART_MS = 1200;
+
+export function hasInFlightHlsFragment(
+  fragments: Record<string, unknown> | null | undefined
+): boolean {
+  if (!fragments) return false;
+  return Object.values(fragments).some((frag) => frag != null);
+}
+
+/**
+ * startLoad() calls stopLoad() first. Doing that while a segment is still
+ * downloading aborts it. A healthy VOD first fragment (several MB) is often
+ * still in flight at 1.2s, and restarting it forever leaves the playhead at 0:00.
+ */
+export function shouldRestartHlsLoad(input: {
+  seeking: boolean;
+  readyState: number;
+  hasInFlightFragment: boolean;
+}): boolean {
+  if (!input.seeking || input.readyState >= 2) return false;
+  return !input.hasInFlightFragment;
+}
+
 function fragmentIndexAtTime(
   fragments: Array<{ start: number; duration: number; url: string }>,
   time: number
@@ -74,12 +97,24 @@ export function attachHlsForwardPrefetch(hls: Hls, video?: HTMLVideoElement): ()
       const idx = fragmentIndexAtTime(details.fragments, video.currentTime);
       warmAroundIndex(details, idx, true);
     }
-    if (seekWatchdog) clearTimeout(seekWatchdog);
-    seekWatchdog = setTimeout(() => {
-      if (video.seeking && video.readyState < 2) {
-        hls.startLoad(video.currentTime);
-      }
-    }, 1200);
+    const armSeekWatchdog = () => {
+      if (seekWatchdog) clearTimeout(seekWatchdog);
+      seekWatchdog = setTimeout(() => {
+        seekWatchdog = null;
+        const restart = shouldRestartHlsLoad({
+          seeking: video.seeking,
+          readyState: video.readyState,
+          hasInFlightFragment: hasInFlightHlsFragment(hls.inFlightFragments),
+        });
+        if (restart) {
+          hls.startLoad(video.currentTime);
+          return;
+        }
+        // Still seeking while the segment downloads. Check again; do not abort it.
+        if (video.seeking && video.readyState < 2) armSeekWatchdog();
+      }, SEEK_RESTART_MS);
+    };
+    armSeekWatchdog();
   };
 
   if (video) video.addEventListener('seeking', onSeeking);
