@@ -27,6 +27,8 @@ export function createVodHlsConfig(): Partial<HlsConfig> {
     manifestLoadingMaxRetry: 4,
     levelLoadingMaxRetry: 4,
     fragLoadingMaxRetry: 6,
+    // A 5MB first segment on the home tunnel can take longer than the 20s default.
+    fragLoadingTimeOut: 60_000,
   };
 }
 
