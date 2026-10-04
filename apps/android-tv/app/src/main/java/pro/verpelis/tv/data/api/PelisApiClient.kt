@@ -76,6 +76,12 @@ class PelisApiClient(private val sessionStore: SessionStore) {
         .writeTimeout(30, TimeUnit.SECONDS)
         .build()
 
+    /** No logging interceptor: the QR payload is the pairing URL and must not land in logcat. */
+    private val quietHttp: OkHttpClient = OkHttpClient.Builder()
+        .connectTimeout(20, TimeUnit.SECONDS)
+        .readTimeout(20, TimeUnit.SECONDS)
+        .build()
+
     private val moshi: Moshi = Moshi.Builder()
         .add(KotlinJsonAdapterFactory())
         .build()
@@ -95,6 +101,37 @@ class PelisApiClient(private val sessionStore: SessionStore) {
         val escaped = escapeJson(deviceId)
         val json = """{"deviceId":"$escaped"}"""
         return postJson("api/tv-auth/pairing", json, PairingCreateResponse::class.java)
+    }
+
+    /**
+     * PNG of the pairing QR. Used only when on-device encoding fails.
+     * Does not log the payload (it contains the pairing code).
+     */
+    suspend fun fetchQrPng(payload: String): ByteArray? = withContext(Dispatchers.IO) {
+        if (payload.isBlank() || payload.length > 512) return@withContext null
+        val url = baseUrl.toHttpUrl()
+            .newBuilder()
+            .addPathSegments("api/tv-auth/qr")
+            .addQueryParameter("format", "png")
+            .addQueryParameter("data", payload)
+            .build()
+        val request = Request.Builder()
+            .url(url)
+            .header("Accept", "image/png")
+            .get()
+            .build()
+        try {
+            quietHttp.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) return@withContext null
+                val bytes = response.body?.bytes() ?: return@withContext null
+                if (bytes.size < 32 || bytes[0] != 0x89.toByte() || bytes[1] != 0x50.toByte()) {
+                    return@withContext null
+                }
+                bytes
+            }
+        } catch (_: Exception) {
+            null
+        }
     }
 
     suspend fun pairingStatus(code: String, deviceId: String): PairingStatusResponse {
