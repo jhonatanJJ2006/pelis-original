@@ -10,6 +10,8 @@ import {
   type MovieQualityFilter,
 } from '../lib/movieQuality';
 import { hasManifestForToken } from '../lib/hasManifestForToken';
+import { movieMatchesGenre } from '../lib/movieGenre';
+import { adminMovieListWhere } from '../lib/adminMovieListWhere';
 
 const qualityFilterValidator = z.enum([
   'all',
@@ -28,6 +30,7 @@ export const adminList = register({
   args: z
     .object({
       search: z.string().optional(),
+      genre: z.string().optional(),
       qualityFilter: qualityFilterValidator.optional(),
       limit: z.number().optional(),
     })
@@ -36,27 +39,23 @@ export const adminList = register({
     await requireAdmin(ctx);
     const a = args ?? {};
     const filter: MovieQualityFilter = a.qualityFilter ?? 'all';
-    const searchLower = a.search?.trim().toLowerCase() ?? '';
-    const where: Record<string, unknown> = {};
-    if (searchLower) {
-      where.OR = [
-        { name: { contains: searchLower, mode: 'insensitive' } },
-        { token: { contains: searchLower, mode: 'insensitive' } },
-        { actors: { contains: searchLower, mode: 'insensitive' } },
-      ];
-    }
+    const genre = a.genre?.trim() ?? '';
+    const where = adminMovieListWhere({ search: a.search, genre });
     let movies = await prisma.movie.findMany({
       where,
       orderBy: { name: 'asc' },
       take: a.limit ?? 200,
     });
+    if (genre) {
+      movies = movies.filter((movie) => movieMatchesGenre(movie.genre, genre));
+    }
 
     const enriched = await Promise.all(
       movies.map(async (m) => {
         const needsManifestCheck = !m.videoUrl || m.videoUrl.trim() === '';
         const hasManifest = needsManifestCheck ? await hasManifestForToken(m.token) : true;
         return { movie: m, hasManifest };
-      }),
+      })
     );
 
     let filtered = enriched;
@@ -75,8 +74,8 @@ export const adminList = register({
             backdropImage: m.backdropImage,
             hasManifest,
           },
-          filter,
-        ),
+          filter
+        )
       );
     }
 
@@ -131,7 +130,14 @@ export const adminStats = register({
       if (flags.isIncomplete) incomplete++;
       if (flags.isMissingBackdrop) missingBackdrop++;
     }
-    return { total: movies.length, orphanIds, missingImage, missingVideo, incomplete, missingBackdrop };
+    return {
+      total: movies.length,
+      orphanIds,
+      missingImage,
+      missingVideo,
+      incomplete,
+      missingBackdrop,
+    };
   },
 });
 
@@ -156,7 +162,11 @@ export const merge = register({
 
     // Patch target with any missing fields from source.
     const patch: Record<string, unknown> = {};
-    const pickIfMissing = (key: string, targetVal: string | null | undefined, sourceVal: string | null | undefined) => {
+    const pickIfMissing = (
+      key: string,
+      targetVal: string | null | undefined,
+      sourceVal: string | null | undefined
+    ) => {
       if ((!targetVal || targetVal === '') && sourceVal && sourceVal !== '') patch[key] = sourceVal;
     };
     pickIfMissing('actors', target.actors, source.actors);
