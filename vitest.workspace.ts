@@ -40,7 +40,7 @@ export default defineWorkspace([
       environment: 'jsdom',
       globals: true,
       setupFiles: ['./test/setup.ts'],
-      include: ['packages/ui/src/**/*.test.tsx'],
+      include: ['packages/ui/src/**/*.test.tsx', 'apps/web/src/components/**/*.test.tsx'],
       exclude: commonExclude,
     },
   },

@@ -116,6 +116,13 @@ export function VideoPlayer({
       hls.loadSource(src);
       hls.attachMedia(video);
 
+      let networkRetries = 0;
+      let mediaRetries = 0;
+      const failLoad = () => {
+        setError('No se pudo cargar el video. Intenta de nuevo más tarde.');
+        setPlaying(false);
+        setBuffering(false);
+      };
       hls.on(Hls.Events.ERROR, (_, data) => {
         if (!data.fatal) {
           if (data.details === Hls.ErrorDetails.BUFFER_STALLED_ERROR) {
@@ -124,20 +131,34 @@ export function VideoPlayer({
           return;
         }
         switch (data.type) {
-          case Hls.ErrorTypes.NETWORK_ERROR:
-            if (data.details === Hls.ErrorDetails.MANIFEST_LOAD_ERROR) {
-              setError('No se pudo cargar el video. Intenta de nuevo más tarde.');
-              setPlaying(false);
+          case Hls.ErrorTypes.NETWORK_ERROR: {
+            // One retry for a fatal network error, then a visible error.
+            // An uncapped startLoad() never reaches loadedmetadata, so the
+            // overlay spins at 0:00 forever.
+            const manifestDead =
+              data.details === Hls.ErrorDetails.MANIFEST_LOAD_ERROR ||
+              data.details === Hls.ErrorDetails.MANIFEST_LOAD_TIMEOUT ||
+              data.details === Hls.ErrorDetails.MANIFEST_PARSING_ERROR;
+            if (manifestDead || networkRetries >= 1) {
+              failLoad();
             } else {
+              networkRetries += 1;
               hls.startLoad();
             }
             break;
+          }
           case Hls.ErrorTypes.MEDIA_ERROR:
-            hls.recoverMediaError();
+            // recoverMediaError() re-fires a fatal error when it cannot repair
+            // the pipeline. One attempt, then surface the failure.
+            if (mediaRetries >= 1) {
+              failLoad();
+            } else {
+              mediaRetries += 1;
+              hls.recoverMediaError();
+            }
             break;
           default:
-            setError('No se pudo cargar el video. Intenta de nuevo más tarde.');
-            setPlaying(false);
+            failLoad();
         }
       });
 

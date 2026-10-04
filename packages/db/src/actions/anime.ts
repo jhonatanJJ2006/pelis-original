@@ -23,6 +23,11 @@ import {
 import { fetchVidnestEpisode } from '../lib/vidnest-client';
 import { fetchEpisodeList } from '../lib/anizip-client';
 import { searchAnilist, getAnilistById } from '../lib/anilist';
+import {
+  ANILIST_CATALOG_DEFAULT_LIMIT,
+  ANILIST_CATALOG_MAX_LIMIT,
+  runAnilistImport,
+} from '../lib/anilist-import';
 
 export const searchExternal = register({
   kind: 'action',
@@ -472,9 +477,8 @@ export const importCatalogBulk = register({
   kind: 'action',
   name: 'anime.importCatalogBulk',
   writes: ['anime'],
-  args: z.object({ limit: z.number().min(1).max(500).optional() }),
-  handler: async (_ctx, { limit = 200 }) => {
-    const { runAnilistImport } = await import('../lib/anilist-import');
+  args: z.object({ limit: z.number().min(1).max(ANILIST_CATALOG_MAX_LIMIT).optional() }),
+  handler: async (_ctx, { limit = ANILIST_CATALOG_DEFAULT_LIMIT }) => {
     return runAnilistImport(limit);
   },
 });

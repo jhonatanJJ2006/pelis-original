@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import { Plus, Search, Sparkles, Monitor } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@pelis/db/api';
-import { Button, Input, Spinner } from '@pelis/ui/components';
+import { Button, Input, Select, Spinner } from '@pelis/ui/components';
 import { AdminTableSkeleton } from '@pelis/ui/features/admin-table-skeleton';
 import { MoviePoster } from '@pelis/ui/features/movie-poster';
 import { EnrichMovieModal } from '../components/enrich-movie-modal';
@@ -56,6 +56,7 @@ export default function AdminMoviesPageClient() {
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [qualityFilter, setQualityFilter] = useState<QualityFilter>('all');
+  const [genre, setGenre] = useState('');
   const [mergeSource, setMergeSource] = useState<AdminMovie | null>(null);
   const [previewMovie, setPreviewMovie] = useState<AdminMovie | null>(null);
   const [enrichTarget, setEnrichTarget] = useState<AdminMovie | null>(null);
@@ -78,6 +79,7 @@ export default function AdminMoviesPageClient() {
     if (filter && filterTabs.some((tab) => tab.value === filter)) {
       setQualityFilter(filter);
     }
+    setGenre(searchParams.get('genre') ?? '');
   }, [searchParams]);
 
   useEffect(() => {
@@ -85,8 +87,11 @@ export default function AdminMoviesPageClient() {
     return () => clearTimeout(timer);
   }, [search]);
 
+  const genres = (useQuery(api.movies.getGenres) as string[] | undefined) ?? [];
+
   const movies = useQuery(api.adminMovies.adminList, {
     search: debouncedSearch || undefined,
+    genre: genre || undefined,
     qualityFilter,
     limit: 300,
   }) as AdminMovie[] | undefined;
@@ -114,6 +119,15 @@ export default function AdminMoviesPageClient() {
       params.set('filter', filter);
     }
     router.replace(`/admin/movies?${params.toString()}`);
+  };
+
+  const updateGenre = (next: string) => {
+    setGenre(next);
+    const params = new URLSearchParams(searchParams.toString());
+    if (!next) params.delete('genre');
+    else params.set('genre', next);
+    const qs = params.toString();
+    router.replace(qs ? `/admin/movies?${qs}` : '/admin/movies');
   };
 
   const canEnrich = (movie: AdminMovie) =>
@@ -288,15 +302,30 @@ export default function AdminMoviesPageClient() {
           )}
       </div>
 
-      <div className="mb-4 sm:mb-6 w-full max-w-md">
-        <Input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Buscar por título, actor o token..."
-          iconLeft={<Search className="w-4 h-4" />}
-          clearable
-          onClear={() => setSearch('')}
-        />
+      <div className="mb-4 sm:mb-6 flex w-full max-w-3xl flex-col gap-3 sm:flex-row">
+        <div className="w-full max-w-md">
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar por título, actor o token..."
+            iconLeft={<Search className="w-4 h-4" />}
+            clearable
+            onClear={() => setSearch('')}
+          />
+        </div>
+        <Select
+          aria-label="Filtrar por género"
+          value={genre}
+          onChange={(e) => updateGenre(e.target.value)}
+          wrapperClassName="w-full sm:w-56"
+        >
+          <option value="">Todos los géneros</option>
+          {genres.map((item) => (
+            <option key={item} value={item}>
+              {item}
+            </option>
+          ))}
+        </Select>
       </div>
 
       {movies === undefined ? (
