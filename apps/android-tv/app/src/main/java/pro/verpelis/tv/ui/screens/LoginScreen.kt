@@ -1,6 +1,7 @@
 package pro.verpelis.tv.ui.screens
 
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -34,8 +35,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -97,8 +101,14 @@ fun LoginScreen(
                 }
                 session.deviceId = created.deviceId.ifBlank { session.deviceId }
                 pairing = created
-                qr = QrBitmap.encode(PairingVerifyUrl.resolve(created.verifyUrl, created.code, BuildConfig.API_BASE_URL))
-                statusText = "Esperando confirmación en el celular…"
+                val payload = PairingVerifyUrl.resolve(created.verifyUrl, created.code, BuildConfig.API_BASE_URL)
+                val bitmap = QrBitmap.encode(payload) ?: decodeQrPng(api.fetchQrPng(payload))
+                qr = bitmap
+                if (bitmap == null) {
+                    error = "No se pudo dibujar el código QR"
+                } else {
+                    statusText = "Esperando confirmación en el celular…"
+                }
             } catch (ex: Exception) {
                 error = ex.message ?: "Error de conexión. Reintenta."
                 pairing = null
@@ -346,7 +356,7 @@ fun LoginScreen(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
-                .padding(40.dp),
+                .padding(24.dp),
             contentAlignment = Alignment.Center,
         ) {
             when {
@@ -434,6 +444,11 @@ fun LoginScreen(
     }
 }
 
+private fun decodeQrPng(bytes: ByteArray?): Bitmap? {
+    if (bytes == null || bytes.size < 32) return null
+    return BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+}
+
 @Composable
 private fun SignedInPanel(onGoLive: () -> Unit, onSignOut: () -> Unit) {
     Column(
@@ -469,38 +484,49 @@ private fun QrPanel(
     onRetry: () -> Unit,
     onEmailSignIn: () -> Unit,
 ) {
+    val qrImage = remember(qr) { qr?.asImageBitmap() }
     Row(
         modifier = Modifier
+            .fillMaxWidth()
             .widthIn(max = 820.dp)
             .clip(RoundedCornerShape(16.dp))
             .background(MaisonNoir.Elevated)
-            .padding(28.dp),
-        horizontalArrangement = Arrangement.spacedBy(32.dp),
+            .padding(20.dp),
+        horizontalArrangement = Arrangement.spacedBy(20.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
             modifier = Modifier
-                .size(280.dp)
+                .size(220.dp)
                 .clip(RoundedCornerShape(12.dp))
                 .background(MaisonNoir.Chalk),
             contentAlignment = Alignment.Center,
         ) {
-            if (qr != null) {
+            if (qrImage != null) {
                 Image(
-                    bitmap = qr.asImageBitmap(),
+                    bitmap = qrImage,
                     contentDescription = "Código QR para vincular la tele",
-                    modifier = Modifier.size(260.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(8.dp),
+                    contentScale = ContentScale.Fit,
+                    filterQuality = FilterQuality.None,
                 )
             } else {
-                Text(if (busy) "…" else "QR", color = MaisonNoir.Ash, fontSize = 28.sp)
+                Text(if (busy) "…" else "…", color = MaisonNoir.Ash, fontSize = 28.sp)
             }
         }
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
             Text("TU CÓDIGO", color = MaisonNoir.Ash, fontSize = 14.sp)
             Text(
                 text = pairing?.displayCode ?: pairing?.code ?: "······",
                 color = MaisonNoir.Chalk,
-                fontSize = 56.sp,
+                fontSize = 36.sp,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
             )
             Text(
                 "En el celular, con tu cuenta de Pelis, abre verpelis.pro/link-tv y confirma.",

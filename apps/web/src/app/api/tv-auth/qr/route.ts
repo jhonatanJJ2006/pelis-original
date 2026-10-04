@@ -12,6 +12,27 @@ export async function GET(req: Request) {
     return new NextResponse('missing data', { status: 400 });
   }
 
+  if (url.searchParams.get('format') === 'png') {
+    try {
+      const png = await QRCode.toBuffer(data, {
+        type: 'png',
+        margin: 1,
+        width: 512,
+        errorCorrectionLevel: 'M',
+        color: { dark: '#0B0B0D', light: '#F4F1EA' },
+      });
+      return new NextResponse(new Uint8Array(png), {
+        status: 200,
+        headers: {
+          'Content-Type': 'image/png',
+          'Cache-Control': 'no-store',
+        },
+      });
+    } catch {
+      return new NextResponse('qr failed', { status: 500 });
+    }
+  }
+
   let svg: string;
   try {
     svg = await QRCode.toString(data, {
