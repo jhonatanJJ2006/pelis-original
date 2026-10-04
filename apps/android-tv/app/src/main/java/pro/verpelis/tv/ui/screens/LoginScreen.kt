@@ -310,7 +310,7 @@ fun LoginScreen(
                     fontSize = 36.sp,
                 )
                 Text(
-                    "Escanea el QR, inicia sesión o crea una cuenta. Luego confirma en verpelis.pro/link-tv si usas el código.",
+                    "Escanea el QR o entra con correo y contraseña. Si usas el código, confirma en verpelis.pro/link-tv.",
                     color = MaisonNoir.Silver,
                     modifier = Modifier.padding(top = 16.dp),
                 )
@@ -324,7 +324,7 @@ fun LoginScreen(
                         container = if (mode == LoginMode.Qr) MaisonNoir.GoldSoft else MaisonNoir.Elevated,
                     )
                     TvFocusButton(
-                        label = "Iniciar sesión",
+                        label = "Entrar con correo",
                         onClick = { switchMode(LoginMode.SignIn) },
                         focusedContainer = if (mode == LoginMode.SignIn) MaisonNoir.Gold else MaisonNoir.Elevated,
                         focusedContent = if (mode == LoginMode.SignIn) MaisonNoir.Background else MaisonNoir.Chalk,
@@ -373,6 +373,7 @@ fun LoginScreen(
                         uiSounds.playClick()
                         requestPairing()
                     },
+                    onEmailSignIn = { switchMode(LoginMode.SignIn) },
                 )
                 mode == LoginMode.SignIn -> AuthFormPanel(
                     title = "Tu cuenta Pelis",
@@ -466,6 +467,7 @@ private fun QrPanel(
     error: String,
     statusText: String,
     onRetry: () -> Unit,
+    onEmailSignIn: () -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -512,6 +514,10 @@ private fun QrPanel(
             TvFocusButton(
                 label = if (busy) "Generando…" else "Reintentar",
                 onClick = onRetry,
+            )
+            TvFocusButton(
+                label = "Entrar con correo",
+                onClick = onEmailSignIn,
             )
         }
     }
