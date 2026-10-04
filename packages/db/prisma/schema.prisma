@@ -159,6 +159,8 @@ model Subscription {
   startDate             DateTime
   endDate               DateTime
   status                SubscriptionStatus @default(ACTIVE)
+  // Stripe cancel_at_period_end: access stays until endDate, then the sub is cancelled.
+  cancelAtPeriodEnd     Boolean          @default(false)
   stripeSubscriptionId  String?          @unique
   stripeCustomerId      String?
   stripePriceId         String?

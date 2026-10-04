@@ -4,6 +4,8 @@ import { notifyChange } from '../realtime';
 import { register } from '../registry';
 import { requireAdmin } from '../lib/requireAdmin';
 import { toPlanShape } from '../lib/shapes';
+import { getStripe } from '../lib/stripe-client';
+import { applyStripeSubscription, mapStripeStatus } from '../lib/stripe-subscription';
 
 export const list = register({
   kind: 'query',
@@ -93,8 +95,50 @@ export const subscribe = register({
 export const cancel = register({
   kind: 'mutation',
   name: 'subscriptions.cancel',
-  writes: [],
-  handler: async () => {
-    throw new Error('Use the billing portal to manage or cancel your subscription.');
+  writes: ['subscription'],
+  handler: async (ctx) => {
+    if (!ctx.userId) throw new Error('No autenticado');
+    const subs = await prisma.subscription.findMany({
+      where: { userId: ctx.userId, status: 'ACTIVE' },
+      orderBy: { updatedAt: 'desc' },
+    });
+    const sub = subs.find((row) => row.stripeSubscriptionId) ?? subs[0];
+    if (!sub) throw new Error('No hay una suscripción activa');
+
+    // Comped / admin plans have no Stripe subscription to schedule.
+    if (!sub.stripeSubscriptionId) {
+      const updated = await prisma.subscription.update({
+        where: { id: sub.id },
+        data: { status: 'CANCELLED', cancelAtPeriodEnd: false },
+      });
+      await notifyChange('subscription', 'update', updated.id);
+      return { id: updated.id, status: 'CANCELLED' as const, cancelAtPeriodEnd: false };
+    }
+
+    // Keep access until the paid period ends. Stripe status stays `active`
+    // and sends customer.subscription.deleted when the period is over.
+    const stripe = getStripe();
+    const updatedStripe = await stripe.subscriptions.update(sub.stripeSubscriptionId, {
+      cancel_at_period_end: true,
+    });
+    const applied = await applyStripeSubscription(prisma, updatedStripe, {
+      userId: ctx.userId,
+      planId: sub.planId,
+      customerId: sub.stripeCustomerId,
+    });
+    if (!applied.ok || updatedStripe.cancel_at_period_end !== true) {
+      await prisma.subscription.update({
+        where: { id: sub.id },
+        data: { cancelAtPeriodEnd: true },
+      });
+    }
+    await notifyChange('subscription', 'update', applied.id ?? sub.id);
+    const status = mapStripeStatus(updatedStripe.status) ?? 'ACTIVE';
+    return {
+      id: applied.id ?? sub.id,
+      status,
+      cancelAtPeriodEnd: true,
+      endDate: (applied.endDate ?? sub.endDate).getTime(),
+    };
   },
 });

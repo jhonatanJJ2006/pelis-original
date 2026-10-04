@@ -3,6 +3,7 @@ import type { PrismaClient } from '@prisma/client';
 import {
   applyInvoicePaymentFailed,
   applyStripeSubscription,
+  applySubscriptionDeleted,
   getInvoiceSubscriptionId,
   getStripeObjectId,
   getSubscriptionPeriod,
@@ -19,6 +20,7 @@ type Row = {
   startDate: Date;
   endDate: Date;
   status: 'ACTIVE' | 'CANCELLED' | 'EXPIRED';
+  cancelAtPeriodEnd?: boolean;
   stripeSubscriptionId: string | null;
   stripeCustomerId: string | null;
   stripePriceId: string;
@@ -128,8 +130,11 @@ describe('mapStripeStatus', () => {
   it('treats paid-like Stripe statuses as ACTIVE', () => {
     expect(mapStripeStatus('active')).toBe('ACTIVE');
     expect(mapStripeStatus('trialing')).toBe('ACTIVE');
-    expect(mapStripeStatus('past_due')).toBe('ACTIVE');
-    expect(mapStripeStatus('unpaid')).toBe('ACTIVE');
+  });
+
+  it('does not map past_due or unpaid back to ACTIVE', () => {
+    expect(mapStripeStatus('past_due')).toBe('EXPIRED');
+    expect(mapStripeStatus('unpaid')).toBe('EXPIRED');
   });
 
   it('does not map incomplete to EXPIRED (avoids clobbering a paid plan)', () => {
@@ -285,6 +290,47 @@ describe('applyStripeSubscription', () => {
     expect(isEntitlingSubscription(created)).toBe(true);
   });
 
+  it('stores cancel_at_period_end without dropping an active entitlement', async () => {
+    const { prisma, subscriptions } = createMemoryPrisma();
+    const result = await applyStripeSubscription(prisma, paidSub({ cancel_at_period_end: true }));
+    expect(result.activated).toBe(true);
+    expect(subscriptions[0]?.status).toBe('ACTIVE');
+    expect(subscriptions[0]?.cancelAtPeriodEnd).toBe(true);
+  });
+
+  it('clears cancel_at_period_end when Stripe is no longer set to cancel', async () => {
+    const { prisma, subscriptions } = createMemoryPrisma();
+    await applyStripeSubscription(prisma, paidSub({ cancel_at_period_end: true }));
+    await applyStripeSubscription(prisma, paidSub({ cancel_at_period_end: false }));
+    expect(subscriptions[0]?.status).toBe('ACTIVE');
+    expect(subscriptions[0]?.cancelAtPeriodEnd).toBe(false);
+  });
+
+  it('does not map a past_due subscription.updated back to ACTIVE', async () => {
+    const { prisma, subscriptions } = createMemoryPrisma();
+    await applyStripeSubscription(prisma, paidSub(), { forceActive: true });
+    const result = await applyStripeSubscription(prisma, paidSub({ status: 'past_due' }));
+    expect(result.activated).toBe(false);
+    expect(subscriptions[0]?.status).toBe('EXPIRED');
+    expect(isEntitlingSubscription(subscriptions[0])).toBe(false);
+  });
+
+  it('expires an existing row on past_due even when the plan cannot be resolved', async () => {
+    const { prisma, subscriptions } = createMemoryPrisma();
+    await applyStripeSubscription(prisma, paidSub(), { forceActive: true });
+    const result = await applyStripeSubscription(
+      prisma,
+      paidSub({
+        status: 'past_due',
+        metadata: {},
+        items: { data: [{ price: { id: 'price_missing' } }] },
+      }),
+      { planId: 'plan_no_existe' }
+    );
+    expect(result).toMatchObject({ ok: true, activated: false, reason: 'missing_plan' });
+    expect(subscriptions[0]?.status).toBe('EXPIRED');
+  });
+
   it('rejects events that cannot be mapped to a user or plan', async () => {
     const { prisma } = createMemoryPrisma();
     const missingUser = await applyStripeSubscription(prisma, paidSub({ metadata: {} }));
@@ -299,6 +345,23 @@ describe('applyStripeSubscription', () => {
       { planId: 'plan_no_existe' }
     );
     expect(missingPlan).toMatchObject({ ok: false, reason: 'missing_plan' });
+  });
+});
+
+describe('applySubscriptionDeleted', () => {
+  it('stores CANCELLED rather than EXPIRED when Stripe deletes the subscription', async () => {
+    const { prisma, subscriptions } = createMemoryPrisma();
+    await applyStripeSubscription(prisma, paidSub({ cancel_at_period_end: true }), {
+      forceActive: true,
+    });
+    const result = await applySubscriptionDeleted(
+      prisma,
+      paidSub({ status: 'canceled', cancel_at_period_end: true })
+    );
+    expect(result).toEqual({ ok: true, status: 'CANCELLED' });
+    expect(subscriptions[0]?.status).toBe('CANCELLED');
+    expect(subscriptions[0]?.cancelAtPeriodEnd).toBe(true);
+    expect(isEntitlingSubscription(subscriptions[0])).toBe(false);
   });
 });
 

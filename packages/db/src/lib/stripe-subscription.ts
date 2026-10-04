@@ -18,6 +18,8 @@ export type StripeSubLike = {
   };
   current_period_start?: number;
   current_period_end?: number;
+  /** True while Stripe will end the subscription at current_period_end. Status stays active until then. */
+  cancel_at_period_end?: boolean | null;
 };
 
 export type SubscriptionWrite = {
@@ -26,6 +28,7 @@ export type SubscriptionWrite = {
   startDate: Date;
   endDate: Date;
   status: AppSubscriptionStatus;
+  cancelAtPeriodEnd: boolean;
   stripeSubscriptionId: string;
   stripeCustomerId: string | null;
   stripePriceId: string;
@@ -35,18 +38,20 @@ export type SubscriptionWrite = {
  * Map Stripe subscription status to our enum.
  * `incomplete` returns null — do not clobber an existing ACTIVE row.
  * Checkout can still force ACTIVE via `forceActive`.
+ * `past_due` and `unpaid` are not entitled: a later subscription.updated
+ * must not flip a failed renewal back to ACTIVE.
  */
 export function mapStripeStatus(status: string): AppSubscriptionStatus | null {
   switch (status) {
     case 'active':
     case 'trialing':
-    case 'past_due':
-    case 'unpaid':
       return 'ACTIVE';
     case 'canceled':
       return 'CANCELLED';
     case 'incomplete':
       return null;
+    case 'past_due':
+    case 'unpaid':
     case 'incomplete_expired':
     case 'paused':
     default:
@@ -118,6 +123,7 @@ export function buildSubscriptionWrite(input: {
     startDate,
     endDate,
     status: input.status,
+    cancelAtPeriodEnd: input.subscription.cancel_at_period_end === true,
     stripeSubscriptionId: input.subscription.id,
     stripeCustomerId: input.customerId ?? getStripeObjectId(input.subscription.customer),
     stripePriceId: input.subscription.items?.data?.[0]?.price?.id ?? '',
@@ -155,6 +161,7 @@ export async function upsertSubscriptionFromStripe(prisma: PrismaClient, data: S
           startDate: data.startDate,
           endDate: data.endDate,
           status: data.status,
+          cancelAtPeriodEnd: data.cancelAtPeriodEnd,
           stripeCustomerId: data.stripeCustomerId,
           stripePriceId: data.stripePriceId,
         },
@@ -236,6 +243,39 @@ export async function applyInvoicePaymentFailed(
   return { ok: true, activated: false, reason: 'payment_failed' };
 }
 
+async function downgradeSubscriptionByStripeId(
+  prisma: PrismaClient,
+  subscription: StripeSubLike,
+  status: 'EXPIRED' | 'CANCELLED'
+) {
+  await prisma.subscription.updateMany({
+    where: { stripeSubscriptionId: subscription.id },
+    data: {
+      status,
+      cancelAtPeriodEnd: subscription.cancel_at_period_end === true,
+    },
+  });
+}
+
+/**
+ * `customer.subscription.deleted` is the terminal cancel, not a payment failure.
+ * Stripe's own status is `canceled`, which we store as CANCELLED so the product
+ * shows a cancellation. EXPIRED stays reserved for failed payment / superseded rows.
+ */
+export async function applySubscriptionDeleted(
+  prisma: PrismaClient,
+  subscription: StripeSubLike
+): Promise<{ ok: true; status: 'CANCELLED' }> {
+  await prisma.subscription.updateMany({
+    where: { stripeSubscriptionId: subscription.id },
+    data: {
+      status: 'CANCELLED',
+      cancelAtPeriodEnd: subscription.cancel_at_period_end === true,
+    },
+  });
+  return { ok: true, status: 'CANCELLED' };
+}
+
 export async function applyStripeSubscription(
   prisma: PrismaClient,
   subscription: StripeSubLike,
@@ -246,17 +286,31 @@ export async function applyStripeSubscription(
     forceActive?: boolean;
   }
 ): Promise<{ ok: boolean; activated: boolean; reason?: string; id?: string; endDate?: Date }> {
+  const mapped = extras?.forceActive ? ('ACTIVE' as const) : mapStripeStatus(subscription.status);
+
   const userId = await resolveUserId(prisma, subscription, extras);
-  if (!userId) return { ok: false, activated: false, reason: 'missing_user' };
+  if (!userId) {
+    if (mapped === 'EXPIRED' || mapped === 'CANCELLED') {
+      await downgradeSubscriptionByStripeId(prisma, subscription, mapped);
+      return { ok: true, activated: false, reason: 'missing_user' };
+    }
+    return { ok: false, activated: false, reason: 'missing_user' };
+  }
 
   const stripePriceId = subscription.items?.data?.[0]?.price?.id ?? null;
   const planId = await resolvePlanId(prisma, {
     planId: extras?.planId || subscription.metadata?.planId,
     stripePriceId,
   });
-  if (!planId) return { ok: false, activated: false, reason: 'missing_plan' };
+  if (!planId) {
+    if (mapped === 'EXPIRED' || mapped === 'CANCELLED') {
+      await downgradeSubscriptionByStripeId(prisma, subscription, mapped);
+      return { ok: true, activated: false, reason: 'missing_plan' };
+    }
+    return { ok: false, activated: false, reason: 'missing_plan' };
+  }
 
-  let status = extras?.forceActive ? ('ACTIVE' as const) : mapStripeStatus(subscription.status);
+  let status: AppSubscriptionStatus | null = mapped;
   if (status === null) {
     const existing = await prisma.subscription.findUnique({
       where: { stripeSubscriptionId: subscription.id },
