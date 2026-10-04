@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { TV_APK_DOWNLOAD_PATH } from '@/lib/app-download';
 import { detectTvExperience } from '@/lib/device-context';
 import {
   TV_APK_DISMISSED_VERSION_KEY,
@@ -31,7 +30,6 @@ export function useTvApkUpdate() {
   const [updating, setUpdating] = useState(false);
   const [versionLabel, setVersionLabel] = useState<string | null>(null);
   const latestKeyRef = useRef<string | null>(null);
-  const downloadPathRef = useRef(TV_APK_DOWNLOAD_PATH);
 
   const evaluate = useCallback(
     (latestKey: string | null, available: boolean, label: string | null) => {
@@ -100,18 +98,19 @@ export function useTvApkUpdate() {
   }, [check]);
 
   const accept = useCallback(() => {
-    setUpdating(true);
     const latest = latestKeyRef.current;
     if (latest) {
       window.localStorage.setItem(TV_APK_STORED_VERSION_KEY, latest);
       window.localStorage.removeItem(TV_APK_DISMISSED_VERSION_KEY);
     }
     const bridge = readBridge();
+    // La web no descarga el APK. Solo el bridge nativo de la app de TV puede actualizar.
     if (typeof bridge?.requestUpdate === 'function') {
+      setUpdating(true);
       bridge.requestUpdate();
       return;
     }
-    window.location.assign(downloadPathRef.current);
+    setVisible(false);
   }, []);
 
   const dismiss = useCallback(() => {
