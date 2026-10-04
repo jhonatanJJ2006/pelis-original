@@ -9,11 +9,21 @@ import {
 
 const SEEK_RESTART_MS = 1200;
 
+function loaderEntryIsInFlight(entry: unknown): boolean {
+  if (entry == null) return false;
+  // hls.js 1.6 keeps `{ frag, state }` even when nothing is downloading.
+  // `frag` is null while idle, so a bare null-check never lets a stuck seek recover.
+  if (typeof entry === 'object' && entry !== null && 'frag' in entry) {
+    return (entry as { frag?: unknown }).frag != null;
+  }
+  return true;
+}
+
 export function hasInFlightHlsFragment(
   fragments: Record<string, unknown> | null | undefined
 ): boolean {
   if (!fragments) return false;
-  return Object.values(fragments).some((frag) => frag != null);
+  return Object.values(fragments).some(loaderEntryIsInFlight);
 }
 
 /**
@@ -71,7 +81,11 @@ export function attachHlsForwardPrefetch(hls: Hls, video?: HTMLVideoElement): ()
     data: { details: { fragments: Array<{ url: string }>; initSegment?: { url: string } | null } }
   ) => {
     if (data.details.initSegment?.url) warmUrls([data.details.initSegment.url]);
-    warmUrls(data.details.fragments.slice(0, HLS_PREFETCH_SEGMENTS).map((frag) => frag.url));
+    // hls.js already downloads fragment 0. Prefetching it again doubles a
+    // multi-megabyte VOD segment and the playhead never leaves 0:00.
+    warmUrls(
+      data.details.fragments.slice(1, 1 + HLS_PREFETCH_SEGMENTS).map((frag) => frag.url)
+    );
   };
 
   const onFragChanged = (

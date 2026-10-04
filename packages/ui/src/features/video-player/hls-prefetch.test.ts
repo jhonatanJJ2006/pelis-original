@@ -14,6 +14,14 @@ describe('shouldRestartHlsLoad', () => {
       true
     );
     expect(hasInFlightHlsFragment({ main: null, audio: null })).toBe(false);
+    expect(
+      hasInFlightHlsFragment({ main: { frag: null, state: 'IDLE' }, audio: { frag: null } })
+    ).toBe(false);
+    expect(
+      hasInFlightHlsFragment({
+        main: { frag: { url: '000.ts' }, state: 'LOADING' },
+      })
+    ).toBe(true);
   });
 
   it('does not restart once a frame is available or the seek ended', () => {
