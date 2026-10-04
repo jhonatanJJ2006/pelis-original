@@ -125,9 +125,10 @@ export function VideoPlayer({
       };
       hls.on(Hls.Events.ERROR, (_, data) => {
         if (!data.fatal) {
-          if (data.details === Hls.ErrorDetails.BUFFER_STALLED_ERROR) {
-            hls.startLoad();
-          }
+          // Do not startLoad() on BUFFER_STALLED. That stops the loader and
+          // aborts the fragment already in flight, so a healthy VOD never
+          // reaches loadedmetadata and the overlay stays at 0:00. hls.js
+          // nudges buffer holes itself. Fatal network errors still retry once.
           return;
         }
         switch (data.type) {
