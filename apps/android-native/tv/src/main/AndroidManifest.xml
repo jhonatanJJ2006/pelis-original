@@ -4,7 +4,8 @@
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
     <application
         android:label="@string/app_name"
-        android:icon="@android:drawable/ic_media_play"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:banner="@drawable/banner"
         android:theme="@style/Theme.PelisTv">
         <activity android:name=".TvActivity" android:exported="true" android:screenOrientation="landscape">
