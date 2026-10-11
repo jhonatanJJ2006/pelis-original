@@ -1,6 +1,9 @@
-import { createHmac, randomBytes } from 'node:crypto';
+import { randomBytes } from 'node:crypto';
 import { prisma } from '../client';
 import { auth } from '../auth';
+import { signSessionToken } from './tv-session-sign';
+
+export { signSessionToken };
 
 const SESSION_DAYS = 7;
 
@@ -24,17 +27,6 @@ function wantsSecureCookie(request: Request): boolean {
 
 export function betterAuthSessionCookieName(secure: boolean): string {
   return secure ? '__Secure-better-auth.session_token' : 'better-auth.session_token';
-}
-
-/**
- * Firma el token igual que better-call (`signCookieValue`): `<token>.<base64 HMAC-SHA256>`.
- * better-auth `getSession` solo acepta cookies de sesión firmadas; sin firma la sesión
- * emitida al reclamar un emparejamiento quedaba anónima.
- * El valor se devuelve sin codificar: `NextResponse.cookies.set` aplica encodeURIComponent.
- */
-export function signSessionToken(token: string, secret: string): string {
-  const signature = createHmac('sha256', secret).update(token).digest('base64');
-  return `${token}.${signature}`;
 }
 
 async function createSessionViaAdapter(userId: string, request: Request) {

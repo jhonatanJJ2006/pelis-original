@@ -1,6 +1,6 @@
 import { webcrypto } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
-import { signSessionToken } from './tv-session';
+import { signSessionToken } from './tv-session-sign';
 
 // Réplica de better-call `signCookieValue` (crypto.mjs), que better-auth usa para la cookie de sesión.
 async function betterCallSign(value: string, secret: string): Promise<string> {
@@ -19,6 +19,8 @@ describe('signSessionToken', () => {
   it('coincide con la firma de better-call usada por better-auth', async () => {
     const secret = 'secreto-de-prueba-123';
     const token = 'O9gi7rbTCh4n1Iw5M0Dzz5ZSTBOshHe4';
-    expect(encodeURIComponent(signSessionToken(token, secret))).toBe(await betterCallSign(token, secret));
+    expect(encodeURIComponent(signSessionToken(token, secret))).toBe(
+      await betterCallSign(token, secret)
+    );
   });
 });
