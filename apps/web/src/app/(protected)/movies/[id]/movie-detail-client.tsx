@@ -105,11 +105,16 @@ export default function MovieDetailPageClient({ preloaded }: MovieDetailPageClie
   const relatedFiltered = (resolvedRelated ?? []).filter((m) => m._id !== resolvedMovie._id);
   const entitled = hasActivePlan(user);
   const heroImage = resolvedMovie.backdropImage ?? resolvedMovie.image;
+  const castList = (resolvedMovie.actors ?? '')
+    .split(',')
+    .map((name) => name.trim())
+    .filter(Boolean)
+    .slice(0, 8);
 
   return (
     <div className="pb-12">
-      <div className="relative overflow-hidden md:h-[520px]">
-        <div className="relative h-64 md:absolute md:inset-0 md:h-auto">
+      <div className="relative overflow-hidden md:h-[640px]">
+        <div className="relative h-[52vh] max-h-[460px] md:max-h-none md:absolute md:inset-0 md:h-auto">
           <MoviePoster
             src={heroImage}
             alt=""
@@ -132,17 +137,23 @@ export default function MovieDetailPageClient({ preloaded }: MovieDetailPageClie
 
         <div className="relative px-4 py-6 md:absolute md:inset-x-0 md:bottom-0 md:p-14">
           <div className="container mx-auto">
-            <div className="flex flex-wrap gap-2 mb-4">
-              <Badge variant="primary">{resolvedMovie.classification}</Badge>
-              <Badge variant="violet">{resolvedMovie.genre}</Badge>
-              <Badge>{resolvedMovie.releaseYear}</Badge>
+            <div className="flex flex-wrap items-center gap-2 mb-4 text-meta text-cinema-muted">
+              <span className="rounded-[4px] border border-cinema-accent/60 px-2 py-0.5 text-label uppercase text-cinema-accent">
+                {isSeries ? 'Serie' : 'Película'}
+              </span>
+              <span className="rounded-[4px] border border-cinema-border px-2 py-0.5 text-label text-cinema-chalk">
+                {resolvedMovie.classification}
+              </span>
+              <span>{resolvedMovie.releaseYear}</span>
+              <span aria-hidden>·</span>
+              <span>{resolvedMovie.genre}</span>
               {isSeries && resolvedMovie.episodes && (
                 <Badge variant="warning" className="bg-cinema-accent/90 text-cinema-bg border-0">
                   {resolvedMovie.episodes} episodios
                 </Badge>
               )}
             </div>
-            <h1 className="font-display text-4xl md:text-6xl font-semibold tracking-tight text-cinema-chalk max-w-3xl mb-4">
+            <h1 className="font-display text-4xl md:text-hero font-semibold tracking-tight text-cinema-chalk max-w-3xl mb-4">
               {resolvedMovie.name}
             </h1>
             <p className="text-cinema-muted text-lg mb-6 max-w-2xl line-clamp-2">
@@ -179,7 +190,7 @@ export default function MovieDetailPageClient({ preloaded }: MovieDetailPageClie
                     document.getElementById('player')?.scrollIntoView({ behavior: 'smooth' });
                   }
                 }}
-                className="btn-primary-glow inline-flex items-center gap-2"
+                className="btn-base h-11 px-7 bg-cinema-accent hover:bg-cinema-accent-light text-cinema-bg text-xs uppercase tracking-[0.08em] inline-flex items-center gap-2"
               >
                 <Play className="w-5 h-5" fill="currentColor" aria-hidden />
                 Reproducir
@@ -188,7 +199,7 @@ export default function MovieDetailPageClient({ preloaded }: MovieDetailPageClie
                 type="button"
                 onClick={handleFavorite}
                 className={cn(
-                  'btn-secondary inline-flex items-center gap-2',
+                  'btn-base h-11 px-5 border border-cinema-border bg-cinema-bg/40 backdrop-blur-sm hover:border-cinema-chalk/50 text-cinema-chalk text-sm inline-flex items-center gap-2',
                   isFavorited && 'border-cinema-accent/50 text-cinema-accent-light'
                 )}
                 aria-pressed={isFavorited ?? false}
@@ -253,10 +264,38 @@ export default function MovieDetailPageClient({ preloaded }: MovieDetailPageClie
               Sinopsis
             </h2>
             <p className="text-cinema-muted leading-relaxed text-lg">{resolvedMovie.synopsis}</p>
+            {castList.length > 0 && (
+              <div className="mt-10">
+                <h2 className="font-display text-2xl font-semibold tracking-tight text-cinema-chalk mb-4">
+                  Reparto principal
+                </h2>
+                <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {castList.map((name) => (
+                    <li
+                      key={name}
+                      className="flex flex-col items-center gap-2 rounded-lg border border-cinema-border bg-cinema-surface p-4 text-center"
+                    >
+                      <span
+                        className="flex h-12 w-12 items-center justify-center rounded-full border border-cinema-accent/40 bg-cinema-elevated font-display text-lg text-cinema-accent"
+                        aria-hidden
+                      >
+                        {name
+                          .split(/\s+/)
+                          .slice(0, 2)
+                          .map((part) => part[0])
+                          .join('')
+                          .toUpperCase()}
+                      </span>
+                      <span className="text-sm text-cinema-chalk leading-tight">{name}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
           <div className="card-feature p-6 h-fit">
             <h3 className="font-display text-lg font-semibold tracking-tight text-cinema-chalk mb-5">
-              Detalles
+              Detalles de producción
             </h3>
             <dl className="space-y-4 text-sm">
               {[

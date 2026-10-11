@@ -84,8 +84,8 @@ export default function SeriesPageClient({ preloaded }: SeriesPageClientProps) {
       {series.length === 0 ? (
         <EmptyState
           icon={Tv}
-          title="Sin series disponibles"
-          description="Pronto añadiremos más series al catálogo."
+          title="La sala de series se está preparando"
+          description="Todavía no hay series en el catálogo. Mientras tanto, explora películas, anime y TV en vivo."
           actionLabel="Ver películas"
           actionHref="/movies"
         />
