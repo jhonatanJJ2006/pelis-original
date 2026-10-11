@@ -23,6 +23,8 @@ import {
 } from '../components/admin-movie-list-item';
 import { getAdminMovieDisplayName, isAdminOrphanDisplayName } from '../lib/movie-display';
 import { cn } from '@pelis/ui/utils';
+import { AdminPaginator } from '../components/admin-paginator';
+import { useAdminPage } from '../lib/admin-pagination';
 
 type QualityFilter =
   | 'all'
@@ -95,6 +97,13 @@ export default function AdminMoviesPageClient() {
     qualityFilter,
     limit: 300,
   }) as AdminMovie[] | undefined;
+  const {
+    page: adminPage,
+    setPage: setAdminPage,
+    pageItems: pageMovies,
+    total: adminTotal,
+    pageSize: adminPageSize,
+  } = useAdminPage(movies);
 
   const handleDelete = async (id: string, name: string) => {
     if (!confirm(`¿Eliminar "${name}"? Esta acción no se puede deshacer.`)) return;
@@ -337,7 +346,7 @@ export default function AdminMoviesPageClient() {
       ) : (
         <>
           <div className="md:hidden space-y-3">
-            {movies.map((movie) => (
+            {(pageMovies ?? []).map((movie) => (
               <AdminMovieMobileCard
                 key={movie._id}
                 movie={movie}
@@ -368,7 +377,7 @@ export default function AdminMoviesPageClient() {
                 </tr>
               </thead>
               <tbody>
-                {movies.map((movie) => (
+                {(pageMovies ?? []).map((movie) => (
                   <tr
                     key={movie._id}
                     role="button"
@@ -414,6 +423,13 @@ export default function AdminMoviesPageClient() {
               </tbody>
             </table>
           </div>
+          <AdminPaginator
+            page={adminPage}
+            total={adminTotal}
+            pageSize={adminPageSize}
+            onPageChange={setAdminPage}
+            noun="películas"
+          />
         </>
       )}
 

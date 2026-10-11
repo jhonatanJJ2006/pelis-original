@@ -20,6 +20,8 @@ import { Button, Input, Spinner } from '@pelis/ui/components';
 import { AdminTableSkeleton } from '@pelis/ui/features/admin-table-skeleton';
 import { MoviePoster } from '@pelis/ui/features/movie-poster';
 import { cn } from '@pelis/ui/utils';
+import { AdminPaginator } from '../components/admin-paginator';
+import { useAdminPage } from '../lib/admin-pagination';
 import { EnrichAnimeModal } from '../components/enrich-anime-modal';
 import { BackdropAnimeModal } from '../components/backdrop-anime-modal';
 import { ProviderHealthPanel } from '../components/provider-health-panel';
@@ -54,6 +56,13 @@ export default function AdminAnimePage() {
     status: statusFilter || undefined,
     limit: 500,
   }) as AnimeRow[] | undefined;
+  const {
+    page: adminPage,
+    setPage: setAdminPage,
+    pageItems: pageAnime,
+    total: adminTotal,
+    pageSize: adminPageSize,
+  } = useAdminPage(anime);
 
   const remove = useMutation(api.adminAnime.remove);
   const importCatalog = useAction(api.anime.importCatalogBulk);
@@ -164,7 +173,7 @@ export default function AdminAnimePage() {
       ) : (
         <>
           <div className="md:hidden space-y-3">
-            {anime.map((a) => (
+            {(pageAnime ?? []).map((a) => (
               <article
                 key={a._id}
                 className="rounded-2xl border border-cinema-border bg-cinema-surface p-4"
@@ -252,7 +261,7 @@ export default function AdminAnimePage() {
                 </tr>
               </thead>
               <tbody>
-                {anime.map((a) => (
+                {(pageAnime ?? []).map((a) => (
                   <tr
                     key={a._id}
                     className="border-b border-cinema-border/60 hover:bg-cinema-elevated/30 transition-colors"
@@ -347,6 +356,13 @@ export default function AdminAnimePage() {
               </tbody>
             </table>
           </div>
+          <AdminPaginator
+            page={adminPage}
+            total={adminTotal}
+            pageSize={adminPageSize}
+            onPageChange={setAdminPage}
+            noun="animes"
+          />
         </>
       )}
 

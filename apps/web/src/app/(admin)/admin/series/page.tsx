@@ -19,6 +19,8 @@ import { Button, Input, Spinner } from '@pelis/ui/components';
 import { AdminTableSkeleton } from '@pelis/ui/features/admin-table-skeleton';
 import { MoviePoster } from '@pelis/ui/features/movie-poster';
 import { cn } from '@pelis/ui/utils';
+import { AdminPaginator } from '../components/admin-paginator';
+import { useAdminPage } from '../lib/admin-pagination';
 import { EnrichSeriesModal } from '../components/enrich-series-modal';
 import { BackdropSeriesModal } from '../components/backdrop-series-modal';
 
@@ -47,6 +49,13 @@ export default function AdminSeriesPage() {
     search: search || undefined,
     limit: 500,
   }) as SeriesRow[] | undefined;
+  const {
+    page: adminPage,
+    setPage: setAdminPage,
+    pageItems: pageSeries,
+    total: adminTotal,
+    pageSize: adminPageSize,
+  } = useAdminPage(series);
   const remove = useMutation(api.adminSeries.remove);
 
   const handleDelete = async (id: string, name: string) => {
@@ -101,7 +110,7 @@ export default function AdminSeriesPage() {
       ) : (
         <>
           <div className="md:hidden space-y-3">
-            {series.map((s) => (
+            {(pageSeries ?? []).map((s) => (
               <article
                 key={s._id}
                 className="rounded-2xl border border-cinema-border bg-cinema-surface p-4"
@@ -195,7 +204,7 @@ export default function AdminSeriesPage() {
                 </tr>
               </thead>
               <tbody>
-                {series.map((s) => (
+                {(pageSeries ?? []).map((s) => (
                   <tr
                     key={s._id}
                     className="border-b border-cinema-border/60 hover:bg-cinema-elevated/30 transition-colors"
@@ -290,6 +299,13 @@ export default function AdminSeriesPage() {
               </tbody>
             </table>
           </div>
+          <AdminPaginator
+            page={adminPage}
+            total={adminTotal}
+            pageSize={adminPageSize}
+            onPageChange={setAdminPage}
+            noun="series"
+          />
         </>
       )}
 

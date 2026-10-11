@@ -8,6 +8,8 @@ import { api } from '@pelis/db/api';
 import { Button, Input } from '@pelis/ui/components';
 import { AdminTableSkeleton } from '@pelis/ui/features/admin-table-skeleton';
 import { cn } from '@pelis/ui/utils';
+import { AdminPaginator } from '../components/admin-paginator';
+import { useAdminPage } from '../lib/admin-pagination';
 
 interface UserRow {
   _id: string;
@@ -46,6 +48,13 @@ export default function AdminUsersPage() {
     role: roleFilter || undefined,
     limit: 500,
   }) as UserRow[] | undefined;
+  const {
+    page: adminPage,
+    setPage: setAdminPage,
+    pageItems: pageUsers,
+    total: adminTotal,
+    pageSize: adminPageSize,
+  } = useAdminPage(users);
 
   const setRole = useMutation(api.adminUsers.adminSetRole);
 
@@ -126,7 +135,7 @@ export default function AdminUsersPage() {
       ) : (
         <>
           <div className="md:hidden space-y-3">
-            {users.map((u) => (
+            {(pageUsers ?? []).map((u) => (
               <article
                 key={u._id}
                 className="rounded-2xl border border-cinema-border bg-cinema-surface p-4"
@@ -201,7 +210,7 @@ export default function AdminUsersPage() {
                 </tr>
               </thead>
               <tbody>
-                {users.map((u) => {
+                {(pageUsers ?? []).map((u) => {
                   const activePlan =
                     u.subscription &&
                     u.subscription.status === 'active' &&
@@ -278,6 +287,13 @@ export default function AdminUsersPage() {
               </tbody>
             </table>
           </div>
+          <AdminPaginator
+            page={adminPage}
+            total={adminTotal}
+            pageSize={adminPageSize}
+            onPageChange={setAdminPage}
+            noun="usuarios"
+          />
         </>
       )}
     </div>
