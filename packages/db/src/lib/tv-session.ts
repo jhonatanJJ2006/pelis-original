@@ -1,4 +1,4 @@
-import { randomBytes } from 'node:crypto';
+import { createHmac, randomBytes } from 'node:crypto';
 import { prisma } from '../client';
 import { auth } from '../auth';
 
@@ -24,6 +24,17 @@ function wantsSecureCookie(request: Request): boolean {
 
 export function betterAuthSessionCookieName(secure: boolean): string {
   return secure ? '__Secure-better-auth.session_token' : 'better-auth.session_token';
+}
+
+/**
+ * Firma el token igual que better-call (`signCookieValue`): `<token>.<base64 HMAC-SHA256>`.
+ * better-auth `getSession` solo acepta cookies de sesión firmadas; sin firma la sesión
+ * emitida al reclamar un emparejamiento quedaba anónima.
+ * El valor se devuelve sin codificar: `NextResponse.cookies.set` aplica encodeURIComponent.
+ */
+export function signSessionToken(token: string, secret: string): string {
+  const signature = createHmac('sha256', secret).update(token).digest('base64');
+  return `${token}.${signature}`;
 }
 
 async function createSessionViaAdapter(userId: string, request: Request) {
@@ -69,12 +80,28 @@ export async function issueTvSession(userId: string, request: Request): Promise<
     token = session.token;
   }
 
-  const secure = wantsSecureCookie(request);
   const maxAge = SESSION_DAYS * 24 * 60 * 60;
+  // Mismo nombre, atributos y firma que usa better-auth al iniciar sesión.
+  let cookieName = betterAuthSessionCookieName(wantsSecureCookie(request));
+  let secure = wantsSecureCookie(request);
+  let secret = process.env.BETTER_AUTH_SECRET ?? '';
+  try {
+    const ctx = (await auth().$context) as {
+      secret?: string;
+      authCookies?: { sessionToken?: { name?: string; options?: { secure?: boolean } } };
+    };
+    if (ctx.authCookies?.sessionToken?.name) cookieName = ctx.authCookies.sessionToken.name;
+    if (typeof ctx.authCookies?.sessionToken?.options?.secure === 'boolean') {
+      secure = ctx.authCookies.sessionToken.options.secure;
+    }
+    if (ctx.secret) secret = ctx.secret;
+  } catch {
+    // se mantienen los valores por defecto
+  }
   return {
     token,
-    cookieName: betterAuthSessionCookieName(secure),
-    cookieValue: token,
+    cookieName,
+    cookieValue: secret ? signSessionToken(token, secret) : token,
     maxAge,
     secure,
   };

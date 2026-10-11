@@ -23,6 +23,8 @@ export async function POST(req: Request) {
       status: 'claimed',
       token: issued.token,
       cookieName: issued.cookieName,
+      // Valor firmado listo para clientes nativos que guardan la cookie manualmente.
+      cookieValue: issued.cookieValue,
     });
     res.cookies.set({
       name: issued.cookieName,
