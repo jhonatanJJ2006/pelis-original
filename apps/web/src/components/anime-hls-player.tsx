@@ -515,7 +515,7 @@ export function AnimeHlsPlayer({
         trailingExtras={
           <>
             {subtitles.length > 0 && (
-              <div className="relative">
+              <div>
                 <button
                   type="button"
                   onClick={() => {
@@ -532,13 +532,19 @@ export function AnimeHlsPlayer({
                   <Subtitles className="h-5 w-5" aria-hidden />
                 </button>
                 {subtitleMenuOpen && (
-                  <div className="absolute bottom-full right-0 mb-2 min-w-40 rounded-[10px] border border-cinema-border bg-cinema-bg/95 py-1 text-sm shadow-xl">
+                  <div
+                    role="menu"
+                    aria-label="Subtítulos"
+                    className="absolute bottom-full right-3 mb-3 w-72 max-w-[calc(100%-1.5rem)] max-h-[60vh] overflow-y-auto rounded-lg border border-cinema-border bg-cinema-surface/95 p-3 text-sm shadow-[0_16px_48px_rgba(11,11,13,0.6)] backdrop-blur-md"
+                  >
+                    <p className="mb-2 px-2 text-label uppercase text-cinema-ash">Subtítulos</p>
                     <button
                       type="button"
                       onClick={() => selectSubtitle(-1)}
                       className={cn(
-                        'block w-full px-3 py-1.5 text-left hover:bg-white/10',
-                        activeSubtitle === -1 && 'text-cinema-accent'
+                        'flex w-full items-center justify-between rounded-[6px] border border-transparent px-3 py-2 text-left text-cinema-chalk hover:bg-cinema-elevated',
+                        activeSubtitle === -1 &&
+                          'border-cinema-accent/60 bg-cinema-accent/10 text-cinema-accent'
                       )}
                     >
                       Desactivados
@@ -549,7 +555,7 @@ export function AnimeHlsPlayer({
                         type="button"
                         onClick={() => selectSubtitle(i)}
                         className={cn(
-                          'block w-full px-3 py-1.5 text-left hover:bg-white/10',
+                          'flex w-full items-center justify-between rounded-[6px] border border-transparent px-3 py-2 text-left text-cinema-chalk hover:bg-cinema-elevated',
                           activeSubtitle === i && 'text-cinema-accent'
                         )}
                       >
@@ -561,14 +567,14 @@ export function AnimeHlsPlayer({
               </div>
             )}
             {levels.length > 1 && (
-              <div className="relative">
+              <div>
                 <button
                   type="button"
                   onClick={() => {
                     setQualityMenuOpen((o) => !o);
                     setSubtitleMenuOpen(false);
                   }}
-                  className="rounded-[10px] px-2 py-1.5 text-xs font-semibold hover:bg-white/10"
+                  className="rounded-[6px] border border-cinema-border px-2 py-1 text-xs font-semibold hover:border-cinema-accent/60"
                   aria-label="Calidad"
                   aria-expanded={qualityMenuOpen}
                 >
@@ -577,13 +583,21 @@ export function AnimeHlsPlayer({
                     : 'Auto'}
                 </button>
                 {qualityMenuOpen && (
-                  <div className="absolute bottom-full right-0 mb-2 min-w-32 rounded-[10px] border border-cinema-border bg-cinema-bg/95 py-1 text-sm shadow-xl">
+                  <div
+                    role="menu"
+                    aria-label="Calidad de transmisión"
+                    className="absolute bottom-full right-3 mb-3 w-72 max-w-[calc(100%-1.5rem)] max-h-[60vh] overflow-y-auto rounded-lg border border-cinema-border bg-cinema-surface/95 p-3 text-sm shadow-[0_16px_48px_rgba(11,11,13,0.6)] backdrop-blur-md"
+                  >
+                    <p className="mb-2 px-2 text-label uppercase text-cinema-ash">
+                      Calidad de transmisión
+                    </p>
                     <button
                       type="button"
                       onClick={() => selectLevel(-1)}
                       className={cn(
-                        'block w-full px-3 py-1.5 text-left hover:bg-white/10',
-                        activeLevel === -1 && 'text-cinema-accent'
+                        'flex w-full items-center justify-between rounded-[6px] border border-transparent px-3 py-2 text-left text-cinema-chalk hover:bg-cinema-elevated',
+                        activeLevel === -1 &&
+                          'border-cinema-accent/60 bg-cinema-accent/10 text-cinema-accent'
                       )}
                     >
                       Auto
@@ -594,7 +608,7 @@ export function AnimeHlsPlayer({
                         type="button"
                         onClick={() => selectLevel(level.index)}
                         className={cn(
-                          'block w-full px-3 py-1.5 text-left hover:bg-white/10',
+                          'flex w-full items-center justify-between rounded-[6px] border border-transparent px-3 py-2 text-left text-cinema-chalk hover:bg-cinema-elevated',
                           activeLevel === level.index && 'text-cinema-accent'
                         )}
                       >
