@@ -1,6 +1,9 @@
 import { randomBytes } from 'node:crypto';
 import { prisma } from '../client';
 import { auth } from '../auth';
+import { signSessionToken } from './tv-session-sign';
+
+export { signSessionToken };
 
 const SESSION_DAYS = 7;
 
@@ -69,12 +72,28 @@ export async function issueTvSession(userId: string, request: Request): Promise<
     token = session.token;
   }
 
-  const secure = wantsSecureCookie(request);
   const maxAge = SESSION_DAYS * 24 * 60 * 60;
+  // Mismo nombre, atributos y firma que usa better-auth al iniciar sesión.
+  let cookieName = betterAuthSessionCookieName(wantsSecureCookie(request));
+  let secure = wantsSecureCookie(request);
+  let secret = process.env.BETTER_AUTH_SECRET ?? '';
+  try {
+    const ctx = (await auth().$context) as {
+      secret?: string;
+      authCookies?: { sessionToken?: { name?: string; options?: { secure?: boolean } } };
+    };
+    if (ctx.authCookies?.sessionToken?.name) cookieName = ctx.authCookies.sessionToken.name;
+    if (typeof ctx.authCookies?.sessionToken?.options?.secure === 'boolean') {
+      secure = ctx.authCookies.sessionToken.options.secure;
+    }
+    if (ctx.secret) secret = ctx.secret;
+  } catch {
+    // se mantienen los valores por defecto
+  }
   return {
     token,
-    cookieName: betterAuthSessionCookieName(secure),
-    cookieValue: token,
+    cookieName,
+    cookieValue: secret ? signSessionToken(token, secret) : token,
     maxAge,
     secure,
   };
