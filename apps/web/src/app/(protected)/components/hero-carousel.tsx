@@ -25,7 +25,7 @@ function HeroImage({ movie, eager }: { movie: MediaItem; eager: boolean }) {
         loading={eager ? 'eager' : 'lazy'}
         fetchPriority={eager ? 'high' : undefined}
         decoding="async"
-        className="w-full h-full object-contain object-center md:object-cover"
+        className="w-full h-full object-cover object-top md:object-center"
         onError={() => setFailed(true)}
       />
     </picture>
@@ -130,7 +130,7 @@ export function HeroCarousel({ movies }: HeroCarouselProps) {
   if (movies.length === 0) {
     return (
       <section
-        className="relative h-[70vh] min-h-[420px] sm:min-h-[500px] max-h-[860px] overflow-hidden bg-cinema-surface animate-pulse"
+        className="relative aspect-[4/5] max-h-[85vh] w-full sm:aspect-auto sm:h-[70vh] sm:min-h-[500px] sm:max-h-[860px] overflow-hidden bg-cinema-surface animate-pulse"
         aria-label="Destacados"
         aria-busy="true"
       />
@@ -140,7 +140,7 @@ export function HeroCarousel({ movies }: HeroCarouselProps) {
   return (
     <section
       data-hero-carousel
-      className="relative h-[70vh] min-h-[420px] sm:min-h-[500px] max-h-[860px] overflow-hidden touch-pan-y"
+      className="relative aspect-[4/5] max-h-[85vh] w-full sm:aspect-auto sm:h-[70vh] sm:min-h-[500px] sm:max-h-[860px] overflow-hidden touch-pan-y"
       aria-label="Destacados"
       aria-roledescription="carrusel"
       onTouchStart={handleTouchStart}
