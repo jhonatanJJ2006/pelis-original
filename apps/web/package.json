@@ -12,7 +12,8 @@
     "lint": "eslint . --max-warnings 0",
     "start": "pnpm with-env next start",
     "typecheck": "tsc --noEmit",
-    "with-env": "dotenv -e ../../.env --"
+    "with-env": "dotenv -e ../../.env --",
+    "start:cluster": "pnpm with-env node server-cluster.mjs"
   },
   "dependencies": {
     "@pelis/auth": "workspace:*",

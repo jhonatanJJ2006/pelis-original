@@ -1,0 +1,17 @@
+# Referencia para /etc/cloudflared/config.yml (las credenciales no van al repo).
+tunnel: <TUNNEL_ID>
+credentials-file: /home/det/.cloudflared/<TUNNEL_ID>.json
+protocol: quic
+originRequest:
+  connectTimeout: 10s
+  tlsTimeout: 10s
+  tcpKeepAlive: 30s
+  keepAliveConnections: 1024
+  keepAliveTimeout: 90s
+  noHappyEyeballs: true
+ingress:
+  - hostname: verpelis.pro
+    service: http://127.0.0.1:3000
+  - hostname: www.verpelis.pro
+    service: http://127.0.0.1:3000
+  - service: http_status:404

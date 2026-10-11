@@ -1,5 +1,9 @@
 import { NextResponse } from 'next/server';
-import { isValidEmail, loginCodeRateLimiter } from '@/lib/login-code-rate-limit';
+import {
+  checkLoginCodeRateLimit,
+  isValidEmail,
+  loginCodeRateLimiter,
+} from '@/lib/login-code-rate-limit';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -32,7 +36,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ message: 'Correo inválido' }, { status: 400 });
   }
 
-  const limit = loginCodeRateLimiter.check(email, clientIp(req));
+  const ip = clientIp(req);
+  let limit;
+  try {
+    limit = await checkLoginCodeRateLimit(email, ip);
+  } catch (err) {
+    // Si Postgres falla, no dejamos el envío sin límite: usamos el de memoria.
+    console.error('[login-code] límite en Postgres no disponible', err);
+    limit = loginCodeRateLimiter.check(email, ip);
+  }
   if (!limit.ok) {
     return NextResponse.json(
       {
