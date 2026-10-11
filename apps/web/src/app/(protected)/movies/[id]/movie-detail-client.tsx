@@ -48,7 +48,7 @@ export default function MovieDetailPageClient({ preloaded }: MovieDetailPageClie
   const resolvedRelated = related ?? preloadedRelated;
   const addFavorite = useMutation(api.favorites.add);
   const removeFavorite = useMutation(api.favorites.remove);
-  const isFavorited = useQuery<boolean>(
+  const { data: isFavorited, refetch: refetchFavorite } = useQueryResult<boolean>(
     api.favorites.check,
     user && resolvedMovie ? { userId: user._id as any, movieId: resolvedMovie._id as any } : 'skip'
   );
@@ -71,6 +71,8 @@ export default function MovieDetailPageClient({ preloaded }: MovieDetailPageClie
         await addFavorite({ userId: user._id as any, movieId: resolvedMovie._id as any });
         toast.success('Agregado a favoritos');
       }
+      // Refrescar el estado del botón sin depender del aviso en tiempo real.
+      refetchFavorite();
     } catch {
       toast.error('Error al actualizar favoritos');
     }
