@@ -274,33 +274,33 @@ export default function SubscribePage() {
                 >
                   <div className="relative h-full pt-4">
                     {isCurrent ? (
-                      <span className="absolute top-0 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap px-4 py-1 bg-cinema-success text-cinema-chalk text-xs font-bold rounded-full uppercase tracking-wide shadow-[0_2px_12px_rgba(16,185,129,0.4)]">
+                      <span className="absolute top-0 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap px-3 py-1 bg-cinema-success text-cinema-bg text-label font-semibold rounded-full uppercase">
                         Tu plan
                       </span>
                     ) : plan.recommended ? (
-                      <span className="absolute top-0 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap px-4 py-1 bg-gradient-to-r from-cinema-accent to-cinema-accent-light text-cinema-bg text-xs font-bold rounded-full uppercase tracking-wide shadow-[0_2px_12px_rgba(245,200,66,0.4)]">
-                        Recomendado
+                      <span className="absolute top-0 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap px-3 py-1 border border-cinema-accent bg-cinema-bg text-cinema-accent text-label font-semibold rounded-full uppercase">
+                        Recomendado PELIS
                       </span>
                     ) : null}
 
                     <div
                       className={cn(
-                        'flex flex-col rounded-lg border p-8 h-full overflow-visible motion-safe:transition-[transform,box-shadow,border-color] motion-safe:duration-normal [@media(hover:hover)_and_(pointer:fine)]:hover:-translate-y-1',
+                        'flex flex-col rounded-lg border p-7 h-full overflow-visible motion-safe:transition-[border-color] motion-safe:duration-normal',
                         isCurrent
-                          ? 'bg-cinema-surface border-cinema-success/50 shadow-[0_8px_32px_rgba(16,185,129,0.15)]'
+                          ? 'bg-cinema-surface border-2 border-cinema-success/60'
                           : plan.recommended
-                            ? 'card-feature border-cinema-accent/40 shadow-[0_8px_32px_rgba(245,200,66,0.15)] [@media(hover:hover)_and_(pointer:fine)]:hover:border-cinema-accent/60 [@media(hover:hover)_and_(pointer:fine)]:hover:shadow-[0_12px_40px_rgba(245,200,66,0.25)]'
+                            ? 'bg-cinema-elevated border-2 border-cinema-accent'
                             : 'bg-cinema-surface border-cinema-border [@media(hover:hover)_and_(pointer:fine)]:hover:border-cinema-accent/40'
                       )}
                     >
                       <div
                         className={cn(
-                          'w-12 h-12 rounded-lg flex items-center justify-center mb-5',
+                          'w-10 h-10 rounded-[6px] flex items-center justify-center mb-5',
                           isCurrent
                             ? 'bg-cinema-success text-cinema-chalk'
                             : plan.recommended
                               ? 'bg-cinema-accent text-cinema-bg'
-                              : 'bg-gradient-to-br from-cinema-accent to-cinema-teal text-cinema-chalk'
+                              : 'border border-cinema-border text-cinema-accent'
                         )}
                       >
                         <Icon className="w-6 h-6" aria-hidden />
@@ -311,7 +311,14 @@ export default function SubscribePage() {
                       <p className="text-cinema-silver text-sm mb-5">{plan.description}</p>
 
                       <div className="mb-6">
-                        <span className="text-4xl font-bold text-cinema-chalk">${plan.price}</span>
+                        <span
+                          className={cn(
+                            'font-display text-4xl font-semibold',
+                            plan.recommended ? 'text-cinema-accent' : 'text-cinema-chalk'
+                          )}
+                        >
+                          ${plan.price}
+                        </span>
                         <span className="text-cinema-silver">
                           /{plan.months} {plan.months === 1 ? 'mes' : 'meses'}
                         </span>
@@ -323,7 +330,7 @@ export default function SubscribePage() {
                           .map((feature, i) => (
                             <li key={i} className="flex items-start gap-2 text-sm">
                               <Check
-                                className="w-4 h-4 text-cinema-teal mt-0.5 shrink-0"
+                                className="w-4 h-4 text-cinema-accent mt-0.5 shrink-0"
                                 aria-hidden
                               />
                               <span className="text-cinema-muted">{feature}</span>
@@ -333,7 +340,7 @@ export default function SubscribePage() {
                       <PlanMediaCapabilities features={plan.features} />
 
                       {action === 'unavailable' && (
-                        <p className="text-xs text-amber-400/90 mb-3 text-center">
+                        <p className="text-xs text-cinema-accent mb-3 text-center">
                           Plan no configurado para pagos
                         </p>
                       )}
@@ -343,14 +350,14 @@ export default function SubscribePage() {
                         onClick={() => handleSubscribe(plan, action)}
                         disabled={!canSelect || isPlanLoading}
                         className={cn(
-                          'w-full py-3.5 rounded font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed',
+                          'w-full h-11 rounded-[6px] text-xs font-semibold uppercase tracking-[0.08em] transition-colors disabled:opacity-50 disabled:cursor-not-allowed',
                           action === 'upgrade'
-                            ? 'bg-gradient-to-r from-cinema-accent to-cinema-accent-light text-cinema-bg hover:brightness-110'
+                            ? 'bg-cinema-accent text-cinema-bg hover:bg-cinema-accent-light'
                             : action === 'current'
                               ? 'bg-cinema-success/20 text-cinema-success border border-cinema-success/40'
                               : plan.recommended
-                                ? 'bg-gradient-to-r from-cinema-accent to-cinema-accent-light text-cinema-bg hover:brightness-110'
-                                : 'bg-cinema-elevated hover:bg-cinema-accent/30 text-cinema-chalk border border-cinema-border'
+                                ? 'bg-cinema-accent text-cinema-bg hover:bg-cinema-accent-light'
+                                : 'bg-transparent hover:bg-cinema-elevated text-cinema-chalk border border-cinema-border'
                         )}
                       >
                         {planButtonLabel(action, isPlanLoading)}
