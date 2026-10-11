@@ -13,6 +13,7 @@ import {
 import { hasManifestForToken } from '../lib/hasManifestForToken';
 import { movieMatchesGenre } from '../lib/movieGenre';
 import { adminMovieListWhere } from '../lib/adminMovieListWhere';
+import { BULK_MAX_TARGETS, isBulkEligible } from '../lib/adminBulk';
 
 const qualityFilterValidator = z.enum([
   'all',
@@ -23,6 +24,55 @@ const qualityFilterValidator = z.enum([
   'incomplete',
   'missing_backdrop',
 ]);
+
+/**
+ * Ids de todas las películas del filtro actual (búsqueda, género y calidad) que son
+ * elegibles para una acción masiva. Lo usa el panel para "todo el filtro".
+ */
+export const bulkTargetIds = register({
+  kind: 'action',
+  name: 'adminMovies.bulkTargetIds',
+  reads: ['movie'],
+  args: z.object({
+    search: z.string().optional(),
+    genre: z.string().optional(),
+    qualityFilter: qualityFilterValidator.optional(),
+    purpose: z.enum(['enrich', 'backdrops']),
+  }),
+  handler: async (ctx, a) => {
+    await requireAdmin(ctx);
+    const filter: MovieQualityFilter = a.qualityFilter ?? 'all';
+    const genre = a.genre?.trim() ?? '';
+    const where = adminMovieListWhere({ search: a.search, genre });
+    let movies = await prisma.movie.findMany({ where, orderBy: { name: 'asc' } });
+    if (genre) movies = movies.filter((movie) => movieMatchesGenre(movie.genre, genre));
+    const ids: string[] = [];
+    for (const m of movies) {
+      const input = {
+        name: m.name,
+        token: m.token,
+        image: m.image,
+        videoUrl: m.videoUrl,
+        synopsis: m.synopsis,
+        actors: m.actors,
+        classification: m.classification,
+        genre: m.genre,
+        backdropImage: m.backdropImage,
+      };
+      // El manifiesto solo importa para los filtros de video; evitarlo ahorra E/S.
+      const needsManifest = filter !== 'all' && (!m.videoUrl || m.videoUrl.trim() === '');
+      const hasManifest = needsManifest ? await hasManifestForToken(m.token) : true;
+      if (filter !== 'all' && !matchesQualityFilter({ ...input, hasManifest }, filter)) continue;
+      if (!isBulkEligible(getMovieQualityFlags({ ...input, hasManifest }), a.purpose)) continue;
+      ids.push(m.id);
+    }
+    return {
+      ids: ids.slice(0, BULK_MAX_TARGETS),
+      total: ids.length,
+      truncated: ids.length > BULK_MAX_TARGETS,
+    };
+  },
+});
 
 export const adminList = register({
   kind: 'query',

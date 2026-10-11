@@ -96,120 +96,136 @@ export function SeriesForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-5 max-w-4xl rounded-lg border border-cinema-border bg-cinema-surface p-5 sm:p-6"
+      className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-5 items-start"
     >
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <Input
-          label="Nombre"
-          value={values.name}
-          onChange={(e) => setField('name', e.target.value)}
-          error={errors.name}
-        />
-        <Input
-          label="Token"
-          value={values.token}
-          onChange={(e) => setField('token', e.target.value)}
-          error={errors.token}
-        />
+      <div className="space-y-5 min-w-0">
+        <section className="rounded-lg border border-cinema-border bg-cinema-surface p-5 space-y-5">
+          <h2 className="font-display text-lg font-semibold text-cinema-chalk">
+            Datos de la serie
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <Input
+              label="Nombre"
+              value={values.name}
+              onChange={(e) => setField('name', e.target.value)}
+              error={errors.name}
+            />
+            <Input
+              label="Token"
+              value={values.token}
+              onChange={(e) => setField('token', e.target.value)}
+              error={errors.token}
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="synopsis"
+              className="block text-sm font-medium text-cinema-muted mb-1.5"
+            >
+              Sinopsis
+            </label>
+            <textarea
+              id="synopsis"
+              value={values.synopsis}
+              onChange={(e) => setField('synopsis', e.target.value)}
+              rows={4}
+              className="input-field resize-y min-h-[120px]"
+            />
+            {errors.synopsis && <p className="mt-1 text-sm text-red-400">{errors.synopsis}</p>}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <Select
+              label="Género"
+              value={values.genre}
+              onChange={(e) => setField('genre', e.target.value)}
+              error={errors.genre}
+            >
+              <option value="">Seleccionar género</option>
+              {genres.map((genre) => (
+                <option key={genre} value={genre}>
+                  {genre}
+                </option>
+              ))}
+            </Select>
+
+            <Select
+              label="Clasificación"
+              value={values.classification}
+              onChange={(e) => setField('classification', e.target.value)}
+              error={errors.classification}
+            >
+              {classifications.map((classification) => (
+                <option key={classification} value={classification}>
+                  {classification}
+                </option>
+              ))}
+            </Select>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <Input
+              label="Año"
+              value={values.releaseYear}
+              onChange={(e) => setField('releaseYear', e.target.value)}
+              error={errors.releaseYear}
+            />
+            <Input
+              label="Temporada"
+              type="number"
+              value={values.season}
+              onChange={(e) => setField('season', e.target.value)}
+            />
+            <Input
+              label="Episodios"
+              type="number"
+              value={values.episodes}
+              onChange={(e) => setField('episodes', e.target.value)}
+            />
+          </div>
+
+          <Input
+            label="Actores"
+            value={values.actors}
+            onChange={(e) => setField('actors', e.target.value)}
+            error={errors.actors}
+          />
+        </section>
       </div>
 
-      <Input
-        label="URL de imagen"
-        value={values.image}
-        onChange={(e) => setField('image', e.target.value)}
-        error={errors.image}
-      />
+      <aside className="space-y-5 lg:sticky lg:top-6">
+        <section className="rounded-lg border border-cinema-border bg-cinema-surface p-5 space-y-5">
+          <h2 className="font-display text-lg font-semibold text-cinema-chalk">
+            Imagen y publicación
+          </h2>
+          <Input
+            label="URL de imagen"
+            value={values.image}
+            onChange={(e) => setField('image', e.target.value)}
+            error={errors.image}
+          />
 
-      {values.image && (
-        <div className="w-24 h-36 rounded-lg overflow-hidden bg-cinema-elevated border border-cinema-border">
-          <img src={values.image} alt="Preview" className="w-full h-full object-cover" />
-        </div>
-      )}
+          {values.image && (
+            <div className="w-24 h-36 rounded-lg overflow-hidden bg-cinema-elevated border border-cinema-border">
+              <img src={values.image} alt="Preview" className="w-full h-full object-cover" />
+            </div>
+          )}
 
-      <div>
-        <label htmlFor="synopsis" className="block text-sm font-medium text-cinema-muted mb-1.5">
-          Sinopsis
-        </label>
-        <textarea
-          id="synopsis"
-          value={values.synopsis}
-          onChange={(e) => setField('synopsis', e.target.value)}
-          rows={4}
-          className="input-field resize-y min-h-[120px]"
-        />
-        {errors.synopsis && <p className="mt-1 text-sm text-red-400">{errors.synopsis}</p>}
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <Select
-          label="Género"
-          value={values.genre}
-          onChange={(e) => setField('genre', e.target.value)}
-          error={errors.genre}
-        >
-          <option value="">Seleccionar género</option>
-          {genres.map((genre) => (
-            <option key={genre} value={genre}>
-              {genre}
-            </option>
-          ))}
-        </Select>
-
-        <Select
-          label="Clasificación"
-          value={values.classification}
-          onChange={(e) => setField('classification', e.target.value)}
-          error={errors.classification}
-        >
-          {classifications.map((classification) => (
-            <option key={classification} value={classification}>
-              {classification}
-            </option>
-          ))}
-        </Select>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <Input
-          label="Año"
-          value={values.releaseYear}
-          onChange={(e) => setField('releaseYear', e.target.value)}
-          error={errors.releaseYear}
-        />
-        <Input
-          label="Temporada"
-          type="number"
-          value={values.season}
-          onChange={(e) => setField('season', e.target.value)}
-        />
-        <Input
-          label="Episodios"
-          type="number"
-          value={values.episodes}
-          onChange={(e) => setField('episodes', e.target.value)}
-        />
-      </div>
-
-      <Input
-        label="Actores"
-        value={values.actors}
-        onChange={(e) => setField('actors', e.target.value)}
-        error={errors.actors}
-      />
-
-      <label className="inline-flex items-center gap-2 text-sm text-cinema-muted cursor-pointer">
-        <input
-          type="checkbox"
-          checked={values.featured}
-          onChange={(e) => setField('featured', e.target.checked)}
-          className="rounded border-cinema-border bg-cinema-surface text-cinema-accent focus:ring-cinema-accent/50"
-        />
-        Destacada en inicio
-      </label>
-
-      <Button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? 'Guardando...' : submitLabel}
-      </Button>
+          <label className="inline-flex items-center gap-2 text-sm text-cinema-muted cursor-pointer">
+            <input
+              type="checkbox"
+              checked={values.featured}
+              onChange={(e) => setField('featured', e.target.checked)}
+              className="rounded border-cinema-border bg-cinema-surface text-cinema-accent focus:ring-cinema-accent/50"
+            />
+            Destacada en inicio
+          </label>
+        </section>
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? 'Guardando...' : submitLabel}
+        </Button>
+      </aside>
     </form>
   );
 }

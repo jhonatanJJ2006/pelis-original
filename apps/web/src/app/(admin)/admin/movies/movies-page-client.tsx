@@ -7,6 +7,8 @@ import { useEffect, useState } from 'react';
 import { Plus, Search, Sparkles, Monitor } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@pelis/db/api';
+import { BulkActionDialog } from '../components/bulk-action-dialog';
+import { addTally, chunkIds, type BulkScope, type BulkTally } from '../lib/bulk-scope';
 import { Button, Input, Select, Spinner } from '@pelis/ui/components';
 import { AdminTableSkeleton } from '@pelis/ui/features/admin-table-skeleton';
 import { MoviePoster } from '@pelis/ui/features/movie-poster';
@@ -163,72 +165,102 @@ export default function AdminMoviesPageClient() {
     />
   );
 
-  const handleBulkBackdrops = async () => {
-    if (!movies?.length) return;
+  type BulkPurpose = 'enrich' | 'backdrops';
+  const [bulkDialog, setBulkDialog] = useState<BulkPurpose | null>(null);
+  const [bulkFilterTargets, setBulkFilterTargets] = useState<
+    { ids: string[]; total: number; truncated: boolean } | undefined
+  >(undefined);
+  const [bulkProgress, setBulkProgress] = useState<{ done: number; total: number } | undefined>();
+  const fetchBulkTargets = useAction<
+    {
+      search?: string;
+      genre?: string;
+      qualityFilter: QualityFilter;
+      purpose: BulkPurpose;
+    },
+    { ids: string[]; total: number; truncated: boolean }
+  >(api.adminMovies.bulkTargetIds);
 
-    const eligible = movies.filter((m) => !m.quality.isOrphanId && m.quality.isMissingBackdrop);
-    if (eligible.length === 0) {
-      toast.info('No hay películas sin backdrop en esta vista');
-      return;
-    }
+  const viewEligible = (purpose: BulkPurpose) =>
+    (movies ?? []).filter((m) =>
+      purpose === 'enrich' ? canEnrich(m) : !m.quality.isOrphanId && m.quality.isMissingBackdrop
+    );
 
-    if (
-      !confirm(
-        `¿Descargar backdrop de TMDB para ${eligible.length} película(s)? Solo se aplicará a las que aún no tienen imagen ancha.`
-      )
-    ) {
-      return;
-    }
-
-    setBulkBackdrops(true);
+  const openBulk = async (purpose: BulkPurpose) => {
+    setBulkDialog(purpose);
+    setBulkProgress(undefined);
+    setBulkFilterTargets(undefined);
     try {
-      const result = await applyBackdropsBulk({
-        movieIds: eligible.map((m) => m._id as any),
+      const targets = await fetchBulkTargets({
+        search: debouncedSearch || undefined,
+        genre: genre || undefined,
+        qualityFilter,
+        purpose,
       });
-      toast.success(
-        `Listo: ${result.ok} actualizadas, ${result.failed} fallidas, ${result.skipped} omitidas`
-      );
+      setBulkFilterTargets(targets);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Error en backdrops masivos');
-    } finally {
-      setBulkBackdrops(false);
+      toast.error(error instanceof Error ? error.message : 'No se pudo contar el filtro');
+      setBulkFilterTargets({ ids: [], total: 0, truncated: false });
     }
   };
 
-  const handleBulkEnrich = async () => {
-    if (!movies?.length) return;
-
-    const eligible = movies.filter(canEnrich);
-    if (eligible.length === 0) {
-      toast.info('No hay películas elegibles para enriquecer en esta vista');
-      return;
-    }
-
-    if (
-      !confirm(
-        `¿Completar metadata de ${eligible.length} película(s) desde TMDB? Se usará el primer resultado de búsqueda para cada una.`
-      )
-    ) {
-      return;
-    }
-
-    setBulkEnriching(true);
+  const runBulk = async (scope: BulkScope) => {
+    if (!bulkDialog) return;
+    const purpose = bulkDialog;
+    const ids =
+      scope === 'view' ? viewEligible(purpose).map((m) => m._id) : (bulkFilterTargets?.ids ?? []);
+    if (ids.length === 0) return;
+    const setRunning = purpose === 'enrich' ? setBulkEnriching : setBulkBackdrops;
+    const run = purpose === 'enrich' ? enrichMoviesBulk : applyBackdropsBulk;
+    setRunning(true);
+    let tally: BulkTally = { ok: 0, failed: 0, skipped: 0 };
+    let done = 0;
+    setBulkProgress({ done, total: ids.length });
     try {
-      const result = await enrichMoviesBulk({
-        movieIds: eligible.map((m) => m._id as any),
-      });
+      for (const batch of chunkIds(ids, 25)) {
+        tally = addTally(tally, await run({ movieIds: batch as any }));
+        done += batch.length;
+        setBulkProgress({ done, total: ids.length });
+      }
       toast.success(
-        `Listo: ${result.ok} actualizadas, ${result.failed} fallidas, ${result.skipped} omitidas`
+        `Listo: ${tally.ok} actualizadas, ${tally.failed} fallidas, ${tally.skipped} omitidas`
       );
+      setBulkDialog(null);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Error en enriquecimiento masivo');
+      toast.error(
+        `${error instanceof Error ? error.message : 'Error en la acción masiva'} (${done} de ${ids.length} procesadas)`
+      );
     } finally {
-      setBulkEnriching(false);
+      setRunning(false);
     }
   };
+
+  const handleBulkBackdrops = () => void openBulk('backdrops');
+  const handleBulkEnrich = () => void openBulk('enrich');
 
   return (
     <div>
+      {bulkDialog && (
+        <BulkActionDialog
+          title={
+            bulkDialog === 'enrich' ? 'Completar metadata desde TMDB' : 'Aplicar backdrops de TMDB'
+          }
+          description={
+            bulkDialog === 'enrich'
+              ? 'Se usará el primer resultado de búsqueda de TMDB para cada película incompleta o sin póster.'
+              : 'Solo se aplicará a las películas que aún no tienen imagen ancha.'
+          }
+          viewCount={viewEligible(bulkDialog).length}
+          filterCount={bulkFilterTargets?.ids.length}
+          filterTruncatedAt={
+            bulkFilterTargets?.truncated ? bulkFilterTargets.ids.length : undefined
+          }
+          running={bulkEnriching || bulkBackdrops}
+          progress={bulkProgress}
+          onConfirm={(scope) => void runBulk(scope)}
+          onClose={() => setBulkDialog(null)}
+        />
+      )}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
         <div>
           <p className="text-label uppercase text-cinema-accent mb-1.5 flex items-center gap-2">

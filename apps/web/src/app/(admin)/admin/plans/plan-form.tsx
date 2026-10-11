@@ -119,139 +119,160 @@ export function PlanForm({ initialValues, onSubmit, submitLabel = 'Guardar' }: P
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-5 max-w-4xl rounded-lg border border-cinema-border bg-cinema-surface p-5 sm:p-6"
+      className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-5 items-start"
     >
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <Input
-          label="Nombre"
-          value={values.name}
-          onChange={(e) => setField('name', e.target.value)}
-          error={errors.name}
-        />
-        <Input
-          label="Precio (USD)"
-          type="number"
-          step="0.01"
-          min="0"
-          value={values.price}
-          onChange={(e) => setField('price', e.target.value)}
-          error={errors.price}
-        />
+      <div className="space-y-5 min-w-0">
+        <section className="rounded-lg border border-cinema-border bg-cinema-surface p-5 space-y-5">
+          <h2 className="font-display text-lg font-semibold text-cinema-chalk">Datos del plan</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <Input
+              label="Nombre"
+              value={values.name}
+              onChange={(e) => setField('name', e.target.value)}
+              error={errors.name}
+            />
+            <Input
+              label="Precio (USD)"
+              type="number"
+              step="0.01"
+              min="0"
+              value={values.price}
+              onChange={(e) => setField('price', e.target.value)}
+              error={errors.price}
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="description"
+              className="block text-sm font-medium text-cinema-muted mb-1.5"
+            >
+              Descripción
+            </label>
+            <textarea
+              id="description"
+              value={values.description}
+              onChange={(e) => setField('description', e.target.value)}
+              rows={3}
+              className="input-field resize-y"
+            />
+            {errors.description && (
+              <p className="mt-1 text-sm text-red-400">{errors.description}</p>
+            )}
+          </div>
+
+          <div>
+            <label
+              htmlFor="features"
+              className="block text-sm font-medium text-cinema-muted mb-1.5"
+            >
+              Características (una por línea)
+            </label>
+            <textarea
+              id="features"
+              value={values.featuresText}
+              onChange={(e) => setField('featuresText', e.target.value)}
+              rows={6}
+              placeholder={DEFAULT_PLAN_FEATURES_TEXT}
+              className="input-field resize-y"
+            />
+            <p className="mt-1.5 text-xs text-cinema-muted">
+              Las opciones de subtítulos y audio se guardan como líneas de características, por
+              ejemplo «Subtítulos: Español, English».
+            </p>
+          </div>
+
+          <fieldset className="rounded-lg border border-cinema-border bg-cinema-bg/40 p-4 space-y-4">
+            <legend className="px-1 font-display text-sm tracking-wide text-cinema-chalk">
+              Pistas de subtítulos y audio
+            </legend>
+            <p className="text-xs text-cinema-muted">
+              Marca lo que incluye este plan. Se muestra en la página de suscripción. El reproductor
+              sigue usando las pistas reales del stream.
+            </p>
+
+            <CheckboxGroup
+              legend="Idiomas de subtítulos"
+              options={PLAN_SUBTITLE_LANGS}
+              selected={subtitleLangs}
+              onToggle={(option) =>
+                togglePrefixed(PLAN_FEATURE_PREFIX.subtitles, option, subtitleLangs)
+              }
+            />
+            <CheckboxGroup
+              legend="Tipos de subtítulos"
+              options={PLAN_SUBTITLE_TYPES}
+              selected={subtitleTypes}
+              onToggle={(option) =>
+                togglePrefixed(PLAN_FEATURE_PREFIX.types, option, subtitleTypes)
+              }
+            />
+            <CheckboxGroup
+              legend="Pistas de audio"
+              options={PLAN_AUDIO_TRACKS}
+              selected={audioTracks}
+              onToggle={(option) => togglePrefixed(PLAN_FEATURE_PREFIX.audio, option, audioTracks)}
+            />
+          </fieldset>
+        </section>
       </div>
 
-      <div>
-        <label htmlFor="description" className="block text-sm font-medium text-cinema-muted mb-1.5">
-          Descripción
-        </label>
-        <textarea
-          id="description"
-          value={values.description}
-          onChange={(e) => setField('description', e.target.value)}
-          rows={3}
-          className="input-field resize-y"
-        />
-        {errors.description && <p className="mt-1 text-sm text-red-400">{errors.description}</p>}
-      </div>
+      <aside className="space-y-5 lg:sticky lg:top-6">
+        <section className="rounded-lg border border-cinema-border bg-cinema-surface p-5 space-y-5">
+          <h2 className="font-display text-lg font-semibold text-cinema-chalk">
+            Ajustes y publicación
+          </h2>
+          <div className="grid grid-cols-1 gap-5">
+            <Select
+              label="Ícono"
+              value={values.icon}
+              onChange={(e) => setField('icon', e.target.value)}
+            >
+              {ICONS.map((icon) => (
+                <option key={icon} value={icon}>
+                  {icon}
+                </option>
+              ))}
+            </Select>
+            <Input
+              label="Duración (meses)"
+              type="number"
+              min="1"
+              value={values.months}
+              onChange={(e) => setField('months', e.target.value)}
+              error={errors.months}
+            />
+            <Input
+              label="Máx. dispositivos / sesiones"
+              type="number"
+              min="1"
+              step="1"
+              value={values.maxDevices}
+              onChange={(e) => setField('maxDevices', e.target.value)}
+              error={errors.maxDevices}
+            />
+            <Input
+              label="Stripe Price ID"
+              value={values.stripePriceId}
+              onChange={(e) => setField('stripePriceId', e.target.value)}
+              placeholder="price_..."
+            />
+          </div>
 
-      <div>
-        <label htmlFor="features" className="block text-sm font-medium text-cinema-muted mb-1.5">
-          Características (una por línea)
-        </label>
-        <textarea
-          id="features"
-          value={values.featuresText}
-          onChange={(e) => setField('featuresText', e.target.value)}
-          rows={6}
-          placeholder={DEFAULT_PLAN_FEATURES_TEXT}
-          className="input-field resize-y"
-        />
-        <p className="mt-1.5 text-xs text-cinema-muted">
-          Las opciones de subtítulos y audio se guardan como líneas de características, por ejemplo
-          «Subtítulos: Español, English».
-        </p>
-      </div>
-
-      <fieldset className="rounded-[10px] border border-cinema-border bg-cinema-surface/60 p-4 space-y-4">
-        <legend className="px-1 font-display text-sm tracking-wide text-cinema-chalk">
-          Pistas de subtítulos y audio
-        </legend>
-        <p className="text-xs text-cinema-muted">
-          Marca lo que incluye este plan. Se muestra en la página de suscripción. El reproductor
-          sigue usando las pistas reales del stream.
-        </p>
-
-        <CheckboxGroup
-          legend="Idiomas de subtítulos"
-          options={PLAN_SUBTITLE_LANGS}
-          selected={subtitleLangs}
-          onToggle={(option) =>
-            togglePrefixed(PLAN_FEATURE_PREFIX.subtitles, option, subtitleLangs)
-          }
-        />
-        <CheckboxGroup
-          legend="Tipos de subtítulos"
-          options={PLAN_SUBTITLE_TYPES}
-          selected={subtitleTypes}
-          onToggle={(option) => togglePrefixed(PLAN_FEATURE_PREFIX.types, option, subtitleTypes)}
-        />
-        <CheckboxGroup
-          legend="Pistas de audio"
-          options={PLAN_AUDIO_TRACKS}
-          selected={audioTracks}
-          onToggle={(option) => togglePrefixed(PLAN_FEATURE_PREFIX.audio, option, audioTracks)}
-        />
-      </fieldset>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-        <Select
-          label="Ícono"
-          value={values.icon}
-          onChange={(e) => setField('icon', e.target.value)}
-        >
-          {ICONS.map((icon) => (
-            <option key={icon} value={icon}>
-              {icon}
-            </option>
-          ))}
-        </Select>
-        <Input
-          label="Duración (meses)"
-          type="number"
-          min="1"
-          value={values.months}
-          onChange={(e) => setField('months', e.target.value)}
-          error={errors.months}
-        />
-        <Input
-          label="Máx. dispositivos / sesiones"
-          type="number"
-          min="1"
-          step="1"
-          value={values.maxDevices}
-          onChange={(e) => setField('maxDevices', e.target.value)}
-          error={errors.maxDevices}
-        />
-        <Input
-          label="Stripe Price ID"
-          value={values.stripePriceId}
-          onChange={(e) => setField('stripePriceId', e.target.value)}
-          placeholder="price_..."
-        />
-      </div>
-
-      <label className="inline-flex items-center gap-2 text-sm text-cinema-muted cursor-pointer">
-        <input
-          type="checkbox"
-          checked={values.recommended}
-          onChange={(e) => setField('recommended', e.target.checked)}
-          className="rounded border-cinema-border bg-cinema-surface text-cinema-accent focus:ring-cinema-accent/50"
-        />
-        Marcar como recomendado
-      </label>
-
-      <Button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? 'Guardando...' : submitLabel}
-      </Button>
+          <label className="inline-flex items-center gap-2 text-sm text-cinema-muted cursor-pointer">
+            <input
+              type="checkbox"
+              checked={values.recommended}
+              onChange={(e) => setField('recommended', e.target.checked)}
+              className="rounded border-cinema-border bg-cinema-surface text-cinema-accent focus:ring-cinema-accent/50"
+            />
+            Marcar como recomendado
+          </label>
+        </section>
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? 'Guardando...' : submitLabel}
+        </Button>
+      </aside>
     </form>
   );
 }
