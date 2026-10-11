@@ -1,10 +1,10 @@
-import { Fraunces, Outfit } from 'next/font/google';
+import { Fraunces, Inter } from 'next/font/google';
 import './globals.css';
 import { Providers } from '@pelis/auth/providers';
 import { Toaster } from 'sonner';
 import { AppProviders } from './providers';
 
-const outfit = Outfit({
+const inter = Inter({
   subsets: ['latin'],
   variable: '--font-body',
 });
@@ -58,7 +58,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
         <link rel="icon" href="/favicon.ico" sizes="any" />
       </head>
-      <body className={`${outfit.variable} ${fraunces.variable} font-sans`}>
+      <body className={`${inter.variable} ${fraunces.variable} font-sans`}>
         <Providers>
           <AppProviders>
             {children}
@@ -67,9 +67,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               position="top-right"
               toastOptions={{
                 style: {
-                  background: '#141418',
-                  border: '1px solid #2A2A32',
-                  color: '#F4F1EA',
+                  background: '#141417',
+                  border: '1px solid #2A2A30',
+                  color: '#F2EEE6',
                 },
               }}
             />

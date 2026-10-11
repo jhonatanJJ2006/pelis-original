@@ -59,13 +59,13 @@ export function AnilistSearchModal({ onClose, onImported }: AnilistSearchModalPr
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
-      <div className="w-full max-w-lg rounded-2xl border border-cinema-border bg-cinema-elevated p-5">
+      <div className="w-full max-w-lg rounded-lg border border-cinema-border bg-cinema-elevated p-5">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-display text-lg text-white uppercase tracking-wide">
+          <h2 className="font-display text-lg text-cinema-chalk uppercase tracking-wide">
             Buscar en AniList
           </h2>
           <button type="button" onClick={onClose} aria-label="Cerrar">
-            <X className="w-5 h-5 text-cinema-muted hover:text-white" />
+            <X className="w-5 h-5 text-cinema-muted hover:text-cinema-chalk" />
           </button>
         </div>
 
@@ -90,7 +90,7 @@ export function AnilistSearchModal({ onClose, onImported }: AnilistSearchModalPr
             >
               <img src={item.image} alt="" className="w-10 h-14 object-cover rounded" />
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-white truncate">{item.title}</p>
+                <p className="text-sm text-cinema-chalk truncate">{item.title}</p>
                 <p className="text-xs text-cinema-muted">
                   {item.year} · {item.episodes} ep.
                 </p>

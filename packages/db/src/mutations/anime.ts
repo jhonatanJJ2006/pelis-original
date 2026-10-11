@@ -73,7 +73,7 @@ const AnimeCreate = z.object({
       url: z.string(),
       language: z.enum(['sub', 'dub', 'esp']),
       isActive: z.boolean(),
-    }),
+    })
   ),
 });
 
@@ -117,7 +117,10 @@ export const update = register({
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
     const { id, ...rest } = args;
-    const current = await prisma.anime.findUnique({ where: { id }, select: { title: true, format: true } });
+    const current = await prisma.anime.findUnique({
+      where: { id },
+      select: { title: true, format: true },
+    });
     // Renaming can move an entry to a different franchise, so recompute the
     // series columns when the title changes.
     const series =

@@ -17,10 +17,17 @@ export function resolveMovieImagePath(image: string | null | undefined): string 
 }
 
 export function enrichMovieImage<
-  T extends { image: string; imageId?: string | null; backdropImage?: string | null; backdropImageId?: string | null }
+  T extends {
+    image: string;
+    imageId?: string | null;
+    backdropImage?: string | null;
+    backdropImageId?: string | null;
+  },
 >(movie: T | null): T | null {
   if (!movie) return movie;
-  const image = movie.imageId ? `/uploads/${movie.imageId}.webp` : resolveMovieImagePath(movie.image);
+  const image = movie.imageId
+    ? `/uploads/${movie.imageId}.webp`
+    : resolveMovieImagePath(movie.image);
   const backdropImage = movie.backdropImageId
     ? `/uploads/${movie.backdropImageId}.webp`
     : movie.backdropImage

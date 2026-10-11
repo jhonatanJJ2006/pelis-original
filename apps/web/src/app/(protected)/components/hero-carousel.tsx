@@ -25,7 +25,7 @@ function HeroImage({ movie, eager }: { movie: MediaItem; eager: boolean }) {
         loading={eager ? 'eager' : 'lazy'}
         fetchPriority={eager ? 'high' : undefined}
         decoding="async"
-        className="w-full h-full object-contain object-center md:object-cover"
+        className="w-full h-full object-cover object-top md:object-center"
         onError={() => setFailed(true)}
       />
     </picture>
@@ -36,7 +36,7 @@ const genreColors: Record<string, string> = {
   Acción: 'from-red-500/25 to-transparent',
   Comedia: 'from-yellow-400/20 to-transparent',
   Drama: 'from-blue-500/30 to-transparent',
-  Terror: 'from-emerald-500/20 to-transparent',
+  Terror: 'from-cinema-success/20 to-transparent',
   Romance: 'from-pink-500/20 to-transparent',
   Ciencia: 'from-cyan-500/25 to-transparent',
   Suspenso: 'from-orange-500/20 to-transparent',
@@ -45,11 +45,11 @@ const genreColors: Record<string, string> = {
 };
 
 function getGenreGradient(genre?: string): string {
-  if (!genre) return 'from-cinema-violet/20 to-transparent';
+  if (!genre) return 'from-cinema-accent/20 to-transparent';
   for (const [key, val] of Object.entries(genreColors)) {
     if (genre?.includes(key)) return val;
   }
-  return 'from-cinema-violet/15 to-transparent';
+  return 'from-cinema-accent/15 to-transparent';
 }
 
 const AUTOPLAY_DELAY_MS = 7000;
@@ -130,7 +130,7 @@ export function HeroCarousel({ movies }: HeroCarouselProps) {
   if (movies.length === 0) {
     return (
       <section
-        className="relative h-[75vh] min-h-[400px] sm:min-h-[500px] max-h-[900px] overflow-hidden bg-cinema-surface animate-pulse"
+        className="relative aspect-[4/5] max-h-[85vh] w-full sm:aspect-auto sm:h-[70vh] sm:min-h-[500px] sm:max-h-[860px] overflow-hidden bg-cinema-surface animate-pulse"
         aria-label="Destacados"
         aria-busy="true"
       />
@@ -140,7 +140,7 @@ export function HeroCarousel({ movies }: HeroCarouselProps) {
   return (
     <section
       data-hero-carousel
-      className="relative h-[75vh] min-h-[400px] sm:min-h-[500px] max-h-[900px] overflow-hidden touch-pan-y"
+      className="relative aspect-[4/5] max-h-[85vh] w-full sm:aspect-auto sm:h-[70vh] sm:min-h-[500px] sm:max-h-[860px] overflow-hidden touch-pan-y"
       aria-label="Destacados"
       aria-roledescription="carrusel"
       onTouchStart={handleTouchStart}
@@ -180,10 +180,23 @@ export function HeroCarousel({ movies }: HeroCarouselProps) {
                           isActive ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
                         )}
                       >
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-cinema-accent text-cinema-bg text-xs font-semibold rounded-full uppercase tracking-wide shadow-glow">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 border border-cinema-accent/60 text-cinema-accent text-label font-semibold rounded-full uppercase">
                           <Sparkles className="w-3.5 h-3.5" aria-hidden />
-                          Destacado
+                          {movie.featured ? 'Destacado' : 'Tendencia'}
                         </span>
+                        {movie.classification && (
+                          <span className="inline-flex items-center px-1.5 py-0.5 border border-cinema-silver/50 text-cinema-chalk text-[11px] font-semibold rounded-[4px]">
+                            {movie.classification}
+                          </span>
+                        )}
+                        <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 bg-cinema-chalk/10 text-cinema-chalk text-[11px] font-semibold rounded-[4px]">
+                          HD
+                        </span>
+                        {movie.subtitleTracks && movie.subtitleTracks.length > 0 && (
+                          <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 bg-cinema-chalk/10 text-cinema-chalk text-[11px] font-semibold rounded-[4px]">
+                            CC
+                          </span>
+                        )}
                         <span className="text-sm text-cinema-muted">
                           {movie.genre} &middot; {movie.releaseYear}
                         </span>
@@ -213,7 +226,7 @@ export function HeroCarousel({ movies }: HeroCarouselProps) {
                         <Link
                           href={`/movies/${movie._id}?play=true`}
                           tabIndex={isActive ? 0 : -1}
-                          className="btn-primary-glow inline-flex items-center gap-2 px-7 py-3.5 text-base"
+                          className="btn-base h-11 bg-cinema-accent hover:bg-cinema-accent-light text-cinema-bg inline-flex items-center gap-2 px-6 text-[15px]"
                         >
                           <Play className="w-5 h-5" fill="currentColor" aria-hidden />
                           Reproducir
@@ -221,7 +234,7 @@ export function HeroCarousel({ movies }: HeroCarouselProps) {
                         <Link
                           href={`/movies/${movie._id}`}
                           tabIndex={isActive ? 0 : -1}
-                          className="btn-secondary inline-flex items-center gap-2 px-7 py-3.5 text-base"
+                          className="btn-base h-11 border border-cinema-chalk/50 bg-cinema-bg/30 backdrop-blur-sm hover:bg-cinema-chalk/10 text-cinema-chalk inline-flex items-center gap-2 px-6 text-[15px]"
                         >
                           <Info className="w-5 h-5" aria-hidden />
                           Más info

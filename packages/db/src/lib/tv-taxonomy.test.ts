@@ -12,7 +12,7 @@ import {
 describe('cleanTvTitle', () => {
   it('strips quality and geo tags', () => {
     expect(cleanTvTitle('Clan Internacional Americas (1080p) [Geo-blocked]')).toBe(
-      'Clan Internacional Americas',
+      'Clan Internacional Americas'
     );
     expect(cleanTvTitle('BabyTV Latin America (720p)')).toBe('BabyTV Latin America');
     expect(cleanTvTitle('Teledeporte (720p) [Geo-blocked]')).toBe('Teledeporte');
@@ -21,8 +21,8 @@ describe('cleanTvTitle', () => {
   it('rescues mangled M3U leftovers', () => {
     expect(
       cleanTvTitle(
-        'like Gecko) Chrome/124.0.0.0 Safari/537.36" group-title="General",Global TV (1080p)',
-      ),
+        'like Gecko) Chrome/124.0.0.0 Safari/537.36" group-title="General",Global TV (1080p)'
+      )
     ).toBe('Global TV');
   });
 });
@@ -89,23 +89,19 @@ describe('normalizeChannelFields', () => {
 
 describe('channelMatchesCategory', () => {
   it('matches display category even when DB still has English tags', () => {
-    expect(
-      channelMatchesCategory({ name: 'Euronews', category: 'News' }, 'Noticias'),
-    ).toBe(true);
-    expect(
-      channelMatchesCategory({ name: 'Random', category: 'News' }, 'Deportes'),
-    ).toBe(false);
+    expect(channelMatchesCategory({ name: 'Euronews', category: 'News' }, 'Noticias')).toBe(true);
+    expect(channelMatchesCategory({ name: 'Random', category: 'News' }, 'Deportes')).toBe(false);
   });
 
   it('matches name-derived featured categories', () => {
+    expect(channelMatchesCategory({ name: 'FIFA+ Spain', category: 'Deportes' }, 'Fútbol')).toBe(
+      true
+    );
+    expect(channelMatchesCategory({ name: 'WWE Raw', category: 'Deportes' }, 'Lucha libre')).toBe(
+      true
+    );
     expect(
-      channelMatchesCategory({ name: 'FIFA+ Spain', category: 'Deportes' }, 'Fútbol'),
-    ).toBe(true);
-    expect(
-      channelMatchesCategory({ name: 'WWE Raw', category: 'Deportes' }, 'Lucha libre'),
-    ).toBe(true);
-    expect(
-      channelMatchesCategory({ name: 'Disney Channel LatAm', category: 'Undefined' }, 'Infantil'),
+      channelMatchesCategory({ name: 'Disney Channel LatAm', category: 'Undefined' }, 'Infantil')
     ).toBe(true);
   });
 });

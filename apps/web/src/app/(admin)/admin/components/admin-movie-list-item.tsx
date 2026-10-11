@@ -28,33 +28,54 @@ interface AdminMovieQualityBadgesProps {
   quality: AdminMovieListItem['quality'];
 }
 
+function StatusChip({
+  tone,
+  children,
+}: {
+  tone: 'ok' | 'warn' | 'danger' | 'info';
+  children: React.ReactNode;
+}) {
+  const tones = {
+    ok: 'border-cinema-success/40 bg-cinema-success/10 text-cinema-success',
+    warn: 'border-cinema-accent/40 bg-cinema-accent/10 text-cinema-accent',
+    danger: 'border-cinema-danger/60 bg-cinema-danger/15 text-cinema-danger-light',
+    info: 'border-cinema-border bg-cinema-elevated text-cinema-muted',
+  } as const;
+  const dots = {
+    ok: 'bg-cinema-success',
+    warn: 'bg-cinema-accent',
+    danger: 'bg-cinema-danger-light',
+    info: 'bg-cinema-ash',
+  } as const;
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em]',
+        tones[tone]
+      )}
+    >
+      <span className={cn('h-1.5 w-1.5 rounded-full', dots[tone])} aria-hidden />
+      {children}
+    </span>
+  );
+}
+
 export function AdminMovieQualityBadges({ quality }: AdminMovieQualityBadgesProps) {
+  const clean =
+    !quality.isOrphanId &&
+    !quality.isMissingImage &&
+    !quality.isMissingVideo &&
+    !quality.isIncomplete &&
+    !quality.isMissingBackdrop;
   return (
     <div className="flex flex-wrap gap-1">
-      {quality.isOrphanId && (
-        <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300">
-          ID
-        </span>
-      )}
-      {quality.isMissingImage && (
-        <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-500/20 text-red-300">
-          Sin img
-        </span>
-      )}
-      {quality.isMissingVideo && (
-        <span className="text-[10px] px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-300">
-          Sin video
-        </span>
-      )}
-      {quality.isIncomplete && (
-        <span className="text-[10px] px-2 py-0.5 rounded-full bg-cinema-gold/20 text-cinema-gold">
-          Incompleta
-        </span>
-      )}
+      {clean && <StatusChip tone="ok">Activo</StatusChip>}
+      {quality.isMissingVideo && <StatusChip tone="danger">Sin video</StatusChip>}
+      {quality.isOrphanId && <StatusChip tone="warn">ID huérfano</StatusChip>}
+      {quality.isMissingImage && <StatusChip tone="danger">Sin imagen</StatusChip>}
+      {quality.isIncomplete && <StatusChip tone="warn">Incompleta</StatusChip>}
       {quality.isMissingBackdrop && !quality.isOrphanId && (
-        <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300">
-          Sin backdrop
-        </span>
+        <StatusChip tone="info">Sin backdrop</StatusChip>
       )}
     </div>
   );
@@ -99,36 +120,40 @@ export function AdminMovieActions({
       </Button>
       {canPickPoster && (
         <Button variant="ghost" size="sm" aria-label="Poster TMDB" onClick={onPoster}>
-          <ImageIcon className="w-4 h-4 text-cinema-violet-light" />
+          <ImageIcon className="w-4 h-4 text-cinema-accent-light" />
         </Button>
       )}
       {canPickBackdrop && (
         <Button variant="ghost" size="sm" aria-label="Backdrop TMDB" onClick={onBackdrop}>
-          <Monitor className="w-4 h-4 text-cyan-400" />
+          <Monitor className="w-4 h-4 text-cinema-muted" />
         </Button>
       )}
       {canEnrich && (
         <Button variant="ghost" size="sm" aria-label="Completar desde TMDB" onClick={onEnrich}>
-          <Sparkles className="w-4 h-4 text-cinema-gold" />
+          <Sparkles className="w-4 h-4 text-cinema-accent" />
         </Button>
       )}
-      <Link href={`/admin/movies/${movie._id}/edit`}>
-        <Button variant="ghost" size="sm" aria-label="Editar">
-          <Pencil className="w-4 h-4" />
-        </Button>
-      </Link>
       <Button variant="ghost" size="sm" aria-label="Enlazar" onClick={onMerge}>
         <Link2 className="w-4 h-4" />
       </Button>
-      <Button
-        variant="ghost"
-        size="sm"
+      <Link
+        href={`/admin/movies/${movie._id}/edit`}
+        aria-label="Editar"
+        className="inline-flex h-8 items-center gap-1.5 rounded-[6px] border border-cinema-accent/40 px-2.5 text-xs font-medium text-cinema-accent hover:bg-cinema-accent/10 transition-colors"
+      >
+        <Pencil className="w-3.5 h-3.5" />
+        {!compact && <span>Editar</span>}
+      </Link>
+      <button
+        type="button"
         aria-label="Eliminar"
         disabled={deletingId === movie._id}
         onClick={onDelete}
+        className="inline-flex h-8 items-center gap-1.5 rounded-[6px] border border-cinema-danger/60 bg-cinema-danger/10 px-2.5 text-xs font-medium text-cinema-danger-light hover:bg-cinema-danger/25 transition-colors disabled:opacity-50"
       >
-        <Trash2 className="w-4 h-4 text-red-400" />
-      </Button>
+        <Trash2 className="w-3.5 h-3.5" />
+        {!compact && <span>Eliminar</span>}
+      </button>
     </div>
   );
 }
@@ -175,7 +200,7 @@ export function AdminMovieMobileCard({
           onOpen();
         }
       }}
-      className="rounded-2xl border border-cinema-border bg-cinema-surface p-4 transition-colors hover:bg-cinema-elevated/30 cursor-pointer"
+      className="rounded-lg border border-cinema-border bg-cinema-surface p-4 transition-colors hover:bg-cinema-elevated/30 cursor-pointer"
     >
       <div className="flex gap-3">
         <div className="w-14 h-20 shrink-0 rounded-lg overflow-hidden bg-cinema-elevated">
@@ -189,7 +214,7 @@ export function AdminMovieMobileCard({
                   'font-medium text-sm leading-snug line-clamp-2',
                   isAdminOrphanDisplayName(movie.name, movie.token)
                     ? 'text-cinema-muted italic'
-                    : 'text-white'
+                    : 'text-cinema-chalk'
                 )}
               >
                 {displayName}

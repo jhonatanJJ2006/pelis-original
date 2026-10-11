@@ -137,12 +137,12 @@ export async function fetchEpisodesFromProvider(
   anilistId: string | number,
   providerId: string,
   episodePage?: number,
-  _title?: string,
+  _title?: string
 ): Promise<AnimeEpisode[]> {
   const pageParam = episodePage ? `&page=${episodePage}` : '';
   try {
     const response = await consumetFetch(
-      `/meta/anilist/info/${anilistId}?provider=${consumetSlug(providerId)}${pageParam}`,
+      `/meta/anilist/info/${anilistId}?provider=${consumetSlug(providerId)}${pageParam}`
     );
     if (!response || !response.ok) return [];
     const data = (await response.json()) as {
@@ -168,7 +168,7 @@ export async function fetchEpisodesFromProvider(
 
 export async function fetchVideoFromProvider(
   episodeId: string,
-  providerId: string,
+  providerId: string
 ): Promise<VideoSourceResult> {
   const path = `/meta/anilist/watch/${episodeId}?provider=${consumetSlug(providerId)}`;
   try {
@@ -195,7 +195,7 @@ export async function fetchEpisodesWithFallback(
   anilistId: string | number,
   preferredProviderId?: string,
   episodePage?: number,
-  title?: string,
+  title?: string
 ): Promise<{ provider: string; episodes: AnimeEpisode[]; triedProviders: string[] }> {
   const order = getHlsProviders();
   const preferred = preferredProviderId ? getProviderById(preferredProviderId) : undefined;
@@ -212,7 +212,11 @@ export async function fetchEpisodesWithFallback(
       return { provider: provider.id, episodes, triedProviders };
     }
   }
-  return { provider: preferredProviderId ?? DEFAULT_ANIME_PROVIDER_ID, episodes: [], triedProviders };
+  return {
+    provider: preferredProviderId ?? DEFAULT_ANIME_PROVIDER_ID,
+    episodes: [],
+    triedProviders,
+  };
 }
 
 /**
@@ -225,7 +229,7 @@ export async function resolveEpisodeId(
   anilistId: string | number,
   providerId: string,
   episodeNumber: number,
-  title?: string,
+  title?: string
 ): Promise<string | null> {
   const episodes = await fetchEpisodesFromProvider(anilistId, providerId, undefined, title);
   if (episodes.length === 0) return null;
@@ -242,7 +246,7 @@ export async function fetchVideoByEpisodeNumber(
   anilistId: string | number,
   episodeNumber: number,
   preferredProviderId?: string,
-  title?: string,
+  title?: string
 ): Promise<{ provider: string | null; video: VideoSourceResult; triedProviders: string[] }> {
   const order = getHlsProviders();
   const preferred = preferredProviderId ? getProviderById(preferredProviderId) : undefined;
@@ -266,7 +270,7 @@ export async function fetchVideoByEpisodeNumber(
 
 export async function fetchVideoWithFallback(
   episodeId: string,
-  preferredProviderId?: string,
+  preferredProviderId?: string
 ): Promise<{ provider: string; video: VideoSourceResult; triedProviders: string[] }> {
   const order = getHlsProviders();
   const preferred = preferredProviderId ? getProviderById(preferredProviderId) : undefined;
@@ -296,7 +300,7 @@ export async function searchConsumet(query: string): Promise<unknown[]> {
     try {
       const response = await consumetFetch(
         `/meta/anilist/${encodeURIComponent(query)}?provider=${consumetSlug(provider.id)}`,
-        5000,
+        5000
       );
       if (response && response.ok) {
         const data = await response.json();
@@ -374,7 +378,7 @@ export async function checkProvidersHealth(): Promise<ProviderHealthResult[]> {
     try {
       const response = await consumetFetch(
         `/meta/anilist/info/${HEALTH_CHECK_ANILIST_ID}?provider=${consumetSlug(provider.id)}`,
-        8000,
+        8000
       );
       const responseMs = Date.now() - started;
       if (!response) {

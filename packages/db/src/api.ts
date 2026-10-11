@@ -136,6 +136,7 @@ export const api = {
   adminMovies: ns([
     'adminMovies.adminList',
     'adminMovies.adminStats',
+    'adminMovies.bulkTargetIds',
     'adminMovies.merge',
     'adminMovies.recent',
   ]),

@@ -183,7 +183,7 @@ function HistoryCard({
   const pct = getProgressPercentage(item.progress, item.duration);
 
   return (
-    <div className="bg-cinema-surface rounded-2xl border border-cinema-border overflow-hidden hover:border-cinema-accent/50 motion-safe:transition-[border-color,box-shadow] motion-safe:duration-normal h-full flex flex-col group">
+    <div className="bg-cinema-surface rounded-lg border border-cinema-border overflow-hidden hover:border-cinema-accent/50 motion-safe:transition-[border-color,box-shadow] motion-safe:duration-normal h-full flex flex-col group">
       <Link
         href={`/movies/${item.movieId}${resume ? '?play=true' : ''}`}
         className="relative aspect-video block overflow-hidden"
@@ -243,7 +243,7 @@ function HistoryCard({
             </div>
             <div className="h-1.5 bg-cinema-elevated rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-cinema-accent to-cinema-gold rounded-full"
+                className="h-full bg-gradient-to-r from-cinema-accent to-cinema-accent rounded-full"
                 style={{ width: `${pct}%` }}
               />
             </div>

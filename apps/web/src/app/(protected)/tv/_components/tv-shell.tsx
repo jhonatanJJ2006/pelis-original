@@ -64,7 +64,7 @@ export function TVShell({
       <div className="relative flex-1 min-w-0 min-h-0 bg-black">
         <button
           type="button"
-          className="absolute top-3 right-3 z-20 inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-black/70 px-2.5 py-1.5 text-xs font-medium text-white md:hidden"
+          className="absolute top-3 right-3 z-20 inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-black/70 px-2.5 py-1.5 text-xs font-medium text-cinema-chalk md:hidden"
           onClick={() => setChannelsOpen(true)}
           aria-expanded={channelsOpen}
         >
@@ -77,7 +77,7 @@ export function TVShell({
               <span className="w-1.5 h-1.5 rounded-full bg-cinema-danger animate-pulse" />
               En vivo
             </p>
-            <p className="text-white text-sm font-medium truncate max-w-[50vw] drop-shadow">
+            <p className="text-cinema-chalk text-sm font-medium truncate max-w-[50vw] drop-shadow">
               {currentChannelName}
             </p>
           </div>
@@ -94,7 +94,7 @@ export function TVShell({
           </div>
         ) : !hasActivePlan ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-6 text-center">
-            <Crown className="w-12 h-12 text-cinema-gold/40" aria-hidden />
+            <Crown className="w-12 h-12 text-cinema-accent/40" aria-hidden />
             <p className="text-cinema-muted max-w-md text-sm">
               Necesitas un plan activo para ver TV en vivo
             </p>

@@ -4,7 +4,7 @@ import { Film } from 'lucide-react';
 export default function NotFound() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6 text-center">
-      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-cinema-accent to-cinema-gold flex items-center justify-center mb-6 shadow-glow">
+      <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-cinema-accent to-cinema-accent flex items-center justify-center mb-6 shadow-glow">
         <Film className="w-7 h-7 text-cinema-bg" aria-hidden />
       </div>
       <p className="text-cinema-accent text-sm font-medium uppercase tracking-[0.28em] mb-3">404</p>

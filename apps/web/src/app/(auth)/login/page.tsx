@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Film } from 'lucide-react';
 import { Button, Input } from '@pelis/ui/components';
 const getAuthApiBase = () => '/api/auth';
 import { authClient } from '@pelis/auth/client';
@@ -115,11 +114,13 @@ function LoginForm() {
     <div className="w-full max-w-md">
       <div className="card-glow p-6 md:p-8 shadow-[0_8px_40px_rgba(196,163,90,0.12)]">
         <div className="text-center mb-8">
-          <div className="w-14 h-14 bg-gradient-to-br from-cinema-accent to-cinema-gold rounded-xl flex items-center justify-center mx-auto mb-4 shadow-glow">
-            <Film className="w-8 h-8 text-cinema-bg" aria-hidden />
-          </div>
-          <h1 className="font-display text-2xl md:text-3xl tracking-tight text-cinema-chalk">
-            Iniciar sesión
+          <p className="text-label uppercase text-cinema-accent mb-3 inline-flex items-center gap-2">
+            <span className="h-1 w-1 rounded-full bg-cinema-accent" aria-hidden />
+            Sala de proyección privada
+            <span className="h-1 w-1 rounded-full bg-cinema-accent" aria-hidden />
+          </p>
+          <h1 className="font-display text-3xl font-medium tracking-tight text-cinema-chalk">
+            Acceso a tu sala de proyección
           </h1>
           <p className="text-cinema-muted mt-2">Accede a tu cuenta para continuar</p>
         </div>
@@ -128,7 +129,7 @@ function LoginForm() {
           type="button"
           onClick={handleGoogleLogin}
           disabled={loading}
-          className="w-full inline-flex items-center justify-center gap-3 h-11 px-4 bg-cinema-elevated hover:bg-cinema-elevated/90 text-white font-semibold border border-cinema-border hover:border-cinema-silver/40 rounded-[10px] transition-all duration-200 active:scale-[0.97] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full inline-flex items-center justify-center gap-3 h-11 px-4 bg-cinema-elevated hover:bg-cinema-elevated/90 text-cinema-chalk font-semibold border border-cinema-border hover:border-cinema-silver/40 rounded-[6px] transition-all duration-200 active:scale-[0.97] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24" aria-hidden>
             <path
@@ -164,7 +165,7 @@ function LoginForm() {
 
         {verified && (
           <div
-            className="mb-4 p-3 rounded bg-green-500/10 border border-green-500/30 text-green-400 text-sm text-center"
+            className="mb-4 p-3 rounded bg-cinema-success/10 border border-cinema-success/30 text-cinema-success text-sm text-center"
             role="alert"
           >
             ¡Email verificado! Ahora puedes iniciar sesión.
@@ -172,10 +173,12 @@ function LoginForm() {
         )}
 
         {showVerifyMessage && (
-          <div className="mb-4 p-3 rounded bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 text-sm text-center">
+          <div className="mb-4 p-3 rounded bg-cinema-accent/10 border border-cinema-accent/30 text-cinema-accent text-sm text-center">
             <p className="mb-2">Debes verificar tu email antes de iniciar sesión.</p>
             {resendMessage && (
-              <p className={`mb-2 ${resendCooldown > 0 ? 'text-yellow-300' : 'text-red-400'}`}>
+              <p
+                className={`mb-2 ${resendCooldown > 0 ? 'text-cinema-accent-light' : 'text-red-400'}`}
+              >
                 {resendMessage}
               </p>
             )}
@@ -183,7 +186,7 @@ function LoginForm() {
               type="button"
               onClick={handleResendVerification}
               disabled={resending || resendCooldown > 0}
-              className="text-yellow-300 hover:text-yellow-200 underline font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="text-cinema-accent-light hover:text-cinema-accent-light underline font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {resending
                 ? 'Reenviando…'
@@ -191,11 +194,11 @@ function LoginForm() {
                   ? `Vuelve a intentarlo en ${resendCooldown}s`
                   : 'Reenviar código de verificación'}
             </button>
-            <p className="mt-3 pt-3 border-t border-yellow-500/20">
+            <p className="mt-3 pt-3 border-t border-cinema-accent/20">
               ¿Ya tienes tu código?{' '}
               <Link
                 href={`/verify-email?email=${encodeURIComponent(email)}`}
-                className="text-yellow-200 hover:text-yellow-100 underline font-medium"
+                className="text-cinema-accent-light hover:text-cinema-chalk underline font-medium"
               >
                 Ingresa tu código de verificación
               </Link>
@@ -234,11 +237,18 @@ function LoginForm() {
           </Button>
         </form>
 
+        <Link
+          href={nextPath ? `/login/codigo?next=${encodeURIComponent(nextPath)}` : '/login/codigo'}
+          className="btn-base mt-3 flex h-11 w-full items-center justify-center rounded-[6px] border border-cinema-border text-sm font-medium text-cinema-chalk hover:border-cinema-accent hover:text-cinema-accent"
+        >
+          Entrar con un código por correo
+        </Link>
+
         <p className="text-center text-cinema-muted text-sm mt-6">
           ¿No tienes cuenta?{' '}
           <Link
             href="/register"
-            className="text-cinema-gold hover:text-cinema-gold-light font-medium"
+            className="text-cinema-accent hover:text-cinema-accent-light font-medium"
           >
             Regístrate
           </Link>
@@ -248,14 +258,14 @@ function LoginForm() {
           Al continuar aceptas los{' '}
           <Link
             href="/terminos"
-            className="text-cinema-gold hover:text-cinema-gold-light underline"
+            className="text-cinema-accent hover:text-cinema-accent-light underline"
           >
             Términos
           </Link>{' '}
           y la{' '}
           <Link
             href="/privacidad"
-            className="text-cinema-gold hover:text-cinema-gold-light underline"
+            className="text-cinema-accent hover:text-cinema-accent-light underline"
           >
             Privacidad
           </Link>
@@ -271,10 +281,12 @@ function LoginPageFallback() {
     <div className="w-full max-w-md">
       <div className="card-glow p-6 md:p-8 shadow-[0_8px_40px_rgba(196,163,90,0.12)]">
         <div className="text-center mb-8">
-          <div className="w-14 h-14 bg-gradient-to-br from-cinema-accent to-cinema-gold rounded-xl flex items-center justify-center mx-auto mb-4 shadow-glow">
-            <Film className="w-8 h-8 text-cinema-bg" aria-hidden />
-          </div>
-          <h1 className="font-display text-2xl md:text-3xl tracking-tight text-cinema-chalk">
+          <p className="text-label uppercase text-cinema-accent mb-3 inline-flex items-center gap-2">
+            <span className="h-1 w-1 rounded-full bg-cinema-accent" aria-hidden />
+            Sala de proyección privada
+            <span className="h-1 w-1 rounded-full bg-cinema-accent" aria-hidden />
+          </p>
+          <h1 className="font-display text-3xl font-medium tracking-tight text-cinema-chalk">
             Iniciar sesión
           </h1>
         </div>

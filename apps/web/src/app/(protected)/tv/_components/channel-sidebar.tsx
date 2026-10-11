@@ -90,7 +90,7 @@ export function ChannelSidebar({
       aria-label="Lista de canales"
     >
       <div className="px-3 pt-3 pb-2 border-b border-cinema-border">
-        <p className="text-[10px] uppercase tracking-widest text-cinema-gold font-medium mb-1">
+        <p className="text-[10px] uppercase tracking-widest text-cinema-accent font-medium mb-1">
           TV en vivo
         </p>
         <div className="relative">
@@ -100,7 +100,7 @@ export function ChannelSidebar({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar canal..."
-            className="w-full h-9 pl-8 pr-3 rounded-lg bg-cinema-elevated border border-cinema-border text-sm text-white placeholder:text-cinema-ash focus:outline-none focus:border-cinema-gold/50"
+            className="w-full h-9 pl-8 pr-3 rounded-lg bg-cinema-elevated border border-cinema-border text-sm text-cinema-chalk placeholder:text-cinema-ash focus:outline-none focus:border-cinema-accent/50"
           />
         </div>
         <div className="flex gap-1.5 overflow-x-auto mt-2 pb-1 -mx-1 px-1 scrollbar-none">
@@ -112,7 +112,7 @@ export function ChannelSidebar({
               className={cn(
                 'shrink-0 px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors tv-focus',
                 chip === item.id
-                  ? 'bg-cinema-gold text-cinema-bg'
+                  ? 'bg-cinema-accent text-cinema-bg'
                   : 'bg-cinema-elevated text-cinema-silver border border-cinema-border'
               )}
             >
@@ -139,7 +139,7 @@ export function ChannelSidebar({
             <section key={category} className="py-1">
               <h3 className="sticky top-0 z-10 px-3 py-1.5 bg-cinema-bg/95 text-[10px] uppercase tracking-widest text-cinema-ash font-semibold">
                 {category}
-                <span className="ml-1.5 text-cinema-gold/80">{items.length}</span>
+                <span className="ml-1.5 text-cinema-accent/80">{items.length}</span>
               </h3>
               <ul className="px-1.5">
                 {items.map((c) => (

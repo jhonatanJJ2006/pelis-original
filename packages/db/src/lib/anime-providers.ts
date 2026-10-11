@@ -263,10 +263,7 @@ export function toProviderListItem(p: AnimeStreamingProvider) {
 }
 
 /** Resolve the iframe URL for an embed provider, or null if it does not apply. */
-export function buildProviderEmbedUrl(
-  providerId: string,
-  ctx: EmbedContext,
-): string | null {
+export function buildProviderEmbedUrl(providerId: string, ctx: EmbedContext): string | null {
   const provider = getProviderById(providerId);
   if (!provider || provider.kind !== 'embed' || !provider.buildEmbedUrl) return null;
   if (!ctx.anilistId) return null;

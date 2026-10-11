@@ -42,10 +42,10 @@ export function ProviderHealthPanel() {
   const embedOk = results?.filter((r) => r.kind === 'embed' && r.ok).length ?? 0;
 
   return (
-    <div className="mb-6 p-4 rounded-2xl border border-cinema-border bg-cinema-surface">
+    <div className="mb-6 p-4 rounded-lg border border-cinema-border bg-cinema-surface">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
         <div>
-          <h2 className="text-sm font-medium text-white">Estado de proveedores</h2>
+          <h2 className="text-sm font-medium text-cinema-chalk">Estado de proveedores</h2>
           <p className="text-xs text-cinema-muted mt-0.5">
             {results
               ? `${okCount}/${results.length} operativos · ${embedOk} reproductor(es) integrado(s)`
@@ -66,7 +66,7 @@ export function ProviderHealthPanel() {
               className={cn(
                 'flex items-center gap-2 px-3 py-2 rounded-lg border text-sm',
                 r.ok
-                  ? 'border-emerald-500/30 bg-emerald-500/5 text-emerald-300'
+                  ? 'border-cinema-success/30 bg-cinema-success/5 text-cinema-success'
                   : 'border-red-500/30 bg-red-500/5 text-red-300'
               )}
             >

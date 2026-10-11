@@ -22,7 +22,7 @@ describe('isSpanishChannel', () => {
         language: 'es',
         streamUrl: 'http://example/a.m3u8',
         tvgId: 'AgroMais.br@SD',
-      }).accept,
+      }).accept
     ).toBe(false);
     expect(
       isSpanishChannel({
@@ -30,7 +30,7 @@ describe('isSpanishChannel', () => {
         language: 'es',
         streamUrl: 'https://jmp2.uk/plu-609ae66b359b270007869ff1.m3u8',
         tvgId: 'ComedyCentralSouthPark.us@LatAm',
-      }).accept,
+      }).accept
     ).toBe(false);
   });
 
@@ -41,7 +41,7 @@ describe('isSpanishChannel', () => {
         language: 'en',
         country: 'Estados Unidos',
         streamUrl: 'https://amagi.tv/x.m3u8',
-      }).accept,
+      }).accept
     ).toBe(false);
     expect(
       isSpanishChannel({
@@ -49,7 +49,7 @@ describe('isSpanishChannel', () => {
         language: 'es',
         streamUrl: 'http://23.237.104.106:8080/USA_DISNEY_JUNIOR/index.m3u8',
         tvgId: 'DisneyJunior.us@East',
-      }).accept,
+      }).accept
     ).toBe(false);
   });
 
@@ -60,7 +60,7 @@ describe('isSpanishChannel', () => {
         language: 'es',
         streamUrl: 'https://jmp2.uk/plu-5dd6dae8ce788b0009eaf77b.m3u8',
         tvgId: 'PlutoTVKids.us@LatAm',
-      }).accept,
+      }).accept
     ).toBe(true);
     expect(
       isSpanishChannel({
@@ -68,7 +68,7 @@ describe('isSpanishChannel', () => {
         language: 'es',
         country: 'Francia',
         streamUrl: 'https://static.france24.com/live/F24_ES_LO_HLS/live_web.m3u8',
-      }).accept,
+      }).accept
     ).toBe(true);
     expect(
       isSpanishChannel({
@@ -76,7 +76,7 @@ describe('isSpanishChannel', () => {
         language: 'es',
         streamUrl: 'https://jmp2.uk/plu-60d3583ef310610007fb02b1.m3u8',
         tvgId: 'EuronewsSpanish.fr@SD',
-      }).accept,
+      }).accept
     ).toBe(true);
     expect(
       isSpanishChannel({
@@ -84,7 +84,7 @@ describe('isSpanishChannel', () => {
         language: 'es',
         streamUrl: 'http://example/latina.m3u8',
         tvgId: 'LatinaClasicos.pe',
-      }).accept,
+      }).accept
     ).toBe(true);
   });
 
@@ -95,7 +95,7 @@ describe('isSpanishChannel', () => {
         language: '',
         streamUrl: 'https://jmp2.uk/plu-aaaaaaaaaaaaaaaaaaaaaaaa.m3u8',
         tvgId: '',
-      }).accept,
+      }).accept
     ).toBe(false);
   });
 });

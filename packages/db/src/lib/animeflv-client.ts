@@ -84,7 +84,10 @@ function parseSearchSlugs(html: string): string[] {
 }
 
 function normalizeTitle(title: string): string {
-  return title.replace(/[^a-z0-9]+/gi, ' ').toLowerCase().trim();
+  return title
+    .replace(/[^a-z0-9]+/gi, ' ')
+    .toLowerCase()
+    .trim();
 }
 
 /**
@@ -92,10 +95,7 @@ function normalizeTitle(title: string): string {
  * contains the requested episode number wins; otherwise the page with the
  * highest episode count that covers it is used.
  */
-async function resolveAnimeflvSlug(
-  title: string,
-  episodeNumber: number,
-): Promise<string | null> {
+async function resolveAnimeflvSlug(title: string, episodeNumber: number): Promise<string | null> {
   const key = normalizeTitle(title);
   if (!key) return null;
 
@@ -112,9 +112,7 @@ async function resolveAnimeflvSlug(
     }
   }
 
-  const searchHtml = await fetchHtml(
-    `${ANIMEFLV_BASE}/browse?q=${encodeURIComponent(title)}`,
-  );
+  const searchHtml = await fetchHtml(`${ANIMEFLV_BASE}/browse?q=${encodeURIComponent(title)}`);
   const candidates = searchHtml ? parseSearchSlugs(searchHtml) : [];
   if (candidates.length === 0) {
     slugCache.set(key, { at: Date.now(), slug: null, episodeNumbers: [] });
@@ -148,7 +146,7 @@ async function resolveAnimeflvSlug(
 /** Full iframe URL for an AnimeFLV episode, or null when the series is absent. */
 export async function resolveAnimeflvEmbedUrl(
   ctx: EmbedContext,
-  opts: { title: string },
+  opts: { title: string }
 ): Promise<string | null> {
   const slug = await resolveAnimeflvSlug(opts.title, ctx.episodeNumber);
   if (!slug) return null;

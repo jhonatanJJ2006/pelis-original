@@ -3,6 +3,7 @@ import { prisma } from '../client';
 import { notifyChange } from '../realtime';
 import { register } from '../registry';
 import { requireAdmin } from '../lib/requireAdmin';
+import { normalizePageArgs, sliceAdminPage, toAdminPage } from '../lib/adminPage';
 
 const RoleEnum = z.enum(['USER', 'ADMIN']);
 
@@ -15,6 +16,7 @@ export const adminList = register({
       search: z.string().optional(),
       role: RoleEnum.optional(),
       limit: z.number().optional(),
+      offset: z.number().optional(),
     })
     .optional(),
   handler: async (ctx, args) => {
@@ -29,10 +31,19 @@ export const adminList = register({
         { name: { contains: search, mode: 'insensitive' } },
       ];
     }
+    const paged = a.offset !== undefined;
+    const page = normalizePageArgs(a.offset, a.limit);
     const users = await prisma.user.findMany({
       where,
-      take: a.limit ?? 500,
+      ...(paged
+        ? {
+            orderBy: [{ lastLoginAt: { sort: 'desc', nulls: 'last' } }, { createdAt: 'desc' }],
+            skip: page.offset,
+            take: page.limit,
+          }
+        : { take: a.limit ?? 500 }),
     });
+    const total = paged ? await prisma.user.count({ where }) : 0;
     const result = await Promise.all(
       users.map(async (u) => {
         const subscription = await prisma.subscription.findFirst({
@@ -62,8 +73,9 @@ export const adminList = register({
               }
             : null,
         };
-      }),
+      })
     );
+    if (paged) return toAdminPage(result, total, page.offset, page.limit);
     result.sort((a, b) => (b.lastLoginAt ?? b.createdAt) - (a.lastLoginAt ?? a.createdAt));
     return result;
   },

@@ -130,7 +130,7 @@ export default function TerminosPage() {
             El tratamiento de datos personales se describe en la{' '}
             <Link
               href="/privacidad"
-              className="text-cinema-gold hover:text-cinema-gold-light underline"
+              className="text-cinema-accent hover:text-cinema-accent-light underline"
             >
               Política de privacidad
             </Link>

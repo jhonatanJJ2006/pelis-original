@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { prisma } from '../client';
 import { register } from '../registry';
+import { notifyChange } from '../realtime';
 import { toMovieShape } from '../lib/shapes';
 import { requireUser } from '../lib/requireAdmin';
 
@@ -46,6 +47,8 @@ export const add = register({
       create: { userId, movieId },
       update: {},
     });
+    // Sin este aviso, el botón de Mi lista no se actualizaba hasta recargar.
+    await notifyChange('favorite', 'insert', fav.id);
     return fav.id;
   },
 });
@@ -58,6 +61,7 @@ export const remove = register({
   handler: async (ctx, { movieId }) => {
     const userId = requireUser(ctx);
     await prisma.favorite.deleteMany({ where: { userId, movieId } });
+    await notifyChange('favorite', 'delete', movieId);
     return true;
   },
 });

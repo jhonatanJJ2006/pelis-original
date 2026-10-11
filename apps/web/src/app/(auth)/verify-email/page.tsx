@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Film } from 'lucide-react';
 import { Button } from '@pelis/ui/components';
 const getAuthApiBase = () => '/api/auth';
 import { useState, useEffect, Suspense } from 'react';
@@ -30,7 +29,7 @@ function VerifyForm() {
           <p className="text-cinema-muted mb-6">No se ha proporcionado un correo electrónico.</p>
           <Link
             href="/register"
-            className="text-cinema-gold hover:text-cinema-gold-light font-medium"
+            className="text-cinema-accent hover:text-cinema-accent-light font-medium"
           >
             Volver al registro
           </Link>
@@ -125,9 +124,9 @@ function VerifyForm() {
     return (
       <div className="w-full max-w-md">
         <div className="card-glow p-6 md:p-8 shadow-[0_8px_40px_rgba(196,163,90,0.12)] text-center">
-          <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+          <div className="w-14 h-14 bg-gradient-to-br from-cinema-success to-cinema-success rounded-lg flex items-center justify-center mx-auto mb-4 shadow-lg">
             <svg
-              className="w-8 h-8 text-white"
+              className="w-8 h-8 text-cinema-chalk"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -141,7 +140,7 @@ function VerifyForm() {
               />
             </svg>
           </div>
-          <h1 className="font-display text-2xl md:text-3xl tracking-tight text-cinema-chalk mb-2">
+          <h1 className="font-display text-3xl font-medium tracking-tight text-cinema-chalk mb-2">
             ¡Cuenta verificada!
           </h1>
           <p className="text-cinema-muted">Te estamos redirigiendo...</p>
@@ -154,15 +153,17 @@ function VerifyForm() {
     <div className="w-full max-w-md">
       <div className="card-glow p-6 md:p-8 shadow-[0_8px_40px_rgba(196,163,90,0.12)]">
         <div className="text-center mb-8">
-          <div className="w-14 h-14 bg-gradient-to-br from-cinema-accent to-cinema-gold rounded-xl flex items-center justify-center mx-auto mb-4 shadow-glow">
-            <Film className="w-8 h-8 text-cinema-bg" aria-hidden />
-          </div>
-          <h1 className="font-display text-2xl md:text-3xl tracking-tight text-cinema-chalk">
+          <p className="text-label uppercase text-cinema-accent mb-3 inline-flex items-center gap-2">
+            <span className="h-1 w-1 rounded-full bg-cinema-accent" aria-hidden />
+            Paso 2 de 2 - Verificación
+            <span className="h-1 w-1 rounded-full bg-cinema-accent" aria-hidden />
+          </p>
+          <h1 className="font-display text-3xl font-medium tracking-tight text-cinema-chalk">
             Verifica tu email
           </h1>
           <p className="text-cinema-muted mt-2">
             Hemos enviado un código de verificación a<br />
-            <span className="text-white font-medium">{maskedEmail}</span>
+            <span className="text-cinema-chalk font-medium">{maskedEmail}</span>
           </p>
         </div>
 
@@ -180,18 +181,35 @@ function VerifyForm() {
             <label className="block text-sm font-medium text-cinema-muted mb-2 text-center">
               Código de verificación
             </label>
-            <input
-              type="text"
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              maxLength={OTP_LENGTH}
-              placeholder="000000"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, OTP_LENGTH))}
-              className="w-full bg-cinema-surface border border-cinema-border rounded-[10px] py-4 px-4 text-white text-center text-2xl sm:text-3xl font-mono tracking-[0.3em] sm:tracking-[0.5em] focus:outline-none focus:ring-2 focus:ring-cinema-accent/50 focus:border-cinema-accent/60 transition-all duration-200 placeholder-cinema-ash/40"
-              required
-              autoFocus
-            />
+            <div className="relative mx-auto flex w-fit gap-2 sm:gap-3">
+              {Array.from({ length: OTP_LENGTH }, (_, i) => (
+                <div
+                  key={i}
+                  aria-hidden
+                  className={`flex h-14 w-11 sm:h-16 sm:w-12 items-center justify-center rounded-[6px] border bg-cinema-bg font-display text-2xl text-cinema-chalk transition-colors ${
+                    i === otp.length
+                      ? 'border-cinema-accent'
+                      : otp[i]
+                        ? 'border-cinema-accent/60'
+                        : 'border-cinema-border'
+                  }`}
+                >
+                  {otp[i] ?? ''}
+                </div>
+              ))}
+              <input
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                maxLength={OTP_LENGTH}
+                value={otp}
+                onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, OTP_LENGTH))}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-text"
+                aria-label="Código de verificación"
+                required
+                autoFocus
+              />
+            </div>
           </div>
 
           <Button
@@ -241,7 +259,7 @@ function VerifyForm() {
               type="button"
               onClick={handleResend}
               disabled={resending || resendCooldown > 0}
-              className="relative text-cinema-gold hover:text-cinema-gold-light font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="relative text-cinema-accent hover:text-cinema-accent-light font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {resending
                 ? 'Reenviando…'
@@ -253,7 +271,10 @@ function VerifyForm() {
         </div>
 
         <p className="text-center text-cinema-muted text-sm mt-6 pt-6 border-t border-cinema-border">
-          <Link href="/login" className="text-cinema-gold hover:text-cinema-gold-light font-medium">
+          <Link
+            href="/login"
+            className="text-cinema-accent hover:text-cinema-accent-light font-medium"
+          >
             Volver a iniciar sesión
           </Link>
         </p>

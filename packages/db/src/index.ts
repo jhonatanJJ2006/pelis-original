@@ -4,7 +4,13 @@ export { prisma } from './client';
 export { auth } from './auth';
 export { getRequestCtx, preloadQuery, invoke } from './server';
 export type { PreloadedQuery } from './server';
-export { isAdmin, requireUser, requireAdmin, requireActivePlan, AuthError } from './lib/requireAdmin';
+export {
+  isAdmin,
+  requireUser,
+  requireAdmin,
+  requireActivePlan,
+  AuthError,
+} from './lib/requireAdmin';
 export {
   approveTvPairing,
   buildLinkTvUrl,

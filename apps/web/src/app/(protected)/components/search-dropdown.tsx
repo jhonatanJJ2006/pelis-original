@@ -180,7 +180,7 @@ export function SearchDropdown({
           }}
           onKeyDown={handleKeyDown}
           className={cn(
-            'w-full h-11 bg-cinema-surface border border-cinema-border rounded-[10px] pl-10 text-sm text-white placeholder-cinema-ash',
+            'w-full h-11 bg-cinema-surface border border-cinema-border rounded-[10px] pl-10 text-sm text-cinema-chalk placeholder-cinema-ash',
             'shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]',
             value ? 'pr-10' : 'pr-4',
             'hover:border-cinema-silver/40 hover:bg-cinema-elevated/60',
@@ -201,7 +201,7 @@ export function SearchDropdown({
               if (typeof inputRef === 'object' && inputRef?.current) inputRef.current.focus();
             }}
             aria-label="Limpiar búsqueda"
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6 rounded-md text-cinema-ash hover:text-white hover:bg-cinema-elevated transition-colors duration-150 cursor-pointer"
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6 rounded-md text-cinema-ash hover:text-cinema-chalk hover:bg-cinema-elevated transition-colors duration-150 cursor-pointer"
           >
             <X className="w-3.5 h-3.5" aria-hidden />
           </button>
@@ -254,7 +254,7 @@ export function SearchDropdown({
                       className={cn(
                         'w-full flex items-start gap-3 px-3 py-2.5 text-left transition-colors duration-150',
                         index === selectedIndex
-                          ? 'bg-cinema-violet/20'
+                          ? 'bg-cinema-accent/20'
                           : 'hover:bg-cinema-elevated/50'
                       )}
                     >
@@ -266,13 +266,13 @@ export function SearchDropdown({
                         />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-white truncate leading-tight">
+                        <p className="text-sm font-medium text-cinema-chalk truncate leading-tight">
                           {movie.name}
                         </p>
                         <p className="text-xs text-cinema-silver mt-0.5 truncate">{movie.actors}</p>
                         <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                           {isActorMatch && (
-                            <span className="inline-flex items-center gap-1 text-[10px] text-cinema-gold bg-cinema-gold/10 px-1.5 py-0.5 rounded">
+                            <span className="inline-flex items-center gap-1 text-[10px] text-cinema-accent bg-cinema-accent/10 px-1.5 py-0.5 rounded">
                               <User className="w-2.5 h-2.5" />
                               Coincide con actor
                             </span>
@@ -292,7 +292,7 @@ export function SearchDropdown({
                             <TrendingUp className="w-2.5 h-2.5" />
                             {movie.releaseYear}
                           </span>
-                          <span className="ml-auto text-[10px] text-cinema-violet">
+                          <span className="ml-auto text-[10px] text-cinema-accent">
                             {movie.classification}
                           </span>
                         </div>
@@ -314,7 +314,7 @@ export function SearchDropdown({
                     className={cn(
                       'w-full flex items-start gap-3 px-3 py-2.5 text-left transition-colors duration-150',
                       index === selectedIndex
-                        ? 'bg-cinema-violet/20'
+                        ? 'bg-cinema-accent/20'
                         : 'hover:bg-cinema-elevated/50'
                     )}
                   >
@@ -326,7 +326,7 @@ export function SearchDropdown({
                       />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-white truncate leading-tight">
+                      <p className="text-sm font-medium text-cinema-chalk truncate leading-tight">
                         {anime.title}
                       </p>
                       <p className="text-xs text-cinema-silver mt-0.5 truncate">
@@ -350,7 +350,7 @@ export function SearchDropdown({
                     onSubmit(e as unknown as React.FormEvent);
                     setIsOpen(false);
                   }}
-                  className="w-full text-xs text-cinema-violet-light hover:text-cinema-teal transition-colors text-center"
+                  className="w-full text-xs text-cinema-accent-light hover:text-cinema-teal transition-colors text-center"
                 >
                   Ver todos los resultados para &ldquo;{value}&rdquo;
                 </button>

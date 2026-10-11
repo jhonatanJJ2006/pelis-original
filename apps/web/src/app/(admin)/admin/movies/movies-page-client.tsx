@@ -7,6 +7,8 @@ import { useEffect, useState } from 'react';
 import { Plus, Search, Sparkles, Monitor } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@pelis/db/api';
+import { BulkActionDialog } from '../components/bulk-action-dialog';
+import { addTally, chunkIds, type BulkScope, type BulkTally } from '../lib/bulk-scope';
 import { Button, Input, Select, Spinner } from '@pelis/ui/components';
 import { AdminTableSkeleton } from '@pelis/ui/features/admin-table-skeleton';
 import { MoviePoster } from '@pelis/ui/features/movie-poster';
@@ -23,6 +25,8 @@ import {
 } from '../components/admin-movie-list-item';
 import { getAdminMovieDisplayName, isAdminOrphanDisplayName } from '../lib/movie-display';
 import { cn } from '@pelis/ui/utils';
+import { AdminPaginator } from '../components/admin-paginator';
+import { useAdminServerPage, type AdminPageResult } from '../lib/admin-pagination';
 
 type QualityFilter =
   | 'all'
@@ -89,12 +93,21 @@ export default function AdminMoviesPageClient() {
 
   const genres = (useQuery(api.movies.getGenres) as string[] | undefined) ?? [];
 
-  const movies = useQuery(api.adminMovies.adminList, {
+  const {
+    page: adminPage,
+    setPage: setAdminPage,
+    offset: adminOffset,
+    pageSize: adminPageSize,
+  } = useAdminServerPage([debouncedSearch, genre, qualityFilter].join('|'));
+  const moviesPage = useQuery(api.adminMovies.adminList, {
     search: debouncedSearch || undefined,
     genre: genre || undefined,
     qualityFilter,
-    limit: 300,
-  }) as AdminMovie[] | undefined;
+    limit: adminPageSize,
+    offset: adminOffset,
+  }) as AdminPageResult<AdminMovie> | undefined;
+  const movies = moviesPage?.items;
+  const adminTotal = moviesPage?.total ?? 0;
 
   const handleDelete = async (id: string, name: string) => {
     if (!confirm(`¿Eliminar "${name}"? Esta acción no se puede deshacer.`)) return;
@@ -152,79 +165,113 @@ export default function AdminMoviesPageClient() {
     />
   );
 
-  const handleBulkBackdrops = async () => {
-    if (!movies?.length) return;
+  type BulkPurpose = 'enrich' | 'backdrops';
+  const [bulkDialog, setBulkDialog] = useState<BulkPurpose | null>(null);
+  const [bulkFilterTargets, setBulkFilterTargets] = useState<
+    { ids: string[]; total: number; truncated: boolean } | undefined
+  >(undefined);
+  const [bulkProgress, setBulkProgress] = useState<{ done: number; total: number } | undefined>();
+  const fetchBulkTargets = useAction<
+    {
+      search?: string;
+      genre?: string;
+      qualityFilter: QualityFilter;
+      purpose: BulkPurpose;
+    },
+    { ids: string[]; total: number; truncated: boolean }
+  >(api.adminMovies.bulkTargetIds);
 
-    const eligible = movies.filter((m) => !m.quality.isOrphanId && m.quality.isMissingBackdrop);
-    if (eligible.length === 0) {
-      toast.info('No hay películas sin backdrop en esta vista');
-      return;
-    }
+  const viewEligible = (purpose: BulkPurpose) =>
+    (movies ?? []).filter((m) =>
+      purpose === 'enrich' ? canEnrich(m) : !m.quality.isOrphanId && m.quality.isMissingBackdrop
+    );
 
-    if (
-      !confirm(
-        `¿Descargar backdrop de TMDB para ${eligible.length} película(s)? Solo se aplicará a las que aún no tienen imagen ancha.`
-      )
-    ) {
-      return;
-    }
-
-    setBulkBackdrops(true);
+  const openBulk = async (purpose: BulkPurpose) => {
+    setBulkDialog(purpose);
+    setBulkProgress(undefined);
+    setBulkFilterTargets(undefined);
     try {
-      const result = await applyBackdropsBulk({
-        movieIds: eligible.map((m) => m._id as any),
+      const targets = await fetchBulkTargets({
+        search: debouncedSearch || undefined,
+        genre: genre || undefined,
+        qualityFilter,
+        purpose,
       });
-      toast.success(
-        `Listo: ${result.ok} actualizadas, ${result.failed} fallidas, ${result.skipped} omitidas`
-      );
+      setBulkFilterTargets(targets);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Error en backdrops masivos');
-    } finally {
-      setBulkBackdrops(false);
+      toast.error(error instanceof Error ? error.message : 'No se pudo contar el filtro');
+      setBulkFilterTargets({ ids: [], total: 0, truncated: false });
     }
   };
 
-  const handleBulkEnrich = async () => {
-    if (!movies?.length) return;
-
-    const eligible = movies.filter(canEnrich);
-    if (eligible.length === 0) {
-      toast.info('No hay películas elegibles para enriquecer en esta vista');
-      return;
-    }
-
-    if (
-      !confirm(
-        `¿Completar metadata de ${eligible.length} película(s) desde TMDB? Se usará el primer resultado de búsqueda para cada una.`
-      )
-    ) {
-      return;
-    }
-
-    setBulkEnriching(true);
+  const runBulk = async (scope: BulkScope) => {
+    if (!bulkDialog) return;
+    const purpose = bulkDialog;
+    const ids =
+      scope === 'view' ? viewEligible(purpose).map((m) => m._id) : (bulkFilterTargets?.ids ?? []);
+    if (ids.length === 0) return;
+    const setRunning = purpose === 'enrich' ? setBulkEnriching : setBulkBackdrops;
+    const run = purpose === 'enrich' ? enrichMoviesBulk : applyBackdropsBulk;
+    setRunning(true);
+    let tally: BulkTally = { ok: 0, failed: 0, skipped: 0 };
+    let done = 0;
+    setBulkProgress({ done, total: ids.length });
     try {
-      const result = await enrichMoviesBulk({
-        movieIds: eligible.map((m) => m._id as any),
-      });
+      for (const batch of chunkIds(ids, 25)) {
+        tally = addTally(tally, await run({ movieIds: batch as any }));
+        done += batch.length;
+        setBulkProgress({ done, total: ids.length });
+      }
       toast.success(
-        `Listo: ${result.ok} actualizadas, ${result.failed} fallidas, ${result.skipped} omitidas`
+        `Listo: ${tally.ok} actualizadas, ${tally.failed} fallidas, ${tally.skipped} omitidas`
       );
+      setBulkDialog(null);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Error en enriquecimiento masivo');
+      toast.error(
+        `${error instanceof Error ? error.message : 'Error en la acción masiva'} (${done} de ${ids.length} procesadas)`
+      );
     } finally {
-      setBulkEnriching(false);
+      setRunning(false);
     }
   };
+
+  const handleBulkBackdrops = () => void openBulk('backdrops');
+  const handleBulkEnrich = () => void openBulk('enrich');
 
   return (
     <div>
+      {bulkDialog && (
+        <BulkActionDialog
+          title={
+            bulkDialog === 'enrich' ? 'Completar metadata desde TMDB' : 'Aplicar backdrops de TMDB'
+          }
+          description={
+            bulkDialog === 'enrich'
+              ? 'Se usará el primer resultado de búsqueda de TMDB para cada película incompleta o sin póster.'
+              : 'Solo se aplicará a las películas que aún no tienen imagen ancha.'
+          }
+          viewCount={viewEligible(bulkDialog).length}
+          filterCount={bulkFilterTargets?.ids.length}
+          filterTruncatedAt={
+            bulkFilterTargets?.truncated ? bulkFilterTargets.ids.length : undefined
+          }
+          running={bulkEnriching || bulkBackdrops}
+          progress={bulkProgress}
+          onConfirm={(scope) => void runBulk(scope)}
+          onClose={() => setBulkDialog(null)}
+        />
+      )}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
         <div>
-          <h1 className="font-display text-2xl sm:text-3xl tracking-wide text-white uppercase">
+          <p className="text-label uppercase text-cinema-accent mb-1.5 flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-cinema-accent" aria-hidden />
+            Bóveda cinematográfica
+          </p>
+          <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-cinema-chalk">
             Películas
           </h1>
           <p className="text-cinema-muted mt-1 sm:mt-2 text-sm sm:text-base">
-            {movies ? `${movies.length} registros` : 'Cargando...'}
+            {movies ? `${adminTotal} registros` : 'Cargando...'}
           </p>
         </div>
         <Link href="/admin/movies/new" className="w-full sm:w-auto">
@@ -245,8 +292,8 @@ export default function AdminMoviesPageClient() {
               className={cn(
                 'px-3 py-1.5 rounded-full text-xs sm:text-sm transition-colors border whitespace-nowrap shrink-0',
                 qualityFilter === tab.value
-                  ? 'bg-cinema-violet/20 text-white border-cinema-violet/40'
-                  : 'text-cinema-muted border-cinema-border hover:text-white hover:border-cinema-silver/30'
+                  ? 'bg-cinema-accent/20 text-cinema-chalk border-cinema-accent/40'
+                  : 'text-cinema-muted border-cinema-border hover:text-cinema-chalk hover:border-cinema-silver/30'
               )}
             >
               {tab.label}
@@ -337,7 +384,7 @@ export default function AdminMoviesPageClient() {
       ) : (
         <>
           <div className="md:hidden space-y-3">
-            {movies.map((movie) => (
+            {(movies ?? []).map((movie) => (
               <AdminMovieMobileCard
                 key={movie._id}
                 movie={movie}
@@ -356,8 +403,8 @@ export default function AdminMoviesPageClient() {
             ))}
           </div>
 
-          <div className="hidden md:block overflow-x-auto rounded-2xl border border-cinema-border bg-cinema-surface">
-            <table className="w-full min-w-[720px] lg:min-w-[900px] text-sm">
+          <div className="hidden md:block overflow-x-auto rounded-lg border border-cinema-border bg-cinema-surface">
+            <table className="admin-table w-full min-w-[720px] lg:min-w-[900px] text-sm">
               <thead>
                 <tr className="border-b border-cinema-border text-left text-cinema-muted">
                   <th className="px-4 py-3 font-medium">Poster</th>
@@ -368,7 +415,7 @@ export default function AdminMoviesPageClient() {
                 </tr>
               </thead>
               <tbody>
-                {movies.map((movie) => (
+                {(movies ?? []).map((movie) => (
                   <tr
                     key={movie._id}
                     role="button"
@@ -397,7 +444,7 @@ export default function AdminMoviesPageClient() {
                           'font-medium max-w-[280px] truncate',
                           isAdminOrphanDisplayName(movie.name, movie.token)
                             ? 'text-cinema-muted italic'
-                            : 'text-white'
+                            : 'text-cinema-chalk'
                         )}
                       >
                         {getAdminMovieDisplayName(movie)}
@@ -414,6 +461,13 @@ export default function AdminMoviesPageClient() {
               </tbody>
             </table>
           </div>
+          <AdminPaginator
+            page={adminPage}
+            total={adminTotal}
+            pageSize={adminPageSize}
+            onPageChange={setAdminPage}
+            noun="películas"
+          />
         </>
       )}
 

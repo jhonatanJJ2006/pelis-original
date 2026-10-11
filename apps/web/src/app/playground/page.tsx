@@ -128,7 +128,7 @@ export default function PlaygroundPage() {
             Display M
           </p>
           <p className="text-lg font-semibold text-cinema-chalk">Título UI</p>
-          <p className="text-base text-cinema-chalk">Cuerpo Outfit sobre tiza.</p>
+          <p className="text-base text-cinema-chalk">Cuerpo Inter sobre tiza.</p>
           <p className="text-sm text-cinema-muted">Meta / captions en piedra cálida.</p>
           <p className="text-xs uppercase tracking-widest text-cinema-accent">Eyebrow editorial</p>
         </div>

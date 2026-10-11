@@ -87,7 +87,11 @@ export default function AdminPlansPage() {
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
         <div>
-          <h1 className="font-display text-2xl sm:text-3xl tracking-wide text-white uppercase">
+          <p className="text-label uppercase text-cinema-accent mb-1.5 flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-cinema-accent" aria-hidden />
+            Membresías
+          </p>
+          <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-cinema-chalk">
             Planes
           </h1>
           <p className="text-cinema-muted mt-1 sm:mt-2 text-sm sm:text-base">
@@ -114,9 +118,9 @@ export default function AdminPlansPage() {
               <article
                 key={planRowId(plan)}
                 className={cn(
-                  'rounded-2xl border bg-cinema-surface p-5 flex flex-col gap-4',
+                  'rounded-lg border bg-cinema-surface p-5 flex flex-col gap-4',
                   plan.recommended
-                    ? 'border-cinema-gold/40 shadow-[0_0_0_1px_rgba(245,200,66,0.2)]'
+                    ? 'border-cinema-accent/40 shadow-[0_0_0_1px_rgba(245,200,66,0.2)]'
                     : 'border-cinema-border'
                 )}
               >
@@ -124,16 +128,16 @@ export default function AdminPlansPage() {
                   <div className="flex items-center gap-3">
                     <div
                       className={cn(
-                        'p-2.5 rounded-xl',
+                        'p-2.5 rounded-lg',
                         plan.recommended
-                          ? 'bg-cinema-gold/15 text-cinema-gold'
-                          : 'bg-cinema-violet/15 text-cinema-violet-light'
+                          ? 'bg-cinema-accent/15 text-cinema-accent'
+                          : 'bg-cinema-accent/15 text-cinema-accent-light'
                       )}
                     >
                       <Icon className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="font-display text-lg uppercase tracking-wide text-white">
+                      <h3 className="font-display text-lg uppercase tracking-wide text-cinema-chalk">
                         {plan.name}
                       </h3>
                       <p className="text-xs text-cinema-muted mt-0.5">
@@ -143,7 +147,7 @@ export default function AdminPlansPage() {
                     </div>
                   </div>
                   {plan.recommended && (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-cinema-gold/20 text-cinema-gold uppercase tracking-wider font-semibold">
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-cinema-accent/20 text-cinema-accent uppercase tracking-wider font-semibold">
                       Recomendado
                     </span>
                   )}
@@ -154,7 +158,7 @@ export default function AdminPlansPage() {
                 <ul className="space-y-1.5">
                   {plan.features.slice(0, 4).map((f) => (
                     <li key={f} className="flex items-start gap-2 text-xs text-cinema-muted">
-                      <Check className="w-3.5 h-3.5 mt-0.5 text-cinema-violet-light shrink-0" />
+                      <Check className="w-3.5 h-3.5 mt-0.5 text-cinema-accent-light shrink-0" />
                       <span className="line-clamp-1">{f}</span>
                     </li>
                   ))}
@@ -165,7 +169,9 @@ export default function AdminPlansPage() {
 
                 <div className="flex items-end justify-between mt-auto">
                   <div>
-                    <p className="text-2xl font-semibold text-white">{formatPrice(plan.price)}</p>
+                    <p className="text-2xl font-semibold text-cinema-chalk">
+                      {formatPrice(plan.price)}
+                    </p>
                     <p className="text-[10px] text-cinema-ash mt-0.5">
                       {plan.activeSubscribers} activos · {plan.totalSubscribers} totales
                     </p>
@@ -174,7 +180,7 @@ export default function AdminPlansPage() {
                     className={cn(
                       'text-[10px] px-2 py-0.5 rounded-full',
                       plan.stripePriceId
-                        ? 'bg-emerald-500/15 text-emerald-300'
+                        ? 'bg-cinema-success/15 text-cinema-success'
                         : 'bg-cinema-elevated text-cinema-muted'
                     )}
                   >
@@ -192,7 +198,7 @@ export default function AdminPlansPage() {
                     <Star
                       className={cn(
                         'w-4 h-4',
-                        plan.recommended && 'fill-cinema-gold text-cinema-gold'
+                        plan.recommended && 'fill-cinema-accent text-cinema-accent'
                       )}
                     />
                     <span className="ml-1">{plan.recommended ? 'Quitar' : 'Destacar'}</span>

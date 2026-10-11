@@ -140,7 +140,7 @@ export function BackdropPickerModal({ movie, onClose, onApplied }: BackdropPicke
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg sm:max-w-2xl bg-cinema-surface border border-cinema-border rounded-2xl sm:rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col mx-auto"
+        className="w-full max-w-lg sm:max-w-2xl bg-cinema-surface border border-cinema-border rounded-lg sm:rounded-lg shadow-2xl overflow-hidden max-h-[90vh] flex flex-col mx-auto"
         role="dialog"
         aria-modal="true"
         aria-labelledby="backdrop-picker-title"
@@ -149,7 +149,7 @@ export function BackdropPickerModal({ movie, onClose, onApplied }: BackdropPicke
         <div className="flex items-center justify-between px-6 py-4 border-b border-cinema-border shrink-0">
           <h2
             id="backdrop-picker-title"
-            className="text-lg font-semibold text-white flex items-center gap-2"
+            className="text-lg font-semibold text-cinema-chalk flex items-center gap-2"
           >
             <Monitor className="w-5 h-5 text-cyan-400" />
             Backdrop TMDB
@@ -157,7 +157,7 @@ export function BackdropPickerModal({ movie, onClose, onApplied }: BackdropPicke
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-lg text-cinema-muted hover:text-white hover:bg-cinema-elevated transition-colors"
+            className="p-2 rounded-lg text-cinema-muted hover:text-cinema-chalk hover:bg-cinema-elevated transition-colors"
             aria-label="Cerrar"
           >
             <X className="w-5 h-5" />
@@ -166,7 +166,7 @@ export function BackdropPickerModal({ movie, onClose, onApplied }: BackdropPicke
 
         <div className="px-6 py-5 overflow-y-auto flex-1">
           <p className="text-sm text-cinema-muted mb-1">Película local</p>
-          <p className="text-white font-medium mb-4">{displayName}</p>
+          <p className="text-cinema-chalk font-medium mb-4">{displayName}</p>
 
           {loading ? (
             <div className="flex items-center justify-center py-16">
@@ -183,16 +183,16 @@ export function BackdropPickerModal({ movie, onClose, onApplied }: BackdropPicke
           ) : preview?.status === 'ok' ? (
             <div className="space-y-5">
               <div className="text-center">
-                <h3 className="text-lg font-semibold text-white">{preview.tmdb.title}</h3>
+                <h3 className="text-lg font-semibold text-cinema-chalk">{preview.tmdb.title}</h3>
                 {preview.tmdb.originalTitle !== preview.tmdb.title && (
                   <p className="text-sm text-cinema-muted mt-0.5">{preview.tmdb.originalTitle}</p>
                 )}
                 {preview.tmdb.releaseYear && (
-                  <p className="text-sm text-cinema-gold mt-1">{preview.tmdb.releaseYear}</p>
+                  <p className="text-sm text-cinema-accent mt-1">{preview.tmdb.releaseYear}</p>
                 )}
               </div>
 
-              <div className="rounded-xl border border-cinema-border bg-cinema-elevated/40 p-4 space-y-4">
+              <div className="rounded-lg border border-cinema-border bg-cinema-elevated/40 p-4 space-y-4">
                 <div>
                   <p className="text-xs text-cinema-muted mb-2">Actual (hero / reproductor)</p>
                   <div

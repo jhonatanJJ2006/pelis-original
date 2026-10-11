@@ -17,9 +17,9 @@ import {
 import { cn } from '@pelis/ui/utils';
 
 const navItems = [
-  { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, enabled: true },
+  { href: '/admin', label: 'Panel', icon: LayoutDashboard, enabled: true },
   { href: '/admin/movies', label: 'Películas', icon: Film, enabled: true },
-  { href: '/admin/movies/new-releases', label: 'Nuevas películas', icon: Sparkles, enabled: true },
+  { href: '/admin/movies/new-releases', label: 'Estrenos', icon: Sparkles, enabled: true },
   { href: '/admin/series', label: 'Series', icon: Tv, enabled: true },
   { href: '/admin/anime', label: 'Anime', icon: Clapperboard, enabled: true },
   { href: '/admin/tv', label: 'Canales TV', icon: Radio, enabled: true },
@@ -42,7 +42,7 @@ export function AdminSidebar({ mobileOpen = false, onMobileClose }: AdminSidebar
   return (
     <aside
       className={cn(
-        'fixed inset-y-0 left-0 z-50 w-[min(100vw-3rem,16rem)] sm:w-64 shrink-0 border-r border-cinema-border bg-cinema-surface p-5 flex flex-col gap-6 transition-transform duration-200 ease-out lg:static lg:translate-x-0 lg:min-h-screen lg:bg-cinema-surface/50',
+        'fixed inset-y-0 left-0 z-50 w-[min(100vw-3rem,16rem)] sm:w-64 shrink-0 border-r border-cinema-border bg-cinema-bg p-5 flex flex-col gap-6 transition-transform duration-200 ease-out lg:sticky lg:top-0 lg:h-screen lg:translate-x-0',
         mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       )}
       aria-label="Navegación admin"
@@ -52,19 +52,21 @@ export function AdminSidebar({ mobileOpen = false, onMobileClose }: AdminSidebar
           <Link
             href="/"
             onClick={handleNavClick}
-            className="inline-flex items-center gap-2 text-sm text-cinema-muted hover:text-white transition-colors mb-4"
+            className="inline-flex items-center gap-2 text-sm text-cinema-muted hover:text-cinema-chalk transition-colors mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
             Volver al sitio
           </Link>
-          <h1 className="font-display text-2xl tracking-wide text-white uppercase">Admin</h1>
-          <p className="text-xs text-cinema-ash mt-1">Panel de administración</p>
+          <p className="font-display text-2xl font-semibold tracking-[0.12em] text-cinema-accent">
+            PELIS
+          </p>
+          <p className="text-label uppercase text-cinema-ash mt-1">Consola de administración</p>
         </div>
         {onMobileClose && (
           <button
             type="button"
             onClick={onMobileClose}
-            className="lg:hidden p-2 rounded-lg text-cinema-muted hover:text-white hover:bg-cinema-elevated transition-colors shrink-0"
+            className="lg:hidden p-2 rounded-lg text-cinema-muted hover:text-cinema-chalk hover:bg-cinema-elevated transition-colors shrink-0"
             aria-label="Cerrar menú"
           >
             <X className="w-5 h-5" />
@@ -75,8 +77,12 @@ export function AdminSidebar({ mobileOpen = false, onMobileClose }: AdminSidebar
       <nav className="flex flex-col gap-1 overflow-y-auto">
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive =
-            item.href === '/admin' ? pathname === '/admin' : pathname.startsWith(item.href);
+          const matches = (href: string) =>
+            href === '/admin' ? pathname === '/admin' : pathname.startsWith(href);
+          const bestMatch = navItems
+            .filter((n) => matches(n.href))
+            .sort((a, b) => b.href.length - a.href.length)[0];
+          const isActive = bestMatch?.href === item.href;
 
           if (!item.enabled) {
             return (
@@ -97,13 +103,13 @@ export function AdminSidebar({ mobileOpen = false, onMobileClose }: AdminSidebar
               href={item.href}
               onClick={handleNavClick}
               className={cn(
-                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors',
+                'relative flex items-center gap-3 px-3 py-2.5 rounded-[6px] text-sm transition-colors',
                 isActive
-                  ? 'bg-cinema-violet/20 text-white border border-cinema-violet/30'
-                  : 'text-cinema-muted hover:text-white hover:bg-cinema-elevated/60'
+                  ? 'bg-cinema-accent/10 text-cinema-chalk before:absolute before:left-0 before:inset-y-2 before:w-0.5 before:rounded-full before:bg-cinema-accent'
+                  : 'text-cinema-muted hover:text-cinema-chalk hover:bg-cinema-elevated/60'
               )}
             >
-              <Icon className="w-4 h-4 shrink-0" />
+              <Icon className={cn('w-4 h-4 shrink-0', isActive && 'text-cinema-accent')} />
               {item.label}
             </Link>
           );

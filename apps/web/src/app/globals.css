@@ -5,21 +5,21 @@
 /* Tokens canónicos — DESIGN.md (Maison Noir) */
 :root {
   --color-midnight-plum: #0b0b0d;
-  --color-indigo-surface: #141418;
-  --color-indigo-elevated: #1c1c22;
-  --color-border-indigo: #2a2a32;
-  --color-coral-red: #8b1e2d;
-  --color-coral-light: #a5283a;
+  --color-indigo-surface: #141417;
+  --color-indigo-elevated: #1c1c21;
+  --color-border-indigo: #2a2a30;
+  --color-coral-red: #7a1e2b;
+  --color-coral-light: #93283a;
   --color-violet-accent: #d4b896;
   --color-violet-light: #e8d4b8;
   --color-gold-premium: #f5c842;
   --color-gold-light: #ffd966;
   --color-teal-genre: #8a9a7b;
-  --color-chalk-white: #f4f1ea;
-  --color-lavender-gray: #a39e94;
+  --color-chalk-white: #f2eee6;
+  --color-lavender-gray: #a9a39a;
   --color-silver: #8a857c;
-  --color-ash: #6b665e;
-  --gradient-feature-card: linear-gradient(149deg, #141418, #1c1c22 50%, #2a2a32);
+  --color-ash: #6b675f;
+  --gradient-feature-card: linear-gradient(149deg, #141417, #1c1c21 50%, #2a2a30);
   --gradient-hero-overlay: linear-gradient(
     90deg,
     #0b0b0d 0%,
@@ -47,9 +47,9 @@
   );
   --page-max-width: 1280px;
   --section-gap: 48px;
-  --radius-buttons: 10px;
-  --radius-inputs: 10px;
-  --radius-cards: 16px;
+  --radius-buttons: 6px;
+  --radius-inputs: 6px;
+  --radius-cards: 6px;
 
   /* Motion — Emil Kowalski / animation-vocabulary */
   --ease-out-expo: cubic-bezier(0.23, 1, 0.32, 1);
@@ -104,8 +104,8 @@
   input:-webkit-autofill,
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus {
-    -webkit-text-fill-color: #f4f1ea;
-    -webkit-box-shadow: 0 0 0px 1000px #141418 inset;
+    -webkit-text-fill-color: #f2eee6;
+    -webkit-box-shadow: 0 0 0px 1000px #141417 inset;
     transition: background-color 5000s ease-in-out 0s;
   }
 
@@ -132,7 +132,7 @@
 
   /* Base común de botones — unifica .btn-* y el componente Button (packages/ui) */
   .btn-base {
-    @apply inline-flex items-center justify-center gap-2 font-semibold rounded-[10px] transition-all duration-fast ease-out-expo active:scale-[0.97] select-none cursor-pointer;
+    @apply inline-flex items-center justify-center gap-2 font-semibold rounded-[6px] transition-all duration-fast ease-out-expo active:scale-[0.97] select-none cursor-pointer;
     @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cinema-accent/70 focus-visible:ring-offset-2 focus-visible:ring-offset-cinema-bg;
     @apply disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 disabled:shadow-none;
   }
@@ -165,7 +165,7 @@
   }
 
   .input-field {
-    @apply w-full h-11 bg-cinema-surface border border-cinema-border rounded-[10px] px-4 text-cinema-chalk placeholder-cinema-ash transition-all duration-200;
+    @apply w-full h-11 bg-cinema-surface border border-cinema-border rounded-[6px] px-4 text-cinema-chalk placeholder-cinema-ash transition-all duration-200;
     @apply shadow-[inset_0_1px_0_rgba(255,255,255,0.04)];
     @apply hover:border-cinema-silver/40 hover:bg-cinema-elevated/60;
     @apply focus:outline-none focus:ring-2 focus:ring-cinema-accent/50 focus:border-cinema-accent/60 focus:hover:bg-cinema-surface focus:hover:border-cinema-accent/60;
@@ -558,7 +558,7 @@
 
 /* Color del botón cerrar según tipo de toast */
 [data-sonner-toaster] [data-type='error'] [data-close-button] svg {
-  color: #8b1e2d;
+  color: #7a1e2b;
 }
 
 [data-sonner-toaster] [data-type='success'] [data-close-button] svg {
@@ -574,7 +574,7 @@
 }
 
 [data-sonner-toaster] [data-type='default'] [data-close-button] svg {
-  color: #a39e94;
+  color: #a9a39a;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -603,5 +603,24 @@
   .shadow-glow,
   .shadow-glow-violet {
     box-shadow: none !important;
+  }
+}
+
+/* Tablas densas del admin — Maison Noir */
+@layer components {
+  .admin-table thead tr {
+    @apply bg-cinema-surface;
+  }
+  .admin-table thead th {
+    @apply text-label uppercase font-semibold text-cinema-ash;
+  }
+  .admin-table tbody tr {
+    @apply transition-colors duration-fast;
+  }
+  .admin-table tbody tr:nth-child(even) {
+    @apply bg-cinema-surface/40;
+  }
+  .admin-table tbody tr:hover {
+    @apply bg-cinema-elevated/70;
   }
 }

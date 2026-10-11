@@ -3,6 +3,7 @@ import { prisma } from '../client';
 import { notifyChange } from '../realtime';
 import { register } from '../registry';
 import { requireAdmin } from '../lib/requireAdmin';
+import { normalizePageArgs, sliceAdminPage, toAdminPage } from '../lib/adminPage';
 import { toMovieShape } from '../lib/shapes';
 import {
   getMovieQualityFlags,
@@ -12,6 +13,7 @@ import {
 import { hasManifestForToken } from '../lib/hasManifestForToken';
 import { movieMatchesGenre } from '../lib/movieGenre';
 import { adminMovieListWhere } from '../lib/adminMovieListWhere';
+import { BULK_MAX_TARGETS, isBulkEligible } from '../lib/adminBulk';
 
 const qualityFilterValidator = z.enum([
   'all',
@@ -23,6 +25,55 @@ const qualityFilterValidator = z.enum([
   'missing_backdrop',
 ]);
 
+/**
+ * Ids de todas las películas del filtro actual (búsqueda, género y calidad) que son
+ * elegibles para una acción masiva. Lo usa el panel para "todo el filtro".
+ */
+export const bulkTargetIds = register({
+  kind: 'action',
+  name: 'adminMovies.bulkTargetIds',
+  reads: ['movie'],
+  args: z.object({
+    search: z.string().optional(),
+    genre: z.string().optional(),
+    qualityFilter: qualityFilterValidator.optional(),
+    purpose: z.enum(['enrich', 'backdrops']),
+  }),
+  handler: async (ctx, a) => {
+    await requireAdmin(ctx);
+    const filter: MovieQualityFilter = a.qualityFilter ?? 'all';
+    const genre = a.genre?.trim() ?? '';
+    const where = adminMovieListWhere({ search: a.search, genre });
+    let movies = await prisma.movie.findMany({ where, orderBy: { name: 'asc' } });
+    if (genre) movies = movies.filter((movie) => movieMatchesGenre(movie.genre, genre));
+    const ids: string[] = [];
+    for (const m of movies) {
+      const input = {
+        name: m.name,
+        token: m.token,
+        image: m.image,
+        videoUrl: m.videoUrl,
+        synopsis: m.synopsis,
+        actors: m.actors,
+        classification: m.classification,
+        genre: m.genre,
+        backdropImage: m.backdropImage,
+      };
+      // El manifiesto solo importa para los filtros de video; evitarlo ahorra E/S.
+      const needsManifest = filter !== 'all' && (!m.videoUrl || m.videoUrl.trim() === '');
+      const hasManifest = needsManifest ? await hasManifestForToken(m.token) : true;
+      if (filter !== 'all' && !matchesQualityFilter({ ...input, hasManifest }, filter)) continue;
+      if (!isBulkEligible(getMovieQualityFlags({ ...input, hasManifest }), a.purpose)) continue;
+      ids.push(m.id);
+    }
+    return {
+      ids: ids.slice(0, BULK_MAX_TARGETS),
+      total: ids.length,
+      truncated: ids.length > BULK_MAX_TARGETS,
+    };
+  },
+});
+
 export const adminList = register({
   kind: 'query',
   name: 'adminMovies.adminList',
@@ -33,6 +84,7 @@ export const adminList = register({
       genre: z.string().optional(),
       qualityFilter: qualityFilterValidator.optional(),
       limit: z.number().optional(),
+      offset: z.number().optional(),
     })
     .optional(),
   handler: async (ctx, args) => {
@@ -41,11 +93,20 @@ export const adminList = register({
     const filter: MovieQualityFilter = a.qualityFilter ?? 'all';
     const genre = a.genre?.trim() ?? '';
     const where = adminMovieListWhere({ search: a.search, genre });
+    const paged = a.offset !== undefined;
+    const page = normalizePageArgs(a.offset, a.limit);
+    // Sin filtros en memoria (género o calidad) se pagina directo en la base de datos.
+    const dbPaged = paged && !genre && filter === 'all';
     let movies = await prisma.movie.findMany({
       where,
       orderBy: { name: 'asc' },
-      take: a.limit ?? 200,
+      ...(dbPaged
+        ? { skip: page.offset, take: page.limit }
+        : paged
+          ? {}
+          : { take: a.limit ?? 200 }),
     });
+    const dbTotal = dbPaged ? await prisma.movie.count({ where }) : 0;
     if (genre) {
       movies = movies.filter((movie) => movieMatchesGenre(movie.genre, genre));
     }
@@ -79,7 +140,7 @@ export const adminList = register({
       );
     }
 
-    return filtered.map(({ movie, hasManifest }) => ({
+    const shape = ({ movie, hasManifest }: (typeof filtered)[number]) => ({
       ...toMovieShape(movie),
       quality: getMovieQualityFlags({
         name: movie.name,
@@ -93,7 +154,13 @@ export const adminList = register({
         backdropImage: movie.backdropImage,
         hasManifest,
       }),
-    }));
+    });
+    if (dbPaged) return toAdminPage(filtered.map(shape), dbTotal, page.offset, page.limit);
+    if (paged) {
+      const slice = sliceAdminPage(filtered, page.offset, page.limit);
+      return { ...slice, items: slice.items.map(shape) };
+    }
+    return filtered.map(shape);
   },
 });
 

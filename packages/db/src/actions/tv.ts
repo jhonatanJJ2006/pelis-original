@@ -19,7 +19,11 @@ interface ParsedChannel {
   tvgId: string;
 }
 
-function parseM3U(text: string, fallbackCountry: string, fallbackLanguage: string): ParsedChannel[] {
+function parseM3U(
+  text: string,
+  fallbackCountry: string,
+  fallbackLanguage: string
+): ParsedChannel[] {
   const channels: ParsedChannel[] = [];
   const lines = text.split(/\r?\n/);
   let currentExtinf: string | null = null;
@@ -97,7 +101,10 @@ async function probeUpstream(streamUrl: string): Promise<{
     if (!isManifest) return { streamStatus: 'online' };
     const text = await response.text();
     if (!text.startsWith('#EXTM3U') && !text.includes('#EXT-X-')) {
-      return { streamStatus: 'offline', lastStreamError: 'Respuesta no es un manifiesto M3U8 válido' };
+      return {
+        streamStatus: 'offline',
+        lastStreamError: 'Respuesta no es un manifiesto M3U8 válido',
+      };
     }
     if (!text.includes('#EXTINF') && !text.includes('#EXT-X-STREAM-INF')) {
       return { streamStatus: 'offline', lastStreamError: 'Manifiesto sin segmentos de video' };
@@ -135,11 +142,7 @@ export const seedFromM3U = register({
       throw new Error(`No se pudo descargar la lista M3U: ${response.status}`);
     }
     const text = await response.text();
-    const parsed = parseM3U(
-      text,
-      args.country ?? 'Desconocido',
-      args.language ?? 'es',
-    );
+    const parsed = parseM3U(text, args.country ?? 'Desconocido', args.language ?? 'es');
 
     let added = 0;
     let updated = 0;
@@ -157,7 +160,9 @@ export const seedFromM3U = register({
           continue;
         }
 
-        const existingChannel = await prisma.tVChannel.findFirst({ where: { streamUrl: ch.streamUrl } });
+        const existingChannel = await prisma.tVChannel.findFirst({
+          where: { streamUrl: ch.streamUrl },
+        });
         const norm = normalizeChannelFields({
           name: ch.name,
           category: ch.category,
@@ -278,9 +283,7 @@ export const probeAllChannels = register({
     const batch = args.batchSize ?? 8;
     const threshold = args.deactivateAfterFailures ?? FAILURE_THRESHOLD;
     const channels = await prisma.tVChannel.findMany();
-    const all = (args.onlyActive ?? true)
-      ? channels.filter((c) => c.isActive)
-      : channels;
+    const all = (args.onlyActive ?? true) ? channels.filter((c) => c.isActive) : channels;
 
     let online = 0;
     let offline = 0;
@@ -328,7 +331,7 @@ export const probeAllChannels = register({
               },
             });
           }
-        }),
+        })
       );
       await new Promise((r) => setTimeout(r, 100));
     }
@@ -382,15 +385,23 @@ export const cleanupNonWorking = register({
 
     for (const ch of all) {
       const reasons: string[] = [];
-      const spanish = isSpanishChannel({
-        name: ch.name,
-        language: ch.language ?? '',
-        country: ch.country ?? '',
-        streamUrl: ch.streamUrl,
-        tvgId: ch.tvgId ?? '',
-      }, ch.country ?? '');
+      const spanish = isSpanishChannel(
+        {
+          name: ch.name,
+          language: ch.language ?? '',
+          country: ch.country ?? '',
+          streamUrl: ch.streamUrl,
+          tvgId: ch.tvgId ?? '',
+        },
+        ch.country ?? ''
+      );
       if (!spanish.accept) reasons.push(spanish.reason ?? 'no-es');
-      if (ch.language != null && ch.language !== 'es' && ch.language !== 'spa' && ch.language !== 'spanish') {
+      if (
+        ch.language != null &&
+        ch.language !== 'es' &&
+        ch.language !== 'spa' &&
+        ch.language !== 'spanish'
+      ) {
         reasons.push('no-es');
       }
       if (ch.lastStreamError && GEO_HINT_RE.test(ch.lastStreamError)) reasons.push('geo');

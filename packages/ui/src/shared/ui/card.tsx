@@ -11,10 +11,10 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
       <div
         ref={ref}
         className={cn(
-          'rounded-2xl border overflow-hidden transition-all duration-300',
+          'rounded-lg border overflow-hidden transition-all duration-300',
           variant === 'default' &&
-            'bg-cinema-surface border-cinema-border hover:border-cinema-violet/40',
-          variant === 'feature' && 'card-feature border-cinema-violet/20',
+            'bg-cinema-surface border-cinema-border hover:border-cinema-accent/40',
+          variant === 'feature' && 'card-feature border-cinema-accent/20',
           variant === 'glow' &&
             'bg-cinema-surface border-cinema-border hover:border-cinema-accent/40 hover:-translate-y-0.5 shadow-[0_4px_24px_rgba(139,92,246,0.08)]',
           className

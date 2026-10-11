@@ -121,7 +121,7 @@ export function BackdropAnimeModal({ anime, onClose, onApplied }: BackdropAnimeM
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg sm:max-w-2xl bg-cinema-surface border border-cinema-border rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col mx-auto"
+        className="w-full max-w-lg sm:max-w-2xl bg-cinema-surface border border-cinema-border rounded-lg shadow-2xl overflow-hidden max-h-[90vh] flex flex-col mx-auto"
         role="dialog"
         aria-modal="true"
         aria-labelledby="backdrop-anime-title"
@@ -130,7 +130,7 @@ export function BackdropAnimeModal({ anime, onClose, onApplied }: BackdropAnimeM
         <div className="flex items-center justify-between px-6 py-4 border-b border-cinema-border shrink-0">
           <h2
             id="backdrop-anime-title"
-            className="text-lg font-semibold text-white flex items-center gap-2"
+            className="text-lg font-semibold text-cinema-chalk flex items-center gap-2"
           >
             <Monitor className="w-5 h-5 text-cyan-400" />
             Backdrop TMDB
@@ -138,7 +138,7 @@ export function BackdropAnimeModal({ anime, onClose, onApplied }: BackdropAnimeM
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-lg text-cinema-muted hover:text-white hover:bg-cinema-elevated transition-colors"
+            className="p-2 rounded-lg text-cinema-muted hover:text-cinema-chalk hover:bg-cinema-elevated transition-colors"
             aria-label="Cerrar"
           >
             <X className="w-5 h-5" />
@@ -147,7 +147,7 @@ export function BackdropAnimeModal({ anime, onClose, onApplied }: BackdropAnimeM
 
         <div className="px-6 py-5 overflow-y-auto flex-1">
           <p className="text-sm text-cinema-muted mb-1">Anime local</p>
-          <p className="text-white font-medium mb-4">{anime.title}</p>
+          <p className="text-cinema-chalk font-medium mb-4">{anime.title}</p>
 
           {loading ? (
             <div className="flex items-center justify-center py-16">
@@ -164,13 +164,13 @@ export function BackdropAnimeModal({ anime, onClose, onApplied }: BackdropAnimeM
           ) : preview?.status === 'ok' ? (
             <div className="space-y-5">
               <div className="text-center">
-                <h3 className="text-lg font-semibold text-white">{preview.tmdb.title}</h3>
+                <h3 className="text-lg font-semibold text-cinema-chalk">{preview.tmdb.title}</h3>
                 {preview.tmdb.originalTitle !== preview.tmdb.title && (
                   <p className="text-sm text-cinema-muted mt-0.5">{preview.tmdb.originalTitle}</p>
                 )}
               </div>
 
-              <div className="rounded-xl border border-cinema-border bg-cinema-elevated/40 p-4 space-y-4">
+              <div className="rounded-lg border border-cinema-border bg-cinema-elevated/40 p-4 space-y-4">
                 <div>
                   <p className="text-xs text-cinema-muted mb-2">Actual</p>
                   <div
