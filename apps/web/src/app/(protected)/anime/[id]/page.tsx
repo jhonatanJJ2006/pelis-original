@@ -156,224 +156,274 @@ export default function AnimeDetailPage() {
   const seasons = series.seasons.filter((s) => !s.isExtra);
   const extras = series.seasons.filter((s) => s.isExtra);
 
-  return (
-    <div className="page-shell">
-      <Link
-        href="/anime"
-        className="inline-flex items-center gap-2 text-cinema-silver hover:text-cinema-chalk transition-colors text-sm mb-6"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Todos los animes
-      </Link>
+  const heroImage = series.backdropImage || activeSeason?.image || series.image;
+  const firstEpisodeHref = activeSeason ? `/anime/watch/${activeSeason._id}/1` : null;
+  const yearLabel =
+    series.year === series.latestYear
+      ? String(series.year)
+      : `${series.year} – ${series.latestYear}`;
 
-      <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-8 mb-12">
-        <div className="relative">
-          <div className="aspect-[3/4] rounded-lg overflow-hidden bg-cinema-elevated border border-cinema-border">
-            <img
-              src={activeSeason?.image ?? series.image}
-              alt={series.title}
-              className="w-full h-full object-cover"
-            />
-          </div>
+  return (
+    <div className="pb-12">
+      <div className="relative overflow-hidden md:h-[640px]">
+        <div className="relative h-[52vh] max-h-[460px] md:max-h-none md:absolute md:inset-0 md:h-auto">
+          <img src={heroImage} alt="" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 hero-gradient-right" />
+          <div className="absolute inset-0 hero-gradient-bottom" />
+          <div className="absolute inset-0 hero-gradient-accent" />
+          <Link
+            href="/anime"
+            className="absolute top-4 left-4 md:top-6 md:left-6 z-10 inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-cinema-chalk bg-black/40 hover:bg-black/60 backdrop-blur-sm border border-white/10 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" aria-hidden />
+            Volver
+          </Link>
         </div>
 
-        <div>
-          <ScrollReveal>
-            <h1 className="font-display text-4xl md:text-5xl font-semibold tracking-tight text-cinema-chalk mb-2">
-              {series.title}
-            </h1>
-            {series.alternativeTitle && (
-              <p className="text-cinema-muted text-lg mb-4">{series.alternativeTitle}</p>
-            )}
-
-            <div className="flex flex-wrap items-center gap-2.5 mb-6">
-              {series.rating && (
-                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cinema-accent/10 border border-cinema-accent/30 text-cinema-accent text-sm font-medium">
-                  <Star className="w-4 h-4" />
-                  {series.rating}
-                </span>
-              )}
-              <span className="px-3 py-1.5 rounded-lg bg-cinema-elevated text-cinema-silver text-sm border border-cinema-border">
-                {series.year === series.latestYear
-                  ? series.year
-                  : `${series.year} – ${series.latestYear}`}
+        <div className="relative px-4 py-6 md:absolute md:inset-x-0 md:bottom-0 md:p-14">
+          <div className="container mx-auto">
+            <div className="flex flex-wrap items-center gap-2 mb-4 text-meta text-cinema-muted">
+              <span className="rounded-[4px] border border-cinema-accent/60 px-2 py-0.5 text-label uppercase text-cinema-accent">
+                Anime
               </span>
-              {seasons.length > 1 && (
-                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cinema-elevated text-cinema-silver text-sm border border-cinema-border">
-                  <Layers className="w-3.5 h-3.5" aria-hidden />
-                  {seasons.length} temporadas
-                </span>
-              )}
-              <span className="px-3 py-1.5 rounded-lg bg-cinema-elevated text-cinema-silver text-sm border border-cinema-border">
-                {series.totalEpisodes} episodios
-              </span>
-              {extras.length > 0 && (
-                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cinema-elevated text-cinema-silver text-sm border border-cinema-border">
-                  <Film className="w-3.5 h-3.5" aria-hidden />
-                  {extras.length} {extras.length === 1 ? 'película/OVA' : 'películas/OVAs'}
-                </span>
-              )}
               <span
                 className={cn(
-                  'px-3 py-1.5 rounded-lg text-sm font-medium border',
+                  'rounded-[4px] border px-2 py-0.5 text-label',
                   series.status === 'ongoing'
-                    ? 'bg-cinema-success/10 border-cinema-success/30 text-cinema-success'
-                    : 'bg-cinema-elevated border-cinema-border text-cinema-silver'
+                    ? 'border-cinema-success/50 text-cinema-success'
+                    : 'border-cinema-border text-cinema-chalk'
                 )}
               >
                 {series.status === 'ongoing' ? 'En emisión' : 'Finalizado'}
               </span>
-            </div>
-
-            <div className="flex flex-wrap gap-2 mb-6">
-              {series.genre.map((g) => (
-                <span
-                  key={g}
-                  className="px-3 py-1 rounded-full bg-cinema-accent/15 text-cinema-accent-light text-xs font-medium border border-cinema-accent/20"
-                >
-                  {g}
+              {series.rating ? (
+                <span className="inline-flex items-center gap-1 text-cinema-accent">
+                  <Star className="w-3.5 h-3.5 fill-current" aria-hidden />
+                  {series.rating}
                 </span>
-              ))}
+              ) : null}
+              <span>{yearLabel}</span>
+              <span aria-hidden>·</span>
+              <span>{series.totalEpisodes} episodios</span>
+              {seasons.length > 1 && (
+                <>
+                  <span aria-hidden>·</span>
+                  <span className="inline-flex items-center gap-1">
+                    <Layers className="w-3.5 h-3.5" aria-hidden />
+                    {seasons.length} temporadas
+                  </span>
+                </>
+              )}
+              {extras.length > 0 && (
+                <>
+                  <span aria-hidden>·</span>
+                  <span className="inline-flex items-center gap-1">
+                    <Film className="w-3.5 h-3.5" aria-hidden />
+                    {extras.length} {extras.length === 1 ? 'película/OVA' : 'películas/OVAs'}
+                  </span>
+                </>
+              )}
             </div>
-
-            <p className="text-cinema-muted leading-relaxed">
+            <h1 className="font-display text-4xl md:text-hero font-semibold tracking-tight text-cinema-chalk max-w-3xl mb-2">
+              {series.title}
+            </h1>
+            {series.alternativeTitle && (
+              <p className="text-cinema-silver text-base mb-4">{series.alternativeTitle}</p>
+            )}
+            <p className="text-cinema-muted text-lg mb-6 max-w-2xl line-clamp-2">
               {activeSeason?.synopsis || series.synopsis}
             </p>
-          </ScrollReveal>
+            <div className="flex flex-col sm:flex-row flex-wrap gap-3">
+              {firstEpisodeHref && (
+                <Link
+                  href={firstEpisodeHref}
+                  className="btn-base h-11 px-7 bg-cinema-accent hover:bg-cinema-accent-light text-cinema-bg text-xs uppercase tracking-[0.08em] inline-flex items-center justify-center gap-2"
+                >
+                  <Play className="w-5 h-5" fill="currentColor" aria-hidden />
+                  Ver episodio 1
+                </Link>
+              )}
+              <a
+                href="#episodios"
+                className="btn-base h-11 px-5 border border-cinema-border bg-cinema-bg/40 backdrop-blur-sm hover:border-cinema-chalk/50 text-cinema-chalk text-sm inline-flex items-center justify-center gap-2"
+              >
+                <Tv className="w-5 h-5" aria-hidden />
+                Ver episodios
+              </a>
+            </div>
+          </div>
         </div>
       </div>
 
-      {series.seasons.length > 1 && (
-        <ScrollReveal className="mb-8">
-          <h2 className="font-display text-2xl font-semibold tracking-tight text-cinema-chalk mb-4">
-            Temporadas
-          </h2>
-          <div
-            className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1"
-            role="tablist"
-            aria-label="Temporadas"
-          >
-            {series.seasons.map((season) => {
-              const isActive = season._id === activeSeasonId;
-              return (
-                <button
-                  key={season._id}
-                  type="button"
-                  role="tab"
-                  aria-selected={isActive}
-                  onClick={() => setActiveSeasonId(season._id)}
-                  className={cn(
-                    'shrink-0 flex flex-col items-start gap-0.5 px-4 py-2.5 rounded-lg border text-left transition-all',
-                    isActive
-                      ? 'bg-cinema-accent text-cinema-chalk border-cinema-accent'
-                      : 'bg-cinema-surface text-cinema-silver border-cinema-border hover:text-cinema-chalk hover:border-cinema-accent/40'
-                  )}
-                >
-                  <span className="text-sm font-medium whitespace-nowrap">
-                    {season.seasonLabel}
-                  </span>
-                  <span
-                    className={cn(
-                      'text-[11px] whitespace-nowrap',
-                      isActive ? 'text-cinema-chalk/70' : 'text-cinema-muted'
-                    )}
-                  >
-                    {season.year}
-                    {season.episodes > 0 && ` · ${season.episodes} eps`}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </ScrollReveal>
-      )}
-
-      <ScrollReveal>
-        <div className="flex items-baseline justify-between gap-4 mb-6 flex-wrap">
-          <h2 className="font-display text-2xl font-semibold tracking-tight text-cinema-chalk">
-            Episodios
-          </h2>
-          {activeSeason && series.seasons.length > 1 && (
-            <p className="text-sm text-cinema-muted">{activeSeason.seasonLabel}</p>
-          )}
-        </div>
-
-        {loadingEpisodes ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-6 h-6 text-cinema-silver animate-spin" />
-          </div>
-        ) : episodes.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {episodes.map((ep) => {
-              const airDate = formatAirDate(ep.airDate);
-              return (
-                <button
-                  key={ep.number}
-                  type="button"
-                  onClick={() => {
-                    if (!activeSeason) return;
-                    router.push(`/anime/watch/${activeSeason._id}/${ep.number}`);
-                  }}
-                  className="group flex gap-3 p-3 rounded-lg bg-cinema-surface border border-cinema-border hover:border-cinema-accent/50 hover:bg-cinema-elevated transition-all text-left"
-                >
-                  <div className="relative w-28 aspect-video rounded-lg overflow-hidden bg-cinema-elevated shrink-0">
-                    {ep.image ? (
-                      <img
-                        src={ep.image}
-                        alt=""
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Tv className="w-4 h-4 text-cinema-ash" aria-hidden />
-                      </div>
-                    )}
-                    <span className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Play className="w-6 h-6 text-cinema-chalk fill-current" aria-hidden />
-                    </span>
-                    <span className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded bg-black/80 text-cinema-chalk text-[10px] font-bold">
-                      {ep.number}
-                    </span>
-                  </div>
-
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-cinema-chalk line-clamp-2 leading-snug group-hover:text-cinema-accent-light transition-colors">
-                      {ep.title}
-                    </p>
-                    <div className="flex items-center gap-2 mt-1 text-[11px] text-cinema-muted">
-                      {airDate && (
-                        <span className="inline-flex items-center gap-1">
-                          <Calendar className="w-3 h-3" aria-hidden />
-                          {airDate}
-                        </span>
-                      )}
-                      {ep.runtime && (
-                        <span className="inline-flex items-center gap-1">
-                          <Clock className="w-3 h-3" aria-hidden />
-                          {ep.runtime} min
-                        </span>
-                      )}
-                    </div>
-                    {ep.overview && (
-                      <p className="text-[11px] text-cinema-muted line-clamp-2 mt-1.5">
-                        {ep.overview}
-                      </p>
-                    )}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <Tv className="w-10 h-10 text-cinema-muted mx-auto mb-3" />
-            <p className="text-cinema-muted text-sm">
-              {episodeError ?? 'No hay episodios para mostrar.'}
+      <div className="container mx-auto px-4 py-12 space-y-10">
+        <ScrollReveal className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+          <div className="lg:col-span-2">
+            <h2 className="font-display text-2xl font-semibold tracking-tight text-cinema-chalk mb-4">
+              Sinopsis
+            </h2>
+            <p className="text-cinema-muted leading-relaxed text-lg">
+              {activeSeason?.synopsis || series.synopsis}
             </p>
           </div>
+          <div className="card-feature p-6 h-fit">
+            <h3 className="font-display text-lg font-semibold tracking-tight text-cinema-chalk mb-5">
+              Detalles
+            </h3>
+            <dl className="space-y-4 text-sm">
+              {[
+                ['Género', series.genre.join(', ')],
+                ['Años', yearLabel],
+                ['Temporadas', String(seasons.length)],
+                ['Episodios', String(series.totalEpisodes)],
+                ['Estado', series.status === 'ongoing' ? 'En emisión' : 'Finalizado'],
+              ].map(([label, value]) => (
+                <div
+                  key={label}
+                  className="flex justify-between gap-4 border-b border-cinema-border/50 pb-3 last:border-0"
+                >
+                  <dt className="text-cinema-silver">{label}</dt>
+                  <dd className="font-medium text-right text-cinema-chalk">{value}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </ScrollReveal>
+
+        {series.seasons.length > 1 && (
+          <ScrollReveal>
+            <h2 className="font-display text-2xl font-semibold tracking-tight text-cinema-chalk mb-4">
+              Temporadas
+            </h2>
+            <div
+              className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1"
+              role="tablist"
+              aria-label="Temporadas"
+            >
+              {series.seasons.map((season) => {
+                const isActive = season._id === activeSeasonId;
+                return (
+                  <button
+                    key={season._id}
+                    type="button"
+                    role="tab"
+                    aria-selected={isActive}
+                    onClick={() => setActiveSeasonId(season._id)}
+                    className={cn(
+                      'shrink-0 flex flex-col items-start gap-0.5 px-4 py-2.5 rounded-lg border text-left transition-all',
+                      isActive
+                        ? 'bg-cinema-accent text-cinema-bg border-cinema-accent'
+                        : 'bg-cinema-surface text-cinema-silver border-cinema-border hover:text-cinema-chalk hover:border-cinema-accent/40'
+                    )}
+                  >
+                    <span className="text-sm font-medium whitespace-nowrap">
+                      {season.seasonLabel}
+                    </span>
+                    <span
+                      className={cn(
+                        'text-[11px] whitespace-nowrap',
+                        isActive ? 'text-cinema-bg/70' : 'text-cinema-muted'
+                      )}
+                    >
+                      {season.year}
+                      {season.episodes > 0 && ` · ${season.episodes} eps`}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </ScrollReveal>
         )}
-      </ScrollReveal>
+
+        <ScrollReveal>
+          <div
+            id="episodios"
+            className="scroll-mt-24 flex items-baseline justify-between gap-4 mb-6 flex-wrap"
+          >
+            <h2 className="font-display text-2xl font-semibold tracking-tight text-cinema-chalk">
+              Episodios
+            </h2>
+            {activeSeason && series.seasons.length > 1 && (
+              <p className="text-sm text-cinema-muted">{activeSeason.seasonLabel}</p>
+            )}
+          </div>
+
+          {loadingEpisodes ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-6 h-6 text-cinema-silver animate-spin" />
+            </div>
+          ) : episodes.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {episodes.map((ep) => {
+                const airDate = formatAirDate(ep.airDate);
+                return (
+                  <button
+                    key={ep.number}
+                    type="button"
+                    onClick={() => {
+                      if (!activeSeason) return;
+                      router.push(`/anime/watch/${activeSeason._id}/${ep.number}`);
+                    }}
+                    className="group flex gap-3 p-3 rounded-lg bg-cinema-surface border border-cinema-border hover:border-cinema-accent/50 hover:bg-cinema-elevated transition-all text-left"
+                  >
+                    <div className="relative w-28 aspect-video rounded-lg overflow-hidden bg-cinema-elevated shrink-0">
+                      {ep.image ? (
+                        <img
+                          src={ep.image}
+                          alt=""
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Tv className="w-4 h-4 text-cinema-ash" aria-hidden />
+                        </div>
+                      )}
+                      <span className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Play className="w-6 h-6 text-cinema-chalk fill-current" aria-hidden />
+                      </span>
+                      <span className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded bg-black/80 text-cinema-chalk text-[10px] font-bold">
+                        {ep.number}
+                      </span>
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-cinema-chalk line-clamp-2 leading-snug group-hover:text-cinema-accent-light transition-colors">
+                        {ep.title}
+                      </p>
+                      <div className="flex items-center gap-2 mt-1 text-[11px] text-cinema-muted">
+                        {airDate && (
+                          <span className="inline-flex items-center gap-1">
+                            <Calendar className="w-3 h-3" aria-hidden />
+                            {airDate}
+                          </span>
+                        )}
+                        {ep.runtime && (
+                          <span className="inline-flex items-center gap-1">
+                            <Clock className="w-3 h-3" aria-hidden />
+                            {ep.runtime} min
+                          </span>
+                        )}
+                      </div>
+                      {ep.overview && (
+                        <p className="text-[11px] text-cinema-muted line-clamp-2 mt-1.5">
+                          {ep.overview}
+                        </p>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <Tv className="w-10 h-10 text-cinema-muted mx-auto mb-3" />
+              <p className="text-cinema-muted text-sm">
+                {episodeError ?? 'No hay episodios para mostrar.'}
+              </p>
+            </div>
+          )}
+        </ScrollReveal>
+      </div>
     </div>
   );
 }

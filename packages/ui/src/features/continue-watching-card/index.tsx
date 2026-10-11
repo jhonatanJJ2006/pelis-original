@@ -22,7 +22,7 @@ export function ContinueWatchingCard({ movie, progress, duration }: ContinueWatc
       prefetch={false}
       className="card-container group relative block shrink-0 w-[260px] sm:w-[300px] md:w-[340px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cinema-accent/60 rounded-lg active:scale-[0.97] motion-safe:transition-transform motion-safe:duration-fast motion-safe:ease-out-expo"
     >
-      <div className="relative aspect-video rounded-lg overflow-hidden border border-cinema-border bg-cinema-surface motion-safe:transition-[border-color,box-shadow] motion-safe:duration-normal [@media(hover:hover)_and_(pointer:fine)]:group-hover:border-cinema-accent/50 [@media(hover:hover)_and_(pointer:fine)]:group-hover:shadow-[0_8px_32px_rgba(59,130,246,0.25)]">
+      <div className="relative aspect-video rounded-lg overflow-hidden border border-cinema-border bg-cinema-surface motion-safe:transition-[border-color,box-shadow] motion-safe:duration-normal [@media(hover:hover)_and_(pointer:fine)]:group-hover:border-cinema-accent/50 [@media(hover:hover)_and_(pointer:fine)]:group-hover:ring-2 [@media(hover:hover)_and_(pointer:fine)]:group-hover:ring-cinema-accent">
         <MoviePoster
           src={movie.backdropImage ?? movie.image}
           alt={movie.name}
@@ -41,7 +41,7 @@ export function ContinueWatchingCard({ movie, progress, duration }: ContinueWatc
         <div className="card-actions-layer absolute inset-0 z-[3] flex items-center justify-center">
           <div className="flex flex-col items-center gap-2">
             <div
-              className="card-action-btn card-action-btn--play p-4 rounded-full bg-cinema-accent text-cinema-chalk shadow-glow"
+              className="card-action-btn card-action-btn--play p-4 rounded-full bg-cinema-accent text-cinema-bg"
               aria-hidden
             >
               <Play className="w-6 h-6" fill="currentColor" />
@@ -59,22 +59,22 @@ export function ContinueWatchingCard({ movie, progress, duration }: ContinueWatc
           <p className="font-medium text-cinema-chalk truncate mb-2.5 transition-colors [@media(hover:hover)_and_(pointer:fine)]:group-hover:text-cinema-accent-light">
             {movie.name}
           </p>
-          <div className="h-2 bg-cinema-elevated/80 rounded-full overflow-hidden relative">
-            <div
-              className="h-full bg-gradient-to-r from-cinema-accent to-cinema-accent rounded-full transition-all"
-              style={{ width: `${pct}%` }}
-            />
-            <span
-              className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-white shadow-[0_0_8px_rgba(59,130,246,0.9)] border-2 border-cinema-accent transition-all"
-              style={{ left: `calc(${pct}% - 6px)` }}
-            />
+          <div
+            className="h-1 bg-cinema-chalk/20 rounded-full overflow-hidden"
+            role="progressbar"
+            aria-label={`Progreso de ${movie.name}`}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={pct}
+          >
+            <div className="h-full bg-cinema-accent transition-all" style={{ width: `${pct}%` }} />
           </div>
           <div className="flex items-center justify-between text-xs text-cinema-silver mt-1.5">
             <span>
               {formatDuration(progress)} de {formatDuration(duration)}
             </span>
             <span className="font-medium text-cinema-accent-light">
-              {remaining > 0 ? `Faltan ${formatDuration(remaining)}` : '¡Completa!'}
+              {remaining > 0 ? `Faltan ${formatDuration(remaining)}` : 'Completa'}
             </span>
           </div>
         </div>

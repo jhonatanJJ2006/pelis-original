@@ -182,8 +182,21 @@ export function HeroCarousel({ movies }: HeroCarouselProps) {
                       >
                         <span className="inline-flex items-center gap-1.5 px-3 py-1 border border-cinema-accent/60 text-cinema-accent text-label font-semibold rounded-full uppercase">
                           <Sparkles className="w-3.5 h-3.5" aria-hidden />
-                          Destacado
+                          {movie.featured ? 'Destacado' : 'Tendencia'}
                         </span>
+                        {movie.classification && (
+                          <span className="inline-flex items-center px-1.5 py-0.5 border border-cinema-silver/50 text-cinema-chalk text-[11px] font-semibold rounded-[4px]">
+                            {movie.classification}
+                          </span>
+                        )}
+                        <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 bg-cinema-chalk/10 text-cinema-chalk text-[11px] font-semibold rounded-[4px]">
+                          HD
+                        </span>
+                        {movie.subtitleTracks && movie.subtitleTracks.length > 0 && (
+                          <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 bg-cinema-chalk/10 text-cinema-chalk text-[11px] font-semibold rounded-[4px]">
+                            CC
+                          </span>
+                        )}
                         <span className="text-sm text-cinema-muted">
                           {movie.genre} &middot; {movie.releaseYear}
                         </span>
