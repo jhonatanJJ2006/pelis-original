@@ -87,7 +87,7 @@ function LinkTvForm() {
       </p>
 
       {ok ? (
-        <div className="rounded-2xl border border-cinema-border bg-cinema-surface p-6">
+        <div className="rounded-lg border border-cinema-border bg-cinema-surface p-6">
           <p className="text-cinema-chalk font-semibold mb-2">Televisor vinculado</p>
           <p className="text-cinema-muted text-sm leading-relaxed">
             Vuelve a la tele. En unos segundos debe abrir los canales en vivo.
@@ -99,7 +99,7 @@ function LinkTvForm() {
       ) : (
         <form
           onSubmit={handleSubmit}
-          className="rounded-2xl border border-cinema-border bg-cinema-surface p-6 space-y-4"
+          className="rounded-lg border border-cinema-border bg-cinema-surface p-6 space-y-4"
         >
           <Input
             label="Código de la tele"

@@ -42,7 +42,7 @@ export function AdminChrome({ children }: { children: React.ReactNode }) {
         <button
           type="button"
           onClick={() => setMobileNavOpen(true)}
-          className="p-2 -ml-2 rounded-lg text-cinema-muted hover:text-white hover:bg-cinema-elevated transition-colors"
+          className="p-2 -ml-2 rounded-lg text-cinema-muted hover:text-cinema-chalk hover:bg-cinema-elevated transition-colors"
           aria-label="Abrir menú"
           aria-expanded={mobileNavOpen}
         >
@@ -53,7 +53,7 @@ export function AdminChrome({ children }: { children: React.ReactNode }) {
         </span>
         <Link
           href="/"
-          className="ml-auto text-xs sm:text-sm text-cinema-muted hover:text-white transition-colors shrink-0"
+          className="ml-auto text-xs sm:text-sm text-cinema-muted hover:text-cinema-chalk transition-colors shrink-0"
         >
           Ir al sitio
         </Link>

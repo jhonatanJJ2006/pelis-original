@@ -42,10 +42,10 @@ export function ProviderHealthPanel() {
   const embedOk = results?.filter((r) => r.kind === 'embed' && r.ok).length ?? 0;
 
   return (
-    <div className="mb-6 p-4 rounded-2xl border border-cinema-border bg-cinema-surface">
+    <div className="mb-6 p-4 rounded-lg border border-cinema-border bg-cinema-surface">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
         <div>
-          <h2 className="text-sm font-medium text-white">Estado de proveedores</h2>
+          <h2 className="text-sm font-medium text-cinema-chalk">Estado de proveedores</h2>
           <p className="text-xs text-cinema-muted mt-0.5">
             {results
               ? `${okCount}/${results.length} operativos · ${embedOk} reproductor(es) integrado(s)`

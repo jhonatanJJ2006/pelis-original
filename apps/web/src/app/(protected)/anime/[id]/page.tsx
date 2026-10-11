@@ -137,11 +137,13 @@ export default function AnimeDetailPage() {
       <div className="page-shell min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
           <AlertCircle className="w-12 h-12 text-cinema-muted mx-auto mb-4" />
-          <h1 className="font-display text-3xl text-white uppercase mb-2">Anime no encontrado</h1>
+          <h1 className="font-display text-3xl text-cinema-chalk uppercase mb-2">
+            Anime no encontrado
+          </h1>
           <p className="text-cinema-muted mb-6">El anime que buscas no está disponible.</p>
           <Link
             href="/anime"
-            className="inline-flex items-center gap-2 text-cinema-violet-light hover:text-cinema-violet"
+            className="inline-flex items-center gap-2 text-cinema-accent-light hover:text-cinema-accent"
           >
             <ArrowLeft className="w-4 h-4" />
             Volver a anime
@@ -158,7 +160,7 @@ export default function AnimeDetailPage() {
     <div className="page-shell">
       <Link
         href="/anime"
-        className="inline-flex items-center gap-2 text-cinema-silver hover:text-white transition-colors text-sm mb-6"
+        className="inline-flex items-center gap-2 text-cinema-silver hover:text-cinema-chalk transition-colors text-sm mb-6"
       >
         <ArrowLeft className="w-4 h-4" />
         Todos los animes
@@ -166,7 +168,7 @@ export default function AnimeDetailPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-8 mb-12">
         <div className="relative">
-          <div className="aspect-[3/4] rounded-2xl overflow-hidden bg-cinema-elevated border border-cinema-border">
+          <div className="aspect-[3/4] rounded-lg overflow-hidden bg-cinema-elevated border border-cinema-border">
             <img
               src={activeSeason?.image ?? series.image}
               alt={series.title}
@@ -177,7 +179,7 @@ export default function AnimeDetailPage() {
 
         <div>
           <ScrollReveal>
-            <h1 className="font-display text-4xl md:text-5xl tracking-wide text-white uppercase mb-2">
+            <h1 className="font-display text-4xl md:text-5xl font-semibold tracking-tight text-cinema-chalk mb-2">
               {series.title}
             </h1>
             {series.alternativeTitle && (
@@ -186,7 +188,7 @@ export default function AnimeDetailPage() {
 
             <div className="flex flex-wrap items-center gap-2.5 mb-6">
               {series.rating && (
-                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cinema-gold/10 border border-cinema-gold/30 text-cinema-gold text-sm font-medium">
+                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cinema-accent/10 border border-cinema-accent/30 text-cinema-accent text-sm font-medium">
                   <Star className="w-4 h-4" />
                   {series.rating}
                 </span>
@@ -227,7 +229,7 @@ export default function AnimeDetailPage() {
               {series.genre.map((g) => (
                 <span
                   key={g}
-                  className="px-3 py-1 rounded-full bg-cinema-violet/15 text-cinema-violet-light text-xs font-medium border border-cinema-violet/20"
+                  className="px-3 py-1 rounded-full bg-cinema-accent/15 text-cinema-accent-light text-xs font-medium border border-cinema-accent/20"
                 >
                   {g}
                 </span>
@@ -243,7 +245,7 @@ export default function AnimeDetailPage() {
 
       {series.seasons.length > 1 && (
         <ScrollReveal className="mb-8">
-          <h2 className="font-display text-2xl tracking-wide text-white uppercase mb-4">
+          <h2 className="font-display text-2xl font-semibold tracking-tight text-cinema-chalk mb-4">
             Temporadas
           </h2>
           <div
@@ -261,10 +263,10 @@ export default function AnimeDetailPage() {
                   aria-selected={isActive}
                   onClick={() => setActiveSeasonId(season._id)}
                   className={cn(
-                    'shrink-0 flex flex-col items-start gap-0.5 px-4 py-2.5 rounded-xl border text-left transition-all',
+                    'shrink-0 flex flex-col items-start gap-0.5 px-4 py-2.5 rounded-lg border text-left transition-all',
                     isActive
-                      ? 'bg-cinema-violet text-white border-cinema-violet'
-                      : 'bg-cinema-surface text-cinema-silver border-cinema-border hover:text-white hover:border-cinema-violet/40'
+                      ? 'bg-cinema-accent text-cinema-chalk border-cinema-accent'
+                      : 'bg-cinema-surface text-cinema-silver border-cinema-border hover:text-cinema-chalk hover:border-cinema-accent/40'
                   )}
                 >
                   <span className="text-sm font-medium whitespace-nowrap">
@@ -273,7 +275,7 @@ export default function AnimeDetailPage() {
                   <span
                     className={cn(
                       'text-[11px] whitespace-nowrap',
-                      isActive ? 'text-white/70' : 'text-cinema-muted'
+                      isActive ? 'text-cinema-chalk/70' : 'text-cinema-muted'
                     )}
                   >
                     {season.year}
@@ -288,7 +290,9 @@ export default function AnimeDetailPage() {
 
       <ScrollReveal>
         <div className="flex items-baseline justify-between gap-4 mb-6 flex-wrap">
-          <h2 className="font-display text-2xl tracking-wide text-white uppercase">Episodios</h2>
+          <h2 className="font-display text-2xl font-semibold tracking-tight text-cinema-chalk">
+            Episodios
+          </h2>
           {activeSeason && series.seasons.length > 1 && (
             <p className="text-sm text-cinema-muted">{activeSeason.seasonLabel}</p>
           )}
@@ -310,7 +314,7 @@ export default function AnimeDetailPage() {
                     if (!activeSeason) return;
                     router.push(`/anime/watch/${activeSeason._id}/${ep.number}`);
                   }}
-                  className="group flex gap-3 p-3 rounded-xl bg-cinema-surface border border-cinema-border hover:border-cinema-violet/50 hover:bg-cinema-elevated transition-all text-left"
+                  className="group flex gap-3 p-3 rounded-lg bg-cinema-surface border border-cinema-border hover:border-cinema-accent/50 hover:bg-cinema-elevated transition-all text-left"
                 >
                   <div className="relative w-28 aspect-video rounded-lg overflow-hidden bg-cinema-elevated shrink-0">
                     {ep.image ? (
@@ -326,15 +330,15 @@ export default function AnimeDetailPage() {
                       </div>
                     )}
                     <span className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Play className="w-6 h-6 text-white fill-current" aria-hidden />
+                      <Play className="w-6 h-6 text-cinema-chalk fill-current" aria-hidden />
                     </span>
-                    <span className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded bg-black/80 text-white text-[10px] font-bold">
+                    <span className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded bg-black/80 text-cinema-chalk text-[10px] font-bold">
                       {ep.number}
                     </span>
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-white line-clamp-2 leading-snug group-hover:text-cinema-violet-light transition-colors">
+                    <p className="text-sm font-medium text-cinema-chalk line-clamp-2 leading-snug group-hover:text-cinema-accent-light transition-colors">
                       {ep.title}
                     </p>
                     <div className="flex items-center gap-2 mt-1 text-[11px] text-cinema-muted">

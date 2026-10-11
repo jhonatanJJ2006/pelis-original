@@ -145,8 +145,8 @@ export default function AdminAnimePage() {
               className={cn(
                 'px-3 py-1.5 rounded-full text-xs sm:text-sm transition-colors border whitespace-nowrap shrink-0',
                 statusFilter === tab.value
-                  ? 'bg-cinema-violet/20 text-white border-cinema-violet/40'
-                  : 'text-cinema-muted border-cinema-border hover:text-white hover:border-cinema-silver/30'
+                  ? 'bg-cinema-accent/20 text-cinema-chalk border-cinema-accent/40'
+                  : 'text-cinema-muted border-cinema-border hover:text-cinema-chalk hover:border-cinema-silver/30'
               )}
             >
               {tab.label}
@@ -176,7 +176,7 @@ export default function AdminAnimePage() {
             {(pageAnime ?? []).map((a) => (
               <article
                 key={a._id}
-                className="rounded-2xl border border-cinema-border bg-cinema-surface p-4"
+                className="rounded-lg border border-cinema-border bg-cinema-surface p-4"
               >
                 <div className="flex gap-3">
                   <div className="w-14 h-20 shrink-0 rounded-lg overflow-hidden bg-cinema-elevated">
@@ -187,7 +187,9 @@ export default function AdminAnimePage() {
                     />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h3 className="font-medium text-sm leading-snug text-white">{a.title}</h3>
+                    <h3 className="font-medium text-sm leading-snug text-cinema-chalk">
+                      {a.title}
+                    </h3>
                     {a.alternativeTitle && (
                       <p className="text-xs text-cinema-ash mt-0.5 truncate">
                         {a.alternativeTitle}
@@ -206,7 +208,7 @@ export default function AdminAnimePage() {
                     aria-label="Poster TMDB"
                     onClick={() => setEnrichTarget(a)}
                   >
-                    <ImageIcon className="w-4 h-4 text-cinema-violet-light" />
+                    <ImageIcon className="w-4 h-4 text-cinema-accent-light" />
                   </Button>
                   <Button
                     variant="ghost"
@@ -222,7 +224,7 @@ export default function AdminAnimePage() {
                     aria-label="Completar desde TMDB"
                     onClick={() => setEnrichTarget(a)}
                   >
-                    <Sparkles className="w-4 h-4 text-cinema-gold" />
+                    <Sparkles className="w-4 h-4 text-cinema-accent" />
                   </Button>
                   <Link href={`/admin/anime/${a._id}/edit`}>
                     <Button variant="ghost" size="sm" aria-label="Editar">
@@ -247,7 +249,7 @@ export default function AdminAnimePage() {
             ))}
           </div>
 
-          <div className="hidden md:block overflow-x-auto rounded-2xl border border-cinema-border bg-cinema-surface">
+          <div className="hidden md:block overflow-x-auto rounded-lg border border-cinema-border bg-cinema-surface">
             <table className="admin-table w-full min-w-[720px] text-sm">
               <thead>
                 <tr className="border-b border-cinema-border text-left text-cinema-muted">
@@ -276,7 +278,9 @@ export default function AdminAnimePage() {
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      <p className="font-medium max-w-[260px] truncate text-white">{a.title}</p>
+                      <p className="font-medium max-w-[260px] truncate text-cinema-chalk">
+                        {a.title}
+                      </p>
                       <p className="text-xs text-cinema-ash mt-0.5 truncate">
                         {a.genre.slice(0, 3).join(', ')}
                       </p>
@@ -289,7 +293,7 @@ export default function AdminAnimePage() {
                           'inline-flex items-center text-[10px] px-2 py-0.5 rounded-full',
                           a.status === 'ongoing'
                             ? 'bg-emerald-500/20 text-emerald-300'
-                            : 'bg-cinema-violet/20 text-cinema-violet-light'
+                            : 'bg-cinema-accent/20 text-cinema-accent-light'
                         )}
                       >
                         {a.status === 'ongoing' ? 'En emisión' : 'Finalizado'}
@@ -298,7 +302,7 @@ export default function AdminAnimePage() {
                     <td className="px-4 py-3 text-cinema-muted">
                       {a.rating ? (
                         <span className="inline-flex items-center gap-1">
-                          <Star className="w-3.5 h-3.5 text-cinema-gold fill-cinema-gold" />
+                          <Star className="w-3.5 h-3.5 text-cinema-accent fill-cinema-accent" />
                           {a.rating.toFixed(1)}
                         </span>
                       ) : (
@@ -313,7 +317,7 @@ export default function AdminAnimePage() {
                           aria-label="Poster TMDB"
                           onClick={() => setEnrichTarget(a)}
                         >
-                          <ImageIcon className="w-4 h-4 text-cinema-violet-light" />
+                          <ImageIcon className="w-4 h-4 text-cinema-accent-light" />
                         </Button>
                         <Button
                           variant="ghost"
@@ -329,7 +333,7 @@ export default function AdminAnimePage() {
                           aria-label="Completar desde TMDB"
                           onClick={() => setEnrichTarget(a)}
                         >
-                          <Sparkles className="w-4 h-4 text-cinema-gold" />
+                          <Sparkles className="w-4 h-4 text-cinema-accent" />
                         </Button>
                         <Link href={`/admin/anime/${a._id}/edit`}>
                           <Button variant="ghost" size="sm" aria-label="Editar">

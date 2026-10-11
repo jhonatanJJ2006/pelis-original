@@ -20,7 +20,7 @@ export default function LegalLayout({ children }: { children: React.ReactNode })
       <header className="relative py-6 px-4 z-10 border-b border-cinema-border/60">
         <div className="container mx-auto flex items-center justify-between gap-4">
           <Link href="/" className="flex items-center gap-2.5 w-fit group">
-            <div className="w-10 h-10 bg-gradient-to-br from-cinema-accent to-cinema-gold rounded flex items-center justify-center group-hover:scale-105 transition-transform shadow-glow">
+            <div className="w-10 h-10 bg-gradient-to-br from-cinema-accent to-cinema-accent rounded flex items-center justify-center group-hover:scale-105 transition-transform shadow-glow">
               <Film className="w-6 h-6 text-cinema-bg" aria-hidden />
             </div>
             <span className="font-display text-2xl tracking-tight text-cinema-chalk">Pelis</span>
@@ -28,19 +28,19 @@ export default function LegalLayout({ children }: { children: React.ReactNode })
           <nav className="flex items-center gap-4 text-sm">
             <Link
               href="/terminos"
-              className="text-cinema-silver hover:text-cinema-gold transition-colors"
+              className="text-cinema-silver hover:text-cinema-accent transition-colors"
             >
               Términos
             </Link>
             <Link
               href="/privacidad"
-              className="text-cinema-silver hover:text-cinema-gold transition-colors"
+              className="text-cinema-silver hover:text-cinema-accent transition-colors"
             >
               Privacidad
             </Link>
             <Link
               href="/login"
-              className="text-cinema-gold hover:text-cinema-gold-light transition-colors"
+              className="text-cinema-accent hover:text-cinema-accent-light transition-colors"
             >
               Iniciar sesión
             </Link>
@@ -54,10 +54,10 @@ export default function LegalLayout({ children }: { children: React.ReactNode })
         <div className="container mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
           <p>© {new Date().getFullYear()} Pelis (verpelis.pro)</p>
           <div className="flex gap-4">
-            <Link href="/terminos" className="hover:text-cinema-gold transition-colors">
+            <Link href="/terminos" className="hover:text-cinema-accent transition-colors">
               Términos
             </Link>
-            <Link href="/privacidad" className="hover:text-cinema-gold transition-colors">
+            <Link href="/privacidad" className="hover:text-cinema-accent transition-colors">
               Privacidad
             </Link>
           </div>

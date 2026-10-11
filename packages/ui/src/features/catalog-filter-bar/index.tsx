@@ -48,7 +48,7 @@ export function CatalogFilterBar({
   return (
     <div
       className={cn(
-        'flex flex-col lg:flex-row lg:items-center gap-3 rounded-2xl border border-cinema-border/70 bg-cinema-surface/40 p-3 md:p-4',
+        'flex flex-col lg:flex-row lg:items-center gap-3 rounded-lg border border-cinema-border/70 bg-cinema-surface/40 p-3 md:p-4',
         className
       )}
     >

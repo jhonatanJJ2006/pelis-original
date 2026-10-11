@@ -123,7 +123,7 @@ export default function MovieDetailPageClient({ preloaded }: MovieDetailPageClie
 
           <Link
             href={isSeries ? '/series' : '/movies'}
-            className="absolute top-4 left-4 md:top-6 md:left-6 z-10 inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-white bg-black/40 hover:bg-black/60 backdrop-blur-sm border border-white/10 transition-colors"
+            className="absolute top-4 left-4 md:top-6 md:left-6 z-10 inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-cinema-chalk bg-black/40 hover:bg-black/60 backdrop-blur-sm border border-white/10 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" aria-hidden />
             Volver
@@ -137,12 +137,12 @@ export default function MovieDetailPageClient({ preloaded }: MovieDetailPageClie
               <Badge variant="violet">{resolvedMovie.genre}</Badge>
               <Badge>{resolvedMovie.releaseYear}</Badge>
               {isSeries && resolvedMovie.episodes && (
-                <Badge variant="warning" className="bg-cinema-gold/90 text-black border-0">
+                <Badge variant="warning" className="bg-cinema-accent/90 text-cinema-bg border-0">
                   {resolvedMovie.episodes} episodios
                 </Badge>
               )}
             </div>
-            <h1 className="font-display text-4xl md:text-6xl tracking-wide text-white uppercase max-w-3xl mb-4">
+            <h1 className="font-display text-4xl md:text-6xl font-semibold tracking-tight text-cinema-chalk max-w-3xl mb-4">
               {resolvedMovie.name}
             </h1>
             <p className="text-cinema-muted text-lg mb-6 max-w-2xl line-clamp-2">
@@ -203,11 +203,11 @@ export default function MovieDetailPageClient({ preloaded }: MovieDetailPageClie
 
       <div className="container mx-auto px-4 py-12 space-y-12">
         <ScrollReveal as="section" id="player">
-          <h2 className="font-display text-2xl tracking-wide text-white uppercase mb-6">
+          <h2 className="font-display text-2xl font-semibold tracking-tight text-cinema-chalk mb-6">
             Reproductor
           </h2>
           {!user ? (
-            <div className="aspect-video rounded-2xl card-feature border border-cinema-violet/20 flex flex-col items-center justify-center gap-4 p-8">
+            <div className="aspect-video rounded-lg card-feature border border-cinema-accent/20 flex flex-col items-center justify-center gap-4 p-8">
               <Play className="w-12 h-12 text-cinema-muted/40" aria-hidden />
               <p className="text-cinema-muted text-center max-w-md">
                 Inicia sesión para reproducir y guardar tu progreso
@@ -217,8 +217,8 @@ export default function MovieDetailPageClient({ preloaded }: MovieDetailPageClie
               </Link>
             </div>
           ) : !entitled ? (
-            <div className="aspect-video rounded-2xl card-feature border border-cinema-gold/20 flex flex-col items-center justify-center gap-4 p-8">
-              <Crown className="w-12 h-12 text-cinema-gold/40" aria-hidden />
+            <div className="aspect-video rounded-lg card-feature border border-cinema-accent/20 flex flex-col items-center justify-center gap-4 p-8">
+              <Crown className="w-12 h-12 text-cinema-accent/40" aria-hidden />
               <p className="text-cinema-muted text-center max-w-md">
                 Necesitas un plan activo para reproducir este contenido
               </p>
@@ -228,7 +228,7 @@ export default function MovieDetailPageClient({ preloaded }: MovieDetailPageClie
               </Link>
             </div>
           ) : resolvingVideo ? (
-            <Skeleton className="aspect-video w-full rounded-2xl" />
+            <Skeleton className="aspect-video w-full rounded-lg" />
           ) : resolvedUrl ? (
             <VideoPlayer
               videoUrl={resolvedUrl}
@@ -239,7 +239,7 @@ export default function MovieDetailPageClient({ preloaded }: MovieDetailPageClie
               autoPlay={shouldPlay}
             />
           ) : (
-            <div className="aspect-video rounded-2xl card-feature border border-cinema-border flex items-center justify-center p-8">
+            <div className="aspect-video rounded-lg card-feature border border-cinema-border flex items-center justify-center p-8">
               <p className="text-cinema-muted text-center">
                 No hay video disponible para esta película en el servidor.
               </p>
@@ -249,13 +249,13 @@ export default function MovieDetailPageClient({ preloaded }: MovieDetailPageClie
 
         <ScrollReveal className="grid grid-cols-1 lg:grid-cols-3 gap-10">
           <div className="lg:col-span-2">
-            <h2 className="font-display text-2xl tracking-wide text-white uppercase mb-4">
+            <h2 className="font-display text-2xl font-semibold tracking-tight text-cinema-chalk mb-4">
               Sinopsis
             </h2>
             <p className="text-cinema-muted leading-relaxed text-lg">{resolvedMovie.synopsis}</p>
           </div>
           <div className="card-feature p-6 h-fit">
-            <h3 className="font-display text-lg tracking-wide text-white uppercase mb-5">
+            <h3 className="font-display text-lg font-semibold tracking-tight text-cinema-chalk mb-5">
               Detalles
             </h3>
             <dl className="space-y-4 text-sm">
@@ -273,7 +273,7 @@ export default function MovieDetailPageClient({ preloaded }: MovieDetailPageClie
                   className="flex justify-between gap-4 border-b border-cinema-border/50 pb-3 last:border-0"
                 >
                   <dt className="text-cinema-silver">{label}</dt>
-                  <dd className="font-medium text-right text-white">{value}</dd>
+                  <dd className="font-medium text-right text-cinema-chalk">{value}</dd>
                 </div>
               ))}
             </dl>

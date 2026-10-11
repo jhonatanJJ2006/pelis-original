@@ -65,20 +65,20 @@ export function MergeMovieModal({ source, onClose, onMerged }: MergeMovieModalPr
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
       <div
-        className="w-full max-w-2xl bg-cinema-surface border border-cinema-border rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col mx-auto"
+        className="w-full max-w-2xl bg-cinema-surface border border-cinema-border rounded-lg shadow-2xl overflow-hidden max-h-[90vh] flex flex-col mx-auto"
         role="dialog"
         aria-modal="true"
         aria-labelledby="merge-modal-title"
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-cinema-border">
-          <h2 id="merge-modal-title" className="text-lg font-semibold text-white">
+          <h2 id="merge-modal-title" className="text-lg font-semibold text-cinema-chalk">
             Enlazar película
           </h2>
           <button
             type="button"
             onClick={onClose}
             aria-label="Cerrar"
-            className="text-cinema-ash hover:text-white transition-colors"
+            className="text-cinema-ash hover:text-cinema-chalk transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -89,7 +89,7 @@ export function MergeMovieModal({ source, onClose, onMerged }: MergeMovieModalPr
             <p className="text-sm text-cinema-muted mb-3">
               Registro fuente (se eliminará tras fusionar):
             </p>
-            <div className="flex gap-4 p-4 rounded-xl bg-cinema-elevated/60 border border-cinema-border">
+            <div className="flex gap-4 p-4 rounded-lg bg-cinema-elevated/60 border border-cinema-border">
               <div className="w-16 h-24 shrink-0 rounded overflow-hidden">
                 <MoviePoster
                   src={source.image}
@@ -98,7 +98,7 @@ export function MergeMovieModal({ source, onClose, onMerged }: MergeMovieModalPr
                 />
               </div>
               <div className="min-w-0">
-                <p className="font-medium text-white truncate">
+                <p className="font-medium text-cinema-chalk truncate">
                   {getAdminMovieDisplayName(source)}
                 </p>
                 <p className="text-xs text-cinema-ash mt-1">
@@ -147,7 +147,7 @@ export function MergeMovieModal({ source, onClose, onMerged }: MergeMovieModalPr
             )}
 
             {targets && targets.length > 0 && (
-              <div className="mt-3 max-h-48 overflow-y-auto rounded-xl border border-cinema-border divide-y divide-cinema-border">
+              <div className="mt-3 max-h-48 overflow-y-auto rounded-lg border border-cinema-border divide-y divide-cinema-border">
                 {targets.map((movie) => (
                   <button
                     key={movie._id}
@@ -155,7 +155,7 @@ export function MergeMovieModal({ source, onClose, onMerged }: MergeMovieModalPr
                     onClick={() => setSelectedTargetId(movie._id)}
                     className={`w-full flex items-center gap-3 p-3 text-left transition-colors ${
                       selectedTargetId === movie._id
-                        ? 'bg-cinema-violet/20'
+                        ? 'bg-cinema-accent/20'
                         : 'hover:bg-cinema-elevated/50'
                     }`}
                   >
@@ -167,7 +167,7 @@ export function MergeMovieModal({ source, onClose, onMerged }: MergeMovieModalPr
                       />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-white truncate">
+                      <p className="text-sm font-medium text-cinema-chalk truncate">
                         {getAdminMovieDisplayName(movie)}
                       </p>
                       <p className="text-xs text-cinema-ash">
@@ -181,9 +181,11 @@ export function MergeMovieModal({ source, onClose, onMerged }: MergeMovieModalPr
           </div>
 
           {selectedTarget && (
-            <div className="p-4 rounded-xl border border-cinema-violet/30 bg-cinema-violet/10">
-              <p className="text-xs text-cinema-violet-light mb-2">Destino seleccionado</p>
-              <p className="font-medium text-white">{getAdminMovieDisplayName(selectedTarget)}</p>
+            <div className="p-4 rounded-lg border border-cinema-accent/30 bg-cinema-accent/10">
+              <p className="text-xs text-cinema-accent-light mb-2">Destino seleccionado</p>
+              <p className="font-medium text-cinema-chalk">
+                {getAdminMovieDisplayName(selectedTarget)}
+              </p>
             </div>
           )}
         </div>

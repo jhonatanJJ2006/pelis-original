@@ -79,7 +79,7 @@ export default function FavoritesPage() {
         </div>
 
         <div
-          className="flex gap-2 p-1 bg-cinema-surface border border-cinema-border rounded-xl overflow-x-auto"
+          className="flex gap-2 p-1 bg-cinema-surface border border-cinema-border rounded-lg overflow-x-auto"
           role="tablist"
           aria-label="Filtrar favoritos"
         >
@@ -100,7 +100,7 @@ export default function FavoritesPage() {
                 'px-4 py-2 rounded-lg text-sm font-medium motion-safe:transition-[background-color,color,box-shadow] motion-safe:duration-fast',
                 tab === item.id
                   ? 'bg-cinema-accent text-cinema-bg shadow-glow'
-                  : 'text-cinema-silver hover:text-white hover:bg-cinema-elevated/50'
+                  : 'text-cinema-silver hover:text-cinema-chalk hover:bg-cinema-elevated/50'
               )}
             >
               {item.label} ({item.count})

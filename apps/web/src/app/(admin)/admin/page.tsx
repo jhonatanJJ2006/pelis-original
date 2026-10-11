@@ -13,8 +13,8 @@ const statCards = [
     href: '/admin/movies',
     filter: 'all',
     icon: Film,
-    color: 'text-cinema-violet-light',
-    bg: 'bg-cinema-violet/15',
+    color: 'text-cinema-accent-light',
+    bg: 'bg-cinema-accent/15',
   },
   {
     key: 'missingVideo',
@@ -67,8 +67,8 @@ const statCards = [
     href: '/admin/movies?filter=incomplete',
     filter: 'incomplete',
     icon: FileWarning,
-    color: 'text-cinema-gold',
-    bg: 'bg-cinema-gold/15',
+    color: 'text-cinema-accent',
+    bg: 'bg-cinema-accent/15',
   },
 ] as const;
 
@@ -99,14 +99,14 @@ export default function AdminDashboardPage() {
             <Link
               key={card.key}
               href={card.href}
-              className="group p-5 rounded-2xl bg-cinema-surface border border-cinema-border hover:border-cinema-violet/40 transition-all"
+              className="group p-5 rounded-lg bg-cinema-surface border border-cinema-border hover:border-cinema-accent/40 transition-all"
             >
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="text-sm text-cinema-muted">{card.label}</p>
-                  <p className="text-3xl font-semibold text-white mt-2">{value}</p>
+                  <p className="text-3xl font-semibold text-cinema-chalk mt-2">{value}</p>
                 </div>
-                <div className={`p-3 rounded-xl ${card.bg}`}>
+                <div className={`p-3 rounded-lg ${card.bg}`}>
                   <Icon className={`w-5 h-5 ${card.color}`} />
                 </div>
               </div>
@@ -115,8 +115,8 @@ export default function AdminDashboardPage() {
         })}
       </div>
 
-      <div className="mt-6 sm:mt-8 p-4 sm:p-6 rounded-2xl bg-cinema-surface border border-cinema-border">
-        <h2 className="text-lg font-semibold text-white mb-2">Acciones rápidas</h2>
+      <div className="mt-6 sm:mt-8 p-4 sm:p-6 rounded-lg bg-cinema-surface border border-cinema-border">
+        <h2 className="text-lg font-semibold text-cinema-chalk mb-2">Acciones rápidas</h2>
         <p className="text-sm text-cinema-muted mb-4">
           Gestiona el catálogo, corrige registros huérfanos y fusiona duplicados.
         </p>

@@ -254,8 +254,8 @@ export default function AdminMoviesPageClient() {
               className={cn(
                 'px-3 py-1.5 rounded-full text-xs sm:text-sm transition-colors border whitespace-nowrap shrink-0',
                 qualityFilter === tab.value
-                  ? 'bg-cinema-violet/20 text-white border-cinema-violet/40'
-                  : 'text-cinema-muted border-cinema-border hover:text-white hover:border-cinema-silver/30'
+                  ? 'bg-cinema-accent/20 text-cinema-chalk border-cinema-accent/40'
+                  : 'text-cinema-muted border-cinema-border hover:text-cinema-chalk hover:border-cinema-silver/30'
               )}
             >
               {tab.label}
@@ -365,7 +365,7 @@ export default function AdminMoviesPageClient() {
             ))}
           </div>
 
-          <div className="hidden md:block overflow-x-auto rounded-2xl border border-cinema-border bg-cinema-surface">
+          <div className="hidden md:block overflow-x-auto rounded-lg border border-cinema-border bg-cinema-surface">
             <table className="admin-table w-full min-w-[720px] lg:min-w-[900px] text-sm">
               <thead>
                 <tr className="border-b border-cinema-border text-left text-cinema-muted">
@@ -406,7 +406,7 @@ export default function AdminMoviesPageClient() {
                           'font-medium max-w-[280px] truncate',
                           isAdminOrphanDisplayName(movie.name, movie.token)
                             ? 'text-cinema-muted italic'
-                            : 'text-white'
+                            : 'text-cinema-chalk'
                         )}
                       >
                         {getAdminMovieDisplayName(movie)}

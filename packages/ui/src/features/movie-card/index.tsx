@@ -118,7 +118,7 @@ function MovieCardBase({
           </div>
           <div className="absolute top-2 left-2 flex flex-wrap gap-1.5 z-[5]">
             {isSeries ? (
-              <Badge className="text-[10px] bg-cinema-gold text-black border-0 gap-1">
+              <Badge className="text-[10px] bg-cinema-accent text-cinema-bg border-0 gap-1">
                 <Tv className="w-3 h-3" />
                 Serie
               </Badge>

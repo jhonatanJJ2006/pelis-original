@@ -113,7 +113,7 @@ export default function AdminSeriesPage() {
             {(pageSeries ?? []).map((s) => (
               <article
                 key={s._id}
-                className="rounded-2xl border border-cinema-border bg-cinema-surface p-4"
+                className="rounded-lg border border-cinema-border bg-cinema-surface p-4"
               >
                 <div className="flex gap-3">
                   <div className="w-14 h-20 shrink-0 rounded-lg overflow-hidden bg-cinema-elevated">
@@ -127,7 +127,7 @@ export default function AdminSeriesPage() {
                     <h3
                       className={cn(
                         'font-medium text-sm leading-snug',
-                        s.isOrphanId ? 'text-cinema-muted italic' : 'text-white'
+                        s.isOrphanId ? 'text-cinema-muted italic' : 'text-cinema-chalk'
                       )}
                     >
                       {s.isOrphanId ? 'Sin título' : s.name}
@@ -147,7 +147,7 @@ export default function AdminSeriesPage() {
                     disabled={!canEdit(s)}
                     onClick={() => setEnrichTarget(s)}
                   >
-                    <ImageIcon className="w-4 h-4 text-cinema-violet-light" />
+                    <ImageIcon className="w-4 h-4 text-cinema-accent-light" />
                   </Button>
                   <Button
                     variant="ghost"
@@ -165,7 +165,7 @@ export default function AdminSeriesPage() {
                     disabled={!canEdit(s)}
                     onClick={() => setEnrichTarget(s)}
                   >
-                    <Sparkles className="w-4 h-4 text-cinema-gold" />
+                    <Sparkles className="w-4 h-4 text-cinema-accent" />
                   </Button>
                   <Link href={`/admin/series/${s._id}/edit`}>
                     <Button variant="ghost" size="sm" aria-label="Editar">
@@ -190,7 +190,7 @@ export default function AdminSeriesPage() {
             ))}
           </div>
 
-          <div className="hidden md:block overflow-x-auto rounded-2xl border border-cinema-border bg-cinema-surface">
+          <div className="hidden md:block overflow-x-auto rounded-lg border border-cinema-border bg-cinema-surface">
             <table className="admin-table w-full min-w-[720px] text-sm">
               <thead>
                 <tr className="border-b border-cinema-border text-left text-cinema-muted">
@@ -222,7 +222,7 @@ export default function AdminSeriesPage() {
                       <p
                         className={cn(
                           'font-medium max-w-[280px] truncate',
-                          s.isOrphanId ? 'text-cinema-muted italic' : 'text-white'
+                          s.isOrphanId ? 'text-cinema-muted italic' : 'text-cinema-chalk'
                         )}
                       >
                         {s.isOrphanId ? 'Sin título' : s.name}
@@ -238,7 +238,7 @@ export default function AdminSeriesPage() {
                           <AlertTriangle className="w-3 h-3" /> ID
                         </span>
                       ) : s.featured ? (
-                        <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-cinema-gold/20 text-cinema-gold">
+                        <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-cinema-accent/20 text-cinema-accent">
                           <Sparkles className="w-3 h-3" /> Destacada
                         </span>
                       ) : (
@@ -254,7 +254,7 @@ export default function AdminSeriesPage() {
                           disabled={!canEdit(s)}
                           onClick={() => setEnrichTarget(s)}
                         >
-                          <ImageIcon className="w-4 h-4 text-cinema-violet-light" />
+                          <ImageIcon className="w-4 h-4 text-cinema-accent-light" />
                         </Button>
                         <Button
                           variant="ghost"
@@ -272,7 +272,7 @@ export default function AdminSeriesPage() {
                           disabled={!canEdit(s)}
                           onClick={() => setEnrichTarget(s)}
                         >
-                          <Sparkles className="w-4 h-4 text-cinema-gold" />
+                          <Sparkles className="w-4 h-4 text-cinema-accent" />
                         </Button>
                         <Link href={`/admin/series/${s._id}/edit`}>
                           <Button variant="ghost" size="sm" aria-label="Editar">

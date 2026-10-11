@@ -52,7 +52,7 @@ export function AdminSidebar({ mobileOpen = false, onMobileClose }: AdminSidebar
           <Link
             href="/"
             onClick={handleNavClick}
-            className="inline-flex items-center gap-2 text-sm text-cinema-muted hover:text-white transition-colors mb-4"
+            className="inline-flex items-center gap-2 text-sm text-cinema-muted hover:text-cinema-chalk transition-colors mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
             Volver al sitio
@@ -66,7 +66,7 @@ export function AdminSidebar({ mobileOpen = false, onMobileClose }: AdminSidebar
           <button
             type="button"
             onClick={onMobileClose}
-            className="lg:hidden p-2 rounded-lg text-cinema-muted hover:text-white hover:bg-cinema-elevated transition-colors shrink-0"
+            className="lg:hidden p-2 rounded-lg text-cinema-muted hover:text-cinema-chalk hover:bg-cinema-elevated transition-colors shrink-0"
             aria-label="Cerrar menú"
           >
             <X className="w-5 h-5" />

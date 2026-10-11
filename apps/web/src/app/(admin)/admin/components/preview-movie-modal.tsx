@@ -111,21 +111,21 @@ function AdminPreviewVideo({ src, poster, title }: { src: string; poster: string
         controls
         playsInline
         poster={poster}
-        className="w-full aspect-video bg-black rounded-xl"
+        className="w-full aspect-video bg-black rounded-lg"
         aria-label={`Reproducir ${title}`}
       />
       {loading && !error && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-xl">
-          <Loader2 className="w-8 h-8 text-white animate-spin" aria-hidden />
+        <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg">
+          <Loader2 className="w-8 h-8 text-cinema-chalk animate-spin" aria-hidden />
         </div>
       )}
       {error && (
         <div
-          className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 rounded-xl p-4 text-center"
+          className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 rounded-lg p-4 text-center"
           data-testid="admin-preview-video-error"
         >
           <AlertCircle className="w-8 h-8 text-red-400 mb-2" aria-hidden />
-          <p className="text-white text-sm font-medium">{error}</p>
+          <p className="text-cinema-chalk text-sm font-medium">{error}</p>
           <p className="text-cinema-ash text-xs mt-2 break-all max-w-full">{src}</p>
         </div>
       )}
@@ -172,21 +172,24 @@ export function PreviewMovieModal({ movie, onClose, onBackdrop }: PreviewMovieMo
       onClick={onClose}
     >
       <div
-        className="w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-cinema-surface border border-cinema-border rounded-2xl shadow-2xl mx-auto"
+        className="w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-cinema-surface border border-cinema-border rounded-lg shadow-2xl mx-auto"
         role="dialog"
         aria-modal="true"
         aria-labelledby="preview-movie-title"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-cinema-border sticky top-0 bg-cinema-surface z-10">
-          <h2 id="preview-movie-title" className="text-lg font-semibold text-white truncate pr-4">
+          <h2
+            id="preview-movie-title"
+            className="text-lg font-semibold text-cinema-chalk truncate pr-4"
+          >
             {displayName}
           </h2>
           <button
             type="button"
             onClick={onClose}
             aria-label="Cerrar"
-            className="text-cinema-ash hover:text-white transition-colors shrink-0"
+            className="text-cinema-ash hover:text-cinema-chalk transition-colors shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
@@ -205,13 +208,13 @@ export function PreviewMovieModal({ movie, onClose, onBackdrop }: PreviewMovieMo
               {movie.genre && (
                 <p>
                   <span className="text-cinema-muted">Género: </span>
-                  <span className="text-white">{movie.genre}</span>
+                  <span className="text-cinema-chalk">{movie.genre}</span>
                 </p>
               )}
               {movie.releaseYear && (
                 <p>
                   <span className="text-cinema-muted">Año: </span>
-                  <span className="text-white">{movie.releaseYear}</span>
+                  <span className="text-cinema-chalk">{movie.releaseYear}</span>
                 </p>
               )}
               <p>
@@ -253,7 +256,7 @@ export function PreviewMovieModal({ movie, onClose, onBackdrop }: PreviewMovieMo
                     </span>
                   )}
                   {movie.quality.isIncomplete && (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-cinema-gold/20 text-cinema-gold">
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-cinema-accent/20 text-cinema-accent">
                       Incompleta
                     </span>
                   )}
@@ -285,7 +288,7 @@ export function PreviewMovieModal({ movie, onClose, onBackdrop }: PreviewMovieMo
               )}
             </div>
             <div
-              className={`relative w-full aspect-video rounded-xl overflow-hidden border bg-cinema-elevated ${
+              className={`relative w-full aspect-video rounded-lg overflow-hidden border bg-cinema-elevated ${
                 movie.backdropImage ? 'border-cinema-border' : 'border-dashed border-cinema-border'
               }`}
               data-testid="admin-preview-backdrop"
@@ -320,13 +323,13 @@ export function PreviewMovieModal({ movie, onClose, onBackdrop }: PreviewMovieMo
             <AdminPreviewVideo src={effectiveVideoUrl} poster={movie.image} title={displayName} />
           ) : (
             <div
-              className="flex flex-col items-center text-center py-8 px-4 rounded-xl bg-cinema-elevated/40 border border-cinema-border"
+              className="flex flex-col items-center text-center py-8 px-4 rounded-lg bg-cinema-elevated/40 border border-cinema-border"
               data-testid="admin-preview-no-video"
             >
-              <div className="w-14 h-14 rounded-2xl bg-cinema-elevated flex items-center justify-center mb-3">
+              <div className="w-14 h-14 rounded-lg bg-cinema-elevated flex items-center justify-center mb-3">
                 <Film className="w-7 h-7 text-cinema-ash" aria-hidden />
               </div>
-              <h3 className="text-white font-semibold mb-1">Sin video disponible</h3>
+              <h3 className="text-cinema-chalk font-semibold mb-1">Sin video disponible</h3>
               <p className="text-cinema-muted text-sm max-w-sm">
                 No hay stream disponible para esta película. Comprueba que exista en{' '}
                 <span className="font-mono">MOVIE_OUTPUT_ROOT</span> o añade un{' '}

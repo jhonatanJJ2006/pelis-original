@@ -165,7 +165,7 @@ export function Header({ sticky = true, minimalNav = false, tvMode = false }: He
                     className="w-9 h-9 rounded-full ring-2 ring-cinema-accent/50"
                   />
                 ) : (
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cinema-accent to-cinema-gold flex items-center justify-center ring-2 ring-cinema-accent/50">
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cinema-accent to-cinema-accent flex items-center justify-center ring-2 ring-cinema-accent/50">
                     <User className="w-4 h-4 text-cinema-bg" aria-hidden />
                   </div>
                 )}
@@ -185,10 +185,10 @@ export function Header({ sticky = true, minimalNav = false, tvMode = false }: He
               <Link
                 href="/subscribe"
                 className={cn(
-                  'p-2.5 rounded-xl transition-colors',
+                  'p-2.5 rounded-lg transition-colors',
                   hasActivePlan
-                    ? 'text-cinema-gold hover:bg-cinema-gold/10'
-                    : 'text-cinema-gold hover:bg-cinema-elevated/50'
+                    ? 'text-cinema-accent hover:bg-cinema-accent/10'
+                    : 'text-cinema-accent hover:bg-cinema-elevated/50'
                 )}
                 aria-label="Suscripciones"
               >
@@ -198,7 +198,7 @@ export function Header({ sticky = true, minimalNav = false, tvMode = false }: He
             <button
               type="button"
               onClick={() => setSearchOpen(!searchOpen)}
-              className="p-2.5 text-cinema-silver hover:text-white transition-colors rounded-xl"
+              className="p-2.5 text-cinema-silver hover:text-cinema-chalk transition-colors rounded-lg"
               aria-label="Buscar"
               aria-expanded={searchOpen}
             >

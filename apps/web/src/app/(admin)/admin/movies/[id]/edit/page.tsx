@@ -94,7 +94,7 @@ export default function EditMoviePage() {
     return (
       <div className="text-center py-24 text-cinema-muted">
         Película no encontrada.{' '}
-        <Link href="/admin/movies" className="text-cinema-violet-light hover:underline">
+        <Link href="/admin/movies" className="text-cinema-accent-light hover:underline">
           Volver al listado
         </Link>
       </div>
@@ -105,7 +105,7 @@ export default function EditMoviePage() {
     <div>
       <Link
         href="/admin/movies"
-        className="inline-flex items-center gap-2 text-sm text-cinema-muted hover:text-white transition-colors mb-6"
+        className="inline-flex items-center gap-2 text-sm text-cinema-muted hover:text-cinema-chalk transition-colors mb-6"
       >
         <ArrowLeft className="w-4 h-4" />
         Volver al listado

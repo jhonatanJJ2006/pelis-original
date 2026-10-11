@@ -107,8 +107,8 @@ export default function AdminUsersPage() {
               className={cn(
                 'px-3 py-1.5 rounded-full text-xs sm:text-sm transition-colors border whitespace-nowrap shrink-0',
                 roleFilter === tab.value
-                  ? 'bg-cinema-violet/20 text-white border-cinema-violet/40'
-                  : 'text-cinema-muted border-cinema-border hover:text-white hover:border-cinema-silver/30'
+                  ? 'bg-cinema-accent/20 text-cinema-chalk border-cinema-accent/40'
+                  : 'text-cinema-muted border-cinema-border hover:text-cinema-chalk hover:border-cinema-silver/30'
               )}
             >
               {tab.label}
@@ -138,21 +138,21 @@ export default function AdminUsersPage() {
             {(pageUsers ?? []).map((u) => (
               <article
                 key={u._id}
-                className="rounded-2xl border border-cinema-border bg-cinema-surface p-4"
+                className="rounded-lg border border-cinema-border bg-cinema-surface p-4"
               >
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cinema-accent to-cinema-violet flex items-center justify-center shrink-0">
-                    <UserIcon className="w-5 h-5 text-white" />
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cinema-accent to-cinema-accent flex items-center justify-center shrink-0">
+                    <UserIcon className="w-5 h-5 text-cinema-chalk" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h3 className="font-medium text-sm text-white truncate">{u.name}</h3>
+                    <h3 className="font-medium text-sm text-cinema-chalk truncate">{u.name}</h3>
                     <p className="text-xs text-cinema-muted truncate">{u.email}</p>
                     <div className="mt-1.5 flex items-center gap-2 flex-wrap">
                       <span
                         className={cn(
                           'inline-flex items-center text-[10px] px-2 py-0.5 rounded-full',
                           u.role === 'admin'
-                            ? 'bg-cinema-gold/20 text-cinema-gold'
+                            ? 'bg-cinema-accent/20 text-cinema-accent'
                             : 'bg-cinema-elevated text-cinema-muted'
                         )}
                       >
@@ -167,7 +167,7 @@ export default function AdminUsersPage() {
                       u.subscription.status === 'active' &&
                       u.subscription.endDate > Date.now() &&
                       u.subscription.plan ? (
-                        <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-cinema-violet/20 text-cinema-violet-light">
+                        <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-cinema-accent/20 text-cinema-accent-light">
                           <Crown className="w-3 h-3" /> {u.subscription.plan.name}
                         </span>
                       ) : null}
@@ -187,7 +187,7 @@ export default function AdminUsersPage() {
                       </>
                     ) : (
                       <>
-                        <Shield className="w-4 h-4 text-cinema-gold" /> Hacer admin
+                        <Shield className="w-4 h-4 text-cinema-accent" /> Hacer admin
                       </>
                     )}
                   </Button>
@@ -196,7 +196,7 @@ export default function AdminUsersPage() {
             ))}
           </div>
 
-          <div className="hidden md:block overflow-x-auto rounded-2xl border border-cinema-border bg-cinema-surface">
+          <div className="hidden md:block overflow-x-auto rounded-lg border border-cinema-border bg-cinema-surface">
             <table className="admin-table w-full min-w-[820px] text-sm">
               <thead>
                 <tr className="border-b border-cinema-border text-left text-cinema-muted">
@@ -221,7 +221,9 @@ export default function AdminUsersPage() {
                       className="border-b border-cinema-border/60 hover:bg-cinema-elevated/30 transition-colors"
                     >
                       <td className="px-4 py-3">
-                        <p className="font-medium text-white truncate max-w-[240px]">{u.name}</p>
+                        <p className="font-medium text-cinema-chalk truncate max-w-[240px]">
+                          {u.name}
+                        </p>
                         <p className="text-xs text-cinema-ash mt-0.5 truncate max-w-[240px]">
                           {u.email}
                         </p>
@@ -231,7 +233,7 @@ export default function AdminUsersPage() {
                           className={cn(
                             'inline-flex items-center text-[10px] px-2 py-0.5 rounded-full',
                             u.role === 'admin'
-                              ? 'bg-cinema-gold/20 text-cinema-gold'
+                              ? 'bg-cinema-accent/20 text-cinema-accent'
                               : 'bg-cinema-elevated text-cinema-muted'
                           )}
                         >
@@ -249,7 +251,7 @@ export default function AdminUsersPage() {
                       </td>
                       <td className="px-4 py-3 text-cinema-muted">
                         {u.subscription?.plan ? (
-                          <span className="inline-flex items-center gap-1 text-cinema-violet-light">
+                          <span className="inline-flex items-center gap-1 text-cinema-accent-light">
                             <Crown className="w-3.5 h-3.5" />
                             {u.subscription.plan.name}
                           </span>
@@ -275,7 +277,7 @@ export default function AdminUsersPage() {
                             </>
                           ) : (
                             <>
-                              <Shield className="w-4 h-4 text-cinema-gold" />
+                              <Shield className="w-4 h-4 text-cinema-accent" />
                               <span className="ml-1 hidden lg:inline">Hacer admin</span>
                             </>
                           )}

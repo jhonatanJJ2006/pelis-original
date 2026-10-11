@@ -115,11 +115,11 @@ export function LandingPage() {
             <ScrollReveal key={item.title} delay={i * 60}>
               <div
                 className={cn(
-                  'h-full rounded-2xl border border-cinema-border bg-cinema-surface/60 p-5',
+                  'h-full rounded-lg border border-cinema-border bg-cinema-surface/60 p-5',
                   'hover:border-cinema-accent/40 hover:-translate-y-1 transition-all duration-normal ease-out-expo'
                 )}
               >
-                <div className="w-10 h-10 rounded-xl bg-cinema-elevated border border-cinema-border flex items-center justify-center mb-4">
+                <div className="w-10 h-10 rounded-lg bg-cinema-elevated border border-cinema-border flex items-center justify-center mb-4">
                   <item.icon className="w-5 h-5 text-cinema-accent" />
                 </div>
                 <h3 className="font-display text-xl text-cinema-chalk mb-2">{item.title}</h3>
@@ -131,12 +131,12 @@ export function LandingPage() {
       </section>
 
       <section className="page-shell pb-16 md:pb-20">
-        <div className="rounded-3xl border border-cinema-border bg-cinema-elevated/40 p-6 md:p-10">
+        <div className="rounded-lg border border-cinema-border bg-cinema-elevated/40 p-6 md:p-10">
           <div className="grid md:grid-cols-3 gap-8">
             {perks.map((perk) => (
               <div key={perk.title}>
                 <div className="flex items-center gap-2 mb-3">
-                  <perk.icon className="w-5 h-5 text-cinema-gold" />
+                  <perk.icon className="w-5 h-5 text-cinema-accent" />
                   <h3 className="font-display text-lg text-cinema-chalk">{perk.title}</h3>
                 </div>
                 <p className="text-sm text-cinema-muted leading-relaxed">{perk.body}</p>
@@ -147,8 +147,8 @@ export function LandingPage() {
       </section>
 
       <section className="page-shell pb-20 md:pb-28">
-        <ScrollReveal className="rounded-3xl border border-cinema-accent/30 bg-gradient-to-br from-cinema-surface via-cinema-elevated to-cinema-bg p-8 md:p-12 text-center">
-          <Crown className="w-10 h-10 text-cinema-gold mx-auto mb-4" />
+        <ScrollReveal className="rounded-lg border border-cinema-accent/30 bg-gradient-to-br from-cinema-surface via-cinema-elevated to-cinema-bg p-8 md:p-12 text-center">
+          <Crown className="w-10 h-10 text-cinema-accent mx-auto mb-4" />
           <h2 className="font-display text-3xl md:text-4xl text-cinema-chalk mb-3">
             Premium cuando lo necesites
           </h2>

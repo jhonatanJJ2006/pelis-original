@@ -15,7 +15,7 @@ export function SubscribePageSkeleton({ className }: SubscribePageSkeletonProps)
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
         {Array.from({ length: 3 }).map((_, i) => (
-          <Skeleton key={i} className="h-80 w-full rounded-2xl" />
+          <Skeleton key={i} className="h-80 w-full rounded-lg" />
         ))}
       </div>
     </div>

@@ -195,7 +195,7 @@ export function MovieForm({
               accept="image/*"
               onChange={handleImageUpload}
               disabled={isUploading}
-              className="block w-full text-sm text-cinema-muted file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-cinema-elevated file:text-white hover:file:bg-cinema-elevated/80"
+              className="block w-full text-sm text-cinema-muted file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-cinema-elevated file:text-cinema-chalk hover:file:bg-cinema-elevated/80"
             />
           </div>
         )}

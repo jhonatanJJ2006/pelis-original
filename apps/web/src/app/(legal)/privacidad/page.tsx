@@ -185,7 +185,7 @@ export default function PrivacidadPage() {
             «última actualización» se revisará en esta página. Ver también los{' '}
             <Link
               href="/terminos"
-              className="text-cinema-gold hover:text-cinema-gold-light underline"
+              className="text-cinema-accent hover:text-cinema-accent-light underline"
             >
               Términos de uso
             </Link>

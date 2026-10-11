@@ -120,7 +120,7 @@ export function VerifyChannelsModal({
       onClick={canClose ? onClose : undefined}
     >
       <div
-        className="w-full max-w-md rounded-2xl border border-cinema-border bg-cinema-surface shadow-2xl"
+        className="w-full max-w-md rounded-lg border border-cinema-border bg-cinema-surface shadow-2xl"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -128,10 +128,10 @@ export function VerifyChannelsModal({
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-cinema-border">
           <div className="flex items-center gap-2">
-            <Activity className="w-5 h-5 text-cinema-violet-light" />
+            <Activity className="w-5 h-5 text-cinema-accent-light" />
             <h2
               id="verify-channels-title"
-              className="font-display text-lg uppercase tracking-wide text-white"
+              className="font-display text-lg uppercase tracking-wide text-cinema-chalk"
             >
               Verificar canales
             </h2>
@@ -140,7 +140,7 @@ export function VerifyChannelsModal({
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 rounded-lg text-cinema-muted hover:text-white hover:bg-cinema-elevated transition-colors"
+              className="p-1.5 rounded-lg text-cinema-muted hover:text-cinema-chalk hover:bg-cinema-elevated transition-colors"
               aria-label="Cerrar"
             >
               <X className="w-5 h-5" />
@@ -173,7 +173,7 @@ export function VerifyChannelsModal({
               <div
                 className={cn(
                   'h-full rounded-full transition-all duration-300',
-                  phase === 'cancelled' ? 'bg-amber-500' : 'bg-cinema-violet'
+                  phase === 'cancelled' ? 'bg-amber-500' : 'bg-cinema-accent'
                 )}
                 style={{ width: `${progressPct}%` }}
               />
@@ -185,16 +185,16 @@ export function VerifyChannelsModal({
 
           {currentName && phase === 'running' && (
             <p className="text-sm text-cinema-silver truncate">
-              Verificando: <span className="text-white">{currentName}</span>
+              Verificando: <span className="text-cinema-chalk">{currentName}</span>
             </p>
           )}
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-3">
+            <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-3">
               <p className="text-[10px] uppercase tracking-wider text-emerald-300/80">Online</p>
               <p className="text-2xl font-semibold text-emerald-300 mt-0.5">{online}</p>
             </div>
-            <div className="rounded-xl bg-red-500/10 border border-red-500/20 p-3">
+            <div className="rounded-lg bg-red-500/10 border border-red-500/20 p-3">
               <p className="text-[10px] uppercase tracking-wider text-red-300/80">Caídos</p>
               <p className="text-2xl font-semibold text-red-300 mt-0.5">{offline}</p>
             </div>

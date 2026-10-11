@@ -12,10 +12,10 @@ export function AdminTableSkeleton({ rows = 8, className }: AdminTableSkeletonPr
       <Skeleton className="h-10 w-full max-w-md" />
       <div className="md:hidden space-y-3">
         {Array.from({ length: Math.min(rows, 5) }).map((_, i) => (
-          <Skeleton key={i} className="h-32 w-full rounded-2xl" />
+          <Skeleton key={i} className="h-32 w-full rounded-lg" />
         ))}
       </div>
-      <div className="hidden md:block rounded-2xl border border-cinema-border overflow-hidden">
+      <div className="hidden md:block rounded-lg border border-cinema-border overflow-hidden">
         <Skeleton className="h-12 w-full rounded-none" />
         {Array.from({ length: rows }).map((_, i) => (
           <Skeleton key={i} className="h-14 w-full rounded-none border-t border-cinema-border" />

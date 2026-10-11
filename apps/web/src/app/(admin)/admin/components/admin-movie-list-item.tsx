@@ -47,7 +47,7 @@ export function AdminMovieQualityBadges({ quality }: AdminMovieQualityBadgesProp
         </span>
       )}
       {quality.isIncomplete && (
-        <span className="text-[10px] px-2 py-0.5 rounded-full bg-cinema-gold/20 text-cinema-gold">
+        <span className="text-[10px] px-2 py-0.5 rounded-full bg-cinema-accent/20 text-cinema-accent">
           Incompleta
         </span>
       )}
@@ -99,7 +99,7 @@ export function AdminMovieActions({
       </Button>
       {canPickPoster && (
         <Button variant="ghost" size="sm" aria-label="Poster TMDB" onClick={onPoster}>
-          <ImageIcon className="w-4 h-4 text-cinema-violet-light" />
+          <ImageIcon className="w-4 h-4 text-cinema-accent-light" />
         </Button>
       )}
       {canPickBackdrop && (
@@ -109,7 +109,7 @@ export function AdminMovieActions({
       )}
       {canEnrich && (
         <Button variant="ghost" size="sm" aria-label="Completar desde TMDB" onClick={onEnrich}>
-          <Sparkles className="w-4 h-4 text-cinema-gold" />
+          <Sparkles className="w-4 h-4 text-cinema-accent" />
         </Button>
       )}
       <Link href={`/admin/movies/${movie._id}/edit`}>
@@ -175,7 +175,7 @@ export function AdminMovieMobileCard({
           onOpen();
         }
       }}
-      className="rounded-2xl border border-cinema-border bg-cinema-surface p-4 transition-colors hover:bg-cinema-elevated/30 cursor-pointer"
+      className="rounded-lg border border-cinema-border bg-cinema-surface p-4 transition-colors hover:bg-cinema-elevated/30 cursor-pointer"
     >
       <div className="flex gap-3">
         <div className="w-14 h-20 shrink-0 rounded-lg overflow-hidden bg-cinema-elevated">
@@ -189,7 +189,7 @@ export function AdminMovieMobileCard({
                   'font-medium text-sm leading-snug line-clamp-2',
                   isAdminOrphanDisplayName(movie.name, movie.token)
                     ? 'text-cinema-muted italic'
-                    : 'text-white'
+                    : 'text-cinema-chalk'
                 )}
               >
                 {displayName}

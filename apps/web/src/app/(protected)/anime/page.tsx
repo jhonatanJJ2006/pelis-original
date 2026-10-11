@@ -155,7 +155,7 @@ export default function AnimePage() {
             <Link
               key={s.seriesKey}
               href={`/anime/${s._id}`}
-              className="group relative flex flex-col rounded-2xl overflow-hidden bg-cinema-surface border border-cinema-border hover:border-cinema-accent/60 transition-all hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cinema-accent"
+              className="group relative flex flex-col rounded-lg overflow-hidden bg-cinema-surface border border-cinema-border hover:border-cinema-accent/60 transition-all hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cinema-accent"
             >
               <div className="relative aspect-[3/4] overflow-hidden bg-cinema-elevated">
                 <RemoteImage
@@ -168,21 +168,21 @@ export default function AnimePage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent opacity-90" />
 
                 {s.seasonCount > 1 && (
-                  <span className="absolute top-2 left-2 inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-black/70 backdrop-blur-sm text-white text-[10px] font-semibold uppercase tracking-wide border border-white/10">
+                  <span className="absolute top-2 left-2 inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-black/70 backdrop-blur-sm text-cinema-chalk text-[10px] font-semibold uppercase tracking-wide border border-white/10">
                     <Layers className="w-3 h-3" aria-hidden />
                     {s.seasonCount} temporadas
                   </span>
                 )}
 
                 {s.rating && (
-                  <span className="absolute top-2 right-2 inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-black/70 backdrop-blur-sm text-cinema-gold text-[10px] font-bold border border-cinema-gold/20">
+                  <span className="absolute top-2 right-2 inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-black/70 backdrop-blur-sm text-cinema-accent text-[10px] font-bold border border-cinema-accent/20">
                     <Star className="w-3 h-3 fill-current" aria-hidden />
                     {s.rating}
                   </span>
                 )}
 
                 <div className="absolute bottom-0 left-0 right-0 p-2.5">
-                  <div className="flex items-center gap-1.5 flex-wrap text-[10px] text-white/70">
+                  <div className="flex items-center gap-1.5 flex-wrap text-[10px] text-cinema-chalk/70">
                     <span>{formatYearRange(s.year, s.latestYear)}</span>
                     <span aria-hidden>·</span>
                     <span>{s.totalEpisodes} eps</span>
@@ -197,7 +197,7 @@ export default function AnimePage() {
               </div>
 
               <div className="p-3 flex-1 flex flex-col gap-1.5">
-                <h3 className="text-sm font-medium text-white line-clamp-2 leading-tight">
+                <h3 className="text-sm font-medium text-cinema-chalk line-clamp-2 leading-tight">
                   {s.title}
                 </h3>
                 <span

@@ -54,16 +54,16 @@ const accountLinks = [
     label: 'Suscripción',
     description: 'Planes, pagos y mejoras',
     icon: Crown,
-    accent: 'text-cinema-gold',
-    bg: 'bg-cinema-gold/15',
+    accent: 'text-cinema-accent',
+    bg: 'bg-cinema-accent/15',
   },
   {
     href: '/link-tv',
     label: 'Vincular televisor',
     description: 'Aprueba el código QR de tu Android TV',
     icon: Tv,
-    accent: 'text-cinema-violet',
-    bg: 'bg-cinema-violet/15',
+    accent: 'text-cinema-accent',
+    bg: 'bg-cinema-accent/15',
   },
 ];
 
@@ -110,8 +110,8 @@ export default function ProfilePage() {
               className="w-20 h-20 rounded-full ring-2 ring-cinema-accent/50 object-cover"
             />
           ) : (
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-cinema-accent to-cinema-gold flex items-center justify-center ring-2 ring-cinema-accent/40">
-              <User className="w-9 h-9 text-white" aria-hidden />
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-cinema-accent to-cinema-accent flex items-center justify-center ring-2 ring-cinema-accent/40">
+              <User className="w-9 h-9 text-cinema-chalk" aria-hidden />
             </div>
           )}
 
@@ -133,7 +133,7 @@ export default function ProfilePage() {
       <ScrollReveal className="mb-8">
         <div
           className={cn(
-            'rounded-2xl border p-5 sm:p-6',
+            'rounded-lg border p-5 sm:p-6',
             hasActivePlan
               ? 'border-emerald-500/30 bg-emerald-500/5'
               : 'border-cinema-border bg-cinema-surface'
@@ -143,16 +143,16 @@ export default function ProfilePage() {
             <div className="flex items-start gap-3">
               <div
                 className={cn(
-                  'w-11 h-11 rounded-xl flex items-center justify-center shrink-0',
+                  'w-11 h-11 rounded-lg flex items-center justify-center shrink-0',
                   hasActivePlan
                     ? 'bg-emerald-500/20 text-emerald-400'
-                    : 'bg-cinema-gold/15 text-cinema-gold'
+                    : 'bg-cinema-accent/15 text-cinema-accent'
                 )}
               >
                 <Crown className="w-5 h-5" aria-hidden />
               </div>
               <div>
-                <h2 className="text-white font-semibold">
+                <h2 className="text-cinema-chalk font-semibold">
                   {hasActivePlan
                     ? `Plan ${currentPlan?.name ?? 'activo'}`
                     : 'Sin suscripción activa'}
@@ -201,11 +201,11 @@ export default function ProfilePage() {
             <li key={item.href}>
               <Link
                 href={item.href}
-                className="group flex items-center gap-4 rounded-2xl border border-cinema-border bg-cinema-surface p-4 sm:p-5 transition-colors hover:border-cinema-accent/40 hover:bg-cinema-elevated/40"
+                className="group flex items-center gap-4 rounded-lg border border-cinema-border bg-cinema-surface p-4 sm:p-5 transition-colors hover:border-cinema-accent/40 hover:bg-cinema-elevated/40"
               >
                 <div
                   className={cn(
-                    'w-12 h-12 rounded-xl flex items-center justify-center shrink-0',
+                    'w-12 h-12 rounded-lg flex items-center justify-center shrink-0',
                     item.bg,
                     item.accent
                   )}
@@ -213,7 +213,7 @@ export default function ProfilePage() {
                   <item.icon className="w-5 h-5" aria-hidden />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-white font-semibold group-hover:text-cinema-accent-light transition-colors">
+                  <p className="text-cinema-chalk font-semibold group-hover:text-cinema-accent-light transition-colors">
                     {item.label}
                   </p>
                   <p className="text-cinema-muted text-sm">{item.description}</p>
@@ -235,13 +235,13 @@ export default function ProfilePage() {
           </h2>
           <Link
             href="/admin"
-            className="group flex items-center gap-4 rounded-2xl border border-cinema-violet/30 bg-cinema-violet/10 p-4 sm:p-5 transition-colors hover:border-cinema-violet/50 hover:bg-cinema-violet/15"
+            className="group flex items-center gap-4 rounded-lg border border-cinema-accent/30 bg-cinema-accent/10 p-4 sm:p-5 transition-colors hover:border-cinema-accent/50 hover:bg-cinema-accent/15"
           >
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-cinema-violet/20 text-cinema-violet-light">
+            <div className="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 bg-cinema-accent/20 text-cinema-accent-light">
               <Shield className="w-5 h-5" aria-hidden />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-white font-semibold group-hover:text-cinema-accent-light transition-colors">
+              <p className="text-cinema-chalk font-semibold group-hover:text-cinema-accent-light transition-colors">
                 Panel de admin
               </p>
               <p className="text-cinema-muted text-sm">Gestionar películas y catálogo</p>
@@ -258,7 +258,7 @@ export default function ProfilePage() {
         <button
           type="button"
           onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-2 rounded-xl border border-cinema-border bg-cinema-surface px-4 py-3.5 text-cinema-silver hover:text-red-400 hover:border-red-500/30 hover:bg-red-500/5 transition-colors font-medium"
+          className="w-full flex items-center justify-center gap-2 rounded-lg border border-cinema-border bg-cinema-surface px-4 py-3.5 text-cinema-silver hover:text-red-400 hover:border-red-500/30 hover:bg-red-500/5 transition-colors font-medium"
         >
           <LogOut className="w-4 h-4" aria-hidden />
           Cerrar sesión

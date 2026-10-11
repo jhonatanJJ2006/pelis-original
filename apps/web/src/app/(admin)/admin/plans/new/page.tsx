@@ -44,7 +44,7 @@ export default function NewPlanPage() {
     <div>
       <Link
         href="/admin/plans"
-        className="inline-flex items-center gap-2 text-sm text-cinema-muted hover:text-white transition-colors mb-6"
+        className="inline-flex items-center gap-2 text-sm text-cinema-muted hover:text-cinema-chalk transition-colors mb-6"
       >
         <ArrowLeft className="w-4 h-4" />
         Volver al listado

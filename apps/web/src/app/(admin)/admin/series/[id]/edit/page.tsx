@@ -61,7 +61,7 @@ export default function EditSeriesPage() {
     return (
       <div className="text-center py-24 text-cinema-muted">
         Serie no encontrada.{' '}
-        <Link href="/admin/series" className="text-cinema-violet-light hover:underline">
+        <Link href="/admin/series" className="text-cinema-accent-light hover:underline">
           Volver al listado
         </Link>
       </div>
@@ -72,7 +72,7 @@ export default function EditSeriesPage() {
     <div>
       <Link
         href="/admin/series"
-        className="inline-flex items-center gap-2 text-sm text-cinema-muted hover:text-white transition-colors mb-6"
+        className="inline-flex items-center gap-2 text-sm text-cinema-muted hover:text-cinema-chalk transition-colors mb-6"
       >
         <ArrowLeft className="w-4 h-4" />
         Volver al listado

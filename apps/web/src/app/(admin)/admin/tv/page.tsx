@@ -397,11 +397,16 @@ export default function AdminTVPage() {
 
       {stats && mode !== 'playlists' && (
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 mb-6">
-          <StatChip icon={Tv} label="Total" value={stats.total} accent="text-cinema-violet-light" />
+          <StatChip icon={Tv} label="Total" value={stats.total} accent="text-cinema-accent-light" />
           <StatChip icon={Activity} label="Online" value={stats.online} accent="text-emerald-300" />
           <StatChip icon={RefreshCw} label="Offline" value={stats.offline} accent="text-red-300" />
           <StatChip icon={Zap} label="Sin probar" value={stats.unknown} accent="text-cinema-ash" />
-          <StatChip icon={Star} label="Populares" value={stats.popular} accent="text-cinema-gold" />
+          <StatChip
+            icon={Star}
+            label="Populares"
+            value={stats.popular}
+            accent="text-cinema-accent"
+          />
           <StatChip icon={Tv} label="Activos" value={stats.active} accent="text-cinema-teal" />
         </div>
       )}
@@ -460,8 +465,8 @@ export default function AdminTVPage() {
               className={cn(
                 'inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs sm:text-sm transition-colors border whitespace-nowrap shrink-0',
                 mode === tab.value
-                  ? 'bg-cinema-violet/20 text-white border-cinema-violet/40'
-                  : 'text-cinema-muted border-cinema-border hover:text-white hover:border-cinema-silver/30'
+                  ? 'bg-cinema-accent/20 text-cinema-chalk border-cinema-accent/40'
+                  : 'text-cinema-muted border-cinema-border hover:text-cinema-chalk hover:border-cinema-silver/30'
               )}
             >
               <tab.icon className="w-4 h-4" />
@@ -489,8 +494,8 @@ export default function AdminTVPage() {
                 className={cn(
                   'px-3 py-1.5 rounded-full text-xs sm:text-sm transition-colors border whitespace-nowrap shrink-0',
                   statusFilter === opt.value
-                    ? 'bg-cinema-violet/20 text-white border-cinema-violet/40'
-                    : 'text-cinema-muted border-cinema-border hover:text-white hover:border-cinema-silver/30'
+                    ? 'bg-cinema-accent/20 text-cinema-chalk border-cinema-accent/40'
+                    : 'text-cinema-muted border-cinema-border hover:text-cinema-chalk hover:border-cinema-silver/30'
                 )}
               >
                 {opt.label}
@@ -532,7 +537,7 @@ export default function AdminTVPage() {
                 ))}
               </div>
 
-              <div className="hidden md:block overflow-x-auto rounded-2xl border border-cinema-border bg-cinema-surface">
+              <div className="hidden md:block overflow-x-auto rounded-lg border border-cinema-border bg-cinema-surface">
                 <table className="admin-table w-full min-w-[960px] text-sm">
                   <thead>
                     <tr className="border-b border-cinema-border text-left text-cinema-muted">
@@ -566,7 +571,7 @@ export default function AdminTVPage() {
                               )}
                             </div>
                             <div className="min-w-0">
-                              <p className="font-medium text-white truncate max-w-[240px]">
+                              <p className="font-medium text-cinema-chalk truncate max-w-[240px]">
                                 {ch.name}
                               </p>
                               <p className="text-[10px] text-cinema-ash truncate max-w-[240px]">
@@ -582,7 +587,7 @@ export default function AdminTVPage() {
                         <td className="px-4 py-3 text-cinema-muted">{ch.country ?? '—'}</td>
                         <td className="px-4 py-3">
                           {ch.isPopular ? (
-                            <Star className="w-4 h-4 text-cinema-gold fill-cinema-gold" />
+                            <Star className="w-4 h-4 text-cinema-accent fill-cinema-accent" />
                           ) : (
                             <span className="text-cinema-ash">—</span>
                           )}
@@ -620,7 +625,7 @@ export default function AdminTVPage() {
                   <button
                     type="button"
                     onClick={() => setOffset((n) => n + 48)}
-                    className="px-4 py-2 rounded-[10px] border border-cinema-border text-sm text-white hover:border-cinema-violet/40"
+                    className="px-4 py-2 rounded-[10px] border border-cinema-border text-sm text-cinema-chalk hover:border-cinema-accent/40"
                   >
                     Cargar más
                   </button>
@@ -647,15 +652,15 @@ export default function AdminTVPage() {
               {playlists.map((pl) => (
                 <article
                   key={pl._id}
-                  className="rounded-2xl border border-cinema-border bg-cinema-surface p-5 flex flex-col gap-4"
+                  className="rounded-lg border border-cinema-border bg-cinema-surface p-5 flex flex-col gap-4"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-3">
-                      <div className="p-2.5 rounded-xl bg-cinema-violet/15 text-cinema-violet-light">
+                      <div className="p-2.5 rounded-lg bg-cinema-accent/15 text-cinema-accent-light">
                         <ListVideo className="w-5 h-5" />
                       </div>
                       <div>
-                        <h3 className="font-display text-lg uppercase tracking-wide text-white">
+                        <h3 className="font-display text-lg uppercase tracking-wide text-cinema-chalk">
                           {pl.name}
                         </h3>
                         <p className="text-xs text-cinema-muted mt-0.5">
@@ -684,7 +689,7 @@ export default function AdminTVPage() {
                       <p className="text-cinema-ash text-[10px] uppercase tracking-wider">
                         Canales
                       </p>
-                      <p className="text-white font-medium text-base mt-0.5">
+                      <p className="text-cinema-chalk font-medium text-base mt-0.5">
                         {pl.totalChannels ?? '—'}
                       </p>
                     </div>
@@ -692,7 +697,7 @@ export default function AdminTVPage() {
                       <p className="text-cinema-ash text-[10px] uppercase tracking-wider">
                         Última importación
                       </p>
-                      <p className="text-white font-medium mt-0.5">
+                      <p className="text-cinema-chalk font-medium mt-0.5">
                         {formatDate(pl.lastImportedAt)}
                       </p>
                     </div>
@@ -764,7 +769,7 @@ function ChannelCard({
   onDelete: (id: string, name: string) => void;
 }) {
   return (
-    <article className="rounded-2xl border border-cinema-border bg-cinema-surface p-4">
+    <article className="rounded-lg border border-cinema-border bg-cinema-surface p-4">
       <div className="flex gap-3">
         <div className="w-14 h-14 shrink-0 rounded-lg bg-cinema-elevated border border-cinema-border flex items-center justify-center overflow-hidden">
           {ch.logo ? (
@@ -775,9 +780,11 @@ function ChannelCard({
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
-            <h3 className="font-medium text-sm leading-snug text-white truncate">{ch.name}</h3>
+            <h3 className="font-medium text-sm leading-snug text-cinema-chalk truncate">
+              {ch.name}
+            </h3>
             {ch.isPopular && (
-              <Star className="w-3 h-3 text-cinema-gold fill-cinema-gold shrink-0" />
+              <Star className="w-3 h-3 text-cinema-accent fill-cinema-accent shrink-0" />
             )}
           </div>
           <p className="text-xs text-cinema-muted mt-0.5 truncate">
@@ -799,14 +806,14 @@ function ChannelCard({
           {probingId === ch._id ? (
             <Spinner className="w-4 h-4" />
           ) : (
-            <Activity className="w-4 h-4 text-cinema-violet-light" />
+            <Activity className="w-4 h-4 text-cinema-accent-light" />
           )}
         </Button>
         <Button variant="ghost" size="sm" aria-label="Popular" onClick={() => onTogglePopular(ch)}>
           <Star
             className={cn(
               'w-4 h-4',
-              ch.isPopular ? 'text-cinema-gold fill-cinema-gold' : 'text-cinema-ash'
+              ch.isPopular ? 'text-cinema-accent fill-cinema-accent' : 'text-cinema-ash'
             )}
           />
         </Button>
@@ -874,14 +881,14 @@ function ChannelActions({
         {probingId === ch._id ? (
           <Spinner className="w-4 h-4" />
         ) : (
-          <Activity className="w-4 h-4 text-cinema-violet-light" />
+          <Activity className="w-4 h-4 text-cinema-accent-light" />
         )}
       </Button>
       <Button variant="ghost" size="sm" aria-label="Popular" onClick={() => onTogglePopular(ch)}>
         <Star
           className={cn(
             'w-4 h-4',
-            ch.isPopular ? 'text-cinema-gold fill-cinema-gold' : 'text-cinema-ash'
+            ch.isPopular ? 'text-cinema-accent fill-cinema-accent' : 'text-cinema-ash'
           )}
         />
       </Button>
@@ -950,12 +957,12 @@ function StatChip({
   accent: string;
 }) {
   return (
-    <div className="rounded-xl bg-cinema-surface border border-cinema-border p-3">
+    <div className="rounded-lg bg-cinema-surface border border-cinema-border p-3">
       <div className="flex items-center gap-2 text-cinema-ash">
         <Icon className={cn('w-4 h-4', accent)} />
         <span className="text-xs uppercase tracking-wider">{label}</span>
       </div>
-      <p className="text-2xl font-semibold text-white mt-1">{value}</p>
+      <p className="text-2xl font-semibold text-cinema-chalk mt-1">{value}</p>
     </div>
   );
 }

@@ -45,11 +45,11 @@ const genreColors: Record<string, string> = {
 };
 
 function getGenreGradient(genre?: string): string {
-  if (!genre) return 'from-cinema-violet/20 to-transparent';
+  if (!genre) return 'from-cinema-accent/20 to-transparent';
   for (const [key, val] of Object.entries(genreColors)) {
     if (genre?.includes(key)) return val;
   }
-  return 'from-cinema-violet/15 to-transparent';
+  return 'from-cinema-accent/15 to-transparent';
 }
 
 const AUTOPLAY_DELAY_MS = 7000;

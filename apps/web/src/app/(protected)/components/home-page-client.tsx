@@ -16,14 +16,14 @@ import { cn } from '@pelis/ui/utils';
 import { LandingPage } from './landing-page';
 
 const genreColors: Record<string, string> = {
-  Acción: 'from-red-500/30 to-cinema-violet/15',
-  Comedia: 'from-yellow-400/25 to-cinema-violet/15',
+  Acción: 'from-red-500/30 to-cinema-accent/15',
+  Comedia: 'from-yellow-400/25 to-cinema-accent/15',
   Drama: 'from-blue-500/30 to-cinema-teal/15',
-  Terror: 'from-emerald-500/25 to-cinema-violet/15',
-  Romance: 'from-pink-500/25 to-cinema-violet/15',
-  Ciencia: 'from-cyan-500/25 to-cinema-violet/15',
-  Suspenso: 'from-orange-500/25 to-cinema-violet/15',
-  Aventura: 'from-teal-500/25 to-cinema-violet/15',
+  Terror: 'from-emerald-500/25 to-cinema-accent/15',
+  Romance: 'from-pink-500/25 to-cinema-accent/15',
+  Ciencia: 'from-cyan-500/25 to-cinema-accent/15',
+  Suspenso: 'from-orange-500/25 to-cinema-accent/15',
+  Aventura: 'from-teal-500/25 to-cinema-accent/15',
   Animación: 'from-blue-400/30 to-cinema-teal/15',
 };
 
@@ -86,7 +86,7 @@ export function HomePageClient({ preloaded }: HomePageClientProps) {
         {user && continueItems.length > 0 && (
           <ContinueWatchingRow
             items={continueItems}
-            className="section-alt rounded-2xl py-6 px-2 -mx-2"
+            className="section-alt rounded-lg py-6 px-2 -mx-2"
           />
         )}
 
@@ -120,7 +120,7 @@ export function HomePageClient({ preloaded }: HomePageClientProps) {
           return (
             <div
               key={genre}
-              className={cn(idx % 2 === 1 && 'section-alt rounded-2xl py-6 px-2 -mx-2')}
+              className={cn(idx % 2 === 1 && 'section-alt rounded-lg py-6 px-2 -mx-2')}
             >
               <MovieRow
                 title={genre}
