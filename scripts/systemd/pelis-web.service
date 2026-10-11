@@ -1,0 +1,27 @@
+# Instalar: sudo cp scripts/systemd/pelis-web.service /etc/systemd/system/ && sudo systemctl daemon-reload
+[Unit]
+Description=Pelis Next.js Production Server (cluster)
+After=network.target postgresql.service
+After=run-media-det-Pelis\x2dA.mount run-media-det-Pelis\x2dB.mount
+Wants=run-media-det-Pelis\x2dA.mount run-media-det-Pelis\x2dB.mount
+
+[Service]
+Type=simple
+User=det
+WorkingDirectory=/home/det/Desktop/PELIS/pelis-original/apps/web
+ExecStart=/usr/bin/pnpm --filter @pelis/web start:cluster
+Restart=always
+RestartSec=5
+KillSignal=SIGTERM
+TimeoutStopSec=20
+LimitNOFILE=65535
+Environment=NODE_ENV=production
+Environment=PORT=3000
+Environment=WEB_CONCURRENCY=3
+Environment=PRISMA_CONNECTION_LIMIT=10
+Environment=UV_THREADPOOL_SIZE=16
+Environment=MOVIE_OUTPUT_ROOTS=/run/media/det/Pelis-A/output:/run/media/det/Pelis-B/output
+Environment=PATH=/usr/bin:/usr/local/bin:/home/det/.local/share/pnpm
+
+[Install]
+WantedBy=multi-user.target

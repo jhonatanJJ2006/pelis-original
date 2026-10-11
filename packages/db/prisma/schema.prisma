@@ -358,3 +358,14 @@ enum TvPairingStatus {
   CLAIMED
   EXPIRED
 }
+/// Eventos de límite de envíos (código de acceso por correo). Compartido entre
+/// todos los procesos de Next, a diferencia del límite en memoria.
+model RateLimitHit {
+  id        String   @id @default(cuid())
+  bucket    String
+  key       String
+  createdAt DateTime @default(now())
+
+  @@index([bucket, key, createdAt])
+  @@index([createdAt])
+}

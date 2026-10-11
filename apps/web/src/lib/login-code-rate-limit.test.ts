@@ -35,3 +35,16 @@ describe('isValidEmail', () => {
     expect(isValidEmail('no-es-correo')).toBe(false);
   });
 });
+
+describe('decideLoginCodeRateLimit', () => {
+  it('blocks a second send within the cooldown and allows after it', async () => {
+    const { decideLoginCodeRateLimit } = await import('./login-code-rate-limit');
+    expect(decideLoginCodeRateLimit([0], [0], 30_000)).toEqual({ ok: false, retryAfterSec: 30 });
+    expect(decideLoginCodeRateLimit([0], [0], 61_000)).toEqual({ ok: true });
+  });
+  it('caps sends per IP per hour', async () => {
+    const { decideLoginCodeRateLimit, IP_MAX_PER_HOUR } = await import('./login-code-rate-limit');
+    const ipHits = Array.from({ length: IP_MAX_PER_HOUR }, (_, i) => i * 1000);
+    expect(decideLoginCodeRateLimit([], ipHits, 100_000).ok).toBe(false);
+  });
+});

@@ -45,7 +45,12 @@ async function serveStreamFile(
   const ext = path.extname(filePath).toLowerCase();
   const headers = new Headers();
   headers.set('Content-Type', MIME[ext] || 'application/octet-stream');
-  headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+  // Contenido detrás de sesión: el navegador lo guarda (segmentos inmutables)
+  // pero un CDN compartido no, para no servir video a quien no tiene plan.
+  headers.set(
+    'Cache-Control',
+    ext === '.m3u8' ? 'private, max-age=300' : 'private, max-age=31536000, immutable'
+  );
   headers.set('Accept-Ranges', 'bytes');
 
   if (ext === '.m3u8') {
