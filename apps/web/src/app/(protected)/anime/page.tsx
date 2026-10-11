@@ -114,7 +114,8 @@ export default function AnimePage() {
           {
             id: 'genre-filter',
             label: 'Filtrar por género',
-            placeholder: 'Todos los géneros',
+            variant: 'chips',
+            placeholder: 'Todos',
             value: selectedGenre,
             onChange: setSelectedGenre,
             options: genres.map((genre) => ({ value: genre, label: genre })),
