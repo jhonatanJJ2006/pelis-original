@@ -221,7 +221,7 @@ fun TvHome(api: PelisApi, onOpen: (Title) -> Unit) {
             val rows = listOf("Acción", "Comedia", "Drama", "Terror").map { g -> g to bg(emptyList()) { api.byGenre(g) } }
             val tr = trending.await()
             TvHomeData(
-                hero = featured.await().firstOrNull() ?: tr.firstOrNull { it.backdrop != null },
+                hero = featured.await().firstOrNull { !it.comingSoon } ?: tr.firstOrNull { it.backdrop != null && !it.comingSoon },
                 cont = cont.await(), anime = anime.await(), trending = tr.take(10), channels = channels.await(),
                 rows = rows.map { (g, d) -> g to d.await() },
             )
@@ -352,6 +352,7 @@ fun TvDetail(api: PelisApi, t: Title) {
     LaunchedEffect(t.id) { if (t.kind != Kind.ANIME) fav = runCatching { api.isFavorite(t.id) }.getOrDefault(false) }
     fun play(ep: Int) = scope.launch {
         msg = null
+        if (m.kind != Kind.ANIME && m.comingSoon) { msg = "Próximamente: este título todavía no tiene video"; return@launch }
         val req = when {
             m.kind == Kind.ANIME -> api.animeEpisode(m.id, ep)?.let { (u, s) -> PlaybackRequest(u, "${m.name} - Ep. $ep", null, s) }
             m.kind == Kind.SERIES && ep > 1 -> null
@@ -380,7 +381,7 @@ fun TvDetail(api: PelisApi, t: Title) {
                     val fr = remember { androidx.compose.ui.focus.FocusRequester() }
                     LaunchedEffect(t.id) { runCatching { fr.requestFocus() } }
                     Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                        TvButton(if (isSeries) "Reproducir episodio $episode" else "Reproducir", primary = true, modifier = Modifier.focusRequester(fr)) { play(episode) }
+                        TvButton(if (m.kind != Kind.ANIME && m.comingSoon) "Próximamente" else if (isSeries) "Reproducir episodio $episode" else "Reproducir", primary = true, modifier = Modifier.focusRequester(fr)) { play(episode) }
                         if (m.kind != Kind.ANIME) TvButton(if (fav) "En mi lista" else "Agregar a mi lista") {
                             scope.launch { runCatching { api.setFavorite(m.id, !fav); fav = !fav } }
                         }
@@ -393,7 +394,7 @@ fun TvDetail(api: PelisApi, t: Title) {
                     Text("TEMPORADA 1  ·  EPISODIOS", style = NoirLabel)
                     LazyRow(contentPadding = PaddingValues(vertical = 14.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                         items((1..episodes).toList()) { e ->
-                            val ok = m.kind == Kind.ANIME || e == 1
+                            val ok = m.kind == Kind.ANIME || (e == 1 && !m.comingSoon)
                             Surface(
                                 onClick = { episode = e; play(e) },
                                 scale = ClickableSurfaceDefaults.scale(focusedScale = 1.1f),

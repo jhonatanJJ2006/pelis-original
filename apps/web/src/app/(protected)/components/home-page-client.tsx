@@ -56,12 +56,14 @@ export function HomePageClient({ preloaded }: HomePageClientProps) {
 
   const topGenres = (genres ?? []).slice(0, 4);
   // Sin destacados marcados en el admin, el hero usa las tendencias para no quedar vacío.
+  const playableOnly = (list: MediaItem[] | undefined) => list?.filter((m) => !m.comingSoon);
+  const playableFeatured = playableOnly(featuredMovies);
   const heroMovies =
-    featuredMovies && featuredMovies.length > 0
-      ? featuredMovies
+    playableFeatured && playableFeatured.length > 0
+      ? playableFeatured
       : featuredMovies === undefined
         ? undefined
-        : (trending ?? movies ?? []).slice(0, 5);
+        : (playableOnly(trending) ?? playableOnly(movies) ?? []).slice(0, 5);
 
   // Visitantes: landing Maison Noir. Con sesión: catálogo de inicio.
   if (authLoading) {

@@ -65,43 +65,114 @@ function timestamp() {
   return `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}-${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}${pad(d.getUTCSeconds())}`;
 }
 
-async function probeUpstream(streamUrl) {
+const PROBE_HEADERS = {
+  Accept: '*/*',
+  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:137.0) Gecko/20100101 Firefox/137.0',
+  'Cache-Control': 'no-store',
+};
+
+async function fetchWithTimeout(url, extraHeaders = {}) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), PROBE_TIMEOUT_MS);
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), PROBE_TIMEOUT_MS);
-    const response = await fetch(streamUrl, {
+    return await fetch(url, {
       method: 'GET',
       redirect: 'follow',
       signal: controller.signal,
-      headers: {
-        Accept: '*/*',
-        'User-Agent': 'Mozilla/5.0 (compatible; PelisTV-Probe/1.0; +https://verpelis.pro)',
-        'Cache-Control': 'no-store',
-      },
+      headers: { ...PROBE_HEADERS, ...extraHeaders },
     });
+  } finally {
     clearTimeout(timeout);
+  }
+}
+
+function playlistUris(text, baseUrl) {
+  const lines = text.split(/\r?\n/).map((l) => l.trim());
+  const variants = [];
+  const segments = [];
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (!line || line.startsWith('#')) continue;
+    let abs;
+    try {
+      abs = new URL(line, baseUrl).toString();
+    } catch {
+      continue;
+    }
+    const prev = lines.slice(Math.max(0, i - 3), i).join('\n');
+    if (prev.includes('#EXT-X-STREAM-INF')) variants.push(abs);
+    else segments.push(abs);
+  }
+  return { variants, segments };
+}
+
+function httpError(response, text) {
+  let detail = `HTTP ${response.status}`;
+  if (text && text.length < 200) detail = `${response.status}: ${text.replace(/\s+/g, ' ').trim()}`;
+  return detail;
+}
+
+/** Downloads the first bytes of a segment: it must answer 2xx with a body. */
+async function probeSegment(url) {
+  const r = await fetchWithTimeout(url, { Range: 'bytes=0-2047' });
+  if (!r.ok) {
+    await r.body?.cancel().catch(() => {});
+    return `segmento ${httpError(r)}`;
+  }
+  const reader = r.body?.getReader();
+  const chunk = reader ? await reader.read() : { value: undefined };
+  await reader?.cancel().catch(() => {});
+  if (!chunk.value || chunk.value.length === 0) return 'segmento vacío';
+  return null;
+}
+
+/**
+ * Probes the whole chain: master -> media playlist -> one segment. A channel is
+ * online only if some variant has a downloadable segment (the master alone
+ * answering 200 is not enough: France 24 Español served a valid master whose
+ * variants all returned 400).
+ */
+async function probeUpstream(streamUrl, depth = 0) {
+  try {
+    const response = await fetchWithTimeout(streamUrl);
     if (!response.ok) {
-      let detail = `HTTP ${response.status}`;
-      try {
-        const text = await response.text();
-        if (text.length < 200) detail = `${response.status}: ${text.replace(/\s+/g, ' ').trim()}`;
-      } catch {}
-      return { streamStatus: 'offline', lastStreamError: detail };
+      const text = await response.text().catch(() => '');
+      return { streamStatus: 'offline', lastStreamError: httpError(response, text) };
     }
     const finalUrl = response.url || streamUrl;
     const contentType = response.headers.get('content-type') ?? '';
     const isManifest =
-      contentType.includes('mpegurl') ||
-      contentType.includes('x-mpegURL') ||
-      finalUrl.toLowerCase().includes('.m3u8');
-    if (!isManifest) return { streamStatus: 'online' };
+      contentType.toLowerCase().includes('mpegurl') || finalUrl.toLowerCase().includes('.m3u8');
+    if (!isManifest) {
+      await response.body?.cancel().catch(() => {});
+      return { streamStatus: 'online' };
+    }
     const text = await response.text();
     if (!text.startsWith('#EXTM3U') && !text.includes('#EXT-X-')) {
-      return { streamStatus: 'offline', lastStreamError: 'Respuesta no es un manifiesto M3U8 válido' };
+      return {
+        streamStatus: 'offline',
+        lastStreamError: 'Respuesta no es un manifiesto M3U8 válido',
+      };
     }
-    if (!text.includes('#EXTINF') && !text.includes('#EXT-X-STREAM-INF')) {
+    const { variants, segments } = playlistUris(text, finalUrl);
+    if (variants.length > 0) {
+      if (depth >= 2)
+        return { streamStatus: 'offline', lastStreamError: 'Demasiados niveles de playlist' };
+      let lastError = 'Ninguna variante responde';
+      for (const v of variants.slice(0, 3)) {
+        const r = await probeUpstream(v, depth + 1);
+        if (r.streamStatus === 'online') return r;
+        lastError = `variante: ${r.lastStreamError}`;
+      }
+      return { streamStatus: 'offline', lastStreamError: lastError };
+    }
+    if (segments.length === 0) {
       return { streamStatus: 'offline', lastStreamError: 'Manifiesto sin segmentos de video' };
     }
+    // Live playlists: the newest segment is the one players request.
+    const target = text.includes('#EXT-X-ENDLIST') ? segments[0] : segments[segments.length - 1];
+    const segError = await probeSegment(target);
+    if (segError) return { streamStatus: 'offline', lastStreamError: segError };
     return { streamStatus: 'online' };
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Error de conexión';
