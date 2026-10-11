@@ -11,6 +11,8 @@ export function Badge({ className, variant = 'default', ...props }: BadgeProps) 
       className={cn(
         'inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full',
         {
+          'bg-cinema-elevated text-cinema-muted border border-cinema-border':
+            variant === 'default' || variant === 'violet',
           'bg-cinema-accent/20 text-cinema-accent-light border border-cinema-accent/30':
             variant === 'primary',
           'bg-cinema-success/20 text-cinema-success border border-cinema-success/40':
