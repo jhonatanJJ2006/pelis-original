@@ -130,7 +130,10 @@ export function ChannelForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5 max-w-2xl">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-5 max-w-4xl rounded-lg border border-cinema-border bg-cinema-surface p-5 sm:p-6"
+    >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <Input
           label="Nombre"

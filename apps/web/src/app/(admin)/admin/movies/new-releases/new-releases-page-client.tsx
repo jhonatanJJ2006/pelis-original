@@ -63,6 +63,10 @@ export default function AdminNewReleasesPageClient() {
             <ArrowLeft className="w-4 h-4" />
             Volver a Películas
           </Link>
+          <p className="text-label uppercase text-cinema-accent mb-1.5 flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-cinema-accent" aria-hidden />
+            Curaduría
+          </p>
           <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-cinema-chalk">
             Estrenos
           </h1>

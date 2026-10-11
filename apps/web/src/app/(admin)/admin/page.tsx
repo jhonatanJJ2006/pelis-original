@@ -2,7 +2,18 @@
 
 import Link from 'next/link';
 import { useQuery } from '@pelis/db/client';
-import { Film, AlertTriangle, ImageOff, VideoOff, FileWarning, Monitor } from 'lucide-react';
+import {
+  Film,
+  AlertTriangle,
+  ImageOff,
+  VideoOff,
+  FileWarning,
+  Monitor,
+  Tv,
+  Clapperboard,
+  Radio,
+  Users,
+} from 'lucide-react';
 import { api } from '@pelis/db/api';
 import { AdminDashboardSkeleton } from '@pelis/ui/features/admin-dashboard-skeleton';
 
@@ -22,8 +33,8 @@ const statCards = [
     href: '/admin/movies?filter=missing_video',
     filter: 'missing_video',
     icon: VideoOff,
-    color: 'text-orange-300',
-    bg: 'bg-orange-500/15',
+    color: 'text-cinema-muted',
+    bg: 'bg-cinema-elevated',
   },
   {
     key: 'orphanIds',
@@ -31,8 +42,8 @@ const statCards = [
     href: '/admin/movies?filter=orphan_ids',
     filter: 'orphan_ids',
     icon: AlertTriangle,
-    color: 'text-amber-300',
-    bg: 'bg-amber-500/15',
+    color: 'text-cinema-muted',
+    bg: 'bg-cinema-elevated',
   },
   {
     key: 'missingImage',
@@ -40,8 +51,8 @@ const statCards = [
     href: '/admin/movies?filter=missing_image',
     filter: 'missing_image',
     icon: ImageOff,
-    color: 'text-red-300',
-    bg: 'bg-red-500/15',
+    color: 'text-cinema-muted',
+    bg: 'bg-cinema-elevated',
   },
   {
     key: 'missingImageTitled',
@@ -49,8 +60,8 @@ const statCards = [
     href: '/admin/movies?filter=missing_image_titled',
     filter: 'missing_image_titled',
     icon: ImageOff,
-    color: 'text-rose-300',
-    bg: 'bg-rose-500/15',
+    color: 'text-cinema-muted',
+    bg: 'bg-cinema-elevated',
   },
   {
     key: 'missingBackdrop',
@@ -58,8 +69,8 @@ const statCards = [
     href: '/admin/movies?filter=missing_backdrop',
     filter: 'missing_backdrop',
     icon: Monitor,
-    color: 'text-cyan-300',
-    bg: 'bg-cyan-500/15',
+    color: 'text-cinema-muted',
+    bg: 'bg-cinema-elevated',
   },
   {
     key: 'incomplete',
@@ -74,6 +85,25 @@ const statCards = [
 
 export default function AdminDashboardPage() {
   const stats = useQuery<any>(api.adminMovies.adminStats, {});
+  // Totales por sección con la paginación en servidor (limit 1: solo interesa total).
+  const seriesTotal = useQuery<{ total: number }>(api.adminSeries.adminList, {
+    offset: 0,
+    limit: 1,
+  });
+  const animeTotal = useQuery<{ total: number }>(api.adminAnime.adminList, { offset: 0, limit: 1 });
+  const usersTotal = useQuery<{ total: number }>(api.adminUsers.adminList, { offset: 0, limit: 1 });
+  const tvTotal = useQuery<{ total: number }>(api.tv.adminList, {
+    offset: 0,
+    limit: 1,
+    includeInactive: true,
+  });
+  const sections = [
+    { label: 'Películas', value: stats?.total, href: '/admin/movies', icon: Film },
+    { label: 'Series', value: seriesTotal?.total, href: '/admin/series', icon: Tv },
+    { label: 'Anime', value: animeTotal?.total, href: '/admin/anime', icon: Clapperboard },
+    { label: 'Canales TV', value: tvTotal?.total, href: '/admin/tv', icon: Radio },
+    { label: 'Usuarios', value: usersTotal?.total, href: '/admin/users', icon: Users },
+  ];
 
   if (stats === undefined) {
     return <AdminDashboardSkeleton />;
@@ -82,13 +112,42 @@ export default function AdminDashboardPage() {
   return (
     <div>
       <div className="mb-6 sm:mb-8">
+        <p className="text-label uppercase text-cinema-accent mb-1.5 flex items-center gap-2">
+          <span className="h-1.5 w-1.5 rounded-full bg-cinema-accent" aria-hidden />
+          Consola
+        </p>
         <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-cinema-chalk">
           Panel
         </h1>
         <p className="text-cinema-muted mt-1 sm:mt-2 text-sm sm:text-base">
-          Resumen del catálogo de películas
+          Resumen del catálogo y estado de curación
         </p>
       </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3 mb-8">
+        {sections.map((section) => {
+          const Icon = section.icon;
+          return (
+            <Link
+              key={section.label}
+              href={section.href}
+              className="group rounded-lg border border-cinema-border bg-cinema-surface p-4 hover:border-cinema-accent/50 transition-colors"
+            >
+              <div className="flex items-center justify-between text-label uppercase text-cinema-ash">
+                {section.label}
+                <Icon className="w-4 h-4 text-cinema-accent" aria-hidden />
+              </div>
+              <p className="font-display text-3xl font-semibold text-cinema-accent mt-2 tabular-nums">
+                {section.value ?? '-'}
+              </p>
+            </Link>
+          );
+        })}
+      </div>
+
+      <h2 className="font-display text-xl font-semibold text-cinema-chalk mb-3">
+        Calidad del catálogo de películas
+      </h2>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
         {statCards.map((card) => {

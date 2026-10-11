@@ -231,6 +231,10 @@ export default function AdminMoviesPageClient() {
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
         <div>
+          <p className="text-label uppercase text-cinema-accent mb-1.5 flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-cinema-accent" aria-hidden />
+            Bóveda cinematográfica
+          </p>
           <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-cinema-chalk">
             Películas
           </h1>
