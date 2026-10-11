@@ -15,4 +15,6 @@ export interface MediaItem {
   mediaType?: 'movie' | 'series';
   episodes?: number;
   featured?: boolean;
+  /** Serie sin video todavía: se lista como "Próximamente" y nunca se destaca. */
+  comingSoon?: boolean;
 }

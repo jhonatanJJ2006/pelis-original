@@ -128,6 +128,11 @@ function MovieCardBase({
                 Película
               </Badge>
             )}
+            {movie.comingSoon && (
+              <Badge className="text-[10px] bg-cinema-bg/85 text-cinema-accent-light border border-cinema-accent/40">
+                Próximamente
+              </Badge>
+            )}
           </div>
           <div className="absolute top-2 right-2 z-[5]">
             <Badge variant="violet" className="text-[10px] bg-cinema-elevated/80">

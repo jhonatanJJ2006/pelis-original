@@ -21,6 +21,8 @@ data class Title(
     val episodes: Int = 0,
     val actors: String = "",
     val progress: Float = 0f,
+    /** Serie sin video todavía: se muestra como Próximamente y nunca va al hero. */
+    val comingSoon: Boolean = false,
 )
 
 data class Subtitle(val label: String, val lang: String, val url: String)
@@ -67,6 +69,7 @@ object Parse {
             token = o.str("token"),
             episodes = o.optInt("episodes", o.optInt("totalEpisodes", 0)),
             actors = o.str("actors") ?: "",
+            comingSoon = o.optBoolean("comingSoon", false),
         )
     }
 

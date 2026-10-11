@@ -41,6 +41,7 @@ export default function MovieDetailPageClient({ preloaded }: MovieDetailPageClie
     refetch,
   } = useQueryResult<MediaItem | null>(api.movies.getById, { id } as any);
   const resolvedMovie = movie ?? preloadedMovie;
+  const comingSoon = Boolean((resolvedMovie as MediaItem | null | undefined)?.comingSoon);
   const related = useQuery(
     api.movies.getByGenre,
     resolvedMovie ? { genre: resolvedMovie.genre, limit: 12 } : 'skip'
@@ -178,25 +179,31 @@ export default function MovieDetailPageClient({ preloaded }: MovieDetailPageClie
             </div>
 
             <div className="flex flex-col sm:flex-row flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={() => {
-                  if (!entitled) {
-                    toast.error('Necesitas un plan para reproducir', {
-                      action: {
-                        label: 'Ver planes',
-                        onClick: () => (window.location.href = '/subscribe'),
-                      },
-                    });
-                  } else {
-                    document.getElementById('player')?.scrollIntoView({ behavior: 'smooth' });
-                  }
-                }}
-                className="btn-base h-11 px-7 bg-cinema-accent hover:bg-cinema-accent-light text-cinema-bg text-xs uppercase tracking-[0.08em] inline-flex items-center gap-2"
-              >
-                <Play className="w-5 h-5" fill="currentColor" aria-hidden />
-                Reproducir
-              </button>
+              {comingSoon ? (
+                <span className="h-11 px-7 border border-cinema-accent/40 text-cinema-accent-light text-xs uppercase tracking-[0.08em] inline-flex items-center gap-2 rounded-md">
+                  Próximamente
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!entitled) {
+                      toast.error('Necesitas un plan para reproducir', {
+                        action: {
+                          label: 'Ver planes',
+                          onClick: () => (window.location.href = '/subscribe'),
+                        },
+                      });
+                    } else {
+                      document.getElementById('player')?.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }}
+                  className="btn-base h-11 px-7 bg-cinema-accent hover:bg-cinema-accent-light text-cinema-bg text-xs uppercase tracking-[0.08em] inline-flex items-center gap-2"
+                >
+                  <Play className="w-5 h-5" fill="currentColor" aria-hidden />
+                  Reproducir
+                </button>
+              )}
               <button
                 type="button"
                 onClick={handleFavorite}
@@ -239,6 +246,12 @@ export default function MovieDetailPageClient({ preloaded }: MovieDetailPageClie
                 <Crown className="w-4 h-4" aria-hidden />
                 Ver planes
               </Link>
+            </div>
+          ) : comingSoon ? (
+            <div className="aspect-video rounded-lg card-feature border border-cinema-border flex items-center justify-center p-8">
+              <p className="text-cinema-muted text-center">
+                Próximamente. Este título todavía no tiene video disponible.
+              </p>
             </div>
           ) : resolvingVideo ? (
             <Skeleton className="aspect-video w-full rounded-lg" />
