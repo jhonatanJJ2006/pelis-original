@@ -1,0 +1,152 @@
+package pro.verpelis.core.data
+
+import android.content.Context
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONArray
+import org.json.JSONObject
+import pro.verpelis.core.BuildConfig
+import java.util.UUID
+import java.util.concurrent.TimeUnit
+
+class ApiException(val status: Int, message: String) : Exception(message)
+
+/**
+ * Cliente de la API web existente de verpelis.pro.
+ * Usa POST /api/function/<nombre> (el mismo registro que usan los hooks de la web)
+ * y las rutas de better-auth y tv-auth. No requiere endpoints nuevos.
+ */
+class PelisApi private constructor(context: Context) {
+    val base: String = BuildConfig.BASE_URL
+    val session = SessionStore(context.applicationContext)
+    private val prefs = context.getSharedPreferences("pelis_device", Context.MODE_PRIVATE)
+    val deviceId: String = prefs.getString("id", null) ?: UUID.randomUUID().toString().also {
+        prefs.edit().putString("id", it).apply()
+    }
+
+    val http: OkHttpClient = OkHttpClient.Builder()
+        .cookieJar(session)
+        .connectTimeout(15, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .addInterceptor { chain ->
+            chain.proceed(chain.request().newBuilder()
+                .header("User-Agent", "PelisAndroid/1.0 (native)")
+                .header("Origin", base)
+                .build())
+        }
+        .build()
+
+    private val json = "application/json".toMediaType()
+
+    private suspend fun post(path: String, body: JSONObject): String = withContext(Dispatchers.IO) {
+        val req = Request.Builder().url(base + path).post(body.toString().toRequestBody(json)).build()
+        http.newCall(req).execute().use { res ->
+            val text = res.body?.string().orEmpty()
+            if (!res.isSuccessful) {
+                val msg = runCatching { JSONObject(text).let { it.optString("message").ifBlank { it.optString("error") } } }.getOrNull()
+                throw ApiException(res.code, msg?.ifBlank { null } ?: "Error ${res.code}")
+            }
+            text
+        }
+    }
+
+    private suspend fun get(path: String): String = withContext(Dispatchers.IO) {
+        http.newCall(Request.Builder().url(base + path).build()).execute().use { res ->
+            val text = res.body?.string().orEmpty()
+            if (!res.isSuccessful) throw ApiException(res.code, "Error ${res.code}")
+            text
+        }
+    }
+
+    suspend fun call(name: String, args: JSONObject = JSONObject()): Any? {
+        val text = post("/api/function/$name", args)
+        if (text.isBlank() || text == "null") return null
+        if (text == "true" || text == "false") return text.toBoolean()
+        return if (text.trimStart().startsWith("[")) JSONArray(text) else JSONObject(text)
+    }
+
+    private fun Any?.asArray(key: String = "items"): JSONArray =
+        when (this) { is JSONArray -> this; is JSONObject -> optJSONArray(key) ?: JSONArray(); else -> JSONArray() }
+
+    // Catálogo
+    suspend fun featured() = call("movies.getFeatured").asArray().objects().map { Parse.movie(base, it) }
+    suspend fun trending() = call("movies.getTrending").asArray().objects().map { Parse.movie(base, it) }
+    suspend fun movies(genre: String? = null, limit: Int = 40, offset: Int = 0) =
+        call("movies.list", JSONObject().put("limit", limit).put("offset", offset).apply { if (genre != null) put("genre", genre) })
+            .asArray().objects().map { Parse.movie(base, it) }
+    suspend fun series() = call("movies.listSeries").asArray().objects().map { Parse.movie(base, it).copy(kind = Kind.SERIES) }
+    suspend fun byGenre(genre: String) = call("movies.getByGenre", JSONObject().put("genre", genre).put("limit", 20)).asArray().objects().map { Parse.movie(base, it) }
+    suspend fun genres(): List<String> = call("movies.getGenres").asArray().let { a -> (0 until a.length()).map { a.optString(it) } }
+    suspend fun search(q: String) = call("movies.search", JSONObject().put("q", q).put("limit", 40)).asArray().objects().map { Parse.movie(base, it) }
+    suspend fun movie(id: String) = (call("movies.getById", JSONObject().put("id", id)) as? JSONObject)?.let { Parse.movie(base, it) }
+    suspend fun animeList() = call("anime.list").asArray().objects().map { Parse.anime(base, it) }
+    suspend fun anime(id: String) = (call("anime.getById", JSONObject().put("id", id)) as? JSONObject)?.let { Parse.anime(base, it) }
+    suspend fun searchAnime(q: String) = call("anime.search", JSONObject().put("q", q)).asArray().objects().map { Parse.anime(base, it) }
+
+    /** Devuelve la URL HLS (proxy /api/anime/stream) y subtítulos de un episodio. */
+    suspend fun animeEpisode(animeId: String, episode: Int, dub: Boolean = false): Pair<String, List<Subtitle>>? {
+        val o = call("anime.getEpisodeStream", JSONObject().put("animeId", animeId).put("episodeNumber", episode).put("dub", dub)) as? JSONObject ?: return null
+        if (o.optString("kind") != "hls") return null
+        val src = o.optJSONArray("sources")?.objects()?.firstOrNull() ?: return null
+        val url = Parse.absolute(base, src.str("url")) ?: return null
+        val subs = o.optJSONArray("subtitles")?.objects()?.mapNotNull { s ->
+            Parse.absolute(base, s.str("url"))?.let { Subtitle(s.str("lang") ?: s.str("label") ?: "Subtítulos", s.str("lang") ?: "es", it) }
+        } ?: emptyList()
+        return url to subs
+    }
+
+    // TV en vivo
+    suspend fun channels() = call("tv.list", JSONObject().put("limit", 500)).asArray().objects().map { Parse.channel(base, it) }
+    fun channelStreamUrl(id: String) = "$base/api/tv/stream/$id"
+
+    // Usuario
+    suspend fun me(): Me? {
+        val o = call("users.me") as? JSONObject ?: return null
+        return Me(o.str("_id") ?: "", o.str("email") ?: "", o.str("name") ?: "", o.str("role") ?: "USER", o.str("planId"))
+    }
+    suspend fun favorites() = call("favorites.listByUser").asArray().objects().mapNotNull { (it.optJSONObject("movie") ?: it).let { m -> Parse.movie(base, m) } }
+    suspend fun isFavorite(id: String) = call("favorites.check", JSONObject().put("movieId", id)) == true
+    suspend fun setFavorite(id: String, on: Boolean) { call(if (on) "favorites.add" else "favorites.remove", JSONObject().put("movieId", id)) }
+    suspend fun history() = call("history.listByUser").asArray().objects().mapNotNull { (it.optJSONObject("movie") ?: return@mapNotNull null).let { m -> Parse.movie(base, m) } }
+    suspend fun saveProgress(movieId: String, progressSec: Long, durationSec: Long) {
+        runCatching { call("history.upsert", JSONObject().put("movieId", movieId).put("progress", progressSec).put("duration", durationSec)) }
+    }
+    suspend fun plans() = call("subscriptions.list").asArray().objects().map { Parse.plan(it) }
+    suspend fun checkoutUrl(planId: String): String? = (call("stripe.createCheckoutSession", JSONObject().put("planId", planId)) as? JSONObject)?.str("url")
+
+    // Autenticación (better-auth, mismas cookies que la web)
+    suspend fun signInEmail(email: String, password: String) {
+        post("/api/auth/sign-in/email", JSONObject().put("email", email.trim().lowercase()).put("password", password))
+    }
+    suspend fun signOut() {
+        runCatching { post("/api/auth/sign-out", JSONObject()) }
+        session.clear()
+    }
+
+    // Emparejamiento (link-tv / TvPairing): usado por la TV y por el login con Google del celular
+    suspend fun createPairing(): Pairing {
+        val o = JSONObject(post("/api/tv-auth/pairing", JSONObject().put("deviceId", deviceId)))
+        return Pairing(o.getString("code"), o.optString("displayCode"), o.optString("deviceId", deviceId), o.optString("verifyUrl"), o.optString("expiresAt"))
+    }
+    suspend fun pairingStatus(p: Pairing): String =
+        JSONObject(get("/api/tv-auth/pairing?code=${p.code}&deviceId=${p.deviceId}")).optString("status")
+    suspend fun claimPairing(p: Pairing) {
+        val o = JSONObject(post("/api/tv-auth/claim", JSONObject().put("code", p.code).put("deviceId", p.deviceId)))
+        val name = o.str("cookieName"); val token = o.str("token")
+        if (!session.hasSession && name != null && token != null) {
+            session.putSessionCookie(base.removePrefix("https://").removePrefix("http://"), name, token)
+        }
+    }
+    fun qrUrl(data: String) = "$base/api/tv-auth/qr?format=png&data=" + java.net.URLEncoder.encode(data, "UTF-8")
+
+    companion object {
+        @Volatile private var instance: PelisApi? = null
+        fun get(context: Context): PelisApi = instance ?: synchronized(this) {
+            instance ?: PelisApi(context).also { instance = it }
+        }
+    }
+}
