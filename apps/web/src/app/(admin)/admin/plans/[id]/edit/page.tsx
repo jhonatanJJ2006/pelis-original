@@ -50,7 +50,7 @@ export default function EditPlanPage() {
     return (
       <div className="text-center py-24 text-cinema-muted">
         Plan no encontrado.{' '}
-        <Link href="/admin/plans" className="text-cinema-violet-light hover:underline">
+        <Link href="/admin/plans" className="text-cinema-accent-light hover:underline">
           Volver al listado
         </Link>
       </div>
@@ -61,13 +61,13 @@ export default function EditPlanPage() {
     <div>
       <Link
         href="/admin/plans"
-        className="inline-flex items-center gap-2 text-sm text-cinema-muted hover:text-white transition-colors mb-6"
+        className="inline-flex items-center gap-2 text-sm text-cinema-muted hover:text-cinema-chalk transition-colors mb-6"
       >
         <ArrowLeft className="w-4 h-4" />
         Volver al listado
       </Link>
 
-      <h1 className="font-display text-2xl sm:text-3xl tracking-wide text-white uppercase mb-6 sm:mb-8">
+      <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-cinema-chalk mb-6 sm:mb-8">
         Editar plan
       </h1>
 

@@ -27,7 +27,7 @@ function ChannelRowInner({ channel, active, onSelect }: ChannelRowProps) {
         className={cn(
           'flex items-center gap-2 px-2 py-2 rounded-lg my-0.5 transition-colors tv-focus',
           'hover:bg-cinema-elevated',
-          active && 'bg-cinema-gold/10 ring-1 ring-cinema-gold/35'
+          active && 'bg-cinema-accent/10 ring-1 ring-cinema-accent/35'
         )}
         aria-current={active ? 'true' : undefined}
       >
@@ -49,7 +49,7 @@ function ChannelRowInner({ channel, active, onSelect }: ChannelRowProps) {
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-xs md:text-sm text-white truncate">{channel.name}</p>
+          <p className="text-xs md:text-sm text-cinema-chalk truncate">{channel.name}</p>
           <div className="flex items-center gap-1 mt-0.5">
             {active && (
               <span className="flex items-center gap-1 text-[9px] uppercase tracking-wider text-cinema-danger font-semibold">

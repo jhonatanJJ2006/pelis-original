@@ -3,6 +3,7 @@ import { prisma } from '../client';
 import { notifyChange } from '../realtime';
 import { register } from '../registry';
 import { requireAdmin } from '../lib/requireAdmin';
+import { normalizePageArgs, sliceAdminPage, toAdminPage } from '../lib/adminPage';
 import { seriesCreateSchema, seriesUpdateSchema } from '../lib/movie-payload';
 import {
   addSeriesMovies,
@@ -72,6 +73,7 @@ export const adminList = register({
     .object({
       search: z.string().optional(),
       limit: z.number().optional(),
+      offset: z.number().optional(),
     })
     .optional(),
   handler: async (ctx, args) => {
@@ -86,12 +88,15 @@ export const adminList = register({
         { actors: { contains: search, mode: 'insensitive' } },
       ];
     }
+    const paged = a.offset !== undefined;
+    const page = normalizePageArgs(a.offset, a.limit);
     const items = await prisma.series.findMany({
       where,
       orderBy: { name: 'asc' },
-      take: a.limit ?? 500,
+      ...(paged ? { skip: page.offset, take: page.limit } : { take: a.limit ?? 500 }),
     });
-    return items.map((s) => ({
+    const total = paged ? await prisma.series.count({ where }) : 0;
+    const shaped = items.map((s) => ({
       _id: s.id,
       name: s.name,
       image: s.image,
@@ -106,6 +111,7 @@ export const adminList = register({
       featured: s.featured,
       isOrphanId: isOrphan(s.name, s.token),
     }));
+    return paged ? toAdminPage(shaped, total, page.offset, page.limit) : shaped;
   },
 });
 

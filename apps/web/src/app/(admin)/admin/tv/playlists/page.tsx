@@ -166,12 +166,12 @@ export default function AdminTVPlaylistsPage() {
       <div>
         <Link
           href="/admin/tv"
-          className="inline-flex items-center gap-2 text-sm text-cinema-muted hover:text-white transition-colors mb-6"
+          className="inline-flex items-center gap-2 text-sm text-cinema-muted hover:text-cinema-chalk transition-colors mb-6"
         >
           <ArrowLeft className="w-4 h-4" />
           Volver a canales
         </Link>
-        <h1 className="font-display text-2xl sm:text-3xl tracking-wide text-white uppercase">
+        <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-cinema-chalk">
           Listas M3U
         </h1>
         <p className="text-cinema-muted mt-1 sm:mt-2 text-sm sm:text-base">
@@ -182,9 +182,9 @@ export default function AdminTVPlaylistsPage() {
 
       <form
         onSubmit={handleCreate}
-        className="rounded-2xl border border-cinema-border bg-cinema-surface p-5 space-y-4 max-w-3xl"
+        className="rounded-lg border border-cinema-border bg-cinema-surface p-5 space-y-4 max-w-3xl"
       >
-        <h2 className="font-semibold text-white text-lg">Agregar lista</h2>
+        <h2 className="font-semibold text-cinema-chalk text-lg">Agregar lista</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
             label="Nombre"
@@ -262,11 +262,11 @@ export default function AdminTVPlaylistsPage() {
       </form>
 
       <div>
-        <h2 className="font-semibold text-white text-lg mb-4">Listas existentes</h2>
+        <h2 className="font-semibold text-cinema-chalk text-lg mb-4">Listas existentes</h2>
         {playlists === undefined ? (
           <AdminTableSkeleton />
         ) : playlists.length === 0 ? (
-          <div className="text-center py-16 rounded-2xl border border-cinema-border bg-cinema-surface/40 text-cinema-muted">
+          <div className="text-center py-16 rounded-lg border border-cinema-border bg-cinema-surface/40 text-cinema-muted">
             <ListVideo className="w-10 h-10 mx-auto mb-3 text-cinema-ash" />
             <p>No hay listas todavía. Agrega la primera arriba.</p>
           </div>
@@ -275,15 +275,15 @@ export default function AdminTVPlaylistsPage() {
             {playlists.map((pl) => (
               <article
                 key={pl._id}
-                className="rounded-2xl border border-cinema-border bg-cinema-surface p-5 flex flex-col gap-4"
+                className="rounded-lg border border-cinema-border bg-cinema-surface p-5 flex flex-col gap-4"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-cinema-violet/15 text-cinema-violet-light">
+                    <div className="p-2.5 rounded-lg bg-cinema-accent/15 text-cinema-accent-light">
                       <ListVideo className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="font-display text-lg uppercase tracking-wide text-white">
+                      <h3 className="font-display text-lg uppercase tracking-wide text-cinema-chalk">
                         {pl.name}
                       </h3>
                       <p className="text-xs text-cinema-muted mt-0.5">
@@ -295,7 +295,7 @@ export default function AdminTVPlaylistsPage() {
                     className={cn(
                       'text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold',
                       pl.isActive
-                        ? 'bg-emerald-500/20 text-emerald-300'
+                        ? 'bg-cinema-success/20 text-cinema-success'
                         : 'bg-cinema-elevated text-cinema-muted'
                     )}
                   >
@@ -310,7 +310,7 @@ export default function AdminTVPlaylistsPage() {
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div className="rounded-lg bg-cinema-elevated/40 p-2">
                     <p className="text-cinema-ash text-[10px] uppercase tracking-wider">Canales</p>
-                    <p className="text-white font-medium text-base mt-0.5">
+                    <p className="text-cinema-chalk font-medium text-base mt-0.5">
                       {pl.totalChannels ?? '—'}
                     </p>
                   </div>
@@ -318,7 +318,9 @@ export default function AdminTVPlaylistsPage() {
                     <p className="text-cinema-ash text-[10px] uppercase tracking-wider">
                       Última importación
                     </p>
-                    <p className="text-white font-medium mt-0.5">{formatDate(pl.lastImportedAt)}</p>
+                    <p className="text-cinema-chalk font-medium mt-0.5">
+                      {formatDate(pl.lastImportedAt)}
+                    </p>
                   </div>
                 </div>
 

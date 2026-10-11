@@ -40,7 +40,7 @@ async function ensureDir() {
 export async function uploadFile(
   data: Buffer | Uint8Array,
   _mimeType?: string,
-  _filename?: string,
+  _filename?: string
 ): Promise<{ id: string; url: string }> {
   await ensureDir();
   const id = randomUUID().replace(/-/g, '');

@@ -74,9 +74,7 @@ export default function SeriesPageClient({ preloaded }: SeriesPageClientProps) {
   return (
     <div className="page-shell">
       <div className="mb-10">
-        <p className="text-cinema-accent text-sm font-medium uppercase tracking-widest mb-2">
-          Catálogo
-        </p>
+        <p className="text-label uppercase text-cinema-accent mb-2">Catálogo</p>
         <h1 className="font-display text-4xl md:text-5xl tracking-tight text-cinema-chalk">
           Series
         </h1>
@@ -86,8 +84,8 @@ export default function SeriesPageClient({ preloaded }: SeriesPageClientProps) {
       {series.length === 0 ? (
         <EmptyState
           icon={Tv}
-          title="Sin series disponibles"
-          description="Pronto añadiremos más series al catálogo."
+          title="La sala de series se está preparando"
+          description="Todavía no hay series en el catálogo. Mientras tanto, explora películas, anime y TV en vivo."
           actionLabel="Ver películas"
           actionHref="/movies"
         />

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Home, Film, User, Crown, Search, Tv, Radio, Clapperboard } from 'lucide-react';
+import { User, Crown, Search } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { useUser } from '@pelis/auth/hooks';
 import { Button } from '@pelis/ui/components';
@@ -10,11 +10,12 @@ import { cn } from '@pelis/ui/utils';
 import { SearchDropdown } from './search-dropdown';
 
 const navItems = [
-  { href: '/', label: 'Inicio', icon: Home, exact: true },
-  { href: '/movies', label: 'Películas', icon: Film },
-  { href: '/series', label: 'Series', icon: Tv },
-  { href: '/tv', label: 'TV', icon: Radio },
-  { href: '/anime', label: 'Anime', icon: Clapperboard },
+  { href: '/', label: 'Inicio', exact: true },
+  { href: '/movies', label: 'Películas' },
+  { href: '/series', label: 'Series' },
+  { href: '/tv', label: 'TV en vivo' },
+  { href: '/anime', label: 'Anime' },
+  { href: '/favorites', label: 'Mi lista' },
 ];
 
 interface HeaderProps {
@@ -32,6 +33,14 @@ export function Header({ sticky = true, minimalNav = false, tvMode = false }: He
   const searchRef = useRef<HTMLInputElement>(null);
 
   const hasActivePlan = !!(user?.planExpiresAt && user.planExpiresAt > Date.now());
+
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   useEffect(() => {
     if (searchOpen && searchRef.current) {
@@ -57,7 +66,10 @@ export function Header({ sticky = true, minimalNav = false, tvMode = false }: He
     <header
       className={cn(
         sticky ? 'sticky top-0 z-50' : 'relative z-50',
-        'glass-strong border-b border-cinema-border/50'
+        'transition-[background-color,border-color,backdrop-filter] duration-normal',
+        scrolled || searchOpen
+          ? 'bg-cinema-bg/92 backdrop-blur-xl border-b border-cinema-border/60'
+          : 'bg-gradient-to-b from-cinema-bg/90 via-cinema-bg/50 to-transparent border-b border-transparent'
       )}
     >
       <nav className="container mx-auto px-4" aria-label="Principal">
@@ -66,10 +78,9 @@ export function Header({ sticky = true, minimalNav = false, tvMode = false }: He
             href={tvMode ? '/tv' : '/'}
             className="flex items-center gap-2.5 shrink-0 group tv-focus"
           >
-            <div className="w-9 h-9 rounded bg-gradient-to-br from-cinema-accent to-cinema-gold flex items-center justify-center shadow-glow group-hover:scale-105 transition-transform duration-200">
-              <Film className="w-5 h-5 text-cinema-bg" />
-            </div>
-            <span className="font-display text-2xl tracking-tight text-cinema-chalk">Pelis</span>
+            <span className="font-display text-2xl font-semibold tracking-[0.12em] text-cinema-accent group-hover:text-cinema-accent-light transition-colors">
+              PELIS
+            </span>
           </Link>
 
           <div
@@ -104,15 +115,14 @@ export function Header({ sticky = true, minimalNav = false, tvMode = false }: He
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    'flex items-center gap-1.5 px-3 py-2 rounded text-sm font-medium transition-all duration-200 tv-focus',
+                    'relative flex items-center gap-1.5 px-3 py-2 text-sm font-medium transition-colors duration-200 tv-focus',
                     tvMode && 'px-4 py-3 text-base',
                     isActive(item.href, item.exact)
-                      ? 'bg-cinema-accent/15 text-cinema-accent-light'
-                      : 'text-cinema-silver hover:text-cinema-chalk hover:bg-cinema-elevated/50'
+                      ? 'text-cinema-chalk after:absolute after:inset-x-3 after:-bottom-0.5 after:h-0.5 after:rounded-full after:bg-cinema-accent'
+                      : 'text-cinema-muted hover:text-cinema-chalk'
                   )}
                 >
-                  <item.icon className="w-4 h-4" aria-hidden />
-                  <span className="hidden xl:inline">{item.label}</span>
+                  <span>{item.label}</span>
                 </Link>
               ))}
             </div>
@@ -126,8 +136,8 @@ export function Header({ sticky = true, minimalNav = false, tvMode = false }: He
                   className={cn(
                     'flex items-center gap-1.5 px-3 py-2 rounded text-sm font-bold transition-all duration-200',
                     hasActivePlan
-                      ? 'bg-cinema-elevated border border-cinema-gold/40 text-cinema-gold hover:bg-cinema-gold/10'
-                      : 'bg-gradient-to-r from-cinema-gold to-cinema-gold-light text-black hover:brightness-110 shadow-[0_4px_16px_rgba(245,200,66,0.25)]'
+                      ? 'border border-cinema-accent/40 text-cinema-accent hover:bg-cinema-accent/10'
+                      : 'bg-cinema-accent text-cinema-bg hover:bg-cinema-accent-light'
                   )}
                 >
                   <Crown className="w-4 h-4" aria-hidden />
@@ -155,7 +165,7 @@ export function Header({ sticky = true, minimalNav = false, tvMode = false }: He
                     className="w-9 h-9 rounded-full ring-2 ring-cinema-accent/50"
                   />
                 ) : (
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cinema-accent to-cinema-gold flex items-center justify-center ring-2 ring-cinema-accent/50">
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cinema-accent to-cinema-accent flex items-center justify-center ring-2 ring-cinema-accent/50">
                     <User className="w-4 h-4 text-cinema-bg" aria-hidden />
                   </div>
                 )}
@@ -175,10 +185,10 @@ export function Header({ sticky = true, minimalNav = false, tvMode = false }: He
               <Link
                 href="/subscribe"
                 className={cn(
-                  'p-2.5 rounded-xl transition-colors',
+                  'p-2.5 rounded-lg transition-colors',
                   hasActivePlan
-                    ? 'text-cinema-gold hover:bg-cinema-gold/10'
-                    : 'text-cinema-gold hover:bg-cinema-elevated/50'
+                    ? 'text-cinema-accent hover:bg-cinema-accent/10'
+                    : 'text-cinema-accent hover:bg-cinema-elevated/50'
                 )}
                 aria-label="Suscripciones"
               >
@@ -188,7 +198,7 @@ export function Header({ sticky = true, minimalNav = false, tvMode = false }: He
             <button
               type="button"
               onClick={() => setSearchOpen(!searchOpen)}
-              className="p-2.5 text-cinema-silver hover:text-white transition-colors rounded-xl"
+              className="p-2.5 text-cinema-silver hover:text-cinema-chalk transition-colors rounded-lg"
               aria-label="Buscar"
               aria-expanded={searchOpen}
             >

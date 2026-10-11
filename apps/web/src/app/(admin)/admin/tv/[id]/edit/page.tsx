@@ -76,7 +76,7 @@ export default function EditTVChannelPage() {
     return (
       <div className="text-center py-24 text-cinema-muted">
         Canal no encontrado.{' '}
-        <Link href="/admin/tv" className="text-cinema-violet-light hover:underline">
+        <Link href="/admin/tv" className="text-cinema-accent-light hover:underline">
           Volver al listado
         </Link>
       </div>
@@ -87,17 +87,17 @@ export default function EditTVChannelPage() {
     <div>
       <Link
         href="/admin/tv"
-        className="inline-flex items-center gap-2 text-sm text-cinema-muted hover:text-white transition-colors mb-6"
+        className="inline-flex items-center gap-2 text-sm text-cinema-muted hover:text-cinema-chalk transition-colors mb-6"
       >
         <ArrowLeft className="w-4 h-4" />
         Volver a canales
       </Link>
 
-      <h1 className="font-display text-2xl sm:text-3xl tracking-wide text-white uppercase mb-4 sm:mb-6">
+      <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-cinema-chalk mb-4 sm:mb-6">
         Editar canal
       </h1>
 
-      <div className="mb-6 rounded-xl border border-cinema-border bg-cinema-surface p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div className="mb-6 rounded-lg border border-cinema-border bg-cinema-surface p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <p className="text-xs text-cinema-muted uppercase tracking-wider mb-1">
             Estado del stream
@@ -106,7 +106,7 @@ export default function EditTVChannelPage() {
             <span
               className={cn(
                 'inline-flex items-center text-xs px-2.5 py-1 rounded-full font-medium',
-                channel.streamStatus === 'online' && 'bg-emerald-500/20 text-emerald-300',
+                channel.streamStatus === 'online' && 'bg-cinema-success/20 text-cinema-success',
                 channel.streamStatus === 'offline' && 'bg-red-500/20 text-red-300',
                 (!channel.streamStatus || channel.streamStatus === 'unknown') &&
                   'bg-cinema-elevated text-cinema-muted'

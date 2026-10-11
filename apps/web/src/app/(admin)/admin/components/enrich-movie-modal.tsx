@@ -181,7 +181,7 @@ export function EnrichMovieModal({ movie, onClose, onEnriched }: EnrichMovieModa
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
       <div
-        className="w-full max-w-2xl bg-cinema-surface border border-cinema-border rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col mx-auto"
+        className="w-full max-w-2xl bg-cinema-surface border border-cinema-border rounded-lg shadow-2xl overflow-hidden max-h-[90vh] flex flex-col mx-auto"
         role="dialog"
         aria-modal="true"
         aria-labelledby="enrich-modal-title"
@@ -189,15 +189,15 @@ export function EnrichMovieModal({ movie, onClose, onEnriched }: EnrichMovieModa
         <div className="flex items-center justify-between px-6 py-4 border-b border-cinema-border shrink-0">
           <h2
             id="enrich-modal-title"
-            className="text-lg font-semibold text-white flex items-center gap-2"
+            className="text-lg font-semibold text-cinema-chalk flex items-center gap-2"
           >
-            <Sparkles className="w-5 h-5 text-cinema-gold" />
+            <Sparkles className="w-5 h-5 text-cinema-accent" />
             Completar desde TMDB
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-lg text-cinema-muted hover:text-white hover:bg-cinema-elevated transition-colors"
+            className="p-2 rounded-lg text-cinema-muted hover:text-cinema-chalk hover:bg-cinema-elevated transition-colors"
             aria-label="Cerrar"
           >
             <X className="w-5 h-5" />
@@ -206,7 +206,8 @@ export function EnrichMovieModal({ movie, onClose, onEnriched }: EnrichMovieModa
 
         <div className="px-6 py-5 overflow-y-auto flex-1">
           <p className="text-sm text-cinema-muted mb-4">
-            Película local: <span className="text-white">{getAdminMovieDisplayName(movie)}</span>
+            Película local:{' '}
+            <span className="text-cinema-chalk">{getAdminMovieDisplayName(movie)}</span>
           </p>
 
           {loading ? (
@@ -224,7 +225,7 @@ export function EnrichMovieModal({ movie, onClose, onEnriched }: EnrichMovieModa
           ) : preview?.status === 'ok' ? (
             <div className="space-y-5">
               {preview.canReplaceImage && (
-                <div className="rounded-xl border border-cinema-border bg-cinema-elevated/40 p-4">
+                <div className="rounded-lg border border-cinema-border bg-cinema-elevated/40 p-4">
                   <p className="text-xs uppercase tracking-wide text-cinema-muted mb-3">Poster</p>
                   <div className="flex items-center justify-center gap-4 flex-wrap">
                     <div className="text-center">
@@ -246,7 +247,7 @@ export function EnrichMovieModal({ movie, onClose, onEnriched }: EnrichMovieModa
                     <ArrowRight className="w-5 h-5 text-cinema-muted shrink-0" />
                     <div className="text-center">
                       <p className="text-xs text-cinema-muted mb-2">TMDB</p>
-                      <div className="w-20 h-28 rounded-lg overflow-hidden bg-cinema-elevated border border-cinema-gold/30">
+                      <div className="w-20 h-28 rounded-lg overflow-hidden bg-cinema-elevated border border-cinema-accent/30">
                         {preview.tmdb.posterUrl ? (
                           <MoviePoster
                             src={preview.tmdb.posterUrl}
@@ -266,7 +267,7 @@ export function EnrichMovieModal({ movie, onClose, onEnriched }: EnrichMovieModa
                     className={cn(
                       'mt-4 flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors',
                       replaceImage
-                        ? 'border-cinema-gold/40 bg-cinema-gold/10'
+                        ? 'border-cinema-accent/40 bg-cinema-accent/10'
                         : 'border-cinema-border hover:border-cinema-silver/30'
                     )}
                   >
@@ -274,19 +275,21 @@ export function EnrichMovieModal({ movie, onClose, onEnriched }: EnrichMovieModa
                       type="checkbox"
                       checked={replaceImage}
                       onChange={(e) => setReplaceImage(e.target.checked)}
-                      className="mt-0.5 rounded border-cinema-border bg-cinema-surface text-cinema-gold focus:ring-cinema-gold/50"
+                      className="mt-0.5 rounded border-cinema-border bg-cinema-surface text-cinema-accent focus:ring-cinema-accent/50"
                     />
                     <span className="text-sm text-cinema-silver leading-snug">
                       {preview.hasExistingImage ? (
                         <>
-                          <span className="text-white font-medium">
+                          <span className="text-cinema-chalk font-medium">
                             Reemplazar el poster actual
                           </span>{' '}
                           por el de TMDB (se borrará la imagen anterior en storage si aplica)
                         </>
                       ) : (
                         <>
-                          <span className="text-white font-medium">Usar el poster de TMDB</span>{' '}
+                          <span className="text-cinema-chalk font-medium">
+                            Usar el poster de TMDB
+                          </span>{' '}
                           para completar la imagen faltante
                         </>
                       )}
@@ -296,7 +299,7 @@ export function EnrichMovieModal({ movie, onClose, onEnriched }: EnrichMovieModa
               )}
 
               {preview.canReplaceBackdrop && (
-                <div className="rounded-xl border border-cinema-border bg-cinema-elevated/40 p-4">
+                <div className="rounded-lg border border-cinema-border bg-cinema-elevated/40 p-4">
                   <div className="flex items-center justify-between gap-2 mb-3">
                     <p className="text-xs uppercase tracking-wide text-cinema-muted">Backdrop</p>
                     {willApplyBackdrop && (
@@ -360,14 +363,14 @@ export function EnrichMovieModal({ movie, onClose, onEnriched }: EnrichMovieModa
                     <span className="text-sm text-cinema-silver leading-snug">
                       {preview.hasExistingBackdrop ? (
                         <>
-                          <span className="text-white font-medium">
+                          <span className="text-cinema-chalk font-medium">
                             Reemplazar el backdrop actual
                           </span>{' '}
                           por el de TMDB (se borrará la imagen anterior en storage si aplica)
                         </>
                       ) : (
                         <>
-                          <span className="text-white font-medium">
+                          <span className="text-cinema-chalk font-medium">
                             Descargar el backdrop de TMDB
                           </span>{' '}
                           para completar la imagen ancha faltante
@@ -379,11 +382,11 @@ export function EnrichMovieModal({ movie, onClose, onEnriched }: EnrichMovieModa
               )}
 
               <div className="min-w-0">
-                <h3 className="text-xl font-semibold text-white">{preview.tmdb.title}</h3>
+                <h3 className="text-xl font-semibold text-cinema-chalk">{preview.tmdb.title}</h3>
                 {preview.tmdb.originalTitle !== preview.tmdb.title && (
                   <p className="text-sm text-cinema-muted mt-0.5">{preview.tmdb.originalTitle}</p>
                 )}
-                <p className="text-sm text-cinema-gold mt-2">{preview.tmdb.releaseYear}</p>
+                <p className="text-sm text-cinema-accent mt-2">{preview.tmdb.releaseYear}</p>
                 <p className="text-sm text-cinema-muted mt-1">
                   {preview.tmdb.genre} · {preview.tmdb.classification}
                 </p>
@@ -401,7 +404,7 @@ export function EnrichMovieModal({ movie, onClose, onEnriched }: EnrichMovieModa
                 <p className="text-sm text-cinema-silver">{preview.tmdb.actors || '—'}</p>
               </div>
 
-              <div className="rounded-xl border border-cinema-border bg-cinema-elevated/40 p-4">
+              <div className="rounded-lg border border-cinema-border bg-cinema-elevated/40 p-4">
                 <p className="text-xs uppercase tracking-wide text-cinema-muted mb-2">
                   Campos que se aplicarán
                 </p>
@@ -415,7 +418,7 @@ export function EnrichMovieModal({ movie, onClose, onEnriched }: EnrichMovieModa
                       {fieldsToApply.map((field) => (
                         <span
                           key={field}
-                          className="text-xs px-2.5 py-1 rounded-full bg-cinema-violet/20 text-cinema-violet-light border border-cinema-violet/30"
+                          className="text-xs px-2.5 py-1 rounded-full bg-cinema-accent/20 text-cinema-accent-light border border-cinema-accent/30"
                         >
                           {FIELD_LABELS[field] ?? field}
                         </span>

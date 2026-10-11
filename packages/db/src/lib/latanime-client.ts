@@ -57,7 +57,10 @@ async function fetchHtml(url: string, timeoutMs = 10000): Promise<string | null>
 }
 
 function normalizeTitle(title: string): string {
-  return title.replace(/[^a-z0-9]+/gi, ' ').toLowerCase().trim();
+  return title
+    .replace(/[^a-z0-9]+/gi, ' ')
+    .toLowerCase()
+    .trim();
 }
 
 /** Slugs (`/anime/{slug}`) of the cards on a search result page. */
@@ -85,10 +88,7 @@ function parseEpisodeNumbers(html: string): number[] {
  * rows usually match a title (latino / castellano / CR cuts); the first one
  * that actually has the requested episode wins.
  */
-async function resolveLatAnimeSlug(
-  title: string,
-  episodeNumber: number,
-): Promise<string | null> {
+async function resolveLatAnimeSlug(title: string, episodeNumber: number): Promise<string | null> {
   const key = normalizeTitle(title);
   if (!key) return null;
 
@@ -135,7 +135,7 @@ export function toMegaEmbedUrl(raw: string): string | null {
 /** All hosts we understand, resolved for one episode. */
 export async function resolveLatAnimeServers(
   ctx: EmbedContext,
-  opts: { title: string },
+  opts: { title: string }
 ): Promise<Partial<Record<LatAnimeHostId, string>>> {
   const cacheKey = `${normalizeTitle(opts.title)}#${ctx.episodeNumber}`;
   const cached = serversCache.get(cacheKey);
@@ -149,9 +149,7 @@ export async function resolveLatAnimeServers(
     return empty;
   }
 
-  const html = await fetchHtml(
-    `${BASE}/ver/${slug}-episodio-${ctx.episodeNumber}`,
-  );
+  const html = await fetchHtml(`${BASE}/ver/${slug}-episodio-${ctx.episodeNumber}`);
   if (!html) {
     serversCache.set(cacheKey, { at: Date.now(), servers: empty });
     return empty;
@@ -179,9 +177,7 @@ export async function resolveLatAnimeServers(
   }
 
   if (!servers.mega) {
-    for (const match of html.matchAll(
-      /class="direct-link"[^>]*href="([^"]+)"/g,
-    )) {
+    for (const match of html.matchAll(/class="direct-link"[^>]*href="([^"]+)"/g)) {
       const href = match[1];
       if (!href) continue;
       const embed = toMegaEmbedUrl(href);
@@ -200,7 +196,7 @@ export async function resolveLatAnimeServers(
 export async function resolveLatAnimeEmbedUrl(
   host: LatAnimeHostId,
   ctx: EmbedContext,
-  opts: { title: string },
+  opts: { title: string }
 ): Promise<string | null> {
   const servers = await resolveLatAnimeServers(ctx, opts);
   return servers[host] ?? null;

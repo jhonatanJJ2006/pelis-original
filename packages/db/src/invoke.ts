@@ -3,7 +3,10 @@ import { getDefinition, callHandler } from './registry';
 import { AuthError, type RequestCtx } from './lib/requireAdmin';
 
 export class InvokeError extends Error {
-  constructor(message: string, public readonly status: number = 400) {
+  constructor(
+    message: string,
+    public readonly status: number = 400
+  ) {
     super(message);
   }
 }
@@ -25,7 +28,7 @@ export async function invoke({ name, args, ctx }: InvokeOptions): Promise<unknow
     if (!result.success) {
       throw new InvokeError(
         `Invalid args for "${name}": ${result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ')}`,
-        400,
+        400
       );
     }
     parsed = result.data;

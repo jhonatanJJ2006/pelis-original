@@ -1,4 +1,5 @@
-export const TAB_ROUTES = ['/', '/movies', '/series', '/tv', '/anime', '/profile'] as const;
+/** Barra inferior móvil: Inicio, Buscar, Anime, TV, Perfil. */
+export const TAB_ROUTES = ['/', '/buscar', '/anime', '/tv', '/profile'] as const;
 
 export type TabRoute = (typeof TAB_ROUTES)[number];
 

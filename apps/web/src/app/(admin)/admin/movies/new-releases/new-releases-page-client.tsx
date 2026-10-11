@@ -58,19 +58,23 @@ export default function AdminNewReleasesPageClient() {
         <div>
           <Link
             href="/admin/movies"
-            className="inline-flex items-center gap-2 text-sm text-cinema-muted hover:text-white transition-colors mb-3"
+            className="inline-flex items-center gap-2 text-sm text-cinema-muted hover:text-cinema-chalk transition-colors mb-3"
           >
             <ArrowLeft className="w-4 h-4" />
             Volver a Películas
           </Link>
-          <h1 className="font-display text-2xl sm:text-3xl tracking-wide text-white uppercase">
-            Nuevas películas
+          <p className="text-label uppercase text-cinema-accent mb-1.5 flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-cinema-accent" aria-hidden />
+            Curaduría
+          </p>
+          <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-cinema-chalk">
+            Estrenos
           </h1>
           <p className="text-cinema-muted mt-1 sm:mt-2 text-sm sm:text-base">
             {movies ? `${movies.length} agregadas en el rango seleccionado` : 'Cargando...'}
           </p>
         </div>
-        <Sparkles className="w-8 h-8 text-cinema-gold shrink-0" />
+        <Sparkles className="w-8 h-8 text-cinema-accent shrink-0" />
       </div>
 
       <div className="-mx-4 px-4 sm:mx-0 sm:px-0 mb-4">
@@ -83,8 +87,8 @@ export default function AdminNewReleasesPageClient() {
               className={cn(
                 'px-3 py-1.5 rounded-full text-xs sm:text-sm transition-colors border whitespace-nowrap shrink-0',
                 sinceDays === Number(tab.value)
-                  ? 'bg-cinema-violet/20 text-white border-cinema-violet/40'
-                  : 'text-cinema-muted border-cinema-border hover:text-white hover:border-cinema-silver/30'
+                  ? 'bg-cinema-accent/20 text-cinema-chalk border-cinema-accent/40'
+                  : 'text-cinema-muted border-cinema-border hover:text-cinema-chalk hover:border-cinema-silver/30'
               )}
             >
               {tab.label}
@@ -100,8 +104,8 @@ export default function AdminNewReleasesPageClient() {
           No hay películas nuevas en este rango.
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-cinema-border bg-cinema-surface">
-          <table className="w-full min-w-[720px] text-sm">
+        <div className="overflow-x-auto rounded-lg border border-cinema-border bg-cinema-surface">
+          <table className="admin-table w-full min-w-[720px] text-sm">
             <thead>
               <tr className="border-b border-cinema-border text-left text-cinema-muted">
                 <th className="px-4 py-3 font-medium">Poster</th>
@@ -132,10 +136,10 @@ export default function AdminNewReleasesPageClient() {
                     <Link
                       href={`/admin/movies/${movie._id}/edit`}
                       className={cn(
-                        'font-medium max-w-[280px] truncate block hover:text-cinema-violet-light transition-colors',
+                        'font-medium max-w-[280px] truncate block hover:text-cinema-accent-light transition-colors',
                         isAdminOrphanDisplayName(movie.name, movie.token)
                           ? 'text-cinema-muted italic'
-                          : 'text-white'
+                          : 'text-cinema-chalk'
                       )}
                     >
                       {getAdminMovieDisplayName(movie)}

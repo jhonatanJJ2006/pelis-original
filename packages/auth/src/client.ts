@@ -1,4 +1,5 @@
 import { createAuthClient } from 'better-auth/react';
+import { emailOTPClient } from 'better-auth/client/plugins';
 
 function resolveBaseUrl(): string {
   if (typeof globalThis.window !== 'undefined') {
@@ -16,6 +17,7 @@ export const authClient = createAuthClient({
   fetchOptions: {
     credentials: 'include',
   },
+  plugins: [emailOTPClient()],
   // Seeking/fullscreen fires visibilitychange; Better Auth's default focus
   // refetch sets session data to null on any get-session error, which unmounted
   // the player. Session is still loaded on mount and after sign-in/sign-out.

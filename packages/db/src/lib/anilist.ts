@@ -52,7 +52,7 @@ export function slugifyTitle(title: string): string {
 async function anilistQuery<T>(
   query: string,
   variables: Record<string, unknown>,
-  attempt = 0,
+  attempt = 0
 ): Promise<T> {
   const response = await fetch(ANILIST_API, {
     method: 'POST',
@@ -91,7 +91,7 @@ export async function searchAnilist(title: string, year?: number): Promise<Anili
         }
       }
     }`,
-    { search: title },
+    { search: title }
   );
 
   const media = data.Page.media;
@@ -113,7 +113,7 @@ export async function getAnilistById(anilistId: number): Promise<AnilistMedia | 
         seasonYear averageScore coverImage { large extraLarge } bannerImage format
       }
     }`,
-    { id: anilistId },
+    { id: anilistId }
   );
   return data.Media;
 }
@@ -143,7 +143,7 @@ export async function fetchAnilistCatalog(options: {
       genre: options.genre,
       seasonYear: options.seasonYear,
       status: options.status,
-    },
+    }
   );
   return data.Page.media;
 }
@@ -153,7 +153,7 @@ export async function fetchAnilistCatalog(options: {
  * page, which keeps a full catalog pass within the rate limit.
  */
 export async function fetchAnilistWithRelations(
-  anilistIds: number[],
+  anilistIds: number[]
 ): Promise<AnilistMediaWithRelations[]> {
   const out: AnilistMediaWithRelations[] = [];
   const batchSize = 50;
@@ -185,7 +185,7 @@ export async function fetchAnilistWithRelations(
           }
         }
       }`,
-      { ids },
+      { ids }
     );
 
     for (const media of data.Page.media) {
@@ -216,7 +216,10 @@ export function mapAnilistStatus(status?: string | null): 'ongoing' | 'completed
 
 export function stripHtml(html?: string | null): string {
   if (!html) return '';
-  return html.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '').trim();
+  return html
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<[^>]+>/g, '')
+    .trim();
 }
 
 export function pickAnilistTitle(media: AnilistMedia): string {

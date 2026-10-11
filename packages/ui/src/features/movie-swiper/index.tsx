@@ -45,7 +45,7 @@ export function MovieSwiper({
       <button
         ref={prevRef}
         type="button"
-        className="absolute -left-1 top-1/2 -translate-y-1/2 z-10 p-2.5 rounded-full bg-cinema-elevated/95 border border-cinema-border text-white motion-safe:transition-[opacity,background-color,border-color] motion-safe:duration-fast hover:bg-cinema-violet/30 hover:border-cinema-violet/50 hidden md:flex items-center justify-center opacity-0 group-hover/swiper:opacity-100 focus-visible:opacity-100 active:scale-95"
+        className="absolute -left-1 top-1/2 -translate-y-1/2 z-10 p-2.5 rounded-full bg-cinema-elevated/95 border border-cinema-border text-cinema-chalk motion-safe:transition-[opacity,background-color,border-color] motion-safe:duration-fast hover:bg-cinema-accent/30 hover:border-cinema-accent/50 hidden md:flex items-center justify-center opacity-0 group-hover/swiper:opacity-100 focus-visible:opacity-100 active:scale-95"
         aria-label="Anterior"
       >
         <ChevronLeft className="w-5 h-5" />
@@ -53,7 +53,7 @@ export function MovieSwiper({
       <button
         ref={nextRef}
         type="button"
-        className="absolute -right-1 top-1/2 -translate-y-1/2 z-10 p-2.5 rounded-full bg-cinema-elevated/95 border border-cinema-border text-white motion-safe:transition-[opacity,background-color,border-color] motion-safe:duration-fast hover:bg-cinema-violet/30 hover:border-cinema-violet/50 hidden md:flex items-center justify-center opacity-0 group-hover/swiper:opacity-100 focus-visible:opacity-100 active:scale-95"
+        className="absolute -right-1 top-1/2 -translate-y-1/2 z-10 p-2.5 rounded-full bg-cinema-elevated/95 border border-cinema-border text-cinema-chalk motion-safe:transition-[opacity,background-color,border-color] motion-safe:duration-fast hover:bg-cinema-accent/30 hover:border-cinema-accent/50 hidden md:flex items-center justify-center opacity-0 group-hover/swiper:opacity-100 focus-visible:opacity-100 active:scale-95"
         aria-label="Siguiente"
       >
         <ChevronRight className="w-5 h-5" />

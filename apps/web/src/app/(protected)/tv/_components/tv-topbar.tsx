@@ -15,7 +15,7 @@ export function TVTopbar({ channelName, channelLogo, onBurgerClick, channelCount
     <header className="absolute inset-x-0 top-0 z-40 flex items-center gap-3 px-4 md:px-6 py-3 bg-gradient-to-b from-black/85 via-black/50 to-transparent">
       <Link
         href="/"
-        className="shrink-0 inline-flex items-center gap-1.5 text-cinema-silver hover:text-white text-xs uppercase tracking-wider font-medium transition-colors"
+        className="shrink-0 inline-flex items-center gap-1.5 text-cinema-silver hover:text-cinema-chalk text-xs uppercase tracking-wider font-medium transition-colors"
         aria-label="Volver al inicio"
       >
         <ChevronLeft className="w-4 h-4" />
@@ -36,7 +36,7 @@ export function TVTopbar({ channelName, channelLogo, onBurgerClick, channelCount
             <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
             En vivo
           </p>
-          <h1 className="font-display text-base md:text-lg text-white tracking-wide uppercase truncate">
+          <h1 className="font-display text-base md:text-lg text-cinema-chalk tracking-wide uppercase truncate">
             {channelName || 'TV en vivo'}
           </h1>
         </div>
@@ -51,7 +51,7 @@ export function TVTopbar({ channelName, channelLogo, onBurgerClick, channelCount
       <button
         type="button"
         onClick={onBurgerClick}
-        className="shrink-0 inline-flex items-center gap-2 px-3 h-10 rounded-[10px] bg-cinema-elevated/90 hover:bg-cinema-violet/30 border border-cinema-border hover:border-cinema-violet/40 transition-colors text-sm text-white"
+        className="shrink-0 inline-flex items-center gap-2 px-3 h-10 rounded-[10px] bg-cinema-elevated/90 hover:bg-cinema-accent/30 border border-cinema-border hover:border-cinema-accent/40 transition-colors text-sm text-cinema-chalk"
         aria-label="Abrir lista de canales"
       >
         <Menu className="w-5 h-5" />

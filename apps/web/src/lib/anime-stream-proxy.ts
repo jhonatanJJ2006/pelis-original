@@ -181,10 +181,12 @@ export async function fetchAnimeUpstream(
 ): Promise<Response> {
   const headers: Record<string, string> = { ...extraHeaders };
   if (opts?.range) headers.Range = opts.range;
-  return fetch(url, {
+  const { fetch: undiciFetch } = await import('undici');
+  const { getUpstreamDispatcher } = await import('./upstream-dispatcher');
+  return (await undiciFetch(url, {
     headers,
     redirect: 'follow',
-    cache: 'no-store',
     signal: AbortSignal.timeout(25000),
-  });
+    dispatcher: getUpstreamDispatcher(),
+  })) as unknown as Response;
 }

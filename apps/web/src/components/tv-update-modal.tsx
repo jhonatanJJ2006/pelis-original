@@ -41,7 +41,7 @@ export function TvUpdateModalView({
   const dialog = (
     <div
       className={cn(
-        'relative w-full max-w-lg rounded-2xl border border-cinema-border bg-cinema-elevated',
+        'relative w-full max-w-lg rounded-lg border border-cinema-border bg-cinema-elevated',
         'shadow-[0_24px_64px_rgba(11,11,13,0.65)] overflow-hidden'
       )}
     >
@@ -50,7 +50,7 @@ export function TvUpdateModalView({
           Actualización
         </p>
         <div className="flex items-start gap-4 mb-5">
-          <div className="w-14 h-14 rounded-xl bg-cinema-accent/15 border border-cinema-accent/30 flex items-center justify-center shrink-0">
+          <div className="w-14 h-14 rounded-lg bg-cinema-accent/15 border border-cinema-accent/30 flex items-center justify-center shrink-0">
             <RefreshCw
               className={cn('w-7 h-7 text-cinema-accent', updating && 'motion-safe:animate-spin')}
               aria-hidden

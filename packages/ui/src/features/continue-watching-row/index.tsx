@@ -43,7 +43,7 @@ export function ContinueWatchingRow({ items, className }: ContinueWatchingRowPro
         <div className="no-scrollbar flex gap-4 overflow-x-auto px-1 py-1">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="w-[280px] sm:w-[320px] md:w-[360px] shrink-0">
-              <div className="aspect-video rounded-2xl bg-cinema-elevated animate-pulse" />
+              <div className="aspect-video rounded-lg bg-cinema-elevated animate-pulse" />
             </div>
           ))}
         </div>
@@ -58,7 +58,7 @@ export function ContinueWatchingRow({ items, className }: ContinueWatchingRowPro
         <button
           type="button"
           onClick={() => scrollBy(-1)}
-          className="absolute -left-1 top-1/2 -translate-y-1/2 z-10 p-2.5 rounded-full bg-cinema-elevated/95 border border-cinema-border text-white hidden md:flex items-center justify-center opacity-0 group-hover/row:opacity-100 focus-visible:opacity-100"
+          className="absolute -left-1 top-1/2 -translate-y-1/2 z-10 p-2.5 rounded-full bg-cinema-elevated/95 border border-cinema-border text-cinema-chalk hidden md:flex items-center justify-center opacity-0 group-hover/row:opacity-100 focus-visible:opacity-100"
           aria-label="Anterior"
         >
           <ChevronLeft className="w-5 h-5" />
@@ -66,7 +66,7 @@ export function ContinueWatchingRow({ items, className }: ContinueWatchingRowPro
         <button
           type="button"
           onClick={() => scrollBy(1)}
-          className="absolute -right-1 top-1/2 -translate-y-1/2 z-10 p-2.5 rounded-full bg-cinema-elevated/95 border border-cinema-border text-white hidden md:flex items-center justify-center opacity-0 group-hover/row:opacity-100 focus-visible:opacity-100"
+          className="absolute -right-1 top-1/2 -translate-y-1/2 z-10 p-2.5 rounded-full bg-cinema-elevated/95 border border-cinema-border text-cinema-chalk hidden md:flex items-center justify-center opacity-0 group-hover/row:opacity-100 focus-visible:opacity-100"
           aria-label="Siguiente"
         >
           <ChevronRight className="w-5 h-5" />

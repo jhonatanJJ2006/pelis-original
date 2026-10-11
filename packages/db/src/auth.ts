@@ -1,7 +1,9 @@
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
+import { emailOTP } from 'better-auth/plugins';
 import type { BetterAuthOptions } from 'better-auth';
 import { prisma } from './client';
+import { LOGIN_CODE_EXPIRES_MIN, sendLoginCodeEmail } from './lib/loginCodeEmail';
 
 const siteUrl =
   process.env.SITE_URL?.trim() ||
@@ -54,13 +56,9 @@ export function createAuth() {
     },
     socialProviders: (() => {
       const clientId =
-        process.env.AUTH_GOOGLE_ID?.trim() ||
-        process.env.GOOGLE_CLIENT_ID?.trim() ||
-        '';
+        process.env.AUTH_GOOGLE_ID?.trim() || process.env.GOOGLE_CLIENT_ID?.trim() || '';
       const clientSecret =
-        process.env.AUTH_GOOGLE_SECRET?.trim() ||
-        process.env.GOOGLE_CLIENT_SECRET?.trim() ||
-        '';
+        process.env.AUTH_GOOGLE_SECRET?.trim() || process.env.GOOGLE_CLIENT_SECRET?.trim() || '';
       if (!clientId || !clientSecret) return undefined;
       return {
         google: {
@@ -69,6 +67,21 @@ export function createAuth() {
         },
       };
     })(),
+    plugins: [
+      // Inicio de sesión sin contraseña: código de 6 dígitos por correo.
+      // Solo cuentas existentes (disableSignUp); 3 intentos; vence en 10 min.
+      // La verificación de correo sigue usando las rutas propias de /api/auth/email-otp.
+      emailOTP({
+        otpLength: 6,
+        expiresIn: LOGIN_CODE_EXPIRES_MIN * 60,
+        allowedAttempts: 3,
+        disableSignUp: true,
+        sendVerificationOTP: async ({ email, otp, type }) => {
+          if (type !== 'sign-in') return;
+          await sendLoginCodeEmail(email, otp);
+        },
+      }),
+    ],
     user: {
       additionalFields: {
         role: { type: 'string', defaultValue: 'USER', input: false },
@@ -82,9 +95,14 @@ export function createAuth() {
       user: {
         create: {
           after: async (user) => {
-            const u = user as unknown as { id: string; email: string; name: string; emailVerified: boolean };
+            const u = user as unknown as {
+              id: string;
+              email: string;
+              name: string;
+              emailVerified: boolean;
+            };
             await syncUser(u).catch((err) =>
-              console.error('[auth] syncUser after create failed', err),
+              console.error('[auth] syncUser after create failed', err)
             );
           },
         },
@@ -92,9 +110,14 @@ export function createAuth() {
           after: async (user) => {
             const list = Array.isArray(user) ? user : [user];
             for (const doc of list) {
-              const u = doc as unknown as { id: string; email: string; name: string; emailVerified: boolean };
+              const u = doc as unknown as {
+                id: string;
+                email: string;
+                name: string;
+                emailVerified: boolean;
+              };
               await syncUser(u).catch((err) =>
-                console.error('[auth] syncUser after update failed', err),
+                console.error('[auth] syncUser after update failed', err)
               );
             }
           },
@@ -118,11 +141,11 @@ export function createAuth() {
                     ? new Date(s.expiresAt)
                     : new Date();
             await recordLogin(s.userId, expiresAt).catch((err) =>
-              console.error('[auth] recordLogin failed', err),
+              console.error('[auth] recordLogin failed', err)
             );
             if (s.id) {
               await enforceConcurrentSessionLimit(s.id, s.userId).catch((err) =>
-                console.error('[auth] enforceConcurrentSessionLimit failed', err),
+                console.error('[auth] enforceConcurrentSessionLimit failed', err)
               );
             }
           },
@@ -150,7 +173,7 @@ async function syncUser(u: { id: string; email: string; name: string; emailVerif
         email,
         name: u.name ?? email,
         emailVerified: !!u.emailVerified,
-        verifiedAt: u.emailVerified ? existing.verifiedAt ?? now : undefined,
+        verifiedAt: u.emailVerified ? (existing.verifiedAt ?? now) : undefined,
         role: existing.role === 'ADMIN' || role === 'ADMIN' ? 'ADMIN' : existing.role,
       },
     });
@@ -174,7 +197,6 @@ async function recordLogin(userId: string, expiresAt: Date) {
     data: { lastLoginAt: new Date(), lastSessionExpiresAt: expiresAt },
   });
 }
-
 
 /**
  * MVP concurrent session/device limit by plan.maxDevices.

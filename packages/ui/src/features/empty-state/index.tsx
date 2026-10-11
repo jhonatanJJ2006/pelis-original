@@ -28,7 +28,7 @@ export function EmptyState({
     <div className="text-center py-16 md:py-24 px-4" role={role}>
       <div
         className={cn(
-          'inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-cinema-surface mb-6',
+          'inline-flex items-center justify-center w-20 h-20 rounded-lg bg-cinema-surface mb-6',
           tone === 'danger'
             ? 'border border-cinema-danger/35 shadow-[0_4px_24px_rgba(139,30,45,0.12)]'
             : 'border border-cinema-accent/25 shadow-[0_4px_24px_rgba(196,163,90,0.08)]'
@@ -37,7 +37,7 @@ export function EmptyState({
         <Icon
           className={cn(
             'w-9 h-9',
-            tone === 'danger' ? 'text-cinema-danger-light' : 'text-cinema-violet-light'
+            tone === 'danger' ? 'text-cinema-danger-light' : 'text-cinema-accent-light'
           )}
           aria-hidden
         />

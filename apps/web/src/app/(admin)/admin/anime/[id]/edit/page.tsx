@@ -81,7 +81,7 @@ export default function EditAnimePage() {
     return (
       <div className="text-center py-24 text-cinema-muted">
         Anime no encontrado.{' '}
-        <Link href="/admin/anime" className="text-cinema-violet-light hover:underline">
+        <Link href="/admin/anime" className="text-cinema-accent-light hover:underline">
           Volver al listado
         </Link>
       </div>
@@ -92,14 +92,14 @@ export default function EditAnimePage() {
     <div>
       <Link
         href="/admin/anime"
-        className="inline-flex items-center gap-2 text-sm text-cinema-muted hover:text-white transition-colors mb-6"
+        className="inline-flex items-center gap-2 text-sm text-cinema-muted hover:text-cinema-chalk transition-colors mb-6"
       >
         <ArrowLeft className="w-4 h-4" />
         Volver al listado
       </Link>
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-        <h1 className="font-display text-2xl sm:text-3xl tracking-wide text-white uppercase">
+        <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-cinema-chalk">
           Editar anime
         </h1>
         <Button

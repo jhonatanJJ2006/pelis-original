@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { Film } from 'lucide-react';
 
 import { cn } from '@pelis/ui/utils';
 
@@ -25,10 +24,9 @@ export function Footer({ className }: { className?: string }) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
           <div>
             <Link href="/" className="flex items-center gap-2.5 mb-4 group">
-              <div className="w-9 h-9 rounded bg-cinema-elevated border border-cinema-border flex items-center justify-center">
-                <Film className="w-5 h-5 text-cinema-gold" aria-hidden />
-              </div>
-              <span className="font-display text-2xl tracking-tight text-cinema-chalk">Pelis</span>
+              <span className="font-display text-2xl font-semibold tracking-[0.12em] text-cinema-accent">
+                PELIS
+              </span>
             </Link>
             <p className="text-cinema-silver text-sm leading-relaxed max-w-xs">
               Tu sala de cine en casa. Películas, series y estrenos con una experiencia pensada para
@@ -45,7 +43,7 @@ export function Footer({ className }: { className?: string }) {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-cinema-silver hover:text-cinema-gold text-sm transition-colors"
+                    className="text-cinema-silver hover:text-cinema-accent text-sm transition-colors"
                   >
                     {link.label}
                   </Link>
@@ -86,7 +84,7 @@ export function Footer({ className }: { className?: string }) {
               <li>
                 <Link
                   href="/subscribe"
-                  className="text-cinema-silver hover:text-cinema-gold text-sm transition-colors"
+                  className="text-cinema-silver hover:text-cinema-accent text-sm transition-colors"
                 >
                   Suscripción
                 </Link>
@@ -102,13 +100,13 @@ export function Footer({ className }: { className?: string }) {
           <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
             <Link
               href="/terminos"
-              className="text-cinema-ash hover:text-cinema-gold transition-colors"
+              className="text-cinema-ash hover:text-cinema-accent transition-colors"
             >
               Términos
             </Link>
             <Link
               href="/privacidad"
-              className="text-cinema-ash hover:text-cinema-gold transition-colors"
+              className="text-cinema-ash hover:text-cinema-accent transition-colors"
             >
               Privacidad
             </Link>

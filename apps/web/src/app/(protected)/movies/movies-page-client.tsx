@@ -129,13 +129,14 @@ export default function MoviesPageClient({ preloaded, initial }: MoviesPageClien
   return (
     <div className="page-shell">
       <div className="mb-10">
-        <p className="text-cinema-accent text-sm font-medium uppercase tracking-widest mb-2">
-          Catálogo
-        </p>
-        <h1 className="font-display text-4xl md:text-5xl tracking-tight text-cinema-chalk mb-2">
+        <p className="text-label uppercase text-cinema-accent mb-2">Catálogo</p>
+        <h1 className="font-display text-4xl md:text-5xl font-medium tracking-tight text-cinema-chalk mb-3">
           Películas
         </h1>
-        <p className="text-cinema-muted mb-8">{movies.length} películas disponibles</p>
+        <p className="inline-flex items-center gap-2 rounded-full border border-cinema-border px-3 py-1 text-meta text-cinema-muted mb-8">
+          <span className="h-1.5 w-1.5 rounded-full bg-cinema-accent" aria-hidden />
+          {movies.length} títulos disponibles
+        </p>
 
         <CatalogFilterBar
           searchId="movies-search"
@@ -153,7 +154,8 @@ export default function MoviesPageClient({ preloaded, initial }: MoviesPageClien
             {
               id: 'genre-filter',
               label: 'Filtrar por género',
-              placeholder: 'Todos los géneros',
+              variant: 'chips',
+              placeholder: 'Todos',
               value: selectedGenre,
               onChange: setSelectedGenre,
               options: genres.map((genre) => ({ value: genre, label: genre })),

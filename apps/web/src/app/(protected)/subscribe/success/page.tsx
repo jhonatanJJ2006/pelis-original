@@ -124,17 +124,17 @@ function SubscribeSuccessContent() {
 
   return (
     <ScrollReveal className="text-center max-w-lg mx-auto">
-      <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-        <div className="w-14 h-14 bg-emerald-500 rounded-full flex items-center justify-center">
+      <div className="w-20 h-20 bg-cinema-success/20 rounded-full flex items-center justify-center mx-auto mb-6">
+        <div className="w-14 h-14 bg-cinema-success rounded-full flex items-center justify-center">
           {activating ? (
-            <Loader2 className="w-8 h-8 text-white animate-spin" />
+            <Loader2 className="w-8 h-8 text-cinema-chalk animate-spin" />
           ) : (
-            <CheckCircle className="w-8 h-8 text-white" />
+            <CheckCircle className="w-8 h-8 text-cinema-chalk" />
           )}
         </div>
       </div>
 
-      <h1 className="font-display text-4xl md:text-5xl tracking-wide text-white uppercase mb-4">
+      <h1 className="font-display text-4xl md:text-5xl font-semibold tracking-tight text-cinema-chalk mb-4">
         {activating
           ? 'Activando suscripción…'
           : active
@@ -158,13 +158,13 @@ function SubscribeSuccessContent() {
         </Link>
         <Link
           href="/movies"
-          className="text-cinema-silver hover:text-white transition-colors text-sm font-medium"
+          className="text-cinema-silver hover:text-cinema-chalk transition-colors text-sm font-medium"
         >
           Explorar películas
         </Link>
         <Link
           href="/profile"
-          className="text-cinema-silver hover:text-white transition-colors text-sm font-medium"
+          className="text-cinema-silver hover:text-cinema-chalk transition-colors text-sm font-medium"
         >
           Ver perfil
         </Link>

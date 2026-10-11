@@ -12,7 +12,8 @@
     "lint": "eslint . --max-warnings 0",
     "start": "pnpm with-env next start",
     "typecheck": "tsc --noEmit",
-    "with-env": "dotenv -e ../../.env --"
+    "with-env": "dotenv -e ../../.env --",
+    "start:cluster": "pnpm with-env node server-cluster.mjs"
   },
   "dependencies": {
     "@pelis/auth": "workspace:*",
@@ -35,6 +36,7 @@
     "sonner": "^1.7.0",
     "swiper": "^14.0.2",
     "tailwindcss": "catalog:",
+    "undici": "^7",
     "zod": "4.0.0"
   },
   "devDependencies": {
@@ -42,8 +44,8 @@
     "@pelis/prettier-config": "workspace:*",
     "@pelis/tailwind-config": "workspace:*",
     "@pelis/tsconfig": "workspace:*",
-    "@types/qrcode": "^1.5.5",
     "@types/node": "^22.19.0",
+    "@types/qrcode": "^1.5.5",
     "@types/react": "catalog:react18",
     "@types/react-dom": "catalog:react18",
     "dotenv-cli": "^7.4.2",

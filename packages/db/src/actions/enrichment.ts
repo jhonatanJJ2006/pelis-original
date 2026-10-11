@@ -33,7 +33,7 @@ export interface TmdbMetadata {
 export async function fetchTmdbMetadata(
   name: string,
   releaseYear: string | null | undefined,
-  tmdbId?: number,
+  tmdbId?: number
 ): Promise<TmdbMetadata | null> {
   if (!TMDB_API_KEY) return null;
   let movie: any = null;
@@ -69,9 +69,7 @@ export async function fetchTmdbMetadata(
 
   let actors = '';
   try {
-    const credits = await fetch(
-      `${TMDB_BASE}/movie/${movie.id}/credits?api_key=${TMDB_API_KEY}`,
-    );
+    const credits = await fetch(`${TMDB_BASE}/movie/${movie.id}/credits?api_key=${TMDB_API_KEY}`);
     if (credits.ok) {
       const data = (await credits.json()) as { cast?: Array<{ name: string }> };
       actors = (data.cast ?? [])
@@ -101,7 +99,7 @@ export async function fetchTmdbMetadata(
 
 export async function searchMovie(
   name: string,
-  releaseYear?: string | null,
+  releaseYear?: string | null
 ): Promise<{ id: number; title: string; releaseYear: string } | null> {
   if (!TMDB_API_KEY) return null;
   const params = new URLSearchParams({
@@ -168,7 +166,7 @@ function gapFillPreview(movie: {
 function buildGapFillPatch(
   movie: { synopsis: string; actors: string; classification: string; genre: string; image: string },
   metadata: TmdbMetadata,
-  options?: { imageId?: string; replaceImage?: boolean },
+  options?: { imageId?: string; replaceImage?: boolean }
 ): Record<string, unknown> {
   const patch: Record<string, unknown> = {};
   const gap = gapFillPreview({
@@ -225,11 +223,7 @@ export const previewMetadata = register({
     const hasExistingImage = !isMissingImage(movie.image);
     const canReplaceBackdrop = !!metadata.backdropPath;
     const hasExistingBackdrop = !isMissingBackdrop(movie.backdropImage);
-    if (
-      !Object.values(gapPreview).some(Boolean) &&
-      !canReplaceImage &&
-      !canReplaceBackdrop
-    ) {
+    if (!Object.values(gapPreview).some(Boolean) && !canReplaceImage && !canReplaceBackdrop) {
       return {
         status: 'nothing_to_fill',
         movie: { id: movie.id, name: movie.name },
@@ -273,7 +267,7 @@ async function performEnrichment(
   movieId: string,
   tmdbId: number,
   replaceImage: boolean,
-  replaceBackdrop: boolean,
+  replaceBackdrop: boolean
 ) {
   const movie = await prisma.movie.findUnique({ where: { id: movieId } });
   if (!movie) throw new Error('Película no encontrada');
@@ -356,12 +350,7 @@ export const enrichMovie = register({
     if (!hasValidMovieTitle(movie.name, movie.token)) {
       throw new Error('La película no tiene un título válido para buscar en TMDB');
     }
-    return performEnrichment(
-      movieId,
-      tmdbId,
-      replaceImage ?? false,
-      replaceBackdrop ?? false,
-    );
+    return performEnrichment(movieId, tmdbId, replaceImage ?? false, replaceBackdrop ?? false);
   },
 });
 
@@ -372,15 +361,31 @@ export const enrichMoviesBulk = register({
   args: z.object({ movieIds: z.array(z.string()) }),
   handler: async (ctx, { movieIds }) => {
     await requireAdmin(ctx);
-    const results: Array<{ movieId: string; name: string; status: 'ok' | 'failed' | 'skipped'; message?: string; fields?: string[] }> = [];
+    const results: Array<{
+      movieId: string;
+      name: string;
+      status: 'ok' | 'failed' | 'skipped';
+      message?: string;
+      fields?: string[];
+    }> = [];
     for (const movieId of movieIds) {
       const movie = await prisma.movie.findUnique({ where: { id: movieId } });
       if (!movie) {
-        results.push({ movieId, name: movieId, status: 'failed', message: 'Película no encontrada' });
+        results.push({
+          movieId,
+          name: movieId,
+          status: 'failed',
+          message: 'Película no encontrada',
+        });
         continue;
       }
       if (!hasValidMovieTitle(movie.name, movie.token)) {
-        results.push({ movieId, name: movie.name, status: 'skipped', message: 'Sin título válido' });
+        results.push({
+          movieId,
+          name: movie.name,
+          status: 'skipped',
+          message: 'Sin título válido',
+        });
         continue;
       }
       const gapPreview = gapFillPreview({
@@ -391,13 +396,23 @@ export const enrichMoviesBulk = register({
         image: movie.image,
       });
       if (!Object.values(gapPreview).some(Boolean)) {
-        results.push({ movieId, name: movie.name, status: 'skipped', message: 'Sin campos por rellenar' });
+        results.push({
+          movieId,
+          name: movie.name,
+          status: 'skipped',
+          message: 'Sin campos por rellenar',
+        });
         continue;
       }
       try {
         const search = await searchMovie(movie.name, movie.releaseYear);
         if (!search) {
-          results.push({ movieId, name: movie.name, status: 'failed', message: 'TMDB sin resultados' });
+          results.push({
+            movieId,
+            name: movie.name,
+            status: 'failed',
+            message: 'TMDB sin resultados',
+          });
           await new Promise((r) => setTimeout(r, 300));
           continue;
         }
@@ -525,25 +540,50 @@ export const applyBackdropsBulk = register({
   args: z.object({ movieIds: z.array(z.string()) }),
   handler: async (ctx, { movieIds }) => {
     await requireAdmin(ctx);
-    const results: Array<{ movieId: string; name: string; status: 'ok' | 'failed' | 'skipped'; message?: string }> = [];
+    const results: Array<{
+      movieId: string;
+      name: string;
+      status: 'ok' | 'failed' | 'skipped';
+      message?: string;
+    }> = [];
     for (const movieId of movieIds) {
       const movie = await prisma.movie.findUnique({ where: { id: movieId } });
       if (!movie) {
-        results.push({ movieId, name: movieId, status: 'failed', message: 'Película no encontrada' });
+        results.push({
+          movieId,
+          name: movieId,
+          status: 'failed',
+          message: 'Película no encontrada',
+        });
         continue;
       }
       if (!hasValidMovieTitle(movie.name, movie.token)) {
-        results.push({ movieId, name: movie.name, status: 'skipped', message: 'Sin título válido' });
+        results.push({
+          movieId,
+          name: movie.name,
+          status: 'skipped',
+          message: 'Sin título válido',
+        });
         continue;
       }
       if (!isMissingBackdrop(movie.backdropImage)) {
-        results.push({ movieId, name: movie.name, status: 'skipped', message: 'Ya tiene backdrop' });
+        results.push({
+          movieId,
+          name: movie.name,
+          status: 'skipped',
+          message: 'Ya tiene backdrop',
+        });
         continue;
       }
       try {
         const search = await searchMovie(movie.name, movie.releaseYear);
         if (!search) {
-          results.push({ movieId, name: movie.name, status: 'failed', message: 'TMDB sin resultados' });
+          results.push({
+            movieId,
+            name: movie.name,
+            status: 'failed',
+            message: 'TMDB sin resultados',
+          });
           await new Promise((r) => setTimeout(r, 300));
           continue;
         }
@@ -611,7 +651,10 @@ export const applyMetadataPatch = register({
     await requireAdmin(ctx);
     const movie = await prisma.movie.findUnique({ where: { id: movieId } });
     if (!movie) throw new Error('Película no encontrada');
-    const patch = buildGapFillPatch(movie, metadata as unknown as TmdbMetadata, { imageId, replaceImage });
+    const patch = buildGapFillPatch(movie, metadata as unknown as TmdbMetadata, {
+      imageId,
+      replaceImage,
+    });
     if (Object.keys(patch).length === 0) return { updated: false, fields: [] };
     if (imageId && replaceImage && movie.imageId && movie.imageId !== imageId) {
       await deleteFile(movie.imageId).catch(() => undefined);

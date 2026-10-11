@@ -103,7 +103,7 @@ export async function fetchAnizipEpisodes(anilistId: number): Promise<AnimeEpiso
  */
 export async function fetchEpisodeList(
   anilistId: number | null,
-  knownEpisodeCount: number,
+  knownEpisodeCount: number
 ): Promise<{ episodes: AnimeEpisodeMeta[]; source: 'anizip' | 'placeholder' }> {
   if (anilistId) {
     const episodes = await fetchAnizipEpisodes(anilistId);

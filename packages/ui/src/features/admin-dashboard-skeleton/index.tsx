@@ -14,7 +14,7 @@ export function AdminDashboardSkeleton({ className }: AdminDashboardSkeletonProp
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
         {Array.from({ length: 5 }).map((_, i) => (
-          <Skeleton key={i} className="h-28 w-full rounded-2xl" />
+          <Skeleton key={i} className="h-28 w-full rounded-lg" />
         ))}
       </div>
     </div>

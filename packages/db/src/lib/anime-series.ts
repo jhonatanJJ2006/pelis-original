@@ -106,7 +106,7 @@ export function parseSeasonNumberFromTitle(title: string): number | null {
   if (numeric?.[1]) return Number(numeric[1]);
 
   const worded = t.match(
-    /\b(first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth)\s+season\b/,
+    /\b(first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth)\s+season\b/
   );
   if (worded?.[1]) return ORDINAL_WORDS[worded[1]] ?? null;
 
@@ -117,7 +117,8 @@ export function parseSeasonNumberFromTitle(title: string): number | null {
 }
 
 export function parsePartNumberFromTitle(title: string): number | null {
-  const part = title.toLowerCase().match(/\bpart\s+(\d+)\b/) ?? title.toLowerCase().match(/\bcour\s+(\d+)\b/);
+  const part =
+    title.toLowerCase().match(/\bpart\s+(\d+)\b/) ?? title.toLowerCase().match(/\bcour\s+(\d+)\b/);
   return part?.[1] ? Number(part[1]) : null;
 }
 
@@ -169,7 +170,8 @@ export function deriveSeasonLabel({
     .replace(/^[\s:·\-–—]+/, '')
     .trim();
   // A bare year or format tag is noise, not a season name.
-  const isNoise = /^\(?(?:19|20)\d{2}\)?$/.test(remainder) || /^\((?:tv|movie|ova|ona)\)$/i.test(remainder);
+  const isNoise =
+    /^\(?(?:19|20)\d{2}\)?$/.test(remainder) || /^\((?:tv|movie|ova|ona)\)$/i.test(remainder);
   if (remainder.length > 0 && remainder.length <= 40 && !isNoise) return remainder;
 
   return seasonNumber ? `Temporada ${seasonNumber}` : 'Temporada 1';

@@ -15,24 +15,105 @@ export interface SpanishChannelInput {
 const SPANISH_LANG = new Set(['es', 'spa', 'spanish', 'español', 'espanol']);
 
 const NON_SPANISH_LANG = new Set([
-  'en', 'eng', 'english', 'pt', 'por', 'portuguese', 'fr', 'fra', 'french',
-  'de', 'ger', 'german', 'it', 'hi', 'ar', 'ru', 'zh', 'ja', 'ko', 'tr', 'nl',
-  'pl', 'sv', 'no', 'da', 'fi', 'el', 'he', 'th', 'vi', 'id', 'ms', 'uk', 'cs',
-  'ro', 'hu', 'bg', 'hr', 'sr', 'sk', 'sl',
+  'en',
+  'eng',
+  'english',
+  'pt',
+  'por',
+  'portuguese',
+  'fr',
+  'fra',
+  'french',
+  'de',
+  'ger',
+  'german',
+  'it',
+  'hi',
+  'ar',
+  'ru',
+  'zh',
+  'ja',
+  'ko',
+  'tr',
+  'nl',
+  'pl',
+  'sv',
+  'no',
+  'da',
+  'fi',
+  'el',
+  'he',
+  'th',
+  'vi',
+  'id',
+  'ms',
+  'uk',
+  'cs',
+  'ro',
+  'hu',
+  'bg',
+  'hr',
+  'sr',
+  'sk',
+  'sl',
 ]);
 
 const SPANISH_COUNTRY_NAMES = new Set([
-  'argentina', 'bolivia', 'chile', 'colombia', 'costa rica', 'cuba', 'ecuador',
-  'el salvador', 'españa', 'spain', 'méxico', 'mexico', 'nicaragua', 'panamá',
-  'panama', 'paraguay', 'perú', 'peru', 'puerto rico', 'república dominicana',
-  'republica dominicana', 'uruguay', 'venezuela', 'latinoamérica', 'latinoamerica',
-  'latin america', 'latam', 'guatemala', 'honduras', 'equatorial guinea',
+  'argentina',
+  'bolivia',
+  'chile',
+  'colombia',
+  'costa rica',
+  'cuba',
+  'ecuador',
+  'el salvador',
+  'españa',
+  'spain',
+  'méxico',
+  'mexico',
+  'nicaragua',
+  'panamá',
+  'panama',
+  'paraguay',
+  'perú',
+  'peru',
+  'puerto rico',
+  'república dominicana',
+  'republica dominicana',
+  'uruguay',
+  'venezuela',
+  'latinoamérica',
+  'latinoamerica',
+  'latin america',
+  'latam',
+  'guatemala',
+  'honduras',
+  'equatorial guinea',
   'guinea ecuatorial',
 ]);
 
 const SPANISH_COUNTRY_CODES = new Set([
-  'es', 'mx', 'ar', 'cl', 'co', 'pe', 've', 'bo', 'py', 'uy', 'ec', 'cr', 'pa',
-  'gt', 'hn', 'sv', 'ni', 'do', 'pr', 'cu', 'gq',
+  'es',
+  'mx',
+  'ar',
+  'cl',
+  'co',
+  'pe',
+  've',
+  'bo',
+  'py',
+  'uy',
+  'ec',
+  'cr',
+  'pa',
+  'gt',
+  'hn',
+  'sv',
+  'ni',
+  'do',
+  'pr',
+  'cu',
+  'gq',
 ]);
 
 const NON_SPANISH_NAME_RE =
@@ -60,7 +141,6 @@ const NON_SPANISH_PLUTO_IDS = new Set([
   '5e8b580a233dc90007f0cb9d', // iCarly Germany
 ]);
 
-
 function tvgCountryCode(tvgId: string): string | null {
   const m = tvgId.match(/\.([a-z]{2})(?:@|$)/i);
   return m?.[1]?.toLowerCase() ?? null;
@@ -80,7 +160,7 @@ function countryLooksSpanish(country: string): boolean {
  */
 export function isSpanishChannel(
   ch: SpanishChannelInput,
-  fallbackCountry = '',
+  fallbackCountry = ''
 ): { accept: boolean; reason?: string; language: string; country: string } {
   const name = ch.name ?? '';
   const lang = (ch.language ?? '').toLowerCase().trim();
@@ -121,7 +201,11 @@ export function isSpanishChannel(
     if (/@east|@brazil|@br\b|@fr\b|@germany|@english/i.test(tvgId)) {
       return { accept: false, reason: 'feed US/BR/FR no español', language: lang || 'en', country };
     }
-    if (/@us\b/.test(tvgId) && !SPANISH_REGION_HINT_RE.test(tvgId) && !/espa[nñ]ol|spanish/i.test(blob)) {
+    if (
+      /@us\b/.test(tvgId) &&
+      !SPANISH_REGION_HINT_RE.test(tvgId) &&
+      !/espa[nñ]ol|spanish/i.test(blob)
+    ) {
       return { accept: false, reason: 'feed US inglés', language: lang || 'en', country };
     }
   } else if (code && !SPANISH_COUNTRY_CODES.has(code)) {
@@ -132,7 +216,12 @@ export function isSpanishChannel(
       (code === 'uk' && /latinam/.test(tvgId)) ||
       (code === 'at' && /@es/.test(tvgId));
     if (!spanishException) {
-      return { accept: false, reason: `tvg-country=${code} no hispanohablante`, language: lang, country };
+      return {
+        accept: false,
+        reason: `tvg-country=${code} no hispanohablante`,
+        language: lang,
+        country,
+      };
     }
   }
 
@@ -164,9 +253,4 @@ export function isSpanishChannel(
   return { accept: false, reason: 'no se pudo confirmar español', language: lang, country };
 }
 
-export {
-  NON_SPANISH_NAME_RE,
-  BRAZILIAN_NAME_RE,
-  KNOWN_FOREIGN_NAME_RE,
-  BR_HINT_RE,
-};
+export { NON_SPANISH_NAME_RE, BRAZILIAN_NAME_RE, KNOWN_FOREIGN_NAME_RE, BR_HINT_RE };
