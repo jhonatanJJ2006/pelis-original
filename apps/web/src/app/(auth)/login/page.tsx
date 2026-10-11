@@ -237,6 +237,13 @@ function LoginForm() {
           </Button>
         </form>
 
+        <Link
+          href={nextPath ? `/login/codigo?next=${encodeURIComponent(nextPath)}` : '/login/codigo'}
+          className="btn-base mt-3 flex h-11 w-full items-center justify-center rounded-[6px] border border-cinema-border text-sm font-medium text-cinema-chalk hover:border-cinema-accent hover:text-cinema-accent"
+        >
+          Entrar con un código por correo
+        </Link>
+
         <p className="text-center text-cinema-muted text-sm mt-6">
           ¿No tienes cuenta?{' '}
           <Link

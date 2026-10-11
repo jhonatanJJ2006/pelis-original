@@ -1,7 +1,9 @@
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
+import { emailOTP } from 'better-auth/plugins';
 import type { BetterAuthOptions } from 'better-auth';
 import { prisma } from './client';
+import { LOGIN_CODE_EXPIRES_MIN, sendLoginCodeEmail } from './lib/loginCodeEmail';
 
 const siteUrl =
   process.env.SITE_URL?.trim() ||
@@ -65,6 +67,21 @@ export function createAuth() {
         },
       };
     })(),
+    plugins: [
+      // Inicio de sesión sin contraseña: código de 6 dígitos por correo.
+      // Solo cuentas existentes (disableSignUp); 3 intentos; vence en 10 min.
+      // La verificación de correo sigue usando las rutas propias de /api/auth/email-otp.
+      emailOTP({
+        otpLength: 6,
+        expiresIn: LOGIN_CODE_EXPIRES_MIN * 60,
+        allowedAttempts: 3,
+        disableSignUp: true,
+        sendVerificationOTP: async ({ email, otp, type }) => {
+          if (type !== 'sign-in') return;
+          await sendLoginCodeEmail(email, otp);
+        },
+      }),
+    ],
     user: {
       additionalFields: {
         role: { type: 'string', defaultValue: 'USER', input: false },
