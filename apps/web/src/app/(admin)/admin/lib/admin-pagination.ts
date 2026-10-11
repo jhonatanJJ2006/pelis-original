@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export const ADMIN_PAGE_SIZE = 40;
 
@@ -23,17 +23,22 @@ export function getPageWindow(page: number, pageCount: number): (number | 'gap')
   return out;
 }
 
-/** Paginación en cliente sobre una lista ya cargada; vuelve a la página 1 si cambia el total. */
-export function useAdminPage<T>(items: T[] | undefined, pageSize = ADMIN_PAGE_SIZE) {
+export interface AdminPageResult<T> {
+  items: T[];
+  total: number;
+  offset: number;
+  limit: number;
+  hasMore: boolean;
+}
+
+/**
+ * Paginación en servidor: devuelve offset/limit para la consulta y vuelve a la
+ * página 1 cuando cambian los filtros (filterKey).
+ */
+export function useAdminServerPage(filterKey: string, pageSize = ADMIN_PAGE_SIZE) {
   const [page, setPage] = useState(1);
-  const total = items?.length ?? 0;
   useEffect(() => {
     setPage(1);
-  }, [total]);
-  const current = clampPage(page, total, pageSize);
-  const pageItems = useMemo(
-    () => (items ? items.slice((current - 1) * pageSize, current * pageSize) : items),
-    [items, current, pageSize]
-  );
-  return { page: current, setPage, pageItems, total, pageSize };
+  }, [filterKey]);
+  return { page, setPage, offset: (page - 1) * pageSize, limit: pageSize, pageSize };
 }

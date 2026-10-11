@@ -9,7 +9,7 @@ import { Button, Input } from '@pelis/ui/components';
 import { AdminTableSkeleton } from '@pelis/ui/features/admin-table-skeleton';
 import { cn } from '@pelis/ui/utils';
 import { AdminPaginator } from '../components/admin-paginator';
-import { useAdminPage } from '../lib/admin-pagination';
+import { useAdminServerPage, type AdminPageResult } from '../lib/admin-pagination';
 
 interface UserRow {
   _id: string;
@@ -43,18 +43,20 @@ export default function AdminUsersPage() {
   const [roleFilter, setRoleFilter] = useState<'' | 'user' | 'admin'>('');
   const [busyId, setBusyId] = useState<string | null>(null);
 
-  const users = useQuery(api.adminUsers.adminList, {
-    search: search || undefined,
-    role: roleFilter || undefined,
-    limit: 500,
-  }) as UserRow[] | undefined;
   const {
     page: adminPage,
     setPage: setAdminPage,
-    pageItems: pageUsers,
-    total: adminTotal,
+    offset: adminOffset,
     pageSize: adminPageSize,
-  } = useAdminPage(users);
+  } = useAdminServerPage([search, roleFilter].join('|'));
+  const usersPage = useQuery(api.adminUsers.adminList, {
+    search: search || undefined,
+    role: roleFilter || undefined,
+    limit: adminPageSize,
+    offset: adminOffset,
+  }) as AdminPageResult<UserRow> | undefined;
+  const users = usersPage?.items;
+  const adminTotal = usersPage?.total ?? 0;
 
   const setRole = useMutation(api.adminUsers.adminSetRole);
 
@@ -93,7 +95,7 @@ export default function AdminUsersPage() {
           Usuarios
         </h1>
         <p className="text-cinema-muted mt-1 sm:mt-2 text-sm sm:text-base">
-          {users ? `${users.length} cuentas` : 'Cargando...'}
+          {users ? `${adminTotal} cuentas` : 'Cargando...'}
         </p>
       </div>
 
@@ -135,7 +137,7 @@ export default function AdminUsersPage() {
       ) : (
         <>
           <div className="md:hidden space-y-3">
-            {(pageUsers ?? []).map((u) => (
+            {(users ?? []).map((u) => (
               <article
                 key={u._id}
                 className="rounded-lg border border-cinema-border bg-cinema-surface p-4"
@@ -210,7 +212,7 @@ export default function AdminUsersPage() {
                 </tr>
               </thead>
               <tbody>
-                {(pageUsers ?? []).map((u) => {
+                {(users ?? []).map((u) => {
                   const activePlan =
                     u.subscription &&
                     u.subscription.status === 'active' &&

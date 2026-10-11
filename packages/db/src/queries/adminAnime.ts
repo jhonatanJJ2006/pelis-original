@@ -3,6 +3,7 @@ import { prisma } from '../client';
 import { notifyChange } from '../realtime';
 import { register } from '../registry';
 import { requireAdmin } from '../lib/requireAdmin';
+import { normalizePageArgs, sliceAdminPage, toAdminPage } from '../lib/adminPage';
 import { toAnimeShape } from '../lib/shapes';
 
 const StatusEnum = z.enum(['ongoing', 'completed']);
@@ -16,6 +17,7 @@ export const adminList = register({
       search: z.string().optional(),
       status: StatusEnum.optional(),
       limit: z.number().optional(),
+      offset: z.number().optional(),
     })
     .optional(),
   handler: async (ctx, args) => {
@@ -29,6 +31,19 @@ export const adminList = register({
         { title: { contains: search, mode: 'insensitive' } },
         { alternativeTitle: { contains: search, mode: 'insensitive' } },
       ];
+    }
+    if (a.offset !== undefined) {
+      const page = normalizePageArgs(a.offset, a.limit);
+      const [rows, total] = await Promise.all([
+        prisma.anime.findMany({
+          where,
+          orderBy: { title: 'asc' },
+          skip: page.offset,
+          take: page.limit,
+        }),
+        prisma.anime.count({ where }),
+      ]);
+      return toAdminPage(rows.map(toAnimeShape), total, page.offset, page.limit);
     }
     const items = await prisma.anime.findMany({
       where,
@@ -88,12 +103,16 @@ const AnimeUpdate = z.object({
   malId: z.number().optional(),
   tmdbId: z.number().optional(),
   slug: z.string().optional(),
-  providers: z.array(z.object({
-    name: z.string(),
-    url: z.string(),
-    language: z.string(),
-    isActive: z.boolean().optional(),
-  })).optional(),
+  providers: z
+    .array(
+      z.object({
+        name: z.string(),
+        url: z.string(),
+        language: z.string(),
+        isActive: z.boolean().optional(),
+      })
+    )
+    .optional(),
 });
 
 const AnimeCreate = AnimeUpdate.omit({ id: true }).extend({
@@ -101,12 +120,14 @@ const AnimeCreate = AnimeUpdate.omit({ id: true }).extend({
   image: z.string().min(1),
   status: StatusEnum,
   year: z.number(),
-  providers: z.array(z.object({
-    name: z.string(),
-    url: z.string(),
-    language: z.string(),
-    isActive: z.boolean().optional(),
-  })),
+  providers: z.array(
+    z.object({
+      name: z.string(),
+      url: z.string(),
+      language: z.string(),
+      isActive: z.boolean().optional(),
+    })
+  ),
 });
 
 export const create = register({
@@ -156,7 +177,8 @@ export const update = register({
     if (rest.synopsis !== undefined) data.synopsis = rest.synopsis;
     if (rest.genre !== undefined) data.genre = rest.genre;
     if (rest.episodes !== undefined) data.episodes = rest.episodes;
-    if (rest.status !== undefined) data.status = rest.status === 'ongoing' ? 'ONGOING' : 'COMPLETED';
+    if (rest.status !== undefined)
+      data.status = rest.status === 'ongoing' ? 'ONGOING' : 'COMPLETED';
     if (rest.year !== undefined) data.year = rest.year;
     if (rest.rating !== undefined) data.rating = rest.rating;
     if (rest.anilistId !== undefined) data.anilistId = rest.anilistId;

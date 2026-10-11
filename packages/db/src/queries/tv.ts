@@ -29,9 +29,9 @@ const TVChannelCreate = z.object({
   sortOrder: z.number().optional(),
 });
 
-function applyPublicDisplay<T extends { name: string; category: string; country?: string | null; language?: string | null }>(
-  row: T,
-) {
+function applyPublicDisplay<
+  T extends { name: string; category: string; country?: string | null; language?: string | null },
+>(row: T) {
   const norm = normalizeChannelFields(row);
   return {
     ...row,

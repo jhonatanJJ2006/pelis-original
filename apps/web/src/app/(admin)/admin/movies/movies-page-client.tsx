@@ -24,7 +24,7 @@ import {
 import { getAdminMovieDisplayName, isAdminOrphanDisplayName } from '../lib/movie-display';
 import { cn } from '@pelis/ui/utils';
 import { AdminPaginator } from '../components/admin-paginator';
-import { useAdminPage } from '../lib/admin-pagination';
+import { useAdminServerPage, type AdminPageResult } from '../lib/admin-pagination';
 
 type QualityFilter =
   | 'all'
@@ -91,19 +91,21 @@ export default function AdminMoviesPageClient() {
 
   const genres = (useQuery(api.movies.getGenres) as string[] | undefined) ?? [];
 
-  const movies = useQuery(api.adminMovies.adminList, {
-    search: debouncedSearch || undefined,
-    genre: genre || undefined,
-    qualityFilter,
-    limit: 300,
-  }) as AdminMovie[] | undefined;
   const {
     page: adminPage,
     setPage: setAdminPage,
-    pageItems: pageMovies,
-    total: adminTotal,
+    offset: adminOffset,
     pageSize: adminPageSize,
-  } = useAdminPage(movies);
+  } = useAdminServerPage([debouncedSearch, genre, qualityFilter].join('|'));
+  const moviesPage = useQuery(api.adminMovies.adminList, {
+    search: debouncedSearch || undefined,
+    genre: genre || undefined,
+    qualityFilter,
+    limit: adminPageSize,
+    offset: adminOffset,
+  }) as AdminPageResult<AdminMovie> | undefined;
+  const movies = moviesPage?.items;
+  const adminTotal = moviesPage?.total ?? 0;
 
   const handleDelete = async (id: string, name: string) => {
     if (!confirm(`¿Eliminar "${name}"? Esta acción no se puede deshacer.`)) return;
@@ -233,7 +235,7 @@ export default function AdminMoviesPageClient() {
             Películas
           </h1>
           <p className="text-cinema-muted mt-1 sm:mt-2 text-sm sm:text-base">
-            {movies ? `${movies.length} registros` : 'Cargando...'}
+            {movies ? `${adminTotal} registros` : 'Cargando...'}
           </p>
         </div>
         <Link href="/admin/movies/new" className="w-full sm:w-auto">
@@ -346,7 +348,7 @@ export default function AdminMoviesPageClient() {
       ) : (
         <>
           <div className="md:hidden space-y-3">
-            {(pageMovies ?? []).map((movie) => (
+            {(movies ?? []).map((movie) => (
               <AdminMovieMobileCard
                 key={movie._id}
                 movie={movie}
@@ -377,7 +379,7 @@ export default function AdminMoviesPageClient() {
                 </tr>
               </thead>
               <tbody>
-                {(pageMovies ?? []).map((movie) => (
+                {(movies ?? []).map((movie) => (
                   <tr
                     key={movie._id}
                     role="button"

@@ -113,7 +113,8 @@ export const enrichSeries = register({
     }
     if (!series.synopsis || series.synopsis.trim().length < 10) patch.synopsis = metadata.synopsis;
     if (!series.actors || !series.actors.trim()) patch.actors = metadata.actors;
-    if (!series.classification || !series.classification.trim()) patch.classification = metadata.classification;
+    if (!series.classification || !series.classification.trim())
+      patch.classification = metadata.classification;
     if (!series.genre || !series.genre.trim()) patch.genre = metadata.genre;
     if (Object.keys(patch).length > 0) {
       await prisma.series.update({ where: { id: seriesId }, data: patch });
@@ -152,11 +153,20 @@ export const previewSeriesBackdrop = register({
       return { status: 'not_found', series: { id: series.id, name: series.name } };
     }
     if (!metadata.backdropPath) {
-      return { status: 'no_backdrop', series: { id: series.id, name: series.name }, tmdb: metadata };
+      return {
+        status: 'no_backdrop',
+        series: { id: series.id, name: series.name },
+        tmdb: metadata,
+      };
     }
     return {
       status: 'ok',
-      series: { id: series.id, name: series.name, image: series.image, backdropImage: series.backdropImage },
+      series: {
+        id: series.id,
+        name: series.name,
+        image: series.image,
+        backdropImage: series.backdropImage,
+      },
       tmdb: metadata,
       hasExistingBackdrop: !isMissingBackdrop(series.backdropImage),
     };
@@ -211,7 +221,10 @@ export const applyEnrichment = register({
     backdropImageId: z.string().optional(),
     replaceBackdrop: z.boolean().optional(),
   }),
-  handler: async (ctx, { seriesId, metadata, imageId, replaceImage, backdropImageId, replaceBackdrop }) => {
+  handler: async (
+    ctx,
+    { seriesId, metadata, imageId, replaceImage, backdropImageId, replaceBackdrop }
+  ) => {
     await requireAdmin(ctx);
     const series = await prisma.series.findUnique({ where: { id: seriesId } });
     if (!series) throw new Error('Serie no encontrada');
@@ -219,7 +232,8 @@ export const applyEnrichment = register({
     const patch: Record<string, unknown> = {};
     if (!series.synopsis || series.synopsis.trim().length < 10) patch.synopsis = metadata.synopsis;
     if (!series.actors || !series.actors.trim()) patch.actors = metadata.actors;
-    if (!series.classification || !series.classification.trim()) patch.classification = metadata.classification;
+    if (!series.classification || !series.classification.trim())
+      patch.classification = metadata.classification;
     if (!series.genre || !series.genre.trim()) patch.genre = metadata.genre;
 
     if (imageId && (replaceImage || isMissingImage(series.image))) {

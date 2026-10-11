@@ -41,10 +41,7 @@ export interface ActionDefinition {
   handler: HandlerFn;
 }
 
-export type FunctionDefinition =
-  | QueryDefinition
-  | MutationDefinition
-  | ActionDefinition;
+export type FunctionDefinition = QueryDefinition | MutationDefinition | ActionDefinition;
 
 const registry = new Map<string, FunctionDefinition>();
 
@@ -84,7 +81,7 @@ export function readsTable(name: string, table: string): boolean {
 export function callHandler(
   def: FunctionDefinition,
   ctx: { userId: string | null; isAdmin: boolean },
-  args: unknown,
+  args: unknown
 ): Promise<unknown> {
   return def.handler(ctx, args);
 }

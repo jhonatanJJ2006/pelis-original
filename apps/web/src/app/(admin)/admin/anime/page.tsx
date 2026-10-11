@@ -21,7 +21,7 @@ import { AdminTableSkeleton } from '@pelis/ui/features/admin-table-skeleton';
 import { MoviePoster } from '@pelis/ui/features/movie-poster';
 import { cn } from '@pelis/ui/utils';
 import { AdminPaginator } from '../components/admin-paginator';
-import { useAdminPage } from '../lib/admin-pagination';
+import { useAdminServerPage, type AdminPageResult } from '../lib/admin-pagination';
 import { EnrichAnimeModal } from '../components/enrich-anime-modal';
 import { BackdropAnimeModal } from '../components/backdrop-anime-modal';
 import { ProviderHealthPanel } from '../components/provider-health-panel';
@@ -51,18 +51,20 @@ export default function AdminAnimePage() {
   const [showAnilistSearch, setShowAnilistSearch] = useState(false);
   const [importingCatalog, setImportingCatalog] = useState(false);
 
-  const anime = useQuery(api.adminAnime.adminList, {
-    search: search || undefined,
-    status: statusFilter || undefined,
-    limit: 500,
-  }) as AnimeRow[] | undefined;
   const {
     page: adminPage,
     setPage: setAdminPage,
-    pageItems: pageAnime,
-    total: adminTotal,
+    offset: adminOffset,
     pageSize: adminPageSize,
-  } = useAdminPage(anime);
+  } = useAdminServerPage([search, statusFilter].join('|'));
+  const animePage = useQuery(api.adminAnime.adminList, {
+    search: search || undefined,
+    status: statusFilter || undefined,
+    limit: adminPageSize,
+    offset: adminOffset,
+  }) as AdminPageResult<AnimeRow> | undefined;
+  const anime = animePage?.items;
+  const adminTotal = animePage?.total ?? 0;
 
   const remove = useMutation(api.adminAnime.remove);
   const importCatalog = useAction(api.anime.importCatalogBulk);
@@ -112,7 +114,7 @@ export default function AdminAnimePage() {
             Anime
           </h1>
           <p className="text-cinema-muted mt-1 sm:mt-2 text-sm sm:text-base">
-            {anime ? `${anime.length} títulos` : 'Cargando...'}
+            {anime ? `${adminTotal} títulos` : 'Cargando...'}
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
@@ -173,7 +175,7 @@ export default function AdminAnimePage() {
       ) : (
         <>
           <div className="md:hidden space-y-3">
-            {(pageAnime ?? []).map((a) => (
+            {(anime ?? []).map((a) => (
               <article
                 key={a._id}
                 className="rounded-lg border border-cinema-border bg-cinema-surface p-4"
@@ -263,7 +265,7 @@ export default function AdminAnimePage() {
                 </tr>
               </thead>
               <tbody>
-                {(pageAnime ?? []).map((a) => (
+                {(anime ?? []).map((a) => (
                   <tr
                     key={a._id}
                     className="border-b border-cinema-border/60 hover:bg-cinema-elevated/30 transition-colors"

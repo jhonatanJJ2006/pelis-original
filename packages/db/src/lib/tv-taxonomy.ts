@@ -197,14 +197,14 @@ function categoryFromName(name: string): CanonicalCategory | null {
   }
   if (
     /\b(f[uú]tbol|futbol|football|soccer|fifa|tyc\s*sports|futv|liga\s*mx|liga\s*profesional|premier\s*league|champions|copa\s*am[eé]rica|mundial)\b/i.test(
-      n,
+      n
     )
   ) {
     return 'Fútbol';
   }
   if (
     /\b(disney|nick(?:elodeon)?|nick\s*jr|baby\s*tv|babyfirst|clan|cartoon|discovery\s*kids|canal\s*infantil|peques|funbox|bob\s*esponja|rugrats|hey\s*arnold|icarly|avatar:?\s*la\s*leyenda|tortugas\s*ninja|pluto\s*tv\s*(kids|junior|teen)|xtrema\s*cartoons|13\s*kids)\b/i.test(
-      n,
+      n
     )
   ) {
     return 'Infantil';
@@ -247,7 +247,7 @@ function categoryFromTags(tags: string[]): CanonicalCategory | null {
 
 export function mapTvCategory(
   rawCategory: string | null | undefined,
-  name?: string | null,
+  name?: string | null
 ): CanonicalCategory {
   const cleanedName = cleanTvTitle(name ?? '');
   const fromName = cleanedName ? categoryFromName(cleanedName) : null;
@@ -294,11 +294,10 @@ export function languageLabel(code: string): string {
   return code;
 }
 
-
 /** True when the channel's public/display category equals `wanted` (after mapTvCategory). */
 export function channelMatchesCategory(
   channel: { name?: string | null; category?: string | null },
-  wanted: string,
+  wanted: string
 ): boolean {
   const target = wanted.trim();
   if (!target) return true;

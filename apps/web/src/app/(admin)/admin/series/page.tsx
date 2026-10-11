@@ -20,7 +20,7 @@ import { AdminTableSkeleton } from '@pelis/ui/features/admin-table-skeleton';
 import { MoviePoster } from '@pelis/ui/features/movie-poster';
 import { cn } from '@pelis/ui/utils';
 import { AdminPaginator } from '../components/admin-paginator';
-import { useAdminPage } from '../lib/admin-pagination';
+import { useAdminServerPage, type AdminPageResult } from '../lib/admin-pagination';
 import { EnrichSeriesModal } from '../components/enrich-series-modal';
 import { BackdropSeriesModal } from '../components/backdrop-series-modal';
 
@@ -45,17 +45,19 @@ export default function AdminSeriesPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [enrichTarget, setEnrichTarget] = useState<SeriesRow | null>(null);
   const [backdropTarget, setBackdropTarget] = useState<SeriesRow | null>(null);
-  const series = useQuery(api.adminSeries.adminList, {
-    search: search || undefined,
-    limit: 500,
-  }) as SeriesRow[] | undefined;
   const {
     page: adminPage,
     setPage: setAdminPage,
-    pageItems: pageSeries,
-    total: adminTotal,
+    offset: adminOffset,
     pageSize: adminPageSize,
-  } = useAdminPage(series);
+  } = useAdminServerPage([search].join('|'));
+  const seriesPage = useQuery(api.adminSeries.adminList, {
+    search: search || undefined,
+    limit: adminPageSize,
+    offset: adminOffset,
+  }) as AdminPageResult<SeriesRow> | undefined;
+  const series = seriesPage?.items;
+  const adminTotal = seriesPage?.total ?? 0;
   const remove = useMutation(api.adminSeries.remove);
 
   const handleDelete = async (id: string, name: string) => {
@@ -81,7 +83,7 @@ export default function AdminSeriesPage() {
             Series
           </h1>
           <p className="text-cinema-muted mt-1 sm:mt-2 text-sm sm:text-base">
-            {series ? `${series.length} series` : 'Cargando...'}
+            {series ? `${adminTotal} series` : 'Cargando...'}
           </p>
         </div>
         <Link href="/admin/series/new" className="w-full sm:w-auto">
@@ -110,7 +112,7 @@ export default function AdminSeriesPage() {
       ) : (
         <>
           <div className="md:hidden space-y-3">
-            {(pageSeries ?? []).map((s) => (
+            {(series ?? []).map((s) => (
               <article
                 key={s._id}
                 className="rounded-lg border border-cinema-border bg-cinema-surface p-4"
@@ -204,7 +206,7 @@ export default function AdminSeriesPage() {
                 </tr>
               </thead>
               <tbody>
-                {(pageSeries ?? []).map((s) => (
+                {(series ?? []).map((s) => (
                   <tr
                     key={s._id}
                     className="border-b border-cinema-border/60 hover:bg-cinema-elevated/30 transition-colors"

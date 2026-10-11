@@ -3,6 +3,7 @@ import { prisma } from '../client';
 import { notifyChange } from '../realtime';
 import { register } from '../registry';
 import { requireAdmin } from '../lib/requireAdmin';
+import { normalizePageArgs, sliceAdminPage, toAdminPage } from '../lib/adminPage';
 import { toMovieShape } from '../lib/shapes';
 import {
   getMovieQualityFlags,
@@ -33,6 +34,7 @@ export const adminList = register({
       genre: z.string().optional(),
       qualityFilter: qualityFilterValidator.optional(),
       limit: z.number().optional(),
+      offset: z.number().optional(),
     })
     .optional(),
   handler: async (ctx, args) => {
@@ -41,11 +43,20 @@ export const adminList = register({
     const filter: MovieQualityFilter = a.qualityFilter ?? 'all';
     const genre = a.genre?.trim() ?? '';
     const where = adminMovieListWhere({ search: a.search, genre });
+    const paged = a.offset !== undefined;
+    const page = normalizePageArgs(a.offset, a.limit);
+    // Sin filtros en memoria (género o calidad) se pagina directo en la base de datos.
+    const dbPaged = paged && !genre && filter === 'all';
     let movies = await prisma.movie.findMany({
       where,
       orderBy: { name: 'asc' },
-      take: a.limit ?? 200,
+      ...(dbPaged
+        ? { skip: page.offset, take: page.limit }
+        : paged
+          ? {}
+          : { take: a.limit ?? 200 }),
     });
+    const dbTotal = dbPaged ? await prisma.movie.count({ where }) : 0;
     if (genre) {
       movies = movies.filter((movie) => movieMatchesGenre(movie.genre, genre));
     }
@@ -79,7 +90,7 @@ export const adminList = register({
       );
     }
 
-    return filtered.map(({ movie, hasManifest }) => ({
+    const shape = ({ movie, hasManifest }: (typeof filtered)[number]) => ({
       ...toMovieShape(movie),
       quality: getMovieQualityFlags({
         name: movie.name,
@@ -93,7 +104,13 @@ export const adminList = register({
         backdropImage: movie.backdropImage,
         hasManifest,
       }),
-    }));
+    });
+    if (dbPaged) return toAdminPage(filtered.map(shape), dbTotal, page.offset, page.limit);
+    if (paged) {
+      const slice = sliceAdminPage(filtered, page.offset, page.limit);
+      return { ...slice, items: slice.items.map(shape) };
+    }
+    return filtered.map(shape);
   },
 });
 

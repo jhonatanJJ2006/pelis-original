@@ -54,13 +54,9 @@ export function createAuth() {
     },
     socialProviders: (() => {
       const clientId =
-        process.env.AUTH_GOOGLE_ID?.trim() ||
-        process.env.GOOGLE_CLIENT_ID?.trim() ||
-        '';
+        process.env.AUTH_GOOGLE_ID?.trim() || process.env.GOOGLE_CLIENT_ID?.trim() || '';
       const clientSecret =
-        process.env.AUTH_GOOGLE_SECRET?.trim() ||
-        process.env.GOOGLE_CLIENT_SECRET?.trim() ||
-        '';
+        process.env.AUTH_GOOGLE_SECRET?.trim() || process.env.GOOGLE_CLIENT_SECRET?.trim() || '';
       if (!clientId || !clientSecret) return undefined;
       return {
         google: {
@@ -82,9 +78,14 @@ export function createAuth() {
       user: {
         create: {
           after: async (user) => {
-            const u = user as unknown as { id: string; email: string; name: string; emailVerified: boolean };
+            const u = user as unknown as {
+              id: string;
+              email: string;
+              name: string;
+              emailVerified: boolean;
+            };
             await syncUser(u).catch((err) =>
-              console.error('[auth] syncUser after create failed', err),
+              console.error('[auth] syncUser after create failed', err)
             );
           },
         },
@@ -92,9 +93,14 @@ export function createAuth() {
           after: async (user) => {
             const list = Array.isArray(user) ? user : [user];
             for (const doc of list) {
-              const u = doc as unknown as { id: string; email: string; name: string; emailVerified: boolean };
+              const u = doc as unknown as {
+                id: string;
+                email: string;
+                name: string;
+                emailVerified: boolean;
+              };
               await syncUser(u).catch((err) =>
-                console.error('[auth] syncUser after update failed', err),
+                console.error('[auth] syncUser after update failed', err)
               );
             }
           },
@@ -118,11 +124,11 @@ export function createAuth() {
                     ? new Date(s.expiresAt)
                     : new Date();
             await recordLogin(s.userId, expiresAt).catch((err) =>
-              console.error('[auth] recordLogin failed', err),
+              console.error('[auth] recordLogin failed', err)
             );
             if (s.id) {
               await enforceConcurrentSessionLimit(s.id, s.userId).catch((err) =>
-                console.error('[auth] enforceConcurrentSessionLimit failed', err),
+                console.error('[auth] enforceConcurrentSessionLimit failed', err)
               );
             }
           },
@@ -150,7 +156,7 @@ async function syncUser(u: { id: string; email: string; name: string; emailVerif
         email,
         name: u.name ?? email,
         emailVerified: !!u.emailVerified,
-        verifiedAt: u.emailVerified ? existing.verifiedAt ?? now : undefined,
+        verifiedAt: u.emailVerified ? (existing.verifiedAt ?? now) : undefined,
         role: existing.role === 'ADMIN' || role === 'ADMIN' ? 'ADMIN' : existing.role,
       },
     });
@@ -174,7 +180,6 @@ async function recordLogin(userId: string, expiresAt: Date) {
     data: { lastLoginAt: new Date(), lastSessionExpiresAt: expiresAt },
   });
 }
-
 
 /**
  * MVP concurrent session/device limit by plan.maxDevices.

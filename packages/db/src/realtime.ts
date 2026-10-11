@@ -100,16 +100,13 @@ export function subscribe(listener: Listener): () => void {
 export async function notifyChange(
   table: string,
   op: 'insert' | 'update' | 'delete',
-  rowId?: string,
+  rowId?: string
 ): Promise<void> {
   const payload = JSON.stringify({ table, op, ts: Date.now(), rowId });
   try {
     // Use the prisma client for the notify call (it manages connection pool).
     const { prisma } = await import('./client');
-    await prisma.$executeRawUnsafe(
-      `SELECT pg_notify('${LISTEN_CHANNEL}', $1)`,
-      payload,
-    );
+    await prisma.$executeRawUnsafe(`SELECT pg_notify('${LISTEN_CHANNEL}', $1)`, payload);
   } catch (err) {
     console.error('[realtime] notifyChange failed', err);
   }

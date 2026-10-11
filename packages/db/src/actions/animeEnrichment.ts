@@ -102,7 +102,12 @@ export const previewAnimeBackdrop = register({
     }
     return {
       status: 'ok',
-      anime: { id: anime.id, title: anime.title, image: anime.image, backdropImage: anime.backdropImage },
+      anime: {
+        id: anime.id,
+        title: anime.title,
+        image: anime.image,
+        backdropImage: anime.backdropImage,
+      },
       tmdb: metadata,
     };
   },
@@ -182,7 +187,7 @@ export const searchExternalAction = register({
       try {
         const response = await fetch(
           `${CONSUMET_API}/meta/anilist/${encodeURIComponent(query)}?provider=${provider}`,
-          { signal: AbortSignal.timeout(5000) },
+          { signal: AbortSignal.timeout(5000) }
         );
         if (response.ok) {
           const data = await response.json();

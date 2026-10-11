@@ -44,7 +44,7 @@ export function isMissingVideo(videoUrl?: string | null): boolean {
 /** Playable if videoUrl is set OR an on-disk HLS manifest exists for the token. */
 export function hasPlayableVideo(
   videoUrl: string | null | undefined,
-  hasManifest: boolean,
+  hasManifest: boolean
 ): boolean {
   return !isMissingVideo(videoUrl) || hasManifest;
 }
@@ -52,7 +52,7 @@ export function hasPlayableVideo(
 /** Missing video for admin/catalog = no videoUrl and no manifest. */
 export function isMissingPlayableVideo(
   videoUrl: string | null | undefined,
-  hasManifest: boolean,
+  hasManifest: boolean
 ): boolean {
   return !hasPlayableVideo(videoUrl, hasManifest);
 }
@@ -121,7 +121,7 @@ export type MovieQualityFilter =
 
 export function matchesQualityFilter(
   movie: Parameters<typeof getMovieQualityFlags>[0],
-  filter: MovieQualityFilter,
+  filter: MovieQualityFilter
 ): boolean {
   if (filter === 'all') return true;
   const flags = getMovieQualityFlags(movie);

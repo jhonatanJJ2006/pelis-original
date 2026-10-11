@@ -28,7 +28,7 @@ export async function getRequestCtx(req: Request | NextRequest): Promise<Request
 export async function preloadQuery<T = unknown>(
   name: string,
   args: unknown,
-  req: Request | NextRequest,
+  req: Request | NextRequest
 ): Promise<PreloadedQuery<T>> {
   const ctx = await getRequestCtx(req);
   const data = (await invoke({ name, args, ctx })) as T;
