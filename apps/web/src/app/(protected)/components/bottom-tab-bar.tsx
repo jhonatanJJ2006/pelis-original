@@ -2,17 +2,16 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Film, Radio, Tv, User, Sparkles } from 'lucide-react';
+import { Home, Search, Radio, User, Sparkles } from 'lucide-react';
 import { cn } from '@pelis/ui/utils';
 import { getTabIndex, TAB_ROUTES } from '@/lib/tab-navigation';
 
 const tabs = [
   { href: TAB_ROUTES[0], label: 'Inicio', icon: Home, exact: true },
-  { href: TAB_ROUTES[1], label: 'Películas', icon: Film },
-  { href: TAB_ROUTES[2], label: 'Series', icon: Tv },
+  { href: TAB_ROUTES[1], label: 'Buscar', icon: Search },
+  { href: TAB_ROUTES[2], label: 'Anime', icon: Sparkles },
   { href: TAB_ROUTES[3], label: 'TV', icon: Radio },
-  { href: TAB_ROUTES[4], label: 'Anime', icon: Sparkles },
-  { href: TAB_ROUTES[5], label: 'Perfil', icon: User },
+  { href: TAB_ROUTES[4], label: 'Perfil', icon: User },
 ] as const;
 
 export function BottomTabBar() {

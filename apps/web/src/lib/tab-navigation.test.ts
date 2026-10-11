@@ -14,19 +14,17 @@ describe('getTabIndex', () => {
   });
 
   it('maps nested paths under a tab route to the same tab', () => {
-    expect(getTabIndex('/movies/123')).toBe(TAB_ROUTES.indexOf('/movies'));
-    expect(getTabIndex('/series/abc')).toBe(TAB_ROUTES.indexOf('/series'));
     expect(getTabIndex('/anime/watch/9/1')).toBe(TAB_ROUTES.indexOf('/anime'));
     expect(getTabIndex('/tv/disney')).toBe(TAB_ROUTES.indexOf('/tv'));
   });
 
-  it('places series between movies and anime, matching the desktop order', () => {
-    const movies = TAB_ROUTES.indexOf('/movies');
-    const series = TAB_ROUTES.indexOf('/series');
-    const anime = TAB_ROUTES.indexOf('/anime');
-    expect(series).toBeGreaterThan(movies);
-    expect(series).toBeLessThan(anime);
-    expect(TAB_ROUTES.indexOf('/tv')).toBeGreaterThan(series);
+  it('orders the mobile tabs as Inicio, Buscar, Anime, TV, Perfil', () => {
+    expect([...TAB_ROUTES]).toEqual(['/', '/buscar', '/anime', '/tv', '/profile']);
+  });
+
+  it('catalogue pages are not tabs, so swiping there does not jump tabs', () => {
+    expect(getTabIndex('/movies')).toBe(-1);
+    expect(getTabIndex('/series/abc')).toBe(-1);
   });
 
   it('returns -1 for unknown routes', () => {
