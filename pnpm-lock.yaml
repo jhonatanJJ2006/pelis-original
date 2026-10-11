@@ -148,6 +148,9 @@ importers:
       tailwindcss:
         specifier: 'catalog:'
         version: 3.4.19(tsx@4.23.12)
+      undici:
+        specifier: ^7
+        version: 7.30.0
       zod:
         specifier: 4.0.0
         version: 4.0.0
@@ -1364,8 +1367,8 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
-  '@maxim_mazurok/gapi.client.androidpublisher-v3@0.5.20260902':
-    resolution: {integrity: sha512-GyeO7C/4G4xvU6Ro8WCP9FC8Xw6a2rIzZPjjLqdCIBCFaZix94//tANjFQc5x618nK11cYvEoGmYZDIm4Gxmcw==}
+  '@maxim_mazurok/gapi.client.androidpublisher-v3@0.5.20261008':
+    resolution: {integrity: sha512-l6hOTZjJd6VTroPmsvulBGDG3Sk2O5rgFfQ4Coo9lj2SriktPCXz2dgnOY71f/P5/7kmgiP8nv81RIEsYFNydQ==}
 
   '@maxim_mazurok/gapi.client.discovery-v1@0.6.20200806':
     resolution: {integrity: sha512-QN6aGmIbLXcJW0SEf8tz9UWCpQTBMy2u4xSuZ04YofzMGknhWwMeUecySLntCZYAEstHzDoSgwxCf5Gb8GqIRQ==}
@@ -4859,6 +4862,10 @@ packages:
   undici-types@6.21.0:
     resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
 
+  undici@7.30.0:
+    resolution: {integrity: sha512-dkrQXeHSaoamnItlYbmzG0wFYrM0ZwDxCIg0A7aKjTyyhh9svRzCNFEzV+Vm05/yehjCzjDZ31KXfGEjYSztDQ==}
+    engines: {node: '>=20.18.1'}
+
   universalify@0.2.0:
     resolution: {integrity: sha512-CJ1QgKmNg3CwvAv/kOFmtnEN05f0D/cn9QntgNOQlQF9dgvVTHj3t+8JPdjqawCHk7V/KA+fbUqzZ9XWhcqPUg==}
     engines: {node: '>= 4.0.0'}
@@ -5979,7 +5986,7 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@maxim_mazurok/gapi.client.androidpublisher-v3@0.5.20260902':
+  '@maxim_mazurok/gapi.client.androidpublisher-v3@0.5.20261008':
     dependencies:
       '@types/gapi.client': 1.0.8
       '@types/gapi.client.discovery-v1': 0.0.4
@@ -6463,7 +6470,7 @@ snapshots:
 
   '@types/gapi.client.androidpublisher@3.0.2':
     dependencies:
-      '@maxim_mazurok/gapi.client.androidpublisher-v3': 0.5.20260902
+      '@maxim_mazurok/gapi.client.androidpublisher-v3': 0.5.20261008
 
   '@types/gapi.client.discovery-v1@0.0.4':
     dependencies:
@@ -9738,6 +9745,8 @@ snapshots:
       which-boxed-primitive: 1.1.1
 
   undici-types@6.21.0: {}
+
+  undici@7.30.0: {}
 
   universalify@0.2.0: {}
 
