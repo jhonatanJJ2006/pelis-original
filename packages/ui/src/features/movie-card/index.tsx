@@ -66,12 +66,13 @@ function MovieCardBase({
     >
       <div
         className={cn(
-          'rounded-2xl overflow-hidden',
+          'rounded-card overflow-hidden',
           'bg-cinema-surface border border-cinema-border',
-          'motion-safe:transition-[transform,border-color,box-shadow] motion-safe:duration-normal motion-safe:ease-out-expo',
+          'motion-safe:transition-[transform,border-color,box-shadow] relative z-0 hover:z-10 motion-safe:duration-normal motion-safe:ease-out-expo',
           '[@media(hover:hover)_and_(pointer:fine)]:group-hover:border-cinema-accent',
-          '[@media(hover:hover)_and_(pointer:fine)]:group-hover:shadow-[0_12px_36px_rgba(196,163,90,0.16)]',
-          '[@media(hover:hover)_and_(pointer:fine)]:group-hover:-translate-y-1'
+          '[@media(hover:hover)_and_(pointer:fine)]:group-hover:ring-2 [@media(hover:hover)_and_(pointer:fine)]:group-hover:ring-cinema-accent',
+          '[@media(hover:hover)_and_(pointer:fine)]:group-hover:scale-[1.06]',
+          'group-focus-visible:ring-2 group-focus-visible:ring-cinema-accent'
         )}
       >
         <div

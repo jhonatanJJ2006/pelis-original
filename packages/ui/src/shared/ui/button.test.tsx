@@ -21,7 +21,7 @@ describe('Button', () => {
 
   it('applies the gold variant class', () => {
     render(<Button variant="gold">Premium</Button>);
-    expect(screen.getByRole('button')).toHaveClass('bg-gradient-to-r');
+    expect(screen.getByRole('button')).toHaveClass('bg-cinema-accent');
   });
 
   it('applies the small size class', () => {

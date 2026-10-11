@@ -6,15 +6,14 @@ const buttonVariants = cva('btn-base', {
   variants: {
     variant: {
       primary:
-        'bg-cinema-accent hover:bg-cinema-accent-light text-cinema-bg shadow-[0_6px_20px_rgba(196,163,90,0.28)] hover:shadow-[0_8px_28px_rgba(196,163,90,0.38)]',
+        'bg-cinema-accent hover:bg-cinema-accent-light active:bg-cinema-accent-pressed text-cinema-bg',
       secondary:
-        'bg-cinema-elevated hover:bg-cinema-elevated/90 text-cinema-chalk border border-cinema-border hover:border-cinema-silver/40 shadow-[0_2px_10px_rgba(11,11,13,0.35)]',
+        'bg-cinema-elevated hover:bg-cinema-border text-cinema-chalk border border-cinema-border',
       outline:
-        'bg-transparent hover:bg-cinema-elevated/60 text-cinema-muted hover:text-cinema-chalk border border-cinema-border hover:border-cinema-accent/50',
+        'bg-transparent hover:bg-cinema-chalk/10 text-cinema-chalk border border-cinema-chalk/40 hover:border-cinema-chalk/70',
       ghost: 'hover:bg-cinema-elevated/60 text-cinema-muted hover:text-cinema-chalk',
-      danger:
-        'bg-cinema-danger hover:bg-cinema-danger-light text-cinema-chalk shadow-[0_6px_20px_rgba(139,30,45,0.35)]',
-      gold: 'bg-gradient-to-r from-cinema-gold to-cinema-gold-light text-black font-semibold hover:brightness-110 shadow-[0_6px_20px_rgba(245,200,66,0.25)]',
+      danger: 'bg-cinema-danger hover:bg-cinema-danger-light text-cinema-chalk',
+      gold: 'bg-cinema-accent hover:bg-cinema-accent-light active:bg-cinema-accent-pressed text-cinema-bg font-semibold',
     },
     size: {
       sm: 'h-9 px-4 text-sm',
