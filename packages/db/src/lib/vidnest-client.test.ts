@@ -93,3 +93,25 @@ describe('normalizeVidnestEpisodeData', () => {
     expect(data.sources[0]?.referer).toBe('https://play.echovideo.ru/');
   });
 });
+
+describe('vidnest v2 nonce + cipher', () => {
+  it('adds a random _n nonce only to VidNest API urls', async () => {
+    const { withVidnestNonce } = await import('./vidnest-client');
+    expect(withVidnestNonce('https://new.vidnest.fun/aniwave_hls/21/1/sub')).toMatch(
+      /\?_n=[\w-]{20,}$/
+    );
+    expect(withVidnestNonce('https://example.com/x')).toBe('https://example.com/x');
+  });
+
+  it('decrypts a v2 AES-GCM payload', async () => {
+    const crypto = await import('node:crypto');
+    const { decryptVidnestV2 } = await import('./vidnest-client');
+    const n = 'nonce123';
+    const key = crypto.createHash('sha256').update(`${n}|secret`).digest();
+    const iv = crypto.randomBytes(12);
+    const c = crypto.createCipheriv('aes-256-gcm', key, iv);
+    const enc = Buffer.concat([c.update(JSON.stringify({ sources: [{ url: 'a' }] })), c.final()]);
+    const d = Buffer.concat([iv, enc, c.getAuthTag()]).toString('base64url');
+    expect(decryptVidnestV2(d, n, 'secret')).toEqual({ sources: [{ url: 'a' }] });
+  });
+});

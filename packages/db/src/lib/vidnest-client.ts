@@ -23,11 +23,45 @@
  * endpoints work without it, and the TLS handshake often fails from servers.
  */
 
+import { createDecipheriv, createHash, randomBytes } from 'node:crypto';
 import { gunzipSync } from 'node:zlib';
 
 const VIDNEST_API_BASE = 'https://new.vidnest.fun';
 const VIDNEST_PUBLIC_ORIGIN = 'https://vidnest.fun';
 const CUID_ENDPOINT = 'https://jz.petarydweller.shop/cuid/';
+
+/**
+ * Public secret embedded in VidNest's bundle (module 50586). Since Oct 2026
+ * every `new.vidnest.fun` request needs a random `_n` nonce query param and
+ * answers `{ v: 2, n, d }`, where `d` is AES-256-GCM (iv = first 12 bytes,
+ * tag = last 16) keyed with SHA-256(`${n}|${secret}`).
+ */
+const VIDNEST_STREAM_SECRET = 'wSnEvGgWkkxb7nO1yyFgMxhDvogX_Q7Dr0Fi1E4qvn0';
+
+/** Append the random `_n` nonce VidNest now requires on API calls. */
+export function withVidnestNonce(url: string): string {
+  if (!url.startsWith(VIDNEST_API_BASE)) return url;
+  const sep = url.includes('?') ? '&' : '?';
+  return `${url}${sep}_n=${encodeURIComponent(randomBytes(16).toString('base64url'))}`;
+}
+
+/** Decrypt a `{ v: 2, n, d }` VidNest payload. */
+export function decryptVidnestV2(d: string, n: string, secret = VIDNEST_STREAM_SECRET): unknown {
+  const key = createHash('sha256').update(`${n}|${secret}`).digest();
+  const buf = Buffer.from(d, 'base64url');
+  if (buf.length < 29) throw new Error('vidnest: payload v2 demasiado corto');
+  const decipher = createDecipheriv('aes-256-gcm', key, buf.subarray(0, 12));
+  decipher.setAuthTag(buf.subarray(buf.length - 16));
+  const text = Buffer.concat([
+    decipher.update(buf.subarray(12, buf.length - 16)),
+    decipher.final(),
+  ]).toString('utf8');
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text;
+  }
+}
 
 export const VIDNEST_B64_ALPHABET =
   'RB0fpH8ZEyVLkv7c2i6MAJ5u3IKFDxlS1NTsnGaqmXYdUrtzjwObCgQP94hoeW+/=';
@@ -190,7 +224,18 @@ export async function parseVidnestResponse(response: Response): Promise<Record<s
   const payload = (await response.json()) as {
     data?: string;
     encrypted?: boolean;
+    v?: number;
+    n?: string;
+    d?: string;
   } & Record<string, unknown>;
+
+  if (payload.v === 2 && typeof payload.d === 'string' && typeof payload.n === 'string') {
+    const plain = decryptVidnestV2(payload.d, payload.n);
+    if (!plain || typeof plain !== 'object') {
+      throw new Error('vidnest: la respuesta v2 descifrada no es JSON válido');
+    }
+    return plain as Record<string, unknown>;
+  }
 
   if (payload.encrypted && typeof payload.data === 'string') {
     const plain = decodeVidnestCipher(payload.data);
@@ -255,7 +300,7 @@ async function requestVidnestEndpoint(url: string, apiKey: string | null): Promi
     'User-Agent': ANIME_CDN_HEADERS['User-Agent']!,
   };
   if (apiKey) headers['x-api-key'] = apiKey;
-  return fetch(url, { headers, signal: AbortSignal.timeout(15000) });
+  return fetch(withVidnestNonce(url), { headers, signal: AbortSignal.timeout(15000) });
 }
 
 async function fetchOneServer(
