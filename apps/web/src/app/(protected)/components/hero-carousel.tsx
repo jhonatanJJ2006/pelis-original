@@ -130,7 +130,7 @@ export function HeroCarousel({ movies }: HeroCarouselProps) {
   if (movies.length === 0) {
     return (
       <section
-        className="relative h-[75vh] min-h-[400px] sm:min-h-[500px] max-h-[900px] overflow-hidden bg-cinema-surface animate-pulse"
+        className="relative h-[70vh] min-h-[420px] sm:min-h-[500px] max-h-[860px] overflow-hidden bg-cinema-surface animate-pulse"
         aria-label="Destacados"
         aria-busy="true"
       />
@@ -140,7 +140,7 @@ export function HeroCarousel({ movies }: HeroCarouselProps) {
   return (
     <section
       data-hero-carousel
-      className="relative h-[75vh] min-h-[400px] sm:min-h-[500px] max-h-[900px] overflow-hidden touch-pan-y"
+      className="relative h-[70vh] min-h-[420px] sm:min-h-[500px] max-h-[860px] overflow-hidden touch-pan-y"
       aria-label="Destacados"
       aria-roledescription="carrusel"
       onTouchStart={handleTouchStart}
@@ -180,7 +180,7 @@ export function HeroCarousel({ movies }: HeroCarouselProps) {
                           isActive ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
                         )}
                       >
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-cinema-accent text-cinema-bg text-xs font-semibold rounded-full uppercase tracking-wide shadow-glow">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 border border-cinema-accent/60 text-cinema-accent text-label font-semibold rounded-full uppercase">
                           <Sparkles className="w-3.5 h-3.5" aria-hidden />
                           Destacado
                         </span>
@@ -213,7 +213,7 @@ export function HeroCarousel({ movies }: HeroCarouselProps) {
                         <Link
                           href={`/movies/${movie._id}?play=true`}
                           tabIndex={isActive ? 0 : -1}
-                          className="btn-primary-glow inline-flex items-center gap-2 px-7 py-3.5 text-base"
+                          className="btn-base h-11 bg-cinema-accent hover:bg-cinema-accent-light text-cinema-bg inline-flex items-center gap-2 px-6 text-[15px]"
                         >
                           <Play className="w-5 h-5" fill="currentColor" aria-hidden />
                           Reproducir
@@ -221,7 +221,7 @@ export function HeroCarousel({ movies }: HeroCarouselProps) {
                         <Link
                           href={`/movies/${movie._id}`}
                           tabIndex={isActive ? 0 : -1}
-                          className="btn-secondary inline-flex items-center gap-2 px-7 py-3.5 text-base"
+                          className="btn-base h-11 border border-cinema-chalk/50 bg-cinema-bg/30 backdrop-blur-sm hover:bg-cinema-chalk/10 text-cinema-chalk inline-flex items-center gap-2 px-6 text-[15px]"
                         >
                           <Info className="w-5 h-5" aria-hidden />
                           Más info
