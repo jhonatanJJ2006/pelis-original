@@ -55,6 +55,13 @@ export function HomePageClient({ preloaded }: HomePageClientProps) {
   const genres = liveGenres ?? preloaded.genres.data;
 
   const topGenres = (genres ?? []).slice(0, 4);
+  // Sin destacados marcados en el admin, el hero usa las tendencias para no quedar vacío.
+  const heroMovies =
+    featuredMovies && featuredMovies.length > 0
+      ? featuredMovies
+      : featuredMovies === undefined
+        ? undefined
+        : (trending ?? movies ?? []).slice(0, 5);
 
   // Visitantes: landing Maison Noir. Con sesión: catálogo de inicio.
   if (authLoading) {
@@ -80,7 +87,7 @@ export function HomePageClient({ preloaded }: HomePageClientProps) {
 
   return (
     <div className="pb-12">
-      {featuredMovies === undefined ? <HeroSkeleton /> : <HeroCarousel movies={featuredMovies} />}
+      {heroMovies === undefined ? <HeroSkeleton /> : <HeroCarousel movies={heroMovies} />}
 
       <div className="container mx-auto px-4 py-10 space-y-12 md:space-y-16">
         {user && continueItems.length > 0 && (
