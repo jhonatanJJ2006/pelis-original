@@ -48,7 +48,7 @@ class PelisApi private constructor(context: Context) {
             val text = res.body?.string().orEmpty()
             if (!res.isSuccessful) {
                 val msg = runCatching { JSONObject(text).let { it.optString("message").ifBlank { it.optString("error") } } }.getOrNull()
-                throw ApiException(res.code, msg?.ifBlank { null } ?: "Error ${res.code}")
+                throw ApiException(res.code, translate(msg?.ifBlank { null }, res.code))
             }
             text
         }
@@ -60,6 +60,14 @@ class PelisApi private constructor(context: Context) {
             if (!res.isSuccessful) throw ApiException(res.code, "Error ${res.code}")
             text
         }
+    }
+
+    private fun translate(msg: String?, code: Int): String = when {
+        msg == null -> if (code == 401) "Inicia sesión para continuar" else "Error de conexión ($code)"
+        msg.contains("Invalid email or password", true) -> "Correo o contraseña incorrectos"
+        msg.contains("Email not verified", true) -> "Verifica tu correo antes de iniciar sesión"
+        msg.contains("Unauthorized", true) || msg.contains("Unauthenticated", true) -> "Inicia sesión para continuar"
+        else -> msg
     }
 
     suspend fun call(name: String, args: JSONObject = JSONObject()): Any? {
@@ -83,7 +91,7 @@ class PelisApi private constructor(context: Context) {
     suspend fun genres(): List<String> = call("movies.getGenres").asArray().let { a -> (0 until a.length()).map { a.optString(it) } }
     suspend fun search(q: String) = call("movies.search", JSONObject().put("q", q).put("limit", 40)).asArray().objects().map { Parse.movie(base, it) }
     suspend fun movie(id: String) = (call("movies.getById", JSONObject().put("id", id)) as? JSONObject)?.let { Parse.movie(base, it) }
-    suspend fun animeList() = call("anime.list").asArray().objects().map { Parse.anime(base, it) }
+    suspend fun animeList(limit: Int = 60) = call("anime.list", JSONObject().put("limit", limit)).asArray().objects().map { Parse.anime(base, it) }
     suspend fun anime(id: String) = (call("anime.getById", JSONObject().put("id", id)) as? JSONObject)?.let { Parse.anime(base, it) }
     suspend fun searchAnime(q: String) = call("anime.search", JSONObject().put("q", q)).asArray().objects().map { Parse.anime(base, it) }
 
@@ -111,7 +119,20 @@ class PelisApi private constructor(context: Context) {
     suspend fun favorites() = call("favorites.listByUser").asArray().objects().mapNotNull { (it.optJSONObject("movie") ?: it).let { m -> Parse.movie(base, m) } }
     suspend fun isFavorite(id: String) = call("favorites.check", JSONObject().put("movieId", id)) == true
     suspend fun setFavorite(id: String, on: Boolean) { call(if (on) "favorites.add" else "favorites.remove", JSONObject().put("movieId", id)) }
-    suspend fun history() = call("history.listByUser").asArray().objects().mapNotNull { (it.optJSONObject("movie") ?: return@mapNotNull null).let { m -> Parse.movie(base, m) } }
+    suspend fun history() = call("history.listByUser").asArray().objects().mapNotNull { h ->
+        val m = h.optJSONObject("movie") ?: return@mapNotNull null
+        val dur = h.optDouble("duration", 0.0)
+        Parse.movie(base, m).copy(progress = if (dur > 0) (h.optDouble("progress", 0.0) / dur).toFloat().coerceIn(0f, 1f) else 0f)
+    }
+
+    /** URL reproducible: videoUrl directo o resuelta por token (/api/stream/resolve), igual que la web. */
+    suspend fun playableUrl(t: Title): String? {
+        t.videoUrl?.let { return it }
+        val token = t.token ?: return null
+        return runCatching {
+            JSONObject(get("/api/stream/resolve?token=" + java.net.URLEncoder.encode(token, "UTF-8"))).str("url")
+        }.getOrNull()?.let { Parse.absolute(base, it) }
+    }
     suspend fun saveProgress(movieId: String, progressSec: Long, durationSec: Long) {
         runCatching { call("history.upsert", JSONObject().put("movieId", movieId).put("progress", progressSec).put("duration", durationSec)) }
     }
@@ -136,9 +157,10 @@ class PelisApi private constructor(context: Context) {
         JSONObject(get("/api/tv-auth/pairing?code=${p.code}&deviceId=${p.deviceId}")).optString("status")
     suspend fun claimPairing(p: Pairing) {
         val o = JSONObject(post("/api/tv-auth/claim", JSONObject().put("code", p.code).put("deviceId", p.deviceId)))
-        val name = o.str("cookieName"); val token = o.str("token")
-        if (!session.hasSession && name != null && token != null) {
-            session.putSessionCookie(base.removePrefix("https://").removePrefix("http://"), name, token)
+        // El servidor ya envía Set-Cookie (lo guarda el CookieJar). Respaldo: cookieValue firmado.
+        val name = o.str("cookieName"); val value = o.str("cookieValue")
+        if (!session.hasSession && name != null && value != null) {
+            session.putSessionCookie(base.removePrefix("https://").removePrefix("http://"), name, java.net.URLEncoder.encode(value, "UTF-8"))
         }
     }
     fun qrUrl(data: String) = "$base/api/tv-auth/qr?format=png&data=" + java.net.URLEncoder.encode(data, "UTF-8")

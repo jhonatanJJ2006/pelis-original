@@ -7,6 +7,7 @@ import android.media.AudioManager
 import android.net.Uri
 import androidx.annotation.OptIn
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -91,7 +93,7 @@ fun buildPlayer(context: Context, api: PelisApi, req: PlaybackRequest): ExoPlaye
  */
 @OptIn(UnstableApi::class)
 @Composable
-fun PelisPlayer(req: PlaybackRequest, api: PelisApi, fullscreen: Boolean, tv: Boolean, modifier: Modifier = Modifier) {
+fun PelisPlayer(req: PlaybackRequest, api: PelisApi, fullscreen: Boolean, tv: Boolean, modifier: Modifier = Modifier, onReady: (ExoPlayer, PlayerView) -> Unit = { _, _ -> }, onBack: (() -> Unit)? = null) {
     val context = LocalContext.current
     val activity = remember { context.findActivity() }
     val player = remember(req.url) { buildPlayer(context, api, req) }
@@ -146,14 +148,18 @@ fun PelisPlayer(req: PlaybackRequest, api: PelisApi, fullscreen: Boolean, tv: Bo
         )
     } else Modifier
 
-    Box(modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Noir.Surface, Noir.Ink)))) {
+    Box(modifier.fillMaxSize().background(Brush.radialGradient(listOf(Noir.Raised, Noir.Surface, Noir.Ink)))) {
         AndroidView(
             factory = { ctx -> PlayerView(ctx).apply {
                 this.player = player
                 setShowSubtitleButton(true)
                 setShowBuffering(PlayerView.SHOW_BUFFERING_NEVER)
                 setKeepContentOnPlayerReset(true)
+                // Sin obturador negro: durante la carga se ve el fondo Maison Noir.
+                setShutterBackgroundColor(android.graphics.Color.TRANSPARENT)
+                setBackgroundColor(android.graphics.Color.TRANSPARENT)
                 if (tv) { requestFocus() }
+                onReady(player, this)
             } },
             modifier = Modifier.fillMaxSize(),
         )
@@ -170,8 +176,17 @@ fun PelisPlayer(req: PlaybackRequest, api: PelisApi, fullscreen: Boolean, tv: Bo
         error?.let {
             Text(it, color = Noir.Text, modifier = Modifier.align(Alignment.Center).background(Noir.Burgundy, RoundedCornerShape(8.dp)).padding(16.dp))
         }
-        hud?.let { zone -> Hud(zone, hudLevel, Modifier.align(Alignment.TopCenter).padding(top = 24.dp)) }
-        if (!req.live) TrackMenu(player, Modifier.align(Alignment.TopEnd).padding(8.dp))
+        hud?.let { zone -> Hud(zone, hudLevel, Modifier.align(Alignment.TopCenter).padding(top = 64.dp)) }
+        var settings by remember { mutableStateOf(false) }
+        if (!tv) Row(Modifier.align(Alignment.TopStart).fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+            if (onBack != null) TextButton(onClick = onBack) { Text("<", color = Noir.Text, fontSize = 20.sp) }
+            Text("PELIS", color = Noir.Gold, fontFamily = Noir.Display, fontSize = 18.sp, letterSpacing = 1.5.sp)
+            Box(Modifier.padding(horizontal = 10.dp).width(1.dp).height(14.dp).background(Noir.Line))
+            Text(req.title, color = Noir.Text, fontFamily = Noir.Display, fontSize = 16.sp, maxLines = 1, modifier = Modifier.weight(1f))
+            if (!req.live) TextButton(onClick = { settings = true }) { Text("Ajustes", color = Noir.Gold) }
+        }
+        if (tv && !req.live) TrackMenu(player, Modifier.align(Alignment.TopEnd).padding(8.dp))
+        if (settings) SettingsPanel(player, req, Modifier.align(Alignment.CenterEnd)) { settings = false }
     }
 }
 
@@ -191,6 +206,65 @@ fun Hud(zone: GestureMath.Zone, level: Float, modifier: Modifier = Modifier) {
         Text("${GestureMath.hudPercent(level)}%", color = Noir.Gold, fontSize = 13.sp)
     }
 }
+
+/** Panel lateral "Ajustes de reproducción" (subtítulos y calidad) del diseño. */
+@OptIn(UnstableApi::class)
+@Composable
+fun SettingsPanel(player: ExoPlayer, req: PlaybackRequest, modifier: Modifier = Modifier, onClose: () -> Unit) {
+    var tick by remember { mutableStateOf(0) }
+    Column(modifier.fillMaxHeight().width(320.dp).background(Noir.Surface).padding(16.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("Ajustes de reproducción", color = Noir.Text, fontFamily = Noir.Display, fontSize = 18.sp, modifier = Modifier.weight(1f))
+            TextButton(onClick = onClose) { Text("Cerrar", color = Noir.Muted) }
+        }
+        androidx.compose.foundation.lazy.LazyColumn {
+            for (type in listOf(C.TRACK_TYPE_TEXT, C.TRACK_TYPE_VIDEO)) {
+                item(key = "h$type") {
+                    Text(if (type == C.TRACK_TYPE_TEXT) "SUBTÍTULOS" else "CALIDAD DE VIDEO", color = Noir.Gold, fontSize = 12.sp,
+                        letterSpacing = 1.sp, modifier = Modifier.padding(top = 16.dp, bottom = 8.dp))
+                }
+                val params = player.trackSelectionParameters
+                val disabled = params.disabledTrackTypes.contains(type)
+                val hasOverride = params.overrides.values.any { it.type == type }
+                item(key = "o$type$tick") {
+                    PanelOption(if (type == C.TRACK_TYPE_VIDEO) "Automática" else "Desactivados",
+                        if (type == C.TRACK_TYPE_VIDEO) !hasOverride else disabled) {
+                        player.trackSelectionParameters = params.buildUpon().clearOverridesOfType(type)
+                            .setTrackTypeDisabled(type, type == C.TRACK_TYPE_TEXT).build(); tick++
+                    }
+                }
+                player.currentTracks.groups.filter { it.type == type }.forEachIndexed { gi, g ->
+                    for (i in 0 until g.length) {
+                        val f = g.getTrackFormat(i)
+                        val label = if (type == C.TRACK_TYPE_VIDEO) (if (f.height > 0) "${f.height}p" else "Pista ${i + 1}")
+                        else (f.label ?: f.language ?: "Pista ${i + 1}")
+                        item(key = "t$type-$gi-$i-$tick") {
+                            PanelOption(label, !disabled && g.isTrackSelected(i) && (type == C.TRACK_TYPE_TEXT || hasOverride)) {
+                                player.trackSelectionParameters = params.buildUpon().setTrackTypeDisabled(type, false)
+                                    .setOverrideForType(TrackSelectionOverride(g.mediaTrackGroup, i)).build(); tick++
+                            }
+                        }
+                    }
+                }
+            }
+            item {
+                Text(req.title, color = Noir.Muted, fontSize = 12.sp, modifier = Modifier.padding(top = 20.dp))
+            }
+        }
+    }
+}
+
+@Composable
+private fun PanelOption(label: String, selected: Boolean, onClick: () -> Unit) {
+    Row(Modifier.fillMaxWidth().padding(vertical = 3.dp).clip(RoundedCornerShape(6.dp))
+        .background(if (selected) Noir.Gold.copy(alpha = 0.14f) else Noir.Raised)
+        .androidxClickable(onClick).padding(horizontal = 12.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+        Text(label, color = if (selected) Noir.Gold else Noir.Text, fontSize = 14.sp, modifier = Modifier.weight(1f))
+        Box(Modifier.size(12.dp).clip(RoundedCornerShape(6.dp)).background(if (selected) Noir.Gold else Noir.Line))
+    }
+}
+
+private fun Modifier.androidxClickable(onClick: () -> Unit): Modifier = this.clickable(onClick = onClick)
 
 /** Selector de calidad y subtítulos usando las pistas reales del stream HLS. */
 @OptIn(UnstableApi::class)

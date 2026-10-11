@@ -17,6 +17,10 @@ data class Title(
     val videoUrl: String?,
     val kind: Kind,
     val subtitles: List<Subtitle> = emptyList(),
+    val token: String? = null,
+    val episodes: Int = 0,
+    val actors: String = "",
+    val progress: Float = 0f,
 )
 
 data class Subtitle(val label: String, val lang: String, val url: String)
@@ -54,12 +58,15 @@ object Parse {
             poster = absolute(base, o.str("image")),
             backdrop = absolute(base, o.str("backdropImage") ?: o.str("image")),
             synopsis = o.str("synopsis") ?: "",
-            genre = o.str("genre") ?: o.optJSONArray("genre")?.let { a -> (0 until a.length()).joinToString(", ") { a.optString(it) } } ?: "",
+            genre = o.optJSONArray("genre")?.let { a -> (0 until a.length()).joinToString(", ") { a.optString(it) } } ?: o.str("genre") ?: "",
             year = o.str("releaseYear") ?: o.opt("year")?.toString() ?: "",
             classification = o.str("classification") ?: "",
             videoUrl = absolute(base, o.str("videoUrl")),
             kind = if (type == "series" || type == "tv") Kind.SERIES else Kind.MOVIE,
             subtitles = subs,
+            token = o.str("token"),
+            episodes = o.optInt("episodes", o.optInt("totalEpisodes", 0)),
+            actors = o.str("actors") ?: "",
         )
     }
 

@@ -24,6 +24,6 @@ class PlayerActivity : ComponentActivity() {
         }
         val req = PlaybackIntent.read(intent)
         val api = PelisApi.get(this)
-        setContent { NoirTheme { PelisPlayer(req, api, fullscreen = true, tv = false) } }
+        setContent { NoirTheme { PelisPlayer(req, api, fullscreen = true, tv = false, onBack = { finish() }) } }
     }
 }

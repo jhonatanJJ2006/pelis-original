@@ -8,6 +8,6 @@ import pro.verpelis.core.ui.NoirTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent { NoirTheme { PhoneApp() } }
+        setContent { NoirTheme { PhoneApp(intent.getStringExtra("start") ?: "home") } }
     }
 }
