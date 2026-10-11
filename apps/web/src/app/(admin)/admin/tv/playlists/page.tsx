@@ -171,7 +171,7 @@ export default function AdminTVPlaylistsPage() {
           <ArrowLeft className="w-4 h-4" />
           Volver a canales
         </Link>
-        <h1 className="font-display text-2xl sm:text-3xl tracking-wide text-white uppercase">
+        <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-cinema-chalk">
           Listas M3U
         </h1>
         <p className="text-cinema-muted mt-1 sm:mt-2 text-sm sm:text-base">

@@ -93,7 +93,7 @@ export default function EditTVChannelPage() {
         Volver a canales
       </Link>
 
-      <h1 className="font-display text-2xl sm:text-3xl tracking-wide text-white uppercase mb-4 sm:mb-6">
+      <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-cinema-chalk mb-4 sm:mb-6">
         Editar canal
       </h1>
 

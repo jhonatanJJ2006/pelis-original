@@ -82,8 +82,8 @@ export default function AdminDashboardPage() {
   return (
     <div>
       <div className="mb-6 sm:mb-8">
-        <h1 className="font-display text-2xl sm:text-3xl tracking-wide text-white uppercase">
-          Dashboard
+        <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-cinema-chalk">
+          Panel
         </h1>
         <p className="text-cinema-muted mt-1 sm:mt-2 text-sm sm:text-base">
           Resumen del catálogo de películas

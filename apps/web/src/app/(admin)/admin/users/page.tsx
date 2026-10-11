@@ -80,7 +80,7 @@ export default function AdminUsersPage() {
   return (
     <div>
       <div className="mb-6 sm:mb-8">
-        <h1 className="font-display text-2xl sm:text-3xl tracking-wide text-white uppercase">
+        <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-cinema-chalk">
           Usuarios
         </h1>
         <p className="text-cinema-muted mt-1 sm:mt-2 text-sm sm:text-base">
@@ -188,7 +188,7 @@ export default function AdminUsersPage() {
           </div>
 
           <div className="hidden md:block overflow-x-auto rounded-2xl border border-cinema-border bg-cinema-surface">
-            <table className="w-full min-w-[820px] text-sm">
+            <table className="admin-table w-full min-w-[820px] text-sm">
               <thead>
                 <tr className="border-b border-cinema-border text-left text-cinema-muted">
                   <th className="px-4 py-3 font-medium">Usuario</th>

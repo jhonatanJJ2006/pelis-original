@@ -38,7 +38,7 @@ export function AdminChrome({ children }: { children: React.ReactNode }) {
         />
       )}
 
-      <header className="lg:hidden sticky top-0 z-30 flex items-center gap-3 px-4 py-3 border-b border-cinema-border bg-cinema-surface/95 backdrop-blur-xl">
+      <header className="lg:hidden sticky top-0 z-30 flex items-center gap-3 px-4 py-3 border-b border-cinema-border bg-cinema-bg/95 backdrop-blur-xl">
         <button
           type="button"
           onClick={() => setMobileNavOpen(true)}
@@ -48,8 +48,8 @@ export function AdminChrome({ children }: { children: React.ReactNode }) {
         >
           <Menu className="w-5 h-5" />
         </button>
-        <span className="font-display text-lg tracking-wide text-white uppercase truncate">
-          Admin
+        <span className="font-display text-lg font-semibold tracking-[0.12em] text-cinema-accent truncate">
+          PELIS <span className="font-sans text-label uppercase text-cinema-ash">Admin</span>
         </span>
         <Link
           href="/"
@@ -61,7 +61,7 @@ export function AdminChrome({ children }: { children: React.ReactNode }) {
 
       <AdminSidebar mobileOpen={mobileNavOpen} onMobileClose={() => setMobileNavOpen(false)} />
 
-      <main className="flex-1 min-w-0 p-4 sm:p-6 md:p-8 pb-[max(1rem,env(safe-area-inset-bottom))]">
+      <main className="flex-1 min-w-0 p-4 sm:p-6 md:p-8 lg:px-10 pb-[max(1rem,env(safe-area-inset-bottom))]">
         {children}
       </main>
     </div>

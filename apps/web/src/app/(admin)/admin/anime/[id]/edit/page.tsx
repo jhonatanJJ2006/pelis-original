@@ -99,7 +99,7 @@ export default function EditAnimePage() {
       </Link>
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-        <h1 className="font-display text-2xl sm:text-3xl tracking-wide text-white uppercase">
+        <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-cinema-chalk">
           Editar anime
         </h1>
         <Button

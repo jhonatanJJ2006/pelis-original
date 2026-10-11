@@ -63,8 +63,8 @@ export default function AdminNewReleasesPageClient() {
             <ArrowLeft className="w-4 h-4" />
             Volver a Películas
           </Link>
-          <h1 className="font-display text-2xl sm:text-3xl tracking-wide text-white uppercase">
-            Nuevas películas
+          <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-cinema-chalk">
+            Estrenos
           </h1>
           <p className="text-cinema-muted mt-1 sm:mt-2 text-sm sm:text-base">
             {movies ? `${movies.length} agregadas en el rango seleccionado` : 'Cargando...'}
@@ -101,7 +101,7 @@ export default function AdminNewReleasesPageClient() {
         </div>
       ) : (
         <div className="overflow-x-auto rounded-2xl border border-cinema-border bg-cinema-surface">
-          <table className="w-full min-w-[720px] text-sm">
+          <table className="admin-table w-full min-w-[720px] text-sm">
             <thead>
               <tr className="border-b border-cinema-border text-left text-cinema-muted">
                 <th className="px-4 py-3 font-medium">Poster</th>
