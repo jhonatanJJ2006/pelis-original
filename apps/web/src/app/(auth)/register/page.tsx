@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Film } from 'lucide-react';
 import { Button, Input } from '@pelis/ui/components';
 const getAuthApiBase = () => '/api/auth';
 import { authClient } from '@pelis/auth/client';
@@ -97,10 +96,12 @@ export default function RegisterPage() {
     <div className="w-full max-w-md">
       <div className="card-glow p-6 md:p-8 shadow-[0_8px_40px_rgba(196,163,90,0.12)]">
         <div className="text-center mb-8">
-          <div className="w-14 h-14 bg-gradient-to-br from-cinema-accent to-cinema-accent rounded-lg flex items-center justify-center mx-auto mb-4 shadow-glow">
-            <Film className="w-8 h-8 text-cinema-bg" aria-hidden />
-          </div>
-          <h1 className="font-display text-2xl md:text-3xl tracking-tight text-cinema-chalk">
+          <p className="text-label uppercase text-cinema-accent mb-3 inline-flex items-center gap-2">
+            <span className="h-1 w-1 rounded-full bg-cinema-accent" aria-hidden />
+            Nueva membresía
+            <span className="h-1 w-1 rounded-full bg-cinema-accent" aria-hidden />
+          </p>
+          <h1 className="font-display text-3xl font-medium tracking-tight text-cinema-chalk">
             Crear cuenta
           </h1>
           <p className="text-cinema-muted mt-2">Únete a Pelis y disfruta del streaming</p>
@@ -110,7 +111,7 @@ export default function RegisterPage() {
           type="button"
           onClick={handleGoogleLogin}
           disabled={loading}
-          className="w-full inline-flex items-center justify-center gap-3 h-11 px-4 bg-cinema-elevated hover:bg-cinema-elevated/90 text-cinema-chalk font-semibold border border-cinema-border hover:border-cinema-silver/40 rounded-[10px] transition-all duration-200 active:scale-[0.97] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full inline-flex items-center justify-center gap-3 h-11 px-4 bg-cinema-elevated hover:bg-cinema-elevated/90 text-cinema-chalk font-semibold border border-cinema-border hover:border-cinema-silver/40 rounded-[6px] transition-all duration-200 active:scale-[0.97] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24" aria-hidden>
             <path
