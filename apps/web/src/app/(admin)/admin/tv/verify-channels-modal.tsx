@@ -156,7 +156,9 @@ export function VerifyChannelsModal({
             </div>
           )}
 
-          {phase === 'done' && <p className="text-sm text-emerald-300">Verificación completada.</p>}
+          {phase === 'done' && (
+            <p className="text-sm text-cinema-success">Verificación completada.</p>
+          )}
 
           {phase === 'cancelled' && (
             <p className="text-sm text-amber-300">Verificación cancelada.</p>
@@ -190,9 +192,9 @@ export function VerifyChannelsModal({
           )}
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-3">
-              <p className="text-[10px] uppercase tracking-wider text-emerald-300/80">Online</p>
-              <p className="text-2xl font-semibold text-emerald-300 mt-0.5">{online}</p>
+            <div className="rounded-lg bg-cinema-success/10 border border-cinema-success/20 p-3">
+              <p className="text-[10px] uppercase tracking-wider text-cinema-success/80">Online</p>
+              <p className="text-2xl font-semibold text-cinema-success mt-0.5">{online}</p>
             </div>
             <div className="rounded-lg bg-red-500/10 border border-red-500/20 p-3">
               <p className="text-[10px] uppercase tracking-wider text-red-300/80">Caídos</p>

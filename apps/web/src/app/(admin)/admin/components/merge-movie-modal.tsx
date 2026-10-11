@@ -117,7 +117,7 @@ export function MergeMovieModal({ source, onClose, onMerged }: MergeMovieModalPr
                     </span>
                   )}
                   {source.videoUrl && (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-cinema-success/20 text-cinema-success">
                       Tiene video
                     </span>
                   )}

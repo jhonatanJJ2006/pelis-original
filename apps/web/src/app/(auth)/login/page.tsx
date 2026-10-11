@@ -164,7 +164,7 @@ function LoginForm() {
 
         {verified && (
           <div
-            className="mb-4 p-3 rounded bg-green-500/10 border border-green-500/30 text-green-400 text-sm text-center"
+            className="mb-4 p-3 rounded bg-cinema-success/10 border border-cinema-success/30 text-cinema-success text-sm text-center"
             role="alert"
           >
             ¡Email verificado! Ahora puedes iniciar sesión.

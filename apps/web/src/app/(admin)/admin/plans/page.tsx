@@ -176,7 +176,7 @@ export default function AdminPlansPage() {
                     className={cn(
                       'text-[10px] px-2 py-0.5 rounded-full',
                       plan.stripePriceId
-                        ? 'bg-emerald-500/15 text-emerald-300'
+                        ? 'bg-cinema-success/15 text-cinema-success'
                         : 'bg-cinema-elevated text-cinema-muted'
                     )}
                   >

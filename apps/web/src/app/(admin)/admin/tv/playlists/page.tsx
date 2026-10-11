@@ -295,7 +295,7 @@ export default function AdminTVPlaylistsPage() {
                     className={cn(
                       'text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold',
                       pl.isActive
-                        ? 'bg-emerald-500/20 text-emerald-300'
+                        ? 'bg-cinema-success/20 text-cinema-success'
                         : 'bg-cinema-elevated text-cinema-muted'
                     )}
                   >

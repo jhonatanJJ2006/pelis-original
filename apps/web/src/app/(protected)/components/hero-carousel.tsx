@@ -36,7 +36,7 @@ const genreColors: Record<string, string> = {
   Acción: 'from-red-500/25 to-transparent',
   Comedia: 'from-yellow-400/20 to-transparent',
   Drama: 'from-blue-500/30 to-transparent',
-  Terror: 'from-emerald-500/20 to-transparent',
+  Terror: 'from-cinema-success/20 to-transparent',
   Romance: 'from-pink-500/20 to-transparent',
   Ciencia: 'from-cyan-500/25 to-transparent',
   Suspenso: 'from-orange-500/20 to-transparent',

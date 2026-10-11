@@ -124,8 +124,8 @@ function SubscribeSuccessContent() {
 
   return (
     <ScrollReveal className="text-center max-w-lg mx-auto">
-      <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-        <div className="w-14 h-14 bg-emerald-500 rounded-full flex items-center justify-center">
+      <div className="w-20 h-20 bg-cinema-success/20 rounded-full flex items-center justify-center mx-auto mb-6">
+        <div className="w-14 h-14 bg-cinema-success rounded-full flex items-center justify-center">
           {activating ? (
             <Loader2 className="w-8 h-8 text-cinema-chalk animate-spin" />
           ) : (

@@ -292,7 +292,7 @@ export default function AdminAnimePage() {
                         className={cn(
                           'inline-flex items-center text-[10px] px-2 py-0.5 rounded-full',
                           a.status === 'ongoing'
-                            ? 'bg-emerald-500/20 text-emerald-300'
+                            ? 'bg-cinema-success/20 text-cinema-success'
                             : 'bg-cinema-accent/20 text-cinema-accent-light'
                         )}
                       >

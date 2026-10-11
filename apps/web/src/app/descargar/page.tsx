@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Film, Smartphone, Tv } from 'lucide-react';
+import { Smartphone, Tv } from 'lucide-react';
 import { APK_DOWNLOAD_PATH, TV_APK_DOWNLOAD_PATH } from '@/lib/app-download';
 
 export const metadata: Metadata = {
@@ -46,10 +46,9 @@ export default function DescargarAppsPage() {
       <header className="relative py-6 px-4 z-10 border-b border-cinema-border/60">
         <div className="container mx-auto flex items-center justify-between gap-4">
           <Link href="/" className="flex items-center gap-2.5 w-fit group">
-            <div className="w-10 h-10 bg-gradient-to-br from-cinema-accent to-cinema-accent rounded flex items-center justify-center group-hover:scale-105 transition-transform shadow-glow">
-              <Film className="w-6 h-6 text-cinema-bg" aria-hidden />
-            </div>
-            <span className="font-display text-2xl tracking-tight text-cinema-chalk">Pelis</span>
+            <span className="font-display text-2xl font-semibold tracking-[0.12em] text-cinema-accent">
+              PELIS
+            </span>
           </Link>
           <Link
             href="/login"

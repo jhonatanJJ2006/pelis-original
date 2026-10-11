@@ -106,7 +106,7 @@ export default function EditTVChannelPage() {
             <span
               className={cn(
                 'inline-flex items-center text-xs px-2.5 py-1 rounded-full font-medium',
-                channel.streamStatus === 'online' && 'bg-emerald-500/20 text-emerald-300',
+                channel.streamStatus === 'online' && 'bg-cinema-success/20 text-cinema-success',
                 channel.streamStatus === 'offline' && 'bg-red-500/20 text-red-300',
                 (!channel.streamStatus || channel.streamStatus === 'unknown') &&
                   'bg-cinema-elevated text-cinema-muted'

@@ -217,7 +217,7 @@ export default function AnimeDetailPage() {
                 className={cn(
                   'px-3 py-1.5 rounded-lg text-sm font-medium border',
                   series.status === 'ongoing'
-                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                    ? 'bg-cinema-success/10 border-cinema-success/30 text-cinema-success'
                     : 'bg-cinema-elevated border-cinema-border text-cinema-silver'
                 )}
               >

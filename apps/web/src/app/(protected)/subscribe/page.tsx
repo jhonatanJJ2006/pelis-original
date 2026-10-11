@@ -176,7 +176,7 @@ export default function SubscribePage() {
         </p>
         {hasActivePlan && (
           <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-full text-sm">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-cinema-success/10 border border-cinema-success/30 text-cinema-success rounded-full text-sm">
               <Check className="w-4 h-4" aria-hidden />
               {currentPlan ? (
                 <>
@@ -274,7 +274,7 @@ export default function SubscribePage() {
                 >
                   <div className="relative h-full pt-4">
                     {isCurrent ? (
-                      <span className="absolute top-0 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap px-4 py-1 bg-emerald-500 text-cinema-chalk text-xs font-bold rounded-full uppercase tracking-wide shadow-[0_2px_12px_rgba(16,185,129,0.4)]">
+                      <span className="absolute top-0 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap px-4 py-1 bg-cinema-success text-cinema-chalk text-xs font-bold rounded-full uppercase tracking-wide shadow-[0_2px_12px_rgba(16,185,129,0.4)]">
                         Tu plan
                       </span>
                     ) : plan.recommended ? (
@@ -287,7 +287,7 @@ export default function SubscribePage() {
                       className={cn(
                         'flex flex-col rounded-lg border p-8 h-full overflow-visible motion-safe:transition-[transform,box-shadow,border-color] motion-safe:duration-normal [@media(hover:hover)_and_(pointer:fine)]:hover:-translate-y-1',
                         isCurrent
-                          ? 'bg-cinema-surface border-emerald-500/50 shadow-[0_8px_32px_rgba(16,185,129,0.15)]'
+                          ? 'bg-cinema-surface border-cinema-success/50 shadow-[0_8px_32px_rgba(16,185,129,0.15)]'
                           : plan.recommended
                             ? 'card-feature border-cinema-accent/40 shadow-[0_8px_32px_rgba(245,200,66,0.15)] [@media(hover:hover)_and_(pointer:fine)]:hover:border-cinema-accent/60 [@media(hover:hover)_and_(pointer:fine)]:hover:shadow-[0_12px_40px_rgba(245,200,66,0.25)]'
                             : 'bg-cinema-surface border-cinema-border [@media(hover:hover)_and_(pointer:fine)]:hover:border-cinema-accent/40'
@@ -297,7 +297,7 @@ export default function SubscribePage() {
                         className={cn(
                           'w-12 h-12 rounded-lg flex items-center justify-center mb-5',
                           isCurrent
-                            ? 'bg-emerald-500 text-cinema-chalk'
+                            ? 'bg-cinema-success text-cinema-chalk'
                             : plan.recommended
                               ? 'bg-cinema-accent text-cinema-bg'
                               : 'bg-gradient-to-br from-cinema-accent to-cinema-teal text-cinema-chalk'
@@ -347,7 +347,7 @@ export default function SubscribePage() {
                           action === 'upgrade'
                             ? 'bg-gradient-to-r from-cinema-accent to-cinema-accent-light text-cinema-bg hover:brightness-110'
                             : action === 'current'
-                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                              ? 'bg-cinema-success/20 text-cinema-success border border-cinema-success/40'
                               : plan.recommended
                                 ? 'bg-gradient-to-r from-cinema-accent to-cinema-accent-light text-cinema-bg hover:brightness-110'
                                 : 'bg-cinema-elevated hover:bg-cinema-accent/30 text-cinema-chalk border border-cinema-border'

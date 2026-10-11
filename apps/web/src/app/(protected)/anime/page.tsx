@@ -204,7 +204,7 @@ export default function AnimePage() {
                   className={cn(
                     'self-start px-1.5 py-0.5 rounded text-[10px] font-medium uppercase tracking-wide',
                     s.status === 'ongoing'
-                      ? 'bg-emerald-500/20 text-emerald-400'
+                      ? 'bg-cinema-success/20 text-cinema-success'
                       : 'bg-cinema-elevated text-cinema-silver'
                   )}
                 >

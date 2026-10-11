@@ -66,7 +66,7 @@ export function ProviderHealthPanel() {
               className={cn(
                 'flex items-center gap-2 px-3 py-2 rounded-lg border text-sm',
                 r.ok
-                  ? 'border-emerald-500/30 bg-emerald-500/5 text-emerald-300'
+                  ? 'border-cinema-success/30 bg-cinema-success/5 text-cinema-success'
                   : 'border-red-500/30 bg-red-500/5 text-red-300'
               )}
             >

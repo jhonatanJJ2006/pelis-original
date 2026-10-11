@@ -19,7 +19,7 @@ const genreColors: Record<string, string> = {
   Acción: 'from-red-500/30 to-cinema-accent/15',
   Comedia: 'from-yellow-400/25 to-cinema-accent/15',
   Drama: 'from-blue-500/30 to-cinema-teal/15',
-  Terror: 'from-emerald-500/25 to-cinema-accent/15',
+  Terror: 'from-cinema-success/25 to-cinema-accent/15',
   Romance: 'from-pink-500/25 to-cinema-accent/15',
   Ciencia: 'from-cyan-500/25 to-cinema-accent/15',
   Suspenso: 'from-orange-500/25 to-cinema-accent/15',

@@ -398,7 +398,12 @@ export default function AdminTVPage() {
       {stats && mode !== 'playlists' && (
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 mb-6">
           <StatChip icon={Tv} label="Total" value={stats.total} accent="text-cinema-accent-light" />
-          <StatChip icon={Activity} label="Online" value={stats.online} accent="text-emerald-300" />
+          <StatChip
+            icon={Activity}
+            label="Online"
+            value={stats.online}
+            accent="text-cinema-success"
+          />
           <StatChip icon={RefreshCw} label="Offline" value={stats.offline} accent="text-red-300" />
           <StatChip icon={Zap} label="Sin probar" value={stats.unknown} accent="text-cinema-ash" />
           <StatChip
@@ -672,7 +677,7 @@ export default function AdminTVPage() {
                       className={cn(
                         'text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold',
                         pl.isActive
-                          ? 'bg-emerald-500/20 text-emerald-300'
+                          ? 'bg-cinema-success/20 text-cinema-success'
                           : 'bg-cinema-elevated text-cinema-muted'
                       )}
                     >
@@ -824,7 +829,7 @@ function ChannelCard({
           onClick={() => onToggle(ch)}
         >
           {ch.isActive ? (
-            <ToggleRight className="w-4 h-4 text-emerald-300" />
+            <ToggleRight className="w-4 h-4 text-cinema-success" />
           ) : (
             <ToggleLeft className="w-4 h-4 text-cinema-ash" />
           )}
@@ -899,7 +904,7 @@ function ChannelActions({
         onClick={() => onToggle(ch)}
       >
         {ch.isActive ? (
-          <ToggleRight className="w-4 h-4 text-emerald-300" />
+          <ToggleRight className="w-4 h-4 text-cinema-success" />
         ) : (
           <ToggleLeft className="w-4 h-4 text-cinema-ash" />
         )}
@@ -928,7 +933,7 @@ function ChannelActions({
 
 function StatusBadge({ status }: { status?: 'online' | 'offline' | 'unknown' }) {
   const map = {
-    online: { label: 'Online', className: 'bg-emerald-500/20 text-emerald-300' },
+    online: { label: 'Online', className: 'bg-cinema-success/20 text-cinema-success' },
     offline: { label: 'Offline', className: 'bg-red-500/20 text-red-300' },
     unknown: { label: 'Sin probar', className: 'bg-cinema-elevated text-cinema-ash' },
   } as const;

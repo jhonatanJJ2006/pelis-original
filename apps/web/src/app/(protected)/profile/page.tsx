@@ -135,7 +135,7 @@ export default function ProfilePage() {
           className={cn(
             'rounded-lg border p-5 sm:p-6',
             hasActivePlan
-              ? 'border-emerald-500/30 bg-emerald-500/5'
+              ? 'border-cinema-success/30 bg-cinema-success/5'
               : 'border-cinema-border bg-cinema-surface'
           )}
         >
@@ -145,7 +145,7 @@ export default function ProfilePage() {
                 className={cn(
                   'w-11 h-11 rounded-lg flex items-center justify-center shrink-0',
                   hasActivePlan
-                    ? 'bg-emerald-500/20 text-emerald-400'
+                    ? 'bg-cinema-success/20 text-cinema-success'
                     : 'bg-cinema-accent/15 text-cinema-accent'
                 )}
               >
@@ -159,7 +159,7 @@ export default function ProfilePage() {
                 </h2>
                 <p className="text-cinema-muted text-sm mt-0.5">
                   {hasActivePlan ? (
-                    <span className="inline-flex items-center gap-1.5 text-emerald-400">
+                    <span className="inline-flex items-center gap-1.5 text-cinema-success">
                       <Check className="w-3.5 h-3.5" aria-hidden />
                       Activa hasta {new Date(user.planExpiresAt!).toLocaleDateString('es-ES')}
                     </span>

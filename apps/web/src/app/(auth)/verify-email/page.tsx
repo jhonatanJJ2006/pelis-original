@@ -125,7 +125,7 @@ function VerifyForm() {
     return (
       <div className="w-full max-w-md">
         <div className="card-glow p-6 md:p-8 shadow-[0_8px_40px_rgba(196,163,90,0.12)] text-center">
-          <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex items-center justify-center mx-auto mb-4 shadow-lg">
+          <div className="w-14 h-14 bg-gradient-to-br from-cinema-success to-cinema-success rounded-lg flex items-center justify-center mx-auto mb-4 shadow-lg">
             <svg
               className="w-8 h-8 text-cinema-chalk"
               fill="none"

@@ -159,7 +159,7 @@ export default function AdminUsersPage() {
                         {u.role === 'admin' ? 'Admin' : 'Usuario'}
                       </span>
                       {u.emailVerified ? (
-                        <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">
+                        <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-cinema-success/20 text-cinema-success">
                           <Check className="w-3 h-3" /> Verificado
                         </span>
                       ) : null}
@@ -242,7 +242,7 @@ export default function AdminUsersPage() {
                       </td>
                       <td className="px-4 py-3 text-cinema-muted">
                         {u.emailVerified ? (
-                          <span className="inline-flex items-center gap-1 text-emerald-300">
+                          <span className="inline-flex items-center gap-1 text-cinema-success">
                             <Check className="w-4 h-4" />
                           </span>
                         ) : (
