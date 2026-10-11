@@ -1,7 +1,7 @@
 'use client';
 
 import { FormEvent, useCallback, useEffect, useRef, useState } from 'react';
-import { useUser } from '@pelis/auth/hooks';
+import { useHydrated, useUser } from '@pelis/auth/hooks';
 import { authClient } from '@pelis/auth/client';
 import { Film } from 'lucide-react';
 import { cn } from '@pelis/ui/utils';
@@ -38,6 +38,7 @@ function persistDeviceId(id: string) {
 
 export function TvLoginScreen() {
   const { user, isLoading } = useUser();
+  const hydrated = useHydrated();
   const [pairing, setPairing] = useState<PairingPayload | null>(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -77,13 +78,13 @@ export function TvLoginScreen() {
   }, []);
 
   useEffect(() => {
-    if (isLoading) return;
+    if (!hydrated || isLoading) return;
     if (user) {
       goLiveTv();
       return;
     }
     void createPairing();
-  }, [user, isLoading, createPairing, goLiveTv]);
+  }, [hydrated, user, isLoading, createPairing, goLiveTv]);
 
   useEffect(() => {
     if (!pairing || user) return;

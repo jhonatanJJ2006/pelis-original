@@ -7,6 +7,7 @@ const getSession = vi.fn();
 
 vi.mock('@pelis/auth/hooks', () => ({
   useUser: () => ({ user: null, isLoading: false }),
+  useHydrated: () => true,
 }));
 
 vi.mock('@pelis/auth/client', () => ({

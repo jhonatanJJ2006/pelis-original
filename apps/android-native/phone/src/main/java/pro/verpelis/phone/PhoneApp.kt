@@ -286,7 +286,7 @@ fun HomeScreen(api: PelisApi, nav: NavHostController) {
             val plans = bg(emptyList()) { api.plans() }
             val tr = trending.await()
             HomeData(
-                hero = featured.await().firstOrNull() ?: tr.firstOrNull { it.backdrop != null },
+                hero = featured.await().firstOrNull { !it.comingSoon } ?: tr.firstOrNull { it.backdrop != null && !it.comingSoon },
                 continueWatching = cont.await(), trending = tr, latest = latest.await(), anime = anime.await(),
                 channels = channels.await(), rows = rows.map { (g, d) -> g to d.await() }, plans = plans.await(),
             )
@@ -458,6 +458,7 @@ fun DetailScreen(api: PelisApi, nav: NavHostController, kind: String, id: String
         val episodes = if (kind == "anime") t.episodes.takeIf { it > 0 } ?: 12 else t.episodes
         fun play() = scope.launch {
             msg = null
+            if (kind != "anime" && t.comingSoon) { msg = "Próximamente: este título todavía no tiene video"; return@launch }
             val req = if (kind == "anime") {
                 api.animeEpisode(t.id, episode)?.let { (u, s) -> PlaybackRequest(u, "${t.name} - Ep. $episode", null, s) }
             } else if (t.kind == Kind.SERIES && episode > 1) null
@@ -483,7 +484,7 @@ fun DetailScreen(api: PelisApi, nav: NavHostController, kind: String, id: String
                     Text(t.name, style = NoirTitle)
                     Text(t.meta(), style = NoirBody)
                     Spacer(Modifier.height(16.dp))
-                    GoldButton(if (isSeries) "Reproducir episodio $episode" else "Reproducir", { play() }, Modifier.fillMaxWidth(), icon = Icons.Filled.PlayArrow)
+                    GoldButton(if (kind != "anime" && t.comingSoon) "Próximamente" else if (isSeries) "Reproducir episodio $episode" else "Reproducir", { play() }, Modifier.fillMaxWidth(), icon = Icons.Filled.PlayArrow)
                     Spacer(Modifier.height(10.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         if (kind != "anime") GhostButton(if (fav) "En mi lista" else "Mi lista", {
@@ -499,7 +500,7 @@ fun DetailScreen(api: PelisApi, nav: NavHostController, kind: String, id: String
                         Spacer(Modifier.height(18.dp))
                         EpisodePicker(seasons = 1, season = season, episodes = episodes.coerceAtLeast(1), selected = episode,
                             onSeason = { season = it; episode = 1 }, onEpisode = { episode = it },
-                            available = { e -> kind == "anime" || e == 1 })
+                            available = { e -> kind == "anime" || (e == 1 && !t.comingSoon) })
                     }
                     Spacer(Modifier.height(18.dp))
                     Column(Modifier.fillMaxWidth().background(Noir.Surface, RoundedCornerShape(8.dp)).border(1.dp, Noir.Line, RoundedCornerShape(8.dp)).padding(16.dp)) {

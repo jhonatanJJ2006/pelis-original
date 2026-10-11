@@ -7,24 +7,38 @@ import { isMissingVideo } from '../lib/movieQuality';
 import { hasManifestForToken } from '../lib/hasManifestForToken';
 import { genreTokenWhere, movieMatchesGenre, splitMovieGenres } from '../lib/movieGenre';
 
-/** Keep series as-is; movies need videoUrl or an on-disk HLS manifest. */
-async function filterPlayableCatalog<
-  T extends { mediaType?: string | null; videoUrl?: string | null; token: string },
->(movies: T[]): Promise<T[]> {
-  const out: T[] = [];
+type CatalogRow = { mediaType?: string | null; videoUrl?: string | null; token: string };
+
+/** True when the title has a direct videoUrl or an on-disk HLS manifest. */
+async function isPlayableTitle(m: CatalogRow): Promise<boolean> {
+  if (!isMissingVideo(m.videoUrl)) return true;
+  return hasManifestForToken(m.token);
+}
+
+/**
+ * Catalog filter: movies need a playable video. Series stay listed even
+ * without video, flagged `comingSoon` so the UI shows "Próximamente".
+ */
+async function filterPlayableCatalog<T extends CatalogRow>(
+  movies: T[]
+): Promise<Array<T & { comingSoon: boolean }>> {
+  const out: Array<T & { comingSoon: boolean }> = [];
   for (const movie of movies) {
     const mediaType = (movie.mediaType ?? 'MOVIE').toString().toUpperCase();
-    if (mediaType === 'SERIES') {
-      out.push(movie);
-      continue;
-    }
-    if (!isMissingVideo(movie.videoUrl)) {
-      out.push(movie);
-      continue;
-    }
-    if (await hasManifestForToken(movie.token)) {
-      out.push(movie);
-    }
+    const playable = await isPlayableTitle(movie);
+    if (playable) out.push({ ...movie, comingSoon: false });
+    else if (mediaType === 'SERIES') out.push({ ...movie, comingSoon: true });
+  }
+  return out;
+}
+
+/** Hero / featured / trending: only titles that can actually play now. */
+async function filterStrictlyPlayable<T extends CatalogRow>(
+  movies: T[]
+): Promise<Array<T & { comingSoon: boolean }>> {
+  const out: Array<T & { comingSoon: boolean }> = [];
+  for (const movie of movies) {
+    if (await isPlayableTitle(movie)) out.push({ ...movie, comingSoon: false });
   }
   return out;
 }
@@ -147,7 +161,8 @@ export const getById = register({
   args: z.object({ id: z.string() }),
   handler: async (_ctx, { id }) => {
     const movie = await prisma.movie.findUnique({ where: { id } });
-    return movie ? toMovieShape(movie) : null;
+    if (!movie) return null;
+    return toMovieShape({ ...movie, comingSoon: !(await isPlayableTitle(movie)) });
   },
 });
 
@@ -157,9 +172,10 @@ export const getFeatured = register({
   reads: ['movie'],
   handler: async () => {
     const featured = await prisma.movie.findMany({ where: { featured: true }, take: 10 });
-    if (featured.length > 0) return (await filterPlayableCatalog(featured)).map(toMovieShape);
-    const fallback = await prisma.movie.findMany({ orderBy: { name: 'asc' }, take: 30 });
-    return (await filterPlayableCatalog(fallback)).slice(0, 10).map(toMovieShape);
+    const playableFeatured = await filterStrictlyPlayable(featured);
+    if (playableFeatured.length > 0) return playableFeatured.map(toMovieShape);
+    const fallback = await prisma.movie.findMany({ orderBy: { releaseYear: 'desc' }, take: 60 });
+    return (await filterStrictlyPlayable(fallback)).slice(0, 10).map(toMovieShape);
   },
 });
 
@@ -172,9 +188,9 @@ export const getTrending = register({
     const take = args?.limit ?? 12;
     const movies = await prisma.movie.findMany({
       orderBy: { releaseYear: 'desc' },
-      take: take * 3,
+      take: take * 6,
     });
-    return (await filterPlayableCatalog(movies)).slice(0, take).map(toMovieShape);
+    return (await filterStrictlyPlayable(movies)).slice(0, take).map(toMovieShape);
   },
 });
 
@@ -211,7 +227,7 @@ export const listSeries = register({
     // that polluted /series and the home "Series" row with mislabeled films.
     // Admin `series` rows are a separate table. adminSeries.create mirrors a new
     // token into this Movie row; import:tmdb-series does the same additively.
-    return series.map(toMovieShape);
+    return (await filterPlayableCatalog(series)).map(toMovieShape);
   },
 });
 
