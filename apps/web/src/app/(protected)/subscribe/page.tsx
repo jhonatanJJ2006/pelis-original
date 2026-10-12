@@ -159,15 +159,13 @@ export default function SubscribePage() {
 
   return (
     <div className="page-shell">
-      <ScrollReveal className="text-center mb-14 max-w-2xl mx-auto">
-        <div className="w-16 h-16 bg-gradient-to-br from-cinema-accent to-cinema-accent-light rounded-lg flex items-center justify-center mx-auto mb-5 shadow-[0_4px_24px_rgba(245,200,66,0.3)]">
-          <Crown className="w-8 h-8 text-cinema-bg" aria-hidden />
-        </div>
-        <p className="text-cinema-accent-light text-sm font-medium uppercase tracking-widest mb-2">
-          Membresía
+      <ScrollReveal className="mb-14 max-w-3xl">
+        <p className="text-label uppercase text-cinema-accent mb-3 inline-flex items-center gap-3">
+          <span className="h-px w-8 bg-cinema-accent" aria-hidden />
+          Suscripción Maison Noir
         </p>
-        <h1 className="font-display text-4xl md:text-5xl font-semibold tracking-tight text-cinema-chalk mb-4">
-          Elige tu plan
+        <h1 className="font-display text-4xl md:text-5xl tracking-tight text-cinema-chalk mb-4">
+          Elige tu plan cinematográfico
         </h1>
         <p className="text-cinema-muted text-lg">
           {hasActivePlan
@@ -175,7 +173,7 @@ export default function SubscribePage() {
             : 'Desliza los planes y elige el que mejor se adapte a ti.'}
         </p>
         {hasActivePlan && (
-          <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <div className="mt-6 flex flex-col sm:flex-row sm:items-center gap-3">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-cinema-success/10 border border-cinema-success/30 text-cinema-success rounded-full text-sm">
               <Check className="w-4 h-4" aria-hidden />
               {currentPlan ? (
