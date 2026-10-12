@@ -74,52 +74,86 @@ function LinkTvForm() {
   };
 
   return (
-    <div className="page-shell max-w-lg mx-auto">
-      <p className="text-cinema-accent text-xs font-medium uppercase tracking-widest mb-2">
-        Dispositivos
-      </p>
-      <h1 className="font-display text-3xl md:text-4xl tracking-tight text-cinema-chalk mb-3">
-        Vincular televisor
-      </h1>
-      <p className="text-cinema-muted text-sm leading-relaxed mb-8">
-        Escribe el código de la pantalla de Pelis en tu Android TV. Al confirmar, la tele entra con
-        tu misma sesión.
-      </p>
+    <div className="page-shell max-w-5xl mx-auto">
+      <div className="text-center max-w-2xl mx-auto mb-12">
+        <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-cinema-accent/40 bg-cinema-accent/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-cinema-accent">
+          <span className="h-1.5 w-1.5 rounded-full bg-cinema-accent" aria-hidden />
+          Sincronización de salón
+        </p>
+        <h1 className="font-display text-4xl md:text-5xl tracking-tight text-cinema-chalk mb-3">
+          Vincular televisor
+        </h1>
+        <p className="text-cinema-muted leading-relaxed">
+          Escribe el código de la pantalla de Pelis en tu Android TV. Al confirmar, la tele entra
+          con tu misma sesión.
+        </p>
+      </div>
 
-      {ok ? (
-        <div className="rounded-lg border border-cinema-border bg-cinema-surface p-6">
-          <p className="text-cinema-chalk font-semibold mb-2">Televisor vinculado</p>
-          <p className="text-cinema-muted text-sm leading-relaxed">
-            Vuelve a la tele. En unos segundos debe abrir los canales en vivo.
-          </p>
-          <Link href="/tv" className="btn-primary mt-6 inline-flex min-h-11 px-5">
-            Ir a TV en vivo
-          </Link>
+      <div className="grid gap-6 md:grid-cols-2">
+        <section className="border border-cinema-border/70 bg-cinema-surface p-6 md:p-8 rounded-[2px]">
+          <h2 className="font-display text-xl text-cinema-chalk mb-6">
+            Instrucciones de vinculación
+          </h2>
+          <ol className="space-y-5">
+            {[
+              ['Abre PELIS en tu Android TV', 'Inicia la aplicación en tu televisor.'],
+              [
+                'Muestra el código de vinculación',
+                'En la pantalla de acceso de la tele aparece un código de 6 caracteres.',
+              ],
+              ['Introduce el código aquí', 'Escríbelo en el formulario y confirma.'],
+            ].map(([title, body], i) => (
+              <li key={title} className="flex gap-4">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-cinema-accent/50 font-display text-cinema-accent">
+                  {i + 1}
+                </span>
+                <div>
+                  <p className="text-cinema-chalk font-medium">{title}</p>
+                  <p className="text-sm text-cinema-muted">{body}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        <div>
+          {ok ? (
+            <div className="border border-cinema-accent/40 bg-cinema-surface p-6 md:p-8 rounded-[2px]">
+              <p className="text-cinema-chalk font-semibold mb-2">Televisor vinculado</p>
+              <p className="text-cinema-muted text-sm leading-relaxed">
+                Vuelve a la tele. En unos segundos debe abrir los canales en vivo.
+              </p>
+              <Link href="/tv" className="btn-primary mt-6 inline-flex min-h-11 px-5">
+                Ir a TV en vivo
+              </Link>
+            </div>
+          ) : (
+            <form
+              onSubmit={handleSubmit}
+              className="border border-cinema-border/70 bg-cinema-surface p-6 md:p-8 space-y-5 rounded-[2px]"
+            >
+              <p className="text-label uppercase text-cinema-accent">Terminal de autorización</p>
+              <Input
+                label="Código de 6 caracteres"
+                value={code}
+                onChange={(event) => setCode(normalizePairingCode(event.target.value))}
+                placeholder="ABC234"
+                autoComplete="one-time-code"
+                inputMode="text"
+                maxLength={6}
+              />
+              {error ? (
+                <p className="text-sm text-cinema-danger-light" role="alert">
+                  {error}
+                </p>
+              ) : null}
+              <Button type="submit" className="w-full" size="lg" disabled={busy}>
+                {busy ? 'Vinculando…' : 'Vincular este televisor'}
+              </Button>
+            </form>
+          )}
         </div>
-      ) : (
-        <form
-          onSubmit={handleSubmit}
-          className="rounded-lg border border-cinema-border bg-cinema-surface p-6 space-y-4"
-        >
-          <Input
-            label="Código de la tele"
-            value={code}
-            onChange={(event) => setCode(normalizePairingCode(event.target.value))}
-            placeholder="ABC234"
-            autoComplete="one-time-code"
-            inputMode="text"
-            maxLength={6}
-          />
-          {error ? (
-            <p className="text-sm text-cinema-danger-light" role="alert">
-              {error}
-            </p>
-          ) : null}
-          <Button type="submit" className="w-full" size="lg" disabled={busy}>
-            {busy ? 'Vinculando…' : 'Vincular este televisor'}
-          </Button>
-        </form>
-      )}
+      </div>
     </div>
   );
 }

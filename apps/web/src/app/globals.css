@@ -194,6 +194,20 @@
     @apply absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cinema-accent to-transparent;
   }
 
+  /* Documentos legales Maison Noir: secciones como fichas con filete dorado */
+  .legal-doc article {
+    @apply max-w-none;
+  }
+
+  .legal-doc article > div > section {
+    @apply border border-cinema-border/70 bg-cinema-surface/70 p-6 md:p-8;
+    border-radius: 2px;
+  }
+
+  .legal-doc article > div > section > h2 {
+    @apply text-cinema-accent border-b border-cinema-border/60 pb-3 mb-4;
+  }
+
   .card-feature {
     background: var(--gradient-feature-card);
     @apply rounded-2xl border border-cinema-violet/20;
