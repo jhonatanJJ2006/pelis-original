@@ -70,8 +70,8 @@ function MovieCardBase({
           'bg-cinema-surface border border-cinema-border',
           'motion-safe:transition-[transform,border-color,box-shadow] relative z-0 hover:z-10 motion-safe:duration-normal motion-safe:ease-out-expo',
           '[@media(hover:hover)_and_(pointer:fine)]:group-hover:border-cinema-accent',
-          '[@media(hover:hover)_and_(pointer:fine)]:group-hover:ring-2 [@media(hover:hover)_and_(pointer:fine)]:group-hover:ring-cinema-accent',
-          '[@media(hover:hover)_and_(pointer:fine)]:group-hover:scale-[1.06]',
+          '[@media(hover:hover)_and_(pointer:fine)]:group-hover:ring-1 [@media(hover:hover)_and_(pointer:fine)]:group-hover:ring-cinema-accent/60',
+          '[@media(hover:hover)_and_(pointer:fine)]:group-hover:scale-[1.03]',
           'group-focus-visible:ring-2 group-focus-visible:ring-cinema-accent'
         )}
       >
@@ -147,16 +147,14 @@ function MovieCardBase({
           </div>
         </div>
         <div className="p-3">
-          <h3 className="font-medium text-sm text-cinema-chalk truncate mb-1 transition-colors duration-200 group-hover:text-cinema-accent-light">
+          <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.12em] text-cinema-silver mb-1">
+            <span className="truncate">{movie.genre}</span>
+            <span aria-hidden>•</span>
+            <span className="shrink-0">{movie.releaseYear}</span>
+          </div>
+          <h3 className="font-display text-[15px] text-cinema-chalk truncate transition-colors duration-200 group-hover:text-cinema-accent-light">
             {movie.name}
           </h3>
-          <div className="flex items-center justify-between text-xs text-cinema-silver">
-            <span className="truncate group-hover:text-cinema-muted">{movie.genre}</span>
-            <span className="shrink-0 ml-2 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-cinema-accent/70 group-hover:bg-cinema-accent group-hover:shadow-glow" />
-              {movie.releaseYear}
-            </span>
-          </div>
           {isSeries && movie.episodes && (
             <p className="text-[11px] text-cinema-silver mt-1">{movie.episodes} episodios</p>
           )}

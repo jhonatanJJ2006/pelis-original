@@ -281,14 +281,15 @@ export default function MovieDetailPageClient({ preloaded }: MovieDetailPageClie
             <p className="text-cinema-muted leading-relaxed text-lg">{resolvedMovie.synopsis}</p>
             {castList.length > 0 && (
               <div className="mt-10">
-                <h2 className="font-display text-2xl font-semibold tracking-tight text-cinema-chalk mb-4">
+                <h2 className="flex items-center gap-3 font-display text-2xl tracking-tight text-cinema-chalk mb-4">
+                  <span className="h-1.5 w-1.5 rounded-full bg-cinema-accent" aria-hidden />
                   Reparto principal
                 </h2>
                 <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                   {castList.map((name) => (
                     <li
                       key={name}
-                      className="flex flex-col items-center gap-2 rounded-lg border border-cinema-border bg-cinema-surface p-4 text-center"
+                      className="flex flex-col items-center gap-2 rounded-[2px] border border-cinema-border/70 bg-cinema-surface p-5 text-center"
                     >
                       <span
                         className="flex h-12 w-12 items-center justify-center rounded-full border border-cinema-accent/40 bg-cinema-elevated font-display text-lg text-cinema-accent"
@@ -308,8 +309,8 @@ export default function MovieDetailPageClient({ preloaded }: MovieDetailPageClie
               </div>
             )}
           </div>
-          <div className="card-feature p-6 h-fit">
-            <h3 className="font-display text-lg font-semibold tracking-tight text-cinema-chalk mb-5">
+          <div className="h-fit border border-cinema-border/70 bg-cinema-surface p-6 rounded-[2px]">
+            <h3 className="font-display text-lg tracking-tight text-cinema-accent border-b border-cinema-border/60 pb-3 mb-5">
               Detalles de producción
             </h3>
             <dl className="space-y-4 text-sm">
@@ -322,12 +323,11 @@ export default function MovieDetailPageClient({ preloaded }: MovieDetailPageClie
                   ? [['Episodios', String(resolvedMovie.episodes)]]
                   : []),
               ].map(([label, value]) => (
-                <div
-                  key={label}
-                  className="flex justify-between gap-4 border-b border-cinema-border/50 pb-3 last:border-0"
-                >
-                  <dt className="text-cinema-silver">{label}</dt>
-                  <dd className="font-medium text-right text-cinema-chalk">{value}</dd>
+                <div key={label} className="border-b border-cinema-border/50 pb-3 last:border-0">
+                  <dt className="text-[10px] uppercase tracking-[0.16em] text-cinema-silver mb-1">
+                    {label}
+                  </dt>
+                  <dd className="font-medium text-cinema-chalk">{value}</dd>
                 </div>
               ))}
             </dl>
@@ -336,7 +336,8 @@ export default function MovieDetailPageClient({ preloaded }: MovieDetailPageClie
 
         {relatedFiltered.length > 0 && (
           <MovieRow
-            title={`Más de ${resolvedMovie.genre}`}
+            title="Más como esto"
+            subtitle={`Más de ${resolvedMovie.genre}`}
             movies={relatedFiltered}
             href={`/movies?genre=${encodeURIComponent(resolvedMovie.genre)}`}
           />

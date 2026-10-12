@@ -74,7 +74,7 @@ export default function SeriesPageClient({ preloaded }: SeriesPageClientProps) {
   return (
     <div className="page-shell">
       <div className="mb-10">
-        <p className="text-label uppercase text-cinema-accent mb-2">Catálogo</p>
+        <p className="text-label uppercase text-cinema-accent mb-2">Catálogo Maison Noir</p>
         <h1 className="font-display text-4xl md:text-5xl tracking-tight text-cinema-chalk">
           Series
         </h1>
