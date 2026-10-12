@@ -11,6 +11,8 @@ import {
   Shield,
   Sparkles,
   ArrowRight,
+  Monitor,
+  Smartphone,
 } from 'lucide-react';
 import { Button } from '@pelis/ui/components';
 import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';
@@ -57,6 +59,24 @@ const perks = [
   },
 ];
 
+const devices = [
+  {
+    icon: Monitor,
+    title: 'Web',
+    body: 'Desde cualquier navegador, en tu computadora o tablet.',
+  },
+  {
+    icon: Smartphone,
+    title: 'Android',
+    body: 'Lleva tu catálogo contigo y continúa donde lo dejaste.',
+  },
+  {
+    icon: Tv,
+    title: 'Android TV',
+    body: 'La experiencia de diez pies, pensada para el control remoto.',
+  },
+];
+
 export function LandingPage() {
   return (
     <div className="relative overflow-hidden">
@@ -65,7 +85,7 @@ export function LandingPage() {
         className="pointer-events-none absolute inset-0 -z-10"
         style={{
           background:
-            'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(196,163,90,0.14), transparent 55%), radial-gradient(ellipse 50% 40% at 100% 20%, rgba(212,184,150,0.08), transparent), radial-gradient(ellipse 40% 30% at 0% 80%, rgba(139,30,45,0.08), transparent)',
+            'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(229,194,118,0.14), transparent 55%), radial-gradient(ellipse 50% 40% at 100% 20%, rgba(212,184,150,0.08), transparent), radial-gradient(ellipse 40% 30% at 0% 80%, rgba(139,30,45,0.08), transparent)',
         }}
       />
 
@@ -75,8 +95,8 @@ export function LandingPage() {
             Streaming · Maison Noir
           </p>
           <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-cinema-chalk leading-[1.05] mb-6">
-            Cine de sala oscura.
-            <span className="block text-cinema-accent-light mt-2">En casa, sin ruido.</span>
+            Cine, series, anime y TV en vivo.
+            <span className="block italic text-cinema-accent mt-2">Todo en un solo lugar.</span>
           </h1>
           <p className="text-cinema-muted text-lg md:text-xl max-w-2xl mb-10">
             Pelis reúne películas, series, anime y TV en vivo en una experiencia premium. Entra,
@@ -85,17 +105,20 @@ export function LandingPage() {
           <div className="flex flex-wrap items-center gap-3">
             <Link href="/register">
               <Button size="lg" className="gap-2">
-                Crear cuenta
+                Comenzar ahora
                 <ArrowRight className="w-4 h-4" />
               </Button>
             </Link>
-            <Link href="/movies">
+            <Link href="/login">
               <Button size="lg" variant="outline" className="gap-2">
-                Explorar catálogo
+                Iniciar sesión
               </Button>
             </Link>
-            <Link href="/login" className="text-sm text-cinema-silver hover:text-cinema-chalk px-2">
-              Ya tengo cuenta
+            <Link
+              href="/movies"
+              className="text-sm text-cinema-silver hover:text-cinema-chalk px-2"
+            >
+              Explorar catálogo
             </Link>
           </div>
         </ScrollReveal>
@@ -143,6 +166,26 @@ export function LandingPage() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="page-shell pb-16 md:pb-20">
+        <ScrollReveal>
+          <p className="text-cinema-accent text-xs font-medium uppercase tracking-[0.2em] mb-3">
+            Dispositivos
+          </p>
+          <h2 className="font-display text-2xl md:text-3xl text-cinema-chalk mb-8">
+            Tu sala, en cualquier pantalla
+          </h2>
+        </ScrollReveal>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-cinema-border/60 border border-cinema-border/60">
+          {devices.map((d) => (
+            <div key={d.title} className="bg-cinema-bg p-6">
+              <d.icon className="w-6 h-6 text-cinema-accent mb-4" />
+              <h3 className="font-display text-xl text-cinema-chalk mb-2">{d.title}</h3>
+              <p className="text-sm text-cinema-muted leading-relaxed">{d.body}</p>
+            </div>
+          ))}
         </div>
       </section>
 

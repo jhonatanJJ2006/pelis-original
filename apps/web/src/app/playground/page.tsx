@@ -54,11 +54,11 @@ const sampleMovies: MediaItem[] = [
 ];
 
 const tokens = [
-  { name: 'bg', hex: '#0B0B0D', cls: 'bg-cinema-bg' },
+  { name: 'bg', hex: '#131315', cls: 'bg-cinema-bg' },
   { name: 'surface', hex: '#141418', cls: 'bg-cinema-surface' },
   { name: 'elevated', hex: '#1C1C22', cls: 'bg-cinema-elevated' },
   { name: 'border', hex: '#2A2A32', cls: 'bg-cinema-border' },
-  { name: 'accent', hex: '#C4A35A', cls: 'bg-cinema-accent' },
+  { name: 'accent', hex: '#E5C276', cls: 'bg-cinema-accent' },
   { name: 'accent-light', hex: '#E0C98A', cls: 'bg-cinema-accent-light' },
   { name: 'gold', hex: '#F5C842', cls: 'bg-cinema-gold' },
   { name: 'violet', hex: '#D4B896', cls: 'bg-cinema-violet' },

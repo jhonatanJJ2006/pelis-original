@@ -61,7 +61,7 @@ export const PLAYER_GESTURE_HUD_FRAME_CLASS =
   'pointer-events-none absolute left-1/2 z-40 -translate-x-1/2 top-[max(1rem,env(safe-area-inset-top,0px))] transition-opacity duration-300 ease-out';
 
 export const PLAYER_GESTURE_HUD_PILL_CLASS =
-  'flex items-center gap-2.5 rounded-full border border-cinema-accent/30 bg-cinema-bg/85 px-3 py-1.5 shadow-[0_8px_32px_rgba(11,11,13,0.55)] backdrop-blur-sm';
+  'flex items-center gap-2.5 rounded-full border border-cinema-accent/30 bg-cinema-bg/85 px-3 py-1.5 shadow-[0_8px_32px_rgba(19,19,21,0.55)] backdrop-blur-sm';
 
 export const PLAYER_GESTURE_HUD_BAR_CLASS =
   'relative h-1.5 w-28 overflow-hidden rounded-full bg-white/15';

@@ -535,7 +535,7 @@ export function AnimeHlsPlayer({
                   <div
                     role="menu"
                     aria-label="Subtítulos"
-                    className="absolute bottom-full right-3 mb-3 w-72 max-w-[calc(100%-1.5rem)] max-h-[60vh] overflow-y-auto rounded-lg border border-cinema-border bg-cinema-surface/95 p-3 text-sm shadow-[0_16px_48px_rgba(11,11,13,0.6)] backdrop-blur-md"
+                    className="absolute bottom-full right-3 mb-3 w-72 max-w-[calc(100%-1.5rem)] max-h-[60vh] overflow-y-auto rounded-lg border border-cinema-border bg-cinema-surface/95 p-3 text-sm shadow-[0_16px_48px_rgba(19,19,21,0.6)] backdrop-blur-md"
                   >
                     <p className="mb-2 px-2 text-label uppercase text-cinema-ash">Subtítulos</p>
                     <button
@@ -586,7 +586,7 @@ export function AnimeHlsPlayer({
                   <div
                     role="menu"
                     aria-label="Calidad de transmisión"
-                    className="absolute bottom-full right-3 mb-3 w-72 max-w-[calc(100%-1.5rem)] max-h-[60vh] overflow-y-auto rounded-lg border border-cinema-border bg-cinema-surface/95 p-3 text-sm shadow-[0_16px_48px_rgba(11,11,13,0.6)] backdrop-blur-md"
+                    className="absolute bottom-full right-3 mb-3 w-72 max-w-[calc(100%-1.5rem)] max-h-[60vh] overflow-y-auto rounded-lg border border-cinema-border bg-cinema-surface/95 p-3 text-sm shadow-[0_16px_48px_rgba(19,19,21,0.6)] backdrop-blur-md"
                   >
                     <p className="mb-2 px-2 text-label uppercase text-cinema-ash">
                       Calidad de transmisión

@@ -43,7 +43,7 @@ export function PwaUpdateModalView({
     <div
       className={cn(
         'relative w-full max-w-md rounded-lg border border-cinema-border bg-cinema-elevated',
-        'shadow-[0_24px_64px_rgba(11,11,13,0.65)] overflow-hidden'
+        'shadow-[0_24px_64px_rgba(19,19,21,0.65)] overflow-hidden'
       )}
     >
       <div className="p-6 md:p-8">

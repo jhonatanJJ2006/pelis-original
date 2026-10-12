@@ -344,7 +344,7 @@ export function VideoPlayer({
     <div
       ref={containerRef}
       className={cn(
-        'group relative overflow-hidden bg-cinema-bg shadow-[0_8px_40px_rgba(196,163,90,0.10)]',
+        'group relative overflow-hidden bg-cinema-bg shadow-[0_8px_40px_rgba(229,194,118,0.10)]',
         landscapeActive
           ? 'aspect-auto [touch-action:none]'
           : 'aspect-video touch-pan-y rounded-2xl border border-cinema-border',
