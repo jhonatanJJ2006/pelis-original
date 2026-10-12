@@ -75,10 +75,17 @@ export default function SeriesPageClient({ preloaded }: SeriesPageClientProps) {
     <div className="page-shell">
       <div className="mb-10">
         <p className="text-label uppercase text-cinema-accent mb-2">Catálogo Maison Noir</p>
-        <h1 className="font-display text-4xl md:text-5xl tracking-tight text-cinema-chalk">
-          Series
-        </h1>
-        <p className="text-cinema-muted mt-3 max-w-2xl">{series.length} series disponibles</p>
+        <div className="flex items-end justify-between gap-4">
+          <h1 className="font-display text-4xl md:text-5xl tracking-tight text-cinema-chalk">
+            Series
+          </h1>
+          <span className="shrink-0 border border-cinema-accent/40 bg-cinema-accent/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-cinema-accent">
+            {series.length} series
+          </span>
+        </div>
+        <p className="text-cinema-muted mt-3 max-w-2xl">
+          Series para maratonear, con temporadas completas.
+        </p>
       </div>
 
       {series.length === 0 ? (
