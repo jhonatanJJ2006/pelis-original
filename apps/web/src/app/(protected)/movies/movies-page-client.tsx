@@ -4,7 +4,8 @@ import { useQueryResult } from '@pelis/db/client';
 import type { PreloadedQuery } from '@pelis/db/server';
 import { useEffect, useMemo, useState } from 'react';
 import { SlidersHorizontal } from 'lucide-react';
-import { MovieRow } from '@pelis/ui/features/movie-row';
+import { MovieCard } from '@pelis/ui/features/movie-card';
+import { SectionHeader } from '@pelis/ui/features/section-header';
 import { EmptyState, ErrorState } from '@pelis/ui/features/empty-state';
 import { CatalogFilterBar } from '@pelis/ui/features/catalog-filter-bar';
 import { CatalogPageSkeleton } from '@pelis/ui/features/catalog-page-skeleton';
@@ -129,14 +130,18 @@ export default function MoviesPageClient({ preloaded, initial }: MoviesPageClien
   return (
     <div className="page-shell">
       <div className="mb-10">
-        <p className="text-label uppercase text-cinema-accent mb-2">Catálogo Maison Noir</p>
-        <h1 className="font-display text-4xl md:text-5xl font-medium tracking-tight text-cinema-chalk mb-3">
-          Películas
-        </h1>
-        <p className="inline-flex items-center gap-2 rounded-full border border-cinema-border px-3 py-1 text-meta text-cinema-muted mb-8">
-          <span className="h-1.5 w-1.5 rounded-full bg-cinema-accent" aria-hidden />
-          {movies.length} títulos disponibles
-        </p>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 mb-8">
+          <div>
+            <p className="text-label uppercase text-cinema-accent mb-2 inline-flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-cinema-accent" aria-hidden />
+              Cinémathèque PELIS
+            </p>
+            <h1 className="font-display italic text-4xl md:text-5xl tracking-tight text-cinema-chalk">
+              Películas
+            </h1>
+          </div>
+          <p className="text-meta text-cinema-muted">{movies.length} títulos disponibles</p>
+        </div>
 
         <CatalogFilterBar
           searchId="movies-search"
@@ -182,29 +187,49 @@ export default function MoviesPageClient({ preloaded, initial }: MoviesPageClien
           actionHref="/movies"
         />
       ) : hasFilters ? (
-        <MovieRow
-          title="Resultados"
-          subtitle={`${movies.length} ${movies.length === 1 ? 'título' : 'títulos'}`}
-          movies={movies}
-        />
+        <section>
+          <SectionHeader
+            title="Resultados"
+            subtitle={`${movies.length} ${movies.length === 1 ? 'título' : 'títulos'}`}
+          />
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-6">
+            {movies.map((movie) => (
+              <MovieCard key={movie._id} movie={movie} />
+            ))}
+          </div>
+        </section>
       ) : (
         <div className="space-y-10">
           {visibleGroups.map(([classification, items]) => (
-            <MovieRow
-              key={classification}
-              title={classification}
-              subtitle={`${classificationLabels[classification] ?? ''} · ${items.length} ${items.length === 1 ? 'título' : 'títulos'}`.trim()}
-              movies={items}
-            />
+            <section key={classification}>
+              <SectionHeader
+                title={classification}
+                subtitle={`${classificationLabels[classification] ?? ''} · ${items.length} ${items.length === 1 ? 'título' : 'títulos'}`.trim()}
+              />
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-6">
+                {items.map((movie) => (
+                  <MovieCard key={movie._id} movie={movie} />
+                ))}
+              </div>
+            </section>
           ))}
           {!hasFilters && hasMore && (
-            <div className="flex justify-center pt-2">
+            <div className="flex flex-col items-center gap-3 pt-2">
+              <p className="text-meta text-cinema-silver">
+                Mostrando {visibleCount_} de {movies.length} títulos
+              </p>
+              <div className="h-px w-48 bg-cinema-border" aria-hidden>
+                <div
+                  className="h-px bg-cinema-accent"
+                  style={{ width: `${Math.round((visibleCount_ / movies.length) * 100)}%` }}
+                />
+              </div>
               <button
                 type="button"
                 onClick={() => setVisibleCount((n) => n + PAGE_SIZE)}
                 className="btn-secondary inline-flex items-center gap-2"
               >
-                Cargar más
+                Cargar más películas
               </button>
             </div>
           )}
