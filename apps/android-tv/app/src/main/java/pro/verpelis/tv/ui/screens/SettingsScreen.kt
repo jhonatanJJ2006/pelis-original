@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -67,7 +68,14 @@ fun SettingsScreen(onBack: () -> Unit) {
             modifier = Modifier.weight(1f).fillMaxHeight().padding(56.dp),
             verticalArrangement = Arrangement.spacedBy(28.dp),
         ) {
-            Text("Ajustes", style = MaisonType.Display)
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("CONFIGURACIÓN  /  ESTE TELEVISOR", style = MaisonType.Eyebrow.copy(color = MaisonNoir.Gold))
+                Text("Ajustes", style = MaisonType.Display)
+                Text(
+                    "Reproducción, cuenta e información del equipo para tu sala.",
+                    style = MaisonType.Body,
+                )
+            }
 
             SettingsPanel(title = "Reproducción", subtitle = "Sonidos de foco y clic") {
                 TvFocusButton(
@@ -101,6 +109,13 @@ fun SettingsScreen(onBack: () -> Unit) {
                     style = MaisonType.Meta,
                 )
             }
+
+            Spacer(Modifier.weight(1f))
+            Row(horizontalArrangement = Arrangement.spacedBy(32.dp)) {
+                Text("▲▼  Navegar", style = MaisonType.Meta)
+                Text("OK  Seleccionar", style = MaisonType.Meta)
+                Text("BACK  Volver", style = MaisonType.Meta)
+            }
         }
     }
 }
@@ -113,9 +128,9 @@ private fun SettingsPanel(
 ) {
     Box(
         modifier = Modifier
-            .border(1.dp, MaisonNoir.Border)
-            .background(MaisonNoir.Surface)
-            .padding(24.dp),
+            .border(1.dp, MaisonNoir.Border, RoundedCornerShape(4.dp))
+            .background(MaisonNoir.Surface, RoundedCornerShape(4.dp))
+            .padding(28.dp),
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(title, style = MaisonType.Title)
