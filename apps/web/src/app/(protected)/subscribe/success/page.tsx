@@ -123,22 +123,23 @@ function SubscribeSuccessContent() {
   }, [setUser]);
 
   return (
-    <ScrollReveal className="text-center max-w-lg mx-auto">
-      <div className="w-20 h-20 bg-cinema-success/20 rounded-full flex items-center justify-center mx-auto mb-6">
-        <div className="w-14 h-14 bg-cinema-success rounded-full flex items-center justify-center">
-          {activating ? (
-            <Loader2 className="w-8 h-8 text-cinema-chalk animate-spin" />
-          ) : (
-            <CheckCircle className="w-8 h-8 text-cinema-chalk" />
-          )}
-        </div>
+    <ScrollReveal className="text-center max-w-2xl mx-auto">
+      <div className="w-16 h-16 border border-cinema-accent/60 bg-cinema-surface rounded-[4px] flex items-center justify-center mx-auto mb-6 shadow-[0_0_40px_rgba(229,194,118,0.15)]">
+        {activating ? (
+          <Loader2 className="w-7 h-7 text-cinema-accent animate-spin" />
+        ) : (
+          <CheckCircle className="w-7 h-7 text-cinema-accent" />
+        )}
       </div>
 
-      <h1 className="font-display text-4xl md:text-5xl font-semibold tracking-tight text-cinema-chalk mb-4">
+      <p className="text-label uppercase text-cinema-accent mb-3">
+        {active ? 'Membresía oficial activada' : 'Suscripción PELIS'}
+      </p>
+      <h1 className="font-display text-4xl md:text-5xl tracking-tight text-cinema-chalk mb-4">
         {activating
           ? 'Activando suscripción…'
           : active
-            ? '¡Suscripción activada!'
+            ? 'Bienvenido a tu sala de proyección'
             : 'Pago recibido'}
       </h1>
       <p className="text-cinema-muted text-lg mb-8">
@@ -150,17 +151,17 @@ function SubscribeSuccessContent() {
       </p>
 
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-        <Link href="/">
-          <Button className="flex items-center gap-2">
+        <Link href="/movies">
+          <Button className="flex items-center gap-2 rounded-[2px] px-8">
             <Film className="w-4 h-4" />
-            Ir al inicio
+            Comenzar a ver películas
           </Button>
         </Link>
         <Link
-          href="/movies"
+          href="/"
           className="text-cinema-silver hover:text-cinema-chalk transition-colors text-sm font-medium"
         >
-          Explorar películas
+          Ir al inicio
         </Link>
         <Link
           href="/profile"
