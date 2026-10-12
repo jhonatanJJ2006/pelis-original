@@ -256,94 +256,52 @@ export default function AnimeDetailPage() {
       </div>
 
       <div className="container mx-auto px-4 py-12 space-y-10">
-        <ScrollReveal className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-          <div className="lg:col-span-2">
-            <h2 className="font-display text-2xl font-semibold tracking-tight text-cinema-chalk mb-4">
-              Sinopsis
-            </h2>
-            <p className="text-cinema-muted leading-relaxed text-lg">
-              {activeSeason?.synopsis || series.synopsis}
-            </p>
-          </div>
-          <div className="card-feature p-6 h-fit">
-            <h3 className="font-display text-lg font-semibold tracking-tight text-cinema-chalk mb-5">
-              Detalles
-            </h3>
-            <dl className="space-y-4 text-sm">
-              {[
-                ['Género', series.genre.join(', ')],
-                ['Años', yearLabel],
-                ['Temporadas', String(seasons.length)],
-                ['Episodios', String(series.totalEpisodes)],
-                ['Estado', series.status === 'ongoing' ? 'En emisión' : 'Finalizado'],
-              ].map(([label, value]) => (
-                <div
-                  key={label}
-                  className="flex justify-between gap-4 border-b border-cinema-border/50 pb-3 last:border-0"
-                >
-                  <dt className="text-cinema-silver">{label}</dt>
-                  <dd className="font-medium text-right text-cinema-chalk">{value}</dd>
-                </div>
-              ))}
-            </dl>
-          </div>
+        <ScrollReveal className="max-w-3xl">
+          <h2 className="font-display text-2xl tracking-tight text-cinema-chalk mb-4">Sinopsis</h2>
+          <p className="text-cinema-muted leading-relaxed text-lg">
+            {activeSeason?.synopsis || series.synopsis}
+          </p>
         </ScrollReveal>
-
-        {series.seasons.length > 1 && (
-          <ScrollReveal>
-            <h2 className="font-display text-2xl font-semibold tracking-tight text-cinema-chalk mb-4">
-              Temporadas
-            </h2>
-            <div
-              className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1"
-              role="tablist"
-              aria-label="Temporadas"
-            >
-              {series.seasons.map((season) => {
-                const isActive = season._id === activeSeasonId;
-                return (
-                  <button
-                    key={season._id}
-                    type="button"
-                    role="tab"
-                    aria-selected={isActive}
-                    onClick={() => setActiveSeasonId(season._id)}
-                    className={cn(
-                      'shrink-0 flex flex-col items-start gap-0.5 px-4 py-2.5 rounded-lg border text-left transition-all',
-                      isActive
-                        ? 'bg-cinema-accent text-cinema-bg border-cinema-accent'
-                        : 'bg-cinema-surface text-cinema-silver border-cinema-border hover:text-cinema-chalk hover:border-cinema-accent/40'
-                    )}
-                  >
-                    <span className="text-sm font-medium whitespace-nowrap">
-                      {season.seasonLabel}
-                    </span>
-                    <span
-                      className={cn(
-                        'text-[11px] whitespace-nowrap',
-                        isActive ? 'text-cinema-bg/70' : 'text-cinema-muted'
-                      )}
-                    >
-                      {season.year}
-                      {season.episodes > 0 && ` · ${season.episodes} eps`}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </ScrollReveal>
-        )}
 
         <ScrollReveal>
           <div
             id="episodios"
-            className="scroll-mt-24 flex items-baseline justify-between gap-4 mb-6 flex-wrap"
+            className="scroll-mt-24 flex flex-col lg:flex-row lg:items-end justify-between gap-4 mb-6 border-b border-cinema-border/60 pb-4"
           >
-            <h2 className="font-display text-2xl font-semibold tracking-tight text-cinema-chalk">
-              Episodios
-            </h2>
-            {activeSeason && series.seasons.length > 1 && (
-              <p className="text-sm text-cinema-muted">{activeSeason.seasonLabel}</p>
+            <div>
+              <p className="text-label uppercase text-cinema-accent mb-1">Catálogo audiovisual</p>
+              <h2 className="font-display text-2xl md:text-3xl tracking-tight text-cinema-chalk">
+                Episodios y entregas
+              </h2>
+            </div>
+            {series.seasons.length > 1 && (
+              <div
+                className="flex gap-1 overflow-x-auto -mx-1 px-1"
+                role="tablist"
+                aria-label="Temporadas"
+              >
+                {series.seasons.map((season) => {
+                  const isActive = season._id === activeSeasonId;
+                  return (
+                    <button
+                      key={season._id}
+                      type="button"
+                      role="tab"
+                      aria-selected={isActive}
+                      onClick={() => setActiveSeasonId(season._id)}
+                      title={`${season.year}${season.episodes > 0 ? ` · ${season.episodes} eps` : ''}`}
+                      className={cn(
+                        'shrink-0 whitespace-nowrap px-4 py-2 text-sm border rounded-[2px] transition-colors',
+                        isActive
+                          ? 'border-cinema-accent bg-cinema-accent/10 text-cinema-accent'
+                          : 'border-transparent text-cinema-silver hover:text-cinema-chalk'
+                      )}
+                    >
+                      {season.seasonLabel}
+                    </button>
+                  );
+                })}
+              </div>
             )}
           </div>
 
@@ -352,7 +310,7 @@ export default function AnimeDetailPage() {
               <Loader2 className="w-6 h-6 text-cinema-silver animate-spin" />
             </div>
           ) : episodes.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {episodes.map((ep) => {
                 const airDate = formatAirDate(ep.airDate);
                 return (
@@ -363,9 +321,9 @@ export default function AnimeDetailPage() {
                       if (!activeSeason) return;
                       router.push(`/anime/watch/${activeSeason._id}/${ep.number}`);
                     }}
-                    className="group flex gap-3 p-3 rounded-lg bg-cinema-surface border border-cinema-border hover:border-cinema-accent/50 hover:bg-cinema-elevated transition-all text-left"
+                    className="group flex gap-4 p-3 rounded-[2px] bg-cinema-surface border border-cinema-border/70 hover:border-cinema-accent/50 transition-colors text-left"
                   >
-                    <div className="relative w-28 aspect-video rounded-lg overflow-hidden bg-cinema-elevated shrink-0">
+                    <div className="relative w-36 sm:w-44 aspect-video rounded-[2px] overflow-hidden bg-cinema-elevated shrink-0">
                       {ep.image ? (
                         <img
                           src={ep.image}
@@ -387,7 +345,10 @@ export default function AnimeDetailPage() {
                     </div>
 
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-cinema-chalk line-clamp-2 leading-snug group-hover:text-cinema-accent-light transition-colors">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-cinema-accent mb-1">
+                        Episodio {String(ep.number).padStart(2, '0')}
+                      </p>
+                      <p className="font-display text-base text-cinema-chalk line-clamp-2 leading-snug group-hover:text-cinema-accent-light transition-colors">
                         {ep.title}
                       </p>
                       <div className="flex items-center gap-2 mt-1 text-[11px] text-cinema-muted">
@@ -422,6 +383,34 @@ export default function AnimeDetailPage() {
               </p>
             </div>
           )}
+        </ScrollReveal>
+
+        <ScrollReveal>
+          <p className="text-label uppercase text-cinema-accent mb-1">
+            Créditos y ficha curatorial
+          </p>
+          <h2 className="font-display text-2xl md:text-3xl tracking-tight text-cinema-chalk mb-6">
+            Ficha de la obra
+          </h2>
+          <dl className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+            {[
+              ['Género', series.genre.join(', ')],
+              ['Años', yearLabel],
+              ['Temporadas', String(seasons.length)],
+              ['Episodios', String(series.totalEpisodes)],
+              ['Estado', series.status === 'ongoing' ? 'En emisión' : 'Finalizado'],
+            ].map(([label, value]) => (
+              <div
+                key={label}
+                className="border border-cinema-border/70 bg-cinema-surface p-4 rounded-[2px]"
+              >
+                <dt className="text-[10px] uppercase tracking-[0.16em] text-cinema-silver mb-1.5">
+                  {label}
+                </dt>
+                <dd className="text-sm font-medium text-cinema-chalk">{value}</dd>
+              </div>
+            ))}
+          </dl>
         </ScrollReveal>
       </div>
     </div>
