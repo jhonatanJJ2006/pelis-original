@@ -95,7 +95,7 @@ export default function AdminUsersPage() {
           <span className="h-1.5 w-1.5 rounded-full bg-cinema-accent" aria-hidden />
           Miembros
         </p>
-        <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-cinema-chalk">
+        <h1 className="font-display text-3xl sm:text-4xl tracking-tight text-cinema-chalk">
           Usuarios
         </h1>
         <p className="text-cinema-muted mt-1 sm:mt-2 text-sm sm:text-base">
@@ -144,7 +144,7 @@ export default function AdminUsersPage() {
             {(users ?? []).map((u) => (
               <article
                 key={u._id}
-                className="rounded-lg border border-cinema-border bg-cinema-surface p-4"
+                className="rounded-[2px] border border-cinema-border bg-cinema-surface p-4"
               >
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cinema-accent to-cinema-accent flex items-center justify-center shrink-0">
@@ -202,7 +202,7 @@ export default function AdminUsersPage() {
             ))}
           </div>
 
-          <div className="hidden md:block overflow-x-auto rounded-lg border border-cinema-border bg-cinema-surface">
+          <div className="hidden md:block overflow-x-auto rounded-[2px] border border-cinema-border bg-cinema-surface">
             <table className="admin-table w-full min-w-[820px] text-sm">
               <thead>
                 <tr className="border-b border-cinema-border text-left text-cinema-muted">

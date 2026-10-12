@@ -153,7 +153,7 @@ export function EnrichAnimeModal({ anime, onClose, onEnriched }: EnrichAnimeModa
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
       <div
-        className="w-full max-w-2xl bg-cinema-surface border border-cinema-border rounded-lg shadow-2xl overflow-hidden max-h-[90vh] flex flex-col mx-auto"
+        className="w-full max-w-2xl bg-cinema-surface border border-cinema-border rounded-[2px] shadow-2xl overflow-hidden max-h-[90vh] flex flex-col mx-auto"
         role="dialog"
         aria-modal="true"
         aria-labelledby="enrich-anime-title"
@@ -169,7 +169,7 @@ export function EnrichAnimeModal({ anime, onClose, onEnriched }: EnrichAnimeModa
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-lg text-cinema-muted hover:text-cinema-chalk hover:bg-cinema-elevated transition-colors"
+            className="p-2 rounded-[2px] text-cinema-muted hover:text-cinema-chalk hover:bg-cinema-elevated transition-colors"
             aria-label="Cerrar"
           >
             <X className="w-5 h-5" />
@@ -196,12 +196,12 @@ export function EnrichAnimeModal({ anime, onClose, onEnriched }: EnrichAnimeModa
           ) : preview?.status === 'ok' ? (
             <div className="space-y-5">
               {preview.canReplaceImage && (
-                <div className="rounded-lg border border-cinema-border bg-cinema-elevated/40 p-4">
+                <div className="rounded-[2px] border border-cinema-border bg-cinema-elevated/40 p-4">
                   <p className="text-xs uppercase tracking-wide text-cinema-muted mb-3">Poster</p>
                   <div className="flex items-center justify-center gap-4 flex-wrap">
                     <div className="text-center">
                       <p className="text-xs text-cinema-muted mb-2">Actual</p>
-                      <div className="w-20 h-28 rounded-lg overflow-hidden bg-cinema-elevated border border-cinema-border">
+                      <div className="w-20 h-28 rounded-[2px] overflow-hidden bg-cinema-elevated border border-cinema-border">
                         {preview.hasExistingImage ? (
                           <MoviePoster
                             src={preview.anime.image || anime.image}
@@ -218,7 +218,7 @@ export function EnrichAnimeModal({ anime, onClose, onEnriched }: EnrichAnimeModa
                     <ArrowRight className="w-5 h-5 text-cinema-muted shrink-0" />
                     <div className="text-center">
                       <p className="text-xs text-cinema-muted mb-2">TMDB</p>
-                      <div className="w-20 h-28 rounded-lg overflow-hidden bg-cinema-elevated border border-cinema-accent/30">
+                      <div className="w-20 h-28 rounded-[2px] overflow-hidden bg-cinema-elevated border border-cinema-accent/30">
                         {preview.tmdb.posterUrl ? (
                           <MoviePoster
                             src={preview.tmdb.posterUrl}
@@ -236,7 +236,7 @@ export function EnrichAnimeModal({ anime, onClose, onEnriched }: EnrichAnimeModa
 
                   <label
                     className={cn(
-                      'mt-4 flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors',
+                      'mt-4 flex items-start gap-3 p-3 rounded-[2px] border cursor-pointer transition-colors',
                       replaceImage
                         ? 'border-cinema-accent/40 bg-cinema-accent/10'
                         : 'border-cinema-border hover:border-cinema-silver/30'
@@ -270,7 +270,7 @@ export function EnrichAnimeModal({ anime, onClose, onEnriched }: EnrichAnimeModa
               )}
 
               {preview.canReplaceBackdrop && (
-                <div className="rounded-lg border border-cinema-border bg-cinema-elevated/40 p-4">
+                <div className="rounded-[2px] border border-cinema-border bg-cinema-elevated/40 p-4">
                   <div className="flex items-center justify-between gap-2 mb-3">
                     <p className="text-xs uppercase tracking-wide text-cinema-muted">Backdrop</p>
                     {willApplyBackdrop && (
@@ -282,7 +282,7 @@ export function EnrichAnimeModal({ anime, onClose, onEnriched }: EnrichAnimeModa
                   <div className="flex items-center justify-center gap-4 flex-wrap">
                     <div className="text-center">
                       <p className="text-xs text-cinema-muted mb-2">Actual</p>
-                      <div className="w-32 sm:w-40 rounded-lg overflow-hidden bg-cinema-elevated border border-cinema-border aspect-video">
+                      <div className="w-32 sm:w-40 rounded-[2px] overflow-hidden bg-cinema-elevated border border-cinema-border aspect-video">
                         {preview.hasExistingBackdrop ? (
                           <MoviePoster
                             src={preview.anime.backdropImage || anime.backdropImage || ''}
@@ -300,7 +300,7 @@ export function EnrichAnimeModal({ anime, onClose, onEnriched }: EnrichAnimeModa
                     <ArrowRight className="w-5 h-5 text-cinema-muted shrink-0" />
                     <div className="text-center">
                       <p className="text-xs text-cinema-muted mb-2">TMDB</p>
-                      <div className="w-32 sm:w-40 rounded-lg overflow-hidden bg-cinema-elevated border border-cyan-500/30 aspect-video">
+                      <div className="w-32 sm:w-40 rounded-[2px] overflow-hidden bg-cinema-elevated border border-cyan-500/30 aspect-video">
                         {preview.tmdb.backdropUrl ? (
                           <MoviePoster
                             src={preview.tmdb.backdropUrl}
@@ -318,7 +318,7 @@ export function EnrichAnimeModal({ anime, onClose, onEnriched }: EnrichAnimeModa
 
                   <label
                     className={cn(
-                      'mt-4 flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors',
+                      'mt-4 flex items-start gap-3 p-3 rounded-[2px] border cursor-pointer transition-colors',
                       replaceBackdrop && preview.hasExistingBackdrop
                         ? 'border-cyan-500/40 bg-cyan-500/10'
                         : 'border-cinema-border hover:border-cinema-silver/30'
@@ -366,7 +366,7 @@ export function EnrichAnimeModal({ anime, onClose, onEnriched }: EnrichAnimeModa
                 </p>
               </div>
 
-              <div className="rounded-lg border border-cinema-border bg-cinema-elevated/40 p-4">
+              <div className="rounded-[2px] border border-cinema-border bg-cinema-elevated/40 p-4">
                 <p className="text-xs uppercase tracking-wide text-cinema-muted mb-2">
                   Campos que se aplicarán
                 </p>

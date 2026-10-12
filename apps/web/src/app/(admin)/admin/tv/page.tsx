@@ -351,7 +351,7 @@ export default function AdminTVPage() {
             <span className="h-1.5 w-1.5 rounded-full bg-cinema-accent" aria-hidden />
             Señales en vivo
           </p>
-          <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-cinema-chalk">
+          <h1 className="font-display text-3xl sm:text-4xl tracking-tight text-cinema-chalk">
             Canales TV
           </h1>
           <p className="text-cinema-muted mt-1 sm:mt-2 text-sm sm:text-base">
@@ -546,7 +546,7 @@ export default function AdminTVPage() {
                 ))}
               </div>
 
-              <div className="hidden md:block overflow-x-auto rounded-lg border border-cinema-border bg-cinema-surface">
+              <div className="hidden md:block overflow-x-auto rounded-[2px] border border-cinema-border bg-cinema-surface">
                 <table className="admin-table w-full min-w-[960px] text-sm">
                   <thead>
                     <tr className="border-b border-cinema-border text-left text-cinema-muted">
@@ -567,7 +567,7 @@ export default function AdminTVPage() {
                       >
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 shrink-0 rounded-lg bg-cinema-elevated border border-cinema-border flex items-center justify-center overflow-hidden">
+                            <div className="w-10 h-10 shrink-0 rounded-[2px] bg-cinema-elevated border border-cinema-border flex items-center justify-center overflow-hidden">
                               {ch.logo ? (
                                 <img
                                   src={ch.logo}
@@ -661,11 +661,11 @@ export default function AdminTVPage() {
               {playlists.map((pl) => (
                 <article
                   key={pl._id}
-                  className="rounded-lg border border-cinema-border bg-cinema-surface p-5 flex flex-col gap-4"
+                  className="rounded-[2px] border border-cinema-border bg-cinema-surface p-5 flex flex-col gap-4"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-3">
-                      <div className="p-2.5 rounded-lg bg-cinema-accent/15 text-cinema-accent-light">
+                      <div className="p-2.5 rounded-[2px] bg-cinema-accent/15 text-cinema-accent-light">
                         <ListVideo className="w-5 h-5" />
                       </div>
                       <div>
@@ -689,12 +689,12 @@ export default function AdminTVPage() {
                     </span>
                   </div>
 
-                  <div className="text-xs text-cinema-ash break-all bg-cinema-elevated/40 rounded-lg p-2 line-clamp-2">
+                  <div className="text-xs text-cinema-ash break-all bg-cinema-elevated/40 rounded-[2px] p-2 line-clamp-2">
                     {pl.m3uUrl}
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="rounded-lg bg-cinema-elevated/40 p-2">
+                    <div className="rounded-[2px] bg-cinema-elevated/40 p-2">
                       <p className="text-cinema-ash text-[10px] uppercase tracking-wider">
                         Canales
                       </p>
@@ -702,7 +702,7 @@ export default function AdminTVPage() {
                         {pl.totalChannels ?? '—'}
                       </p>
                     </div>
-                    <div className="rounded-lg bg-cinema-elevated/40 p-2">
+                    <div className="rounded-[2px] bg-cinema-elevated/40 p-2">
                       <p className="text-cinema-ash text-[10px] uppercase tracking-wider">
                         Última importación
                       </p>
@@ -778,9 +778,9 @@ function ChannelCard({
   onDelete: (id: string, name: string) => void;
 }) {
   return (
-    <article className="rounded-lg border border-cinema-border bg-cinema-surface p-4">
+    <article className="rounded-[2px] border border-cinema-border bg-cinema-surface p-4">
       <div className="flex gap-3">
-        <div className="w-14 h-14 shrink-0 rounded-lg bg-cinema-elevated border border-cinema-border flex items-center justify-center overflow-hidden">
+        <div className="w-14 h-14 shrink-0 rounded-[2px] bg-cinema-elevated border border-cinema-border flex items-center justify-center overflow-hidden">
           {ch.logo ? (
             <img src={ch.logo} alt={ch.name} className="w-10 h-10 object-contain" />
           ) : (
@@ -966,7 +966,7 @@ function StatChip({
   accent: string;
 }) {
   return (
-    <div className="rounded-lg bg-cinema-surface border border-cinema-border p-3">
+    <div className="rounded-[2px] bg-cinema-surface border border-cinema-border p-3">
       <div className="flex items-center gap-2 text-cinema-ash">
         <Icon className={cn('w-4 h-4', accent)} />
         <span className="text-xs uppercase tracking-wider">{label}</span>

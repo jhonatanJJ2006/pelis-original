@@ -111,17 +111,17 @@ function AdminPreviewVideo({ src, poster, title }: { src: string; poster: string
         controls
         playsInline
         poster={poster}
-        className="w-full aspect-video bg-black rounded-lg"
+        className="w-full aspect-video bg-black rounded-[2px]"
         aria-label={`Reproducir ${title}`}
       />
       {loading && !error && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg">
+        <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-[2px]">
           <Loader2 className="w-8 h-8 text-cinema-chalk animate-spin" aria-hidden />
         </div>
       )}
       {error && (
         <div
-          className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 rounded-lg p-4 text-center"
+          className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 rounded-[2px] p-4 text-center"
           data-testid="admin-preview-video-error"
         >
           <AlertCircle className="w-8 h-8 text-red-400 mb-2" aria-hidden />
@@ -172,7 +172,7 @@ export function PreviewMovieModal({ movie, onClose, onBackdrop }: PreviewMovieMo
       onClick={onClose}
     >
       <div
-        className="w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-cinema-surface border border-cinema-border rounded-lg shadow-2xl mx-auto"
+        className="w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-cinema-surface border border-cinema-border rounded-[2px] shadow-2xl mx-auto"
         role="dialog"
         aria-modal="true"
         aria-labelledby="preview-movie-title"
@@ -197,7 +197,7 @@ export function PreviewMovieModal({ movie, onClose, onBackdrop }: PreviewMovieMo
 
         <div className="p-6 space-y-6">
           <div className="flex flex-col sm:flex-row gap-4">
-            <div className="w-24 h-36 shrink-0 rounded-lg overflow-hidden bg-cinema-elevated">
+            <div className="w-24 h-36 shrink-0 rounded-[2px] overflow-hidden bg-cinema-elevated">
               <MoviePoster
                 src={movie.image}
                 alt={displayName}
@@ -288,7 +288,7 @@ export function PreviewMovieModal({ movie, onClose, onBackdrop }: PreviewMovieMo
               )}
             </div>
             <div
-              className={`relative w-full aspect-video rounded-lg overflow-hidden border bg-cinema-elevated ${
+              className={`relative w-full aspect-video rounded-[2px] overflow-hidden border bg-cinema-elevated ${
                 movie.backdropImage ? 'border-cinema-border' : 'border-dashed border-cinema-border'
               }`}
               data-testid="admin-preview-backdrop"
@@ -323,10 +323,10 @@ export function PreviewMovieModal({ movie, onClose, onBackdrop }: PreviewMovieMo
             <AdminPreviewVideo src={effectiveVideoUrl} poster={movie.image} title={displayName} />
           ) : (
             <div
-              className="flex flex-col items-center text-center py-8 px-4 rounded-lg bg-cinema-elevated/40 border border-cinema-border"
+              className="flex flex-col items-center text-center py-8 px-4 rounded-[2px] bg-cinema-elevated/40 border border-cinema-border"
               data-testid="admin-preview-no-video"
             >
-              <div className="w-14 h-14 rounded-lg bg-cinema-elevated flex items-center justify-center mb-3">
+              <div className="w-14 h-14 rounded-[2px] bg-cinema-elevated flex items-center justify-center mb-3">
                 <Film className="w-7 h-7 text-cinema-ash" aria-hidden />
               </div>
               <h3 className="text-cinema-chalk font-semibold mb-1">Sin video disponible</h3>

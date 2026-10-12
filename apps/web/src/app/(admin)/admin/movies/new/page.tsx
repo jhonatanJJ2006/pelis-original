@@ -82,7 +82,7 @@ export default function NewMoviePage() {
         Volver al listado
       </Link>
 
-      <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-cinema-chalk mb-6 sm:mb-8">
+      <h1 className="font-display text-3xl sm:text-4xl tracking-tight text-cinema-chalk mb-6 sm:mb-8">
         Nueva película
       </h1>
 
