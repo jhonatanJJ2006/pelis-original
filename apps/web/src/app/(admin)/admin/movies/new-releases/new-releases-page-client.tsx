@@ -54,7 +54,7 @@ export default function AdminNewReleasesPageClient() {
 
   return (
     <div>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6 sm:mb-8 pb-5 border-b border-cinema-border/60">
         <div>
           <Link
             href="/admin/movies"
@@ -67,7 +67,7 @@ export default function AdminNewReleasesPageClient() {
             <span className="h-1.5 w-1.5 rounded-full bg-cinema-accent" aria-hidden />
             Curaduría
           </p>
-          <h1 className="font-display text-3xl sm:text-4xl tracking-tight text-cinema-chalk">
+          <h1 className="font-display text-3xl sm:text-4xl font-normal tracking-tight text-cinema-chalk">
             Estrenos
           </h1>
           <p className="text-cinema-muted mt-1 sm:mt-2 text-sm sm:text-base">

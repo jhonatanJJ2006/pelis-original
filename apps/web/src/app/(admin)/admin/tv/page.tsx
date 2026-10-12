@@ -345,13 +345,13 @@ export default function AdminTVPage() {
 
   return (
     <div>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6 sm:mb-8 pb-5 border-b border-cinema-border/60">
         <div>
           <p className="text-label uppercase text-cinema-accent mb-1.5 flex items-center gap-2">
             <span className="h-1.5 w-1.5 rounded-full bg-cinema-accent" aria-hidden />
             Señales en vivo
           </p>
-          <h1 className="font-display text-3xl sm:text-4xl tracking-tight text-cinema-chalk">
+          <h1 className="font-display text-3xl sm:text-4xl font-normal tracking-tight text-cinema-chalk">
             Canales TV
           </h1>
           <p className="text-cinema-muted mt-1 sm:mt-2 text-sm sm:text-base">

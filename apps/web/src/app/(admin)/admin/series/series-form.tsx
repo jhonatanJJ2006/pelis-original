@@ -99,8 +99,8 @@ export function SeriesForm({
       className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-5 items-start"
     >
       <div className="space-y-5 min-w-0">
-        <section className="rounded-[2px] border border-cinema-border bg-cinema-surface p-5 space-y-5">
-          <h2 className="font-display text-lg font-semibold text-cinema-chalk">
+        <section className="rounded-lg border border-cinema-border bg-cinema-surface p-5 sm:p-6 space-y-5 shadow-xl shadow-black/20">
+          <h2 className="font-display text-xl font-normal tracking-tight text-cinema-chalk">
             Datos de la serie
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -195,8 +195,8 @@ export function SeriesForm({
       </div>
 
       <aside className="space-y-5 lg:sticky lg:top-6">
-        <section className="rounded-[2px] border border-cinema-border bg-cinema-surface p-5 space-y-5">
-          <h2 className="font-display text-lg font-semibold text-cinema-chalk">
+        <section className="rounded-lg border border-cinema-border bg-cinema-surface p-5 sm:p-6 space-y-5 shadow-xl shadow-black/20">
+          <h2 className="font-display text-xl font-normal tracking-tight text-cinema-chalk">
             Imagen y publicación
           </h2>
           <Input

@@ -20,7 +20,9 @@ export default function EditMoviePage() {
   const [showEnrich, setShowEnrich] = useState(false);
 
   const movie = useQuery<MediaItem>(api.movies.getById, { id: movieId as any }) as
-    MediaItem | null | undefined;
+    | MediaItem
+    | null
+    | undefined;
   const updateMovie = useMutation(api.movies.update);
   const generateUploadUrl = useMutation(api.movies.generateUploadUrl);
 
@@ -111,10 +113,16 @@ export default function EditMoviePage() {
         Volver al listado
       </Link>
 
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-        <h1 className="font-display text-3xl sm:text-4xl tracking-tight text-cinema-chalk">
-          Editar película
-        </h1>
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8 pb-5 border-b border-cinema-border/60">
+        <div>
+          <p className="text-label uppercase text-cinema-accent mb-1.5 flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-cinema-accent" aria-hidden />
+            Bóveda cinematográfica
+          </p>
+          <h1 className="font-display text-3xl sm:text-4xl font-normal tracking-tight text-cinema-chalk">
+            Editar película
+          </h1>
+        </div>
         <Button
           variant="secondary"
           className="w-full sm:w-auto"
