@@ -112,7 +112,7 @@ function LoginForm() {
 
   return (
     <div className="w-full max-w-md">
-      <div className="card-glow p-6 md:p-8 shadow-[0_8px_40px_rgba(229,194,118,0.12)]">
+      <div className="card-glow auth-card p-6 md:p-10">
         <div className="text-center mb-8">
           <p className="text-label uppercase text-cinema-accent mb-3 inline-flex items-center gap-2">
             <span className="h-1 w-1 rounded-full bg-cinema-accent" aria-hidden />
@@ -158,7 +158,7 @@ function LoginForm() {
           </div>
           <div className="relative flex justify-center">
             <span className="bg-cinema-surface px-3 text-[11px] text-cinema-ash uppercase tracking-widest">
-              o con email
+              o
             </span>
           </div>
         </div>
@@ -217,9 +217,9 @@ function LoginForm() {
 
         <form className="space-y-4" onSubmit={handleSubmit} noValidate>
           <Input
-            label="Email"
+            label="Correo electrónico"
             type="email"
-            placeholder="tu@email.com"
+            placeholder="nombre@correo.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -279,7 +279,7 @@ function LoginForm() {
 function LoginPageFallback() {
   return (
     <div className="w-full max-w-md">
-      <div className="card-glow p-6 md:p-8 shadow-[0_8px_40px_rgba(229,194,118,0.12)]">
+      <div className="card-glow auth-card p-6 md:p-10">
         <div className="text-center mb-8">
           <p className="text-label uppercase text-cinema-accent mb-3 inline-flex items-center gap-2">
             <span className="h-1 w-1 rounded-full bg-cinema-accent" aria-hidden />

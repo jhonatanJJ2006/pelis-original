@@ -92,7 +92,7 @@ function CodeLoginForm() {
 
   return (
     <div className="w-full max-w-md">
-      <div className="card-glow p-6 md:p-8">
+      <div className="card-glow auth-card p-6 md:p-10">
         <p className="text-label uppercase text-cinema-accent mb-2">
           {step === 'email' ? 'Acceso sin contraseña' : 'Paso 2 de 2'}
         </p>

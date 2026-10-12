@@ -94,7 +94,7 @@ export default function RegisterPage() {
 
   return (
     <div className="w-full max-w-md">
-      <div className="card-glow p-6 md:p-8 shadow-[0_8px_40px_rgba(229,194,118,0.12)]">
+      <div className="card-glow auth-card p-6 md:p-10">
         <div className="text-center mb-8">
           <p className="text-label uppercase text-cinema-accent mb-3 inline-flex items-center gap-2">
             <span className="h-1 w-1 rounded-full bg-cinema-accent" aria-hidden />
@@ -164,9 +164,9 @@ export default function RegisterPage() {
             required
           />
           <Input
-            label="Email"
+            label="Correo electrónico"
             type="email"
-            placeholder="tu@email.com"
+            placeholder="nombre@correo.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required

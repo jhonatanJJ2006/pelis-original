@@ -22,7 +22,7 @@ function VerifyForm() {
   if (!emailFromUrl) {
     return (
       <div className="w-full max-w-md">
-        <div className="card-glow p-6 md:p-8 shadow-[0_8px_40px_rgba(229,194,118,0.12)] text-center">
+        <div className="card-glow auth-card p-6 md:p-10 text-center">
           <h1 className="font-display text-2xl tracking-tight text-cinema-chalk mb-4">
             Enlace inválido
           </h1>
@@ -123,7 +123,7 @@ function VerifyForm() {
   if (success) {
     return (
       <div className="w-full max-w-md">
-        <div className="card-glow p-6 md:p-8 shadow-[0_8px_40px_rgba(229,194,118,0.12)] text-center">
+        <div className="card-glow auth-card p-6 md:p-10 text-center">
           <div className="w-14 h-14 bg-gradient-to-br from-cinema-success to-cinema-success rounded-lg flex items-center justify-center mx-auto mb-4 shadow-lg">
             <svg
               className="w-8 h-8 text-cinema-chalk"
@@ -151,7 +151,7 @@ function VerifyForm() {
 
   return (
     <div className="w-full max-w-md">
-      <div className="card-glow p-6 md:p-8 shadow-[0_8px_40px_rgba(229,194,118,0.12)]">
+      <div className="card-glow auth-card p-6 md:p-10">
         <div className="text-center mb-8">
           <p className="text-label uppercase text-cinema-accent mb-3 inline-flex items-center gap-2">
             <span className="h-1 w-1 rounded-full bg-cinema-accent" aria-hidden />
