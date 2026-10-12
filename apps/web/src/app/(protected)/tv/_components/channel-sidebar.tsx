@@ -90,9 +90,10 @@ export function ChannelSidebar({
       aria-label="Lista de canales"
     >
       <div className="px-3 pt-3 pb-2 border-b border-cinema-border">
-        <p className="text-[10px] uppercase tracking-widest text-cinema-accent font-medium mb-1">
-          TV en vivo
+        <p className="text-[10px] uppercase tracking-widest text-cinema-accent font-medium">
+          Maison Noir broadcast
         </p>
+        <p className="font-display text-2xl text-cinema-chalk mb-2">TV en vivo</p>
         <div className="relative">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-cinema-ash pointer-events-none" />
           <input
@@ -100,7 +101,7 @@ export function ChannelSidebar({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar canal..."
-            className="w-full h-9 pl-8 pr-3 rounded-lg bg-cinema-elevated border border-cinema-border text-sm text-cinema-chalk placeholder:text-cinema-ash focus:outline-none focus:border-cinema-accent/50"
+            className="w-full h-9 pl-8 pr-3 rounded-[2px] bg-cinema-elevated border border-cinema-border text-sm text-cinema-chalk placeholder:text-cinema-ash focus:outline-none focus:border-cinema-accent/50"
           />
         </div>
         <div className="flex gap-1.5 overflow-x-auto mt-2 pb-1 -mx-1 px-1 scrollbar-none">
@@ -110,7 +111,7 @@ export function ChannelSidebar({
               type="button"
               onClick={() => setChip(item.id)}
               className={cn(
-                'shrink-0 px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors tv-focus',
+                'shrink-0 px-2.5 py-1 rounded-[2px] text-[11px] font-medium transition-colors tv-focus',
                 chip === item.id
                   ? 'bg-cinema-accent text-cinema-bg'
                   : 'bg-cinema-elevated text-cinema-silver border border-cinema-border'

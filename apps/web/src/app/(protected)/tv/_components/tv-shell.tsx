@@ -64,7 +64,7 @@ export function TVShell({
       <div className="relative flex-1 min-w-0 min-h-0 bg-black">
         <button
           type="button"
-          className="absolute top-3 right-3 z-20 inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-black/70 px-2.5 py-1.5 text-xs font-medium text-cinema-chalk md:hidden"
+          className="absolute top-3 right-3 z-20 inline-flex items-center gap-1.5 rounded-[2px] border border-cinema-accent/40 bg-black/70 px-2.5 py-1.5 text-xs font-medium text-cinema-chalk md:hidden"
           onClick={() => setChannelsOpen(true)}
           aria-expanded={channelsOpen}
         >
@@ -73,11 +73,11 @@ export function TVShell({
         </button>
         {currentChannelName && (
           <div className="absolute top-3 left-3 z-20 pointer-events-none">
-            <p className="text-[10px] uppercase tracking-widest text-cinema-danger-light font-semibold flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-cinema-danger animate-pulse" />
+            <p className="inline-flex items-center gap-1.5 rounded-[2px] bg-cinema-danger px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-cinema-chalk">
+              <span className="w-1.5 h-1.5 rounded-full bg-cinema-chalk animate-pulse" />
               En vivo
             </p>
-            <p className="text-cinema-chalk text-sm font-medium truncate max-w-[50vw] drop-shadow">
+            <p className="mt-2 font-display text-lg text-cinema-chalk truncate max-w-[50vw] drop-shadow">
               {currentChannelName}
             </p>
           </div>
@@ -88,7 +88,7 @@ export function TVShell({
             <p className="text-cinema-muted max-w-md text-sm">
               Inicia sesión para ver este canal en vivo
             </p>
-            <Link href="/login" className="btn-primary px-6 py-2.5 rounded-[10px] tv-focus">
+            <Link href="/login" className="btn-primary px-6 py-2.5 rounded-[2px] tv-focus">
               Iniciar sesión
             </Link>
           </div>
@@ -100,7 +100,7 @@ export function TVShell({
             </p>
             <Link
               href="/subscribe"
-              className="btn-primary-glow inline-flex items-center gap-2 px-6 py-2.5 rounded-[10px]"
+              className="btn-primary-glow inline-flex items-center gap-2 px-6 py-2.5 rounded-[2px]"
             >
               <Crown className="w-4 h-4" aria-hidden />
               Ver planes

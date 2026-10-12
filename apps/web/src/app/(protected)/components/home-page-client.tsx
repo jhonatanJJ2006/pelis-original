@@ -12,7 +12,7 @@ import { HeroCarousel } from './hero-carousel';
 import { HeroSkeleton } from '@pelis/ui/features/hero-skeleton';
 import { api } from '@pelis/db/api';
 import type { MediaItem } from '@pelis/ui/types';
-import { cn } from '@pelis/ui/utils';
+import { MoviePoster } from '@pelis/ui/features/movie-poster';
 import { LandingPage } from './landing-page';
 
 const genreColors: Record<string, string> = {
@@ -92,20 +92,49 @@ export function HomePageClient({ preloaded }: HomePageClientProps) {
       {heroMovies === undefined ? <HeroSkeleton /> : <HeroCarousel movies={heroMovies} />}
 
       <div className="container mx-auto px-4 py-10 space-y-12 md:space-y-16">
-        {user && continueItems.length > 0 && (
-          <ContinueWatchingRow
-            items={continueItems}
-            className="section-alt rounded-lg py-6 px-2 -mx-2"
-          />
-        )}
+        {user && continueItems.length > 0 && <ContinueWatchingRow items={continueItems} />}
 
         <MovieRow
-          title="Tendencias"
+          title="Estrenos de la colección"
           subtitle="Lo más popular ahora"
           movies={trending}
           isLoading={trending === undefined}
           href="/movies"
         />
+
+        {trending && trending.length >= 3 && (
+          <section aria-labelledby="top-pelis">
+            <SectionHeader title="Tendencias en PELIS Maison Noir" subtitle="Top 5 de la semana" />
+            <h2 id="top-pelis" className="sr-only">
+              Tendencias
+            </h2>
+            <ol className="no-scrollbar -mx-4 flex gap-6 overflow-x-auto px-4 pb-2">
+              {trending.slice(0, 5).map((movie, i) => (
+                <li key={movie._id} className="flex shrink-0 items-end">
+                  <span
+                    aria-hidden
+                    className="font-display text-[7rem] md:text-[9rem] leading-[0.8] text-transparent [-webkit-text-stroke:1px_rgba(229,194,118,0.6)] -mr-4 select-none"
+                  >
+                    {i + 1}
+                  </span>
+                  <Link
+                    href={`/movies/${movie._id}`}
+                    className="relative block w-[130px] md:w-[160px] aspect-[2/3] overflow-hidden rounded-[2px] border border-cinema-border/70 hover:border-cinema-accent/60 transition-colors"
+                  >
+                    <MoviePoster
+                      src={movie.image}
+                      alt={movie.name}
+                      className="h-full w-full object-cover"
+                    />
+                    <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-cinema-bg to-transparent p-2 pt-8 text-xs text-cinema-chalk line-clamp-2">
+                      {movie.name}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ol>
+          </section>
+        )}
 
         <MovieRow
           title="Series"
@@ -116,7 +145,7 @@ export function HomePageClient({ preloaded }: HomePageClientProps) {
           linkLabel="Ver series"
         />
 
-        {topGenres.map((genre, idx) => {
+        {topGenres.map((genre) => {
           const genreMovies = (movies ?? [])
             .filter((m) =>
               (m.genre ?? '')
@@ -127,10 +156,7 @@ export function HomePageClient({ preloaded }: HomePageClientProps) {
             .slice(0, 12);
           if (genreMovies.length === 0 && movies !== undefined) return null;
           return (
-            <div
-              key={genre}
-              className={cn(idx % 2 === 1 && 'section-alt rounded-lg py-6 px-2 -mx-2')}
-            >
+            <div key={genre}>
               <MovieRow
                 title={genre}
                 movies={genreMovies}
