@@ -8,15 +8,14 @@ import { Button } from '@pelis/ui/components';
 export default function SubscribeCancelPage() {
   return (
     <div className="page-shell min-h-[80vh] flex items-center justify-center">
-      <ScrollReveal className="text-center max-w-lg mx-auto">
-        <div className="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-          <div className="w-14 h-14 bg-red-500/80 rounded-full flex items-center justify-center">
-            <XCircle className="w-8 h-8 text-cinema-chalk" />
-          </div>
+      <ScrollReveal className="text-center max-w-2xl mx-auto">
+        <div className="w-16 h-16 border border-cinema-danger-light/60 bg-cinema-surface rounded-[4px] flex items-center justify-center mx-auto mb-6">
+          <XCircle className="w-7 h-7 text-red-300" />
         </div>
 
-        <h1 className="font-display text-4xl md:text-5xl font-semibold tracking-tight text-cinema-chalk mb-4">
-          Pago cancelado
+        <p className="text-label uppercase text-cinema-accent mb-3">Transacción interrumpida</p>
+        <h1 className="font-display text-4xl md:text-5xl tracking-tight text-cinema-chalk mb-4">
+          No se completó el pago
         </h1>
         <p className="text-cinema-muted text-lg mb-8">
           El proceso de pago fue cancelado. No se ha realizado ningún cargo. Puedes intentarlo de
@@ -25,7 +24,7 @@ export default function SubscribeCancelPage() {
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link href="/subscribe">
-            <Button className="flex items-center gap-2">
+            <Button className="flex items-center gap-2 rounded-[2px] px-8">
               <Crown className="w-4 h-4" />
               Intentar de nuevo
             </Button>
