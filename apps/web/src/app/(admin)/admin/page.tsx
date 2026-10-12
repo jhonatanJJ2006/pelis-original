@@ -116,7 +116,7 @@ export default function AdminDashboardPage() {
           <span className="h-1.5 w-1.5 rounded-full bg-cinema-accent" aria-hidden />
           Consola
         </p>
-        <h1 className="font-display text-3xl sm:text-4xl tracking-tight text-cinema-chalk">
+        <h1 className="font-display text-3xl sm:text-4xl font-normal tracking-tight text-cinema-chalk">
           Panel
         </h1>
         <p className="text-cinema-muted mt-1 sm:mt-2 text-sm sm:text-base">

@@ -67,7 +67,11 @@ export default function EditPlanPage() {
         Volver al listado
       </Link>
 
-      <h1 className="font-display text-3xl sm:text-4xl tracking-tight text-cinema-chalk mb-6 sm:mb-8">
+      <p className="text-label uppercase text-cinema-accent mb-1.5 flex items-center gap-2">
+        <span className="h-1.5 w-1.5 rounded-full bg-cinema-accent" aria-hidden />
+        Membresías
+      </p>
+      <h1 className="font-display text-3xl sm:text-4xl font-normal tracking-tight text-cinema-chalk mb-6 sm:mb-8 pb-5 border-b border-cinema-border/60">
         Editar plan
       </h1>
 
