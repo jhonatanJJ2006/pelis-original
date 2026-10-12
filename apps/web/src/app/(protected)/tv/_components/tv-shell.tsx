@@ -43,6 +43,9 @@ export function TVShell({
   const isAdmin = String(user?.role ?? '').toUpperCase() === 'ADMIN';
   const hasActivePlan = isAdmin || !!(user?.planExpiresAt && user.planExpiresAt > Date.now());
   const [channelsOpen, setChannelsOpen] = useState(false);
+  const currentChannel = currentChannelId
+    ? channels.find((c) => c._id === currentChannelId)
+    : undefined;
 
   return (
     <div className="relative h-full min-h-0 flex bg-black">
@@ -72,13 +75,28 @@ export function TVShell({
           Canales
         </button>
         {currentChannelName && (
-          <div className="absolute top-3 left-3 z-20 pointer-events-none">
-            <p className="inline-flex items-center gap-1.5 rounded-[2px] bg-cinema-danger px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-cinema-chalk">
-              <span className="w-1.5 h-1.5 rounded-full bg-cinema-chalk animate-pulse" />
-              En vivo
-            </p>
-            <p className="mt-2 font-display text-lg text-cinema-chalk truncate max-w-[50vw] drop-shadow">
+          <div className="absolute inset-x-0 top-0 z-20 pointer-events-none bg-gradient-to-b from-black/80 via-black/40 to-transparent px-4 pt-3 pb-10 md:px-6 md:pt-5">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-[2px] bg-cinema-danger px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-cinema-chalk">
+                <span className="w-1.5 h-1.5 rounded-full bg-cinema-chalk animate-pulse" />
+                En vivo
+              </span>
+              {currentChannel?.category && (
+                <span className="rounded-[2px] border border-cinema-border/60 bg-black/50 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-cinema-accent backdrop-blur-sm">
+                  {currentChannel.category}
+                </span>
+              )}
+              {currentChannel?.country && (
+                <span className="hidden sm:inline rounded-[2px] border border-cinema-border/60 bg-black/50 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-cinema-muted backdrop-blur-sm">
+                  {currentChannel.country}
+                </span>
+              )}
+            </div>
+            <p className="mt-2 font-display text-xl md:text-3xl tracking-tight text-cinema-chalk truncate max-w-[70vw] md:max-w-[55vw] drop-shadow">
               {currentChannelName}
+            </p>
+            <p className="mt-0.5 text-[11px] uppercase tracking-[0.2em] text-cinema-muted">
+              Emisión continua
             </p>
           </div>
         )}
