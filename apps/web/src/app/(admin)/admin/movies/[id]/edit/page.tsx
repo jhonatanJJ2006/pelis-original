@@ -20,9 +20,7 @@ export default function EditMoviePage() {
   const [showEnrich, setShowEnrich] = useState(false);
 
   const movie = useQuery<MediaItem>(api.movies.getById, { id: movieId as any }) as
-    | MediaItem
-    | null
-    | undefined;
+    MediaItem | null | undefined;
   const updateMovie = useMutation(api.movies.update);
   const generateUploadUrl = useMutation(api.movies.generateUploadUrl);
 
