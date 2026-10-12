@@ -67,7 +67,7 @@ export default function AdminNewReleasesPageClient() {
             <span className="h-1.5 w-1.5 rounded-full bg-cinema-accent" aria-hidden />
             Curaduría
           </p>
-          <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-cinema-chalk">
+          <h1 className="font-display text-3xl sm:text-4xl tracking-tight text-cinema-chalk">
             Estrenos
           </h1>
           <p className="text-cinema-muted mt-1 sm:mt-2 text-sm sm:text-base">
@@ -104,7 +104,7 @@ export default function AdminNewReleasesPageClient() {
           No hay películas nuevas en este rango.
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-cinema-border bg-cinema-surface">
+        <div className="overflow-x-auto rounded-[2px] border border-cinema-border bg-cinema-surface">
           <table className="admin-table w-full min-w-[720px] text-sm">
             <thead>
               <tr className="border-b border-cinema-border text-left text-cinema-muted">

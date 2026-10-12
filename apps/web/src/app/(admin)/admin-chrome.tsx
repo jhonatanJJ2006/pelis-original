@@ -42,7 +42,7 @@ export function AdminChrome({ children }: { children: React.ReactNode }) {
         <button
           type="button"
           onClick={() => setMobileNavOpen(true)}
-          className="p-2 -ml-2 rounded-lg text-cinema-muted hover:text-cinema-chalk hover:bg-cinema-elevated transition-colors"
+          className="p-2 -ml-2 rounded-[2px] text-cinema-muted hover:text-cinema-chalk hover:bg-cinema-elevated transition-colors"
           aria-label="Abrir menú"
           aria-expanded={mobileNavOpen}
         >

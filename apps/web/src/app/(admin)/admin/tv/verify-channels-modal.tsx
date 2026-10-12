@@ -120,7 +120,7 @@ export function VerifyChannelsModal({
       onClick={canClose ? onClose : undefined}
     >
       <div
-        className="w-full max-w-md rounded-lg border border-cinema-border bg-cinema-surface shadow-2xl"
+        className="w-full max-w-md rounded-[2px] border border-cinema-border bg-cinema-surface shadow-2xl"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -140,7 +140,7 @@ export function VerifyChannelsModal({
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 rounded-lg text-cinema-muted hover:text-cinema-chalk hover:bg-cinema-elevated transition-colors"
+              className="p-1.5 rounded-[2px] text-cinema-muted hover:text-cinema-chalk hover:bg-cinema-elevated transition-colors"
               aria-label="Cerrar"
             >
               <X className="w-5 h-5" />
@@ -192,11 +192,11 @@ export function VerifyChannelsModal({
           )}
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-lg bg-cinema-success/10 border border-cinema-success/20 p-3">
+            <div className="rounded-[2px] bg-cinema-success/10 border border-cinema-success/20 p-3">
               <p className="text-[10px] uppercase tracking-wider text-cinema-success/80">Online</p>
               <p className="text-2xl font-semibold text-cinema-success mt-0.5">{online}</p>
             </div>
-            <div className="rounded-lg bg-red-500/10 border border-red-500/20 p-3">
+            <div className="rounded-[2px] bg-red-500/10 border border-red-500/20 p-3">
               <p className="text-[10px] uppercase tracking-wider text-red-300/80">Caídos</p>
               <p className="text-2xl font-semibold text-red-300 mt-0.5">{offline}</p>
             </div>

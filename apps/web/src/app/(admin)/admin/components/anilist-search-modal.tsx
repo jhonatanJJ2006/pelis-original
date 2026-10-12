@@ -59,7 +59,7 @@ export function AnilistSearchModal({ onClose, onImported }: AnilistSearchModalPr
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
-      <div className="w-full max-w-lg rounded-lg border border-cinema-border bg-cinema-elevated p-5">
+      <div className="w-full max-w-lg rounded-[2px] border border-cinema-border bg-cinema-elevated p-5">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-display text-lg text-cinema-chalk uppercase tracking-wide">
             Buscar en AniList
@@ -86,7 +86,7 @@ export function AnilistSearchModal({ onClose, onImported }: AnilistSearchModalPr
           {results.map((item) => (
             <div
               key={item.anilistId}
-              className="flex items-center gap-3 p-2 rounded-lg bg-cinema-surface border border-cinema-border"
+              className="flex items-center gap-3 p-2 rounded-[2px] bg-cinema-surface border border-cinema-border"
             >
               <img src={item.image} alt="" className="w-10 h-14 object-cover rounded" />
               <div className="flex-1 min-w-0">

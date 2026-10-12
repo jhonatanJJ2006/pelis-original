@@ -112,7 +112,7 @@ export default function EditMoviePage() {
       </Link>
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-        <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-cinema-chalk">
+        <h1 className="font-display text-3xl sm:text-4xl tracking-tight text-cinema-chalk">
           Editar película
         </h1>
         <Button

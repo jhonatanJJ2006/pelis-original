@@ -122,7 +122,7 @@ export function PlanForm({ initialValues, onSubmit, submitLabel = 'Guardar' }: P
       className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-5 items-start"
     >
       <div className="space-y-5 min-w-0">
-        <section className="rounded-lg border border-cinema-border bg-cinema-surface p-5 space-y-5">
+        <section className="rounded-[2px] border border-cinema-border bg-cinema-surface p-5 space-y-5">
           <h2 className="font-display text-lg font-semibold text-cinema-chalk">Datos del plan</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <Input
@@ -182,7 +182,7 @@ export function PlanForm({ initialValues, onSubmit, submitLabel = 'Guardar' }: P
             </p>
           </div>
 
-          <fieldset className="rounded-lg border border-cinema-border bg-cinema-bg/40 p-4 space-y-4">
+          <fieldset className="rounded-[2px] border border-cinema-border bg-cinema-bg/40 p-4 space-y-4">
             <legend className="px-1 font-display text-sm tracking-wide text-cinema-chalk">
               Pistas de subtítulos y audio
             </legend>
@@ -218,7 +218,7 @@ export function PlanForm({ initialValues, onSubmit, submitLabel = 'Guardar' }: P
       </div>
 
       <aside className="space-y-5 lg:sticky lg:top-6">
-        <section className="rounded-lg border border-cinema-border bg-cinema-surface p-5 space-y-5">
+        <section className="rounded-[2px] border border-cinema-border bg-cinema-surface p-5 space-y-5">
           <h2 className="font-display text-lg font-semibold text-cinema-chalk">
             Ajustes y publicación
           </h2>

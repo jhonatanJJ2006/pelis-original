@@ -167,7 +167,7 @@ export function MovieForm({
       className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-5 items-start"
     >
       <div className="space-y-5 min-w-0">
-        <section className="rounded-lg border border-cinema-border bg-cinema-surface p-5 space-y-5">
+        <section className="rounded-[2px] border border-cinema-border bg-cinema-surface p-5 space-y-5">
           <h2 className="font-display text-lg font-semibold text-cinema-chalk">
             Metadatos principales
           </h2>
@@ -262,7 +262,7 @@ export function MovieForm({
             error={errors.actors}
           />
         </section>
-        <section className="rounded-lg border border-cinema-border bg-cinema-surface p-5 space-y-5">
+        <section className="rounded-[2px] border border-cinema-border bg-cinema-surface p-5 space-y-5">
           <h2 className="font-display text-lg font-semibold text-cinema-chalk">
             Transmisión de video
           </h2>
@@ -300,12 +300,12 @@ export function MovieForm({
         </section>
       </div>
       <aside className="space-y-5 lg:sticky lg:top-6">
-        <section className="rounded-lg border border-cinema-border bg-cinema-surface p-5 space-y-5">
+        <section className="rounded-[2px] border border-cinema-border bg-cinema-surface p-5 space-y-5">
           <h2 className="font-display text-lg font-semibold text-cinema-chalk">
             Arte y cartelería
           </h2>
           {values.image && (
-            <div className="w-full aspect-[2/3] rounded-lg overflow-hidden bg-cinema-elevated border border-cinema-border">
+            <div className="w-full aspect-[2/3] rounded-[2px] overflow-hidden bg-cinema-elevated border border-cinema-border">
               <img src={values.image} alt="Preview" className="w-full h-full object-cover" />
             </div>
           )}
@@ -327,13 +327,13 @@ export function MovieForm({
                   accept="image/*"
                   onChange={handleImageUpload}
                   disabled={isUploading}
-                  className="block w-full text-sm text-cinema-muted file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-cinema-elevated file:text-cinema-chalk hover:file:bg-cinema-elevated/80"
+                  className="block w-full text-sm text-cinema-muted file:mr-4 file:py-2 file:px-4 file:rounded-[2px] file:border-0 file:bg-cinema-elevated file:text-cinema-chalk hover:file:bg-cinema-elevated/80"
                 />
               </div>
             )}
           </div>
         </section>
-        <section className="rounded-lg border border-cinema-border bg-cinema-surface p-5 space-y-5">
+        <section className="rounded-[2px] border border-cinema-border bg-cinema-surface p-5 space-y-5">
           <h2 className="font-display text-lg font-semibold text-cinema-chalk">Visibilidad</h2>
           <label className="inline-flex items-center gap-2 text-sm text-cinema-muted cursor-pointer">
             <input
