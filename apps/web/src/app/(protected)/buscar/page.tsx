@@ -30,14 +30,20 @@ export default function BuscarPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-10 md:py-16 max-w-4xl">
-      <p className="text-label uppercase text-cinema-accent mb-2">Explorar</p>
-      <h1 className="font-display text-4xl md:text-5xl text-cinema-chalk mb-8">
-        Buscar en <span className="italic text-cinema-accent">PELIS</span>
+    <div className="container mx-auto px-4 py-12 md:py-20 max-w-4xl text-center">
+      <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-cinema-accent/40 bg-cinema-accent/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-cinema-accent">
+        <span className="h-1.5 w-1.5 rounded-full bg-cinema-accent" aria-hidden />
+        Índice PELIS
+      </p>
+      <h1 className="font-display text-4xl md:text-6xl text-cinema-chalk mb-4">
+        Búsqueda en la bóveda
       </h1>
-      <form onSubmit={onSubmit} role="search" className="relative mb-10">
+      <p className="text-cinema-muted max-w-xl mx-auto mb-10">
+        Explora películas, series, anime y canales en vivo.
+      </p>
+      <form onSubmit={onSubmit} role="search" className="relative mb-8 text-left">
         <Search
-          className="absolute left-0 top-1/2 -translate-y-1/2 w-6 h-6 text-cinema-accent"
+          className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-cinema-accent"
           aria-hidden
         />
         <input
@@ -47,16 +53,16 @@ export default function BuscarPage() {
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Busca películas, series, anime o canales"
           aria-label="Buscar en el catálogo"
-          className="w-full h-16 bg-transparent border-0 border-b border-cinema-border pl-10 pr-2 font-display text-2xl md:text-3xl text-cinema-chalk placeholder:text-cinema-ash focus:outline-none focus:border-cinema-accent transition-colors"
+          className="w-full h-16 rounded-[2px] border border-cinema-accent/60 bg-cinema-surface pl-14 pr-4 text-lg text-cinema-chalk placeholder:text-cinema-ash shadow-[0_0_40px_rgba(229,194,118,0.08)] focus:outline-none focus:border-cinema-accent focus:ring-1 focus:ring-cinema-accent/50 transition-colors"
         />
       </form>
-      <h2 className="text-label uppercase text-cinema-ash mb-3">Secciones</h2>
-      <div className="flex flex-wrap gap-2">
+      <h2 className="sr-only">Secciones</h2>
+      <div className="flex flex-wrap justify-center gap-2">
         {sections.map((s) => (
           <Link
             key={s.href}
             href={s.href}
-            className="inline-flex h-9 items-center rounded-full border border-cinema-border bg-cinema-surface px-4 text-sm text-cinema-muted hover:border-cinema-accent hover:text-cinema-chalk transition-colors"
+            className="inline-flex h-9 items-center rounded-[2px] border border-cinema-border bg-cinema-surface px-4 text-xs font-semibold uppercase tracking-[0.12em] text-cinema-muted hover:border-cinema-accent hover:text-cinema-accent transition-colors"
           >
             {s.label}
           </Link>
