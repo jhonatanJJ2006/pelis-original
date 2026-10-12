@@ -18,9 +18,12 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
       <header className="relative py-6 px-4 z-10">
         <div className="container mx-auto">
-          <Link href="/" className="flex items-center gap-2.5 w-fit group">
+          <Link href="/" className="flex flex-col w-fit group leading-none">
             <span className="font-display text-2xl font-semibold tracking-[0.12em] text-cinema-accent">
               PELIS
+            </span>
+            <span className="mt-1 text-[10px] font-medium uppercase tracking-[0.28em] text-cinema-silver">
+              Maison Noir
             </span>
           </Link>
         </div>
