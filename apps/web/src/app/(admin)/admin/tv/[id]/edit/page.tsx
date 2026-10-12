@@ -93,11 +93,15 @@ export default function EditTVChannelPage() {
         Volver a canales
       </Link>
 
-      <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-cinema-chalk mb-4 sm:mb-6">
+      <p className="text-label uppercase text-cinema-accent mb-1.5 flex items-center gap-2">
+        <span className="h-1.5 w-1.5 rounded-full bg-cinema-accent" aria-hidden />
+        Señal en vivo
+      </p>
+      <h1 className="font-display text-3xl sm:text-4xl font-normal tracking-tight text-cinema-chalk mb-6 sm:mb-8 pb-5 border-b border-cinema-border/60">
         Editar canal
       </h1>
 
-      <div className="mb-6 rounded-lg border border-cinema-border bg-cinema-surface p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div className="mb-6 rounded-[2px] border border-cinema-border bg-cinema-surface p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <p className="text-xs text-cinema-muted uppercase tracking-wider mb-1">
             Estado del stream

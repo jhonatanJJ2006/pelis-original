@@ -1,9 +1,12 @@
 package pro.verpelis.tv.ui.screens
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -29,6 +32,7 @@ import pro.verpelis.tv.data.api.TvListArgs
 import pro.verpelis.tv.ui.components.ChannelCard
 import pro.verpelis.tv.ui.components.TvFocusButton
 import pro.verpelis.tv.ui.theme.MaisonNoir
+import pro.verpelis.tv.ui.theme.MaisonType
 
 @Composable
 fun SearchScreen(
@@ -55,32 +59,38 @@ fun SearchScreen(
         }.getOrDefault(emptyList())
     }
 
-    Column(Modifier.fillMaxSize().padding(48.dp)) {
+    Column(Modifier.fillMaxSize().background(MaisonNoir.Background).padding(56.dp)) {
         TvFocusButton("Volver", {
             uiSounds.playClick()
             onBack()
         })
-        Text("Buscar canales", color = MaisonNoir.Gold, modifier = Modifier.padding(top = 20.dp, bottom = 12.dp))
+        Text("BÚSQUEDA", style = MaisonType.Eyebrow, modifier = Modifier.padding(top = 24.dp))
+        Text("Buscar canales", style = MaisonType.Display, modifier = Modifier.padding(bottom = 16.dp))
         BasicTextField(
             value = query,
             onValueChange = { query = it },
-            modifier = Modifier.focusRequester(focus),
-            textStyle = androidx.compose.ui.text.TextStyle(color = MaisonNoir.Chalk),
+            modifier = Modifier
+                .focusRequester(focus)
+                .fillMaxWidth()
+                .border(1.dp, MaisonNoir.Gold)
+                .background(MaisonNoir.Surface)
+                .padding(horizontal = 20.dp, vertical = 8.dp),
+            textStyle = MaisonType.Title,
             cursorBrush = SolidColor(MaisonNoir.Gold),
             decorationBox = { inner ->
                 androidx.compose.foundation.layout.Box(
                     Modifier.padding(vertical = 8.dp),
                 ) {
-                    if (query.isEmpty()) Text("Escribe el nombre del canal", color = MaisonNoir.Ash)
+                    if (query.isEmpty()) Text("Escribe el nombre del canal", style = MaisonType.Title.copy(color = MaisonNoir.Ash))
                     inner()
                 }
             },
         )
         LazyVerticalGrid(
-            columns = GridCells.Adaptive(180.dp),
-            contentPadding = PaddingValues(top = 24.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            columns = GridCells.Adaptive(200.dp),
+            contentPadding = PaddingValues(top = 32.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier.fillMaxSize(),
         ) {
             items(results, key = { it.id }) { channel ->

@@ -127,7 +127,7 @@ export function PosterPickerModal({ movie, onClose, onApplied }: PosterPickerMod
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg bg-cinema-surface border border-cinema-border rounded-lg shadow-2xl overflow-hidden max-h-[90vh] flex flex-col mx-auto"
+        className="w-full max-w-lg bg-cinema-surface border border-cinema-border rounded-[2px] shadow-2xl overflow-hidden max-h-[90vh] flex flex-col mx-auto"
         role="dialog"
         aria-modal="true"
         aria-labelledby="poster-picker-title"
@@ -144,7 +144,7 @@ export function PosterPickerModal({ movie, onClose, onApplied }: PosterPickerMod
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-lg text-cinema-muted hover:text-cinema-chalk hover:bg-cinema-elevated transition-colors"
+            className="p-2 rounded-[2px] text-cinema-muted hover:text-cinema-chalk hover:bg-cinema-elevated transition-colors"
             aria-label="Cerrar"
           >
             <X className="w-5 h-5" />
@@ -179,13 +179,13 @@ export function PosterPickerModal({ movie, onClose, onApplied }: PosterPickerMod
                 )}
               </div>
 
-              <div className="rounded-lg border border-cinema-border bg-cinema-elevated/40 p-4">
+              <div className="rounded-[2px] border border-cinema-border bg-cinema-elevated/40 p-4">
                 <div className="flex items-center justify-center gap-4 flex-wrap">
                   <div className="text-center">
                     <p className="text-xs text-cinema-muted mb-2">Actual</p>
                     <div
                       className={cn(
-                        'w-28 h-40 rounded-lg overflow-hidden bg-cinema-elevated border',
+                        'w-28 h-40 rounded-[2px] overflow-hidden bg-cinema-elevated border',
                         preview.hasExistingImage
                           ? 'border-cinema-border'
                           : 'border-dashed border-cinema-border'
@@ -209,7 +209,7 @@ export function PosterPickerModal({ movie, onClose, onApplied }: PosterPickerMod
 
                   <div className="text-center">
                     <p className="text-xs text-cinema-muted mb-2">TMDB</p>
-                    <div className="w-28 h-40 rounded-lg overflow-hidden bg-cinema-elevated border border-cinema-accent/30">
+                    <div className="w-28 h-40 rounded-[2px] overflow-hidden bg-cinema-elevated border border-cinema-accent/30">
                       {preview.tmdb.posterUrl ? (
                         <MoviePoster
                           src={preview.tmdb.posterUrl}

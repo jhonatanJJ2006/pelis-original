@@ -39,6 +39,7 @@ import pro.verpelis.tv.ui.components.CatalogRow
 import pro.verpelis.tv.ui.components.CategoryRow
 import pro.verpelis.tv.ui.components.TvFocusButton
 import pro.verpelis.tv.ui.theme.MaisonNoir
+import pro.verpelis.tv.ui.theme.MaisonType
 
 private data class PreferredRow(val label: String, val categoryKey: String?, val search: String?)
 
@@ -86,8 +87,8 @@ fun HomeScreen(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column {
-                    Text("Pelis", color = MaisonNoir.Chalk)
-                    Text("En vivo y catálogo", color = MaisonNoir.Silver)
+                    Text("PELIS", style = MaisonType.Title.copy(color = MaisonNoir.Gold))
+                    Text("MAISON NOIR · EN VIVO Y CATÁLOGO", style = MaisonType.Eyebrow)
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     TvFocusButton("Buscar", { uiSounds.playClick(); onOpenSearch() })

@@ -171,7 +171,7 @@ export default function AdminTVPlaylistsPage() {
           <ArrowLeft className="w-4 h-4" />
           Volver a canales
         </Link>
-        <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-cinema-chalk">
+        <h1 className="font-display text-3xl sm:text-4xl font-normal tracking-tight text-cinema-chalk">
           Listas M3U
         </h1>
         <p className="text-cinema-muted mt-1 sm:mt-2 text-sm sm:text-base">
@@ -182,7 +182,7 @@ export default function AdminTVPlaylistsPage() {
 
       <form
         onSubmit={handleCreate}
-        className="rounded-lg border border-cinema-border bg-cinema-surface p-5 space-y-4 max-w-3xl"
+        className="rounded-[2px] border border-cinema-border bg-cinema-surface p-5 space-y-4 max-w-3xl"
       >
         <h2 className="font-semibold text-cinema-chalk text-lg">Agregar lista</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -266,7 +266,7 @@ export default function AdminTVPlaylistsPage() {
         {playlists === undefined ? (
           <AdminTableSkeleton />
         ) : playlists.length === 0 ? (
-          <div className="text-center py-16 rounded-lg border border-cinema-border bg-cinema-surface/40 text-cinema-muted">
+          <div className="text-center py-16 rounded-[2px] border border-cinema-border bg-cinema-surface/40 text-cinema-muted">
             <ListVideo className="w-10 h-10 mx-auto mb-3 text-cinema-ash" />
             <p>No hay listas todavía. Agrega la primera arriba.</p>
           </div>
@@ -275,11 +275,11 @@ export default function AdminTVPlaylistsPage() {
             {playlists.map((pl) => (
               <article
                 key={pl._id}
-                className="rounded-lg border border-cinema-border bg-cinema-surface p-5 flex flex-col gap-4"
+                className="rounded-[2px] border border-cinema-border bg-cinema-surface p-5 flex flex-col gap-4"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-lg bg-cinema-accent/15 text-cinema-accent-light">
+                    <div className="p-2.5 rounded-[2px] bg-cinema-accent/15 text-cinema-accent-light">
                       <ListVideo className="w-5 h-5" />
                     </div>
                     <div>
@@ -303,18 +303,18 @@ export default function AdminTVPlaylistsPage() {
                   </span>
                 </div>
 
-                <div className="text-xs text-cinema-ash break-all bg-cinema-elevated/40 rounded-lg p-2 line-clamp-2">
+                <div className="text-xs text-cinema-ash break-all bg-cinema-elevated/40 rounded-[2px] p-2 line-clamp-2">
                   {pl.m3uUrl}
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div className="rounded-lg bg-cinema-elevated/40 p-2">
+                  <div className="rounded-[2px] bg-cinema-elevated/40 p-2">
                     <p className="text-cinema-ash text-[10px] uppercase tracking-wider">Canales</p>
                     <p className="text-cinema-chalk font-medium text-base mt-0.5">
                       {pl.totalChannels ?? '—'}
                     </p>
                   </div>
-                  <div className="rounded-lg bg-cinema-elevated/40 p-2">
+                  <div className="rounded-[2px] bg-cinema-elevated/40 p-2">
                     <p className="text-cinema-ash text-[10px] uppercase tracking-wider">
                       Última importación
                     </p>

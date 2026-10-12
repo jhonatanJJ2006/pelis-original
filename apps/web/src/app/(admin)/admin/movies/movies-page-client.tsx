@@ -261,13 +261,13 @@ export default function AdminMoviesPageClient() {
           onClose={() => setBulkDialog(null)}
         />
       )}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6 sm:mb-8 pb-5 border-b border-cinema-border/60">
         <div>
           <p className="text-label uppercase text-cinema-accent mb-1.5 flex items-center gap-2">
             <span className="h-1.5 w-1.5 rounded-full bg-cinema-accent" aria-hidden />
             Bóveda cinematográfica
           </p>
-          <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-cinema-chalk">
+          <h1 className="font-display text-3xl sm:text-4xl font-normal tracking-tight text-cinema-chalk">
             Películas
           </h1>
           <p className="text-cinema-muted mt-1 sm:mt-2 text-sm sm:text-base">
@@ -403,7 +403,7 @@ export default function AdminMoviesPageClient() {
             ))}
           </div>
 
-          <div className="hidden md:block overflow-x-auto rounded-lg border border-cinema-border bg-cinema-surface">
+          <div className="hidden md:block overflow-x-auto rounded-[2px] border border-cinema-border bg-cinema-surface">
             <table className="admin-table w-full min-w-[720px] lg:min-w-[900px] text-sm">
               <thead>
                 <tr className="border-b border-cinema-border text-left text-cinema-muted">

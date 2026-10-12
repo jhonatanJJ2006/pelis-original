@@ -200,10 +200,10 @@ export function AdminMovieMobileCard({
           onOpen();
         }
       }}
-      className="rounded-lg border border-cinema-border bg-cinema-surface p-4 transition-colors hover:bg-cinema-elevated/30 cursor-pointer"
+      className="rounded-[2px] border border-cinema-border bg-cinema-surface p-4 transition-colors hover:bg-cinema-elevated/30 cursor-pointer"
     >
       <div className="flex gap-3">
-        <div className="w-14 h-20 shrink-0 rounded-lg overflow-hidden bg-cinema-elevated">
+        <div className="w-14 h-20 shrink-0 rounded-[2px] overflow-hidden bg-cinema-elevated">
           <MoviePoster src={movie.image} alt={displayName} className="w-full h-full object-cover" />
         </div>
         <div className="min-w-0 flex-1">

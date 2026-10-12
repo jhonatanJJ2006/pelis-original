@@ -6,7 +6,6 @@ import { Heart, Film, Tv } from 'lucide-react';
 import { api } from '@pelis/db/api';
 import { useUser } from '@pelis/auth/hooks';
 import { MovieGridSkeleton } from '@pelis/ui/features/movie-card';
-import { MovieSwiper } from '@pelis/ui/features/movie-swiper';
 import { MovieCard } from '@pelis/ui/features/movie-card';
 import { EmptyState, ErrorState } from '@pelis/ui/features/empty-state';
 import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';
@@ -67,22 +66,21 @@ export default function FavoritesPage() {
 
   return (
     <div className="page-shell">
-      <ScrollReveal className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
-        <div>
-          <p className="text-cinema-accent text-sm font-medium uppercase tracking-widest mb-2">
-            Tu lista
-          </p>
-          <h1 className="font-display text-4xl md:text-5xl tracking-tight text-cinema-chalk">
-            Favoritos
-          </h1>
-          <p className="text-cinema-muted mt-2">{(movies ?? []).length} títulos guardados</p>
-        </div>
+      <ScrollReveal className="pb-6 mb-6 border-b border-cinema-border/60">
+        <span className="inline-block border border-cinema-accent/40 bg-cinema-accent/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-cinema-accent mb-3">
+          Curaduría personal
+        </span>
+        <h1 className="font-display text-4xl md:text-5xl tracking-tight text-cinema-chalk">
+          Mi lista{' '}
+          <span className="italic text-cinema-accent text-2xl md:text-3xl">Maison Noir</span>
+        </h1>
+        <p className="text-cinema-muted mt-2">
+          Colección personal: {(movies ?? []).length} títulos guardados.
+        </p>
+      </ScrollReveal>
 
-        <div
-          className="flex gap-2 p-1 bg-cinema-surface border border-cinema-border rounded-lg overflow-x-auto"
-          role="tablist"
-          aria-label="Filtrar favoritos"
-        >
+      <ScrollReveal className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div className="flex gap-2 overflow-x-auto" role="tablist" aria-label="Filtrar favoritos">
           {(
             [
               { id: 'all' as Tab, label: 'Todo', count: movies?.length ?? 0 },
@@ -97,10 +95,10 @@ export default function FavoritesPage() {
               aria-selected={tab === item.id}
               onClick={() => setTab(item.id)}
               className={cn(
-                'px-4 py-2 rounded-lg text-sm font-medium motion-safe:transition-[background-color,color,box-shadow] motion-safe:duration-fast',
+                'px-4 py-1.5 rounded-full border text-sm font-medium whitespace-nowrap motion-safe:transition-[background-color,color,box-shadow] motion-safe:duration-fast',
                 tab === item.id
-                  ? 'bg-cinema-accent text-cinema-bg shadow-glow'
-                  : 'text-cinema-silver hover:text-cinema-chalk hover:bg-cinema-elevated/50'
+                  ? 'bg-cinema-accent border-cinema-accent text-cinema-bg'
+                  : 'border-cinema-border bg-cinema-surface text-cinema-silver hover:text-cinema-chalk'
               )}
             >
               {item.label} ({item.count})
@@ -133,11 +131,9 @@ export default function FavoritesPage() {
         />
       ) : (
         <ScrollReveal>
-          <MovieSwiper
-            movies={filtered}
-            slideWidth="lg"
-            renderSlide={(movie) => (
-              <div className="relative group/item">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+            {filtered.map((movie) => (
+              <div key={movie._id} className="relative group/item">
                 <MovieCard movie={movie} />
                 <button
                   type="button"
@@ -148,8 +144,8 @@ export default function FavoritesPage() {
                   <Heart className="w-4 h-4 fill-current" aria-hidden />
                 </button>
               </div>
-            )}
-          />
+            ))}
+          </div>
         </ScrollReveal>
       )}
     </div>

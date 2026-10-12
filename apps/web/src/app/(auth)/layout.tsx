@@ -11,16 +11,19 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         className="absolute inset-0 opacity-40"
         style={{
           backgroundImage:
-            'radial-gradient(ellipse 60% 50% at 20% 20%, rgba(196,163,90,0.18), transparent), radial-gradient(ellipse 50% 40% at 80% 80%, rgba(139,30,45,0.12), transparent)',
+            'radial-gradient(ellipse 60% 50% at 20% 20%, rgba(229,194,118,0.18), transparent), radial-gradient(ellipse 50% 40% at 80% 80%, rgba(139,30,45,0.12), transparent)',
         }}
         aria-hidden
       />
 
       <header className="relative py-6 px-4 z-10">
         <div className="container mx-auto">
-          <Link href="/" className="flex items-center gap-2.5 w-fit group">
+          <Link href="/" className="flex flex-col w-fit group leading-none">
             <span className="font-display text-2xl font-semibold tracking-[0.12em] text-cinema-accent">
               PELIS
+            </span>
+            <span className="mt-1 text-[10px] font-medium uppercase tracking-[0.28em] text-cinema-silver">
+              Maison Noir
             </span>
           </Link>
         </div>

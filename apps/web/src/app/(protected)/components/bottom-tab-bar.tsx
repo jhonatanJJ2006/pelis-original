@@ -42,13 +42,19 @@ export function BottomTabBar() {
               aria-current={isActive ? 'page' : undefined}
             >
               {isActive && (
-                <span
-                  className="absolute top-0 inset-x-4 h-0.5 rounded-full bg-cinema-accent"
-                  aria-hidden
-                />
+                <span className="absolute top-0 inset-x-5 h-px bg-cinema-accent" aria-hidden />
               )}
-              <Icon className="relative w-[22px] h-[22px]" aria-hidden />
-              <span className="text-[10px] font-medium leading-none">{tab.label}</span>
+              <span
+                className={cn(
+                  'flex h-7 w-9 items-center justify-center rounded-[2px] border',
+                  isActive ? 'border-cinema-accent/50 bg-cinema-accent/10' : 'border-transparent'
+                )}
+              >
+                <Icon className="relative w-5 h-5" aria-hidden />
+              </span>
+              <span className="text-[9px] font-semibold uppercase tracking-[0.14em] leading-none">
+                {tab.label}
+              </span>
             </Link>
           );
         })}

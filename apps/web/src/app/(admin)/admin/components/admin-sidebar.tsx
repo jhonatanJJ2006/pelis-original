@@ -22,9 +22,9 @@ const navItems = [
   { href: '/admin/movies/new-releases', label: 'Estrenos', icon: Sparkles, enabled: true },
   { href: '/admin/series', label: 'Series', icon: Tv, enabled: true },
   { href: '/admin/anime', label: 'Anime', icon: Clapperboard, enabled: true },
-  { href: '/admin/tv', label: 'Canales TV', icon: Radio, enabled: true },
-  { href: '/admin/users', label: 'Usuarios', icon: Users, enabled: true },
-  { href: '/admin/plans', label: 'Planes', icon: CreditCard, enabled: true },
+  { href: '/admin/tv', label: 'TV en directo', icon: Radio, enabled: true },
+  { href: '/admin/users', label: 'Usuarios y accesos', icon: Users, enabled: true },
+  { href: '/admin/plans', label: 'Planes de suscripción', icon: CreditCard, enabled: true },
 ];
 
 interface AdminSidebarProps {
@@ -57,16 +57,24 @@ export function AdminSidebar({ mobileOpen = false, onMobileClose }: AdminSidebar
             <ArrowLeft className="w-4 h-4" />
             Volver al sitio
           </Link>
-          <p className="font-display text-2xl font-semibold tracking-[0.12em] text-cinema-accent">
-            PELIS
+          <p className="flex items-center gap-2">
+            <span className="font-display text-2xl font-semibold tracking-[0.12em] text-cinema-accent">
+              PELIS
+            </span>
+            <span className="border border-cinema-accent/50 px-1.5 py-0.5 text-[9px] uppercase tracking-[0.2em] text-cinema-accent">
+              Maison Noir
+            </span>
           </p>
-          <p className="text-label uppercase text-cinema-ash mt-1">Consola de administración</p>
+          <p className="text-label uppercase text-cinema-ash mt-2 flex items-center gap-1.5">
+            <span className="h-1 w-1 rounded-full bg-cinema-accent" aria-hidden />
+            Consola maestra de curatela
+          </p>
         </div>
         {onMobileClose && (
           <button
             type="button"
             onClick={onMobileClose}
-            className="lg:hidden p-2 rounded-lg text-cinema-muted hover:text-cinema-chalk hover:bg-cinema-elevated transition-colors shrink-0"
+            className="lg:hidden p-2 rounded-[2px] text-cinema-muted hover:text-cinema-chalk hover:bg-cinema-elevated transition-colors shrink-0"
             aria-label="Cerrar menú"
           >
             <X className="w-5 h-5" />
@@ -88,7 +96,7 @@ export function AdminSidebar({ mobileOpen = false, onMobileClose }: AdminSidebar
             return (
               <span
                 key={item.href}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-cinema-ash/60 cursor-not-allowed"
+                className="flex items-center gap-3 px-3 py-2.5 rounded-[2px] text-sm text-cinema-ash/60 cursor-not-allowed"
               >
                 <Icon className="w-4 h-4 shrink-0" />
                 {item.label}
@@ -103,10 +111,10 @@ export function AdminSidebar({ mobileOpen = false, onMobileClose }: AdminSidebar
               href={item.href}
               onClick={handleNavClick}
               className={cn(
-                'relative flex items-center gap-3 px-3 py-2.5 rounded-[6px] text-sm transition-colors',
+                'relative flex items-center gap-3 px-3 py-2.5 rounded-[2px] text-sm transition-colors border-l-2',
                 isActive
-                  ? 'bg-cinema-accent/10 text-cinema-chalk before:absolute before:left-0 before:inset-y-2 before:w-0.5 before:rounded-full before:bg-cinema-accent'
-                  : 'text-cinema-muted hover:text-cinema-chalk hover:bg-cinema-elevated/60'
+                  ? 'border-cinema-accent bg-cinema-accent/10 text-cinema-accent'
+                  : 'border-transparent text-cinema-muted hover:text-cinema-chalk hover:bg-cinema-elevated/60'
               )}
             >
               <Icon className={cn('w-4 h-4 shrink-0', isActive && 'text-cinema-accent')} />

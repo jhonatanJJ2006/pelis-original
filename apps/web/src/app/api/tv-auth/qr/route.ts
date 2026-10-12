@@ -19,7 +19,7 @@ export async function GET(req: Request) {
         margin: 1,
         width: 512,
         errorCorrectionLevel: 'M',
-        color: { dark: '#0B0B0D', light: '#F4F1EA' },
+        color: { dark: '#131315', light: '#F4F1EA' },
       });
       return new NextResponse(new Uint8Array(png), {
         status: 200,
@@ -40,7 +40,7 @@ export async function GET(req: Request) {
       margin: 1,
       width: 240,
       errorCorrectionLevel: 'M',
-      color: { dark: '#0B0B0D', light: '#F4F1EA' },
+      color: { dark: '#131315', light: '#F4F1EA' },
     });
   } catch {
     svg = qrSvg(data, 240);

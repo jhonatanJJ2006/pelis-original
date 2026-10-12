@@ -85,13 +85,13 @@ export default function AdminPlansPage() {
 
   return (
     <div>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6 sm:mb-8 pb-5 border-b border-cinema-border/60">
         <div>
           <p className="text-label uppercase text-cinema-accent mb-1.5 flex items-center gap-2">
             <span className="h-1.5 w-1.5 rounded-full bg-cinema-accent" aria-hidden />
             Membresías
           </p>
-          <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-cinema-chalk">
+          <h1 className="font-display text-3xl sm:text-4xl font-normal tracking-tight text-cinema-chalk">
             Planes
           </h1>
           <p className="text-cinema-muted mt-1 sm:mt-2 text-sm sm:text-base">
@@ -118,7 +118,7 @@ export default function AdminPlansPage() {
               <article
                 key={planRowId(plan)}
                 className={cn(
-                  'rounded-lg border bg-cinema-surface p-5 flex flex-col gap-4',
+                  'rounded-[2px] border bg-cinema-surface p-5 flex flex-col gap-4',
                   plan.recommended
                     ? 'border-cinema-accent/40 shadow-[0_0_0_1px_rgba(245,200,66,0.2)]'
                     : 'border-cinema-border'
@@ -128,7 +128,7 @@ export default function AdminPlansPage() {
                   <div className="flex items-center gap-3">
                     <div
                       className={cn(
-                        'p-2.5 rounded-lg',
+                        'p-2.5 rounded-[2px]',
                         plan.recommended
                           ? 'bg-cinema-accent/15 text-cinema-accent'
                           : 'bg-cinema-accent/15 text-cinema-accent-light'

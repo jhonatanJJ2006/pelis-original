@@ -135,8 +135,10 @@ export function ChannelForm({
       className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-5 items-start"
     >
       <div className="space-y-5 min-w-0">
-        <section className="rounded-lg border border-cinema-border bg-cinema-surface p-5 space-y-5">
-          <h2 className="font-display text-lg font-semibold text-cinema-chalk">Datos del canal</h2>
+        <section className="rounded-lg border border-cinema-border bg-cinema-surface p-5 sm:p-6 space-y-5 shadow-xl shadow-black/20">
+          <h2 className="font-display text-xl font-normal tracking-tight text-cinema-chalk">
+            Datos del canal
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <Input
               label="Nombre"
@@ -218,8 +220,8 @@ export function ChannelForm({
       </div>
 
       <aside className="space-y-5 lg:sticky lg:top-6">
-        <section className="rounded-lg border border-cinema-border bg-cinema-surface p-5 space-y-5">
-          <h2 className="font-display text-lg font-semibold text-cinema-chalk">
+        <section className="rounded-lg border border-cinema-border bg-cinema-surface p-5 sm:p-6 space-y-5 shadow-xl shadow-black/20">
+          <h2 className="font-display text-xl font-normal tracking-tight text-cinema-chalk">
             Logo y publicación
           </h2>
           <Input
@@ -230,7 +232,7 @@ export function ChannelForm({
           />
 
           {values.logo && (
-            <div className="w-16 h-16 rounded-lg overflow-hidden bg-cinema-elevated border border-cinema-border flex items-center justify-center">
+            <div className="w-16 h-16 rounded-[2px] overflow-hidden bg-cinema-elevated border border-cinema-border flex items-center justify-center">
               <img src={values.logo} alt="Preview" className="w-12 h-12 object-contain" />
             </div>
           )}

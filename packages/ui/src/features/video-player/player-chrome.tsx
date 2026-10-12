@@ -359,31 +359,39 @@ export function PlayerChrome({
       )}
     >
       {(title || subtitle) && (
-        <div className="mb-3 px-0.5">
-          {title && <p className="font-display text-base text-cinema-chalk md:text-lg">{title}</p>}
-          {subtitle && <p className="text-xs text-cinema-muted">{subtitle}</p>}
+        <div className="mb-3 px-0.5 md:mb-4 md:px-2">
+          {title && (
+            <p className="font-display text-lg tracking-tight text-cinema-chalk md:text-2xl">
+              {title}
+            </p>
+          )}
+          {subtitle && (
+            <p className="mt-0.5 text-[11px] uppercase tracking-[0.18em] text-cinema-accent/90">
+              {subtitle}
+            </p>
+          )}
         </div>
       )}
 
       {!hideSeek && (
-        <div className="relative mb-2 h-5 cursor-pointer touch-none md:h-4">
-          <div className="absolute top-1/2 h-1 w-full -translate-y-1/2 rounded-full bg-white/15">
+        <div className="group/seek relative mb-2 h-5 cursor-pointer touch-none md:mx-2 md:mb-3 md:h-5">
+          <div className="absolute top-1/2 h-1.5 w-full -translate-y-1/2 overflow-hidden rounded-full bg-white/15 transition-all duration-200 group-hover/seek:h-2.5">
             <div
               className="absolute h-full rounded-full bg-white/25"
               style={{ width: `${bufferedPercent}%` }}
             />
             <div
-              className="absolute h-full rounded-full bg-cinema-accent"
+              className="absolute h-full rounded-full bg-cinema-accent shadow-[0_0_12px_rgba(196,163,90,0.5)]"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
           <div
-            className="absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cinema-accent-light shadow-glow"
+            className="absolute top-1/2 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-cinema-bg bg-cinema-accent-light shadow-glow"
             style={{ left: `${progressPercent}%` }}
           >
             {scrubbing && (
               <div
-                className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-md border border-cinema-accent/30 bg-cinema-bg/95 px-2 py-1 font-display text-xs tabular-nums text-cinema-chalk shadow-[0_8px_24px_rgba(11,11,13,0.55)]"
+                className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-md border border-cinema-accent/30 bg-cinema-bg/95 px-2 py-1 font-display text-xs tabular-nums text-cinema-chalk shadow-[0_8px_24px_rgba(19,19,21,0.55)]"
                 role="status"
                 aria-live="polite"
               >
@@ -410,12 +418,12 @@ export function PlayerChrome({
         </div>
       )}
 
-      <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-cinema-chalk md:flex-nowrap md:gap-2">
+      <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-cinema-chalk md:flex-nowrap md:gap-3 md:rounded-xl md:border md:border-cinema-border/40 md:bg-cinema-bg/85 md:px-4 md:py-2.5 md:shadow-2xl md:backdrop-blur-md">
         {!hidePlayback && (
           <button
             type="button"
             onClick={onTogglePlay}
-            className="rounded-full bg-cinema-accent p-2.5 text-cinema-bg transition-colors hover:bg-cinema-accent-light focus-visible:ring-cinema-accent md:p-2"
+            className="rounded-full bg-cinema-accent p-2.5 text-cinema-bg shadow-md transition-all hover:bg-cinema-accent-light focus-visible:ring-cinema-accent active:scale-95 md:p-3"
             aria-label={playing ? 'Pausar' : 'Reproducir'}
           >
             {playing ? (
@@ -470,9 +478,9 @@ export function PlayerChrome({
             En vivo
           </span>
         ) : !hideSeek ? (
-          <span className="ml-1 text-xs tabular-nums text-cinema-chalk/85">
-            {formatPlayerTime(displayTime)}{' '}
-            <span className="text-cinema-muted">/ {formatPlayerTime(duration)}</span>
+          <span className="ml-1 font-mono text-xs tracking-wider tabular-nums text-cinema-chalk md:pl-2">
+            {formatPlayerTime(displayTime)} <span className="text-cinema-muted/60">/</span>{' '}
+            <span className="text-cinema-muted">{formatPlayerTime(duration)}</span>
           </span>
         ) : null}
 

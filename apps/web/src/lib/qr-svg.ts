@@ -180,7 +180,7 @@ export function qrSvg(text: string, size = 240): string {
       }
     }
   }
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${dim} ${dim}" width="${size}" height="${size}" shape-rendering="crispEdges" role="img" aria-hidden="true"><rect width="${dim}" height="${dim}" fill="#F4F1EA"/>${rects.replace(/<rect/g, '<rect fill="#0B0B0D"')}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${dim} ${dim}" width="${size}" height="${size}" shape-rendering="crispEdges" role="img" aria-hidden="true"><rect width="${dim}" height="${dim}" fill="#F4F1EA"/>${rects.replace(/<rect/g, '<rect fill="#131315"')}</svg>`;
 }
 
 export function qrSvgDataUrl(text: string, size = 240): string {

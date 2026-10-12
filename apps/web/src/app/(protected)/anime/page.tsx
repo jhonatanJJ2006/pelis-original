@@ -81,9 +81,7 @@ export default function AnimePage() {
   return (
     <div className="page-shell">
       <ScrollReveal className="mb-10">
-        <p className="text-cinema-accent text-sm font-medium uppercase tracking-widest mb-2">
-          Catálogo
-        </p>
+        <p className="text-label uppercase text-cinema-accent mb-2">Catálogo Maison Noir</p>
         <h1 className="font-display text-4xl md:text-5xl tracking-tight text-cinema-chalk">
           Anime
         </h1>

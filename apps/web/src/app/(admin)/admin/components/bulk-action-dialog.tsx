@@ -57,7 +57,7 @@ export function BulkActionDialog({
         role="dialog"
         aria-modal="true"
         aria-labelledby="bulk-title"
-        className="w-full max-w-lg rounded-lg border border-cinema-border bg-cinema-surface shadow-2xl"
+        className="w-full max-w-lg rounded-[2px] border border-cinema-border bg-cinema-surface shadow-2xl"
       >
         <div className="flex items-start justify-between gap-4 border-b border-cinema-border p-5">
           <div>
@@ -83,7 +83,7 @@ export function BulkActionDialog({
             <label
               key={o.value}
               className={cn(
-                'flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition-colors',
+                'flex cursor-pointer items-start gap-3 rounded-[2px] border p-3 transition-colors',
                 scope === o.value
                   ? 'border-cinema-accent bg-cinema-accent/10'
                   : 'border-cinema-border hover:border-cinema-silver/40'
@@ -99,7 +99,7 @@ export function BulkActionDialog({
                   setScope(o.value);
                   setAcknowledged(false);
                 }}
-                className="mt-1 accent-[#C4A35A]"
+                className="mt-1 accent-[#E5C276]"
               />
               <span>
                 <span className="block text-sm font-medium text-cinema-chalk">{o.label}</span>
@@ -109,13 +109,13 @@ export function BulkActionDialog({
           ))}
 
           {scope === 'filter' && filterCount !== undefined && filterCount > 0 && (
-            <label className="flex items-start gap-2 rounded-lg border border-cinema-danger/50 bg-cinema-danger/10 p-3 text-sm text-cinema-chalk">
+            <label className="flex items-start gap-2 rounded-[2px] border border-cinema-danger/50 bg-cinema-danger/10 p-3 text-sm text-cinema-chalk">
               <input
                 type="checkbox"
                 checked={acknowledged}
                 disabled={running}
                 onChange={(e) => setAcknowledged(e.target.checked)}
-                className="mt-0.5 accent-[#C4A35A]"
+                className="mt-0.5 accent-[#E5C276]"
               />
               Entiendo que esto modificará {filterCount} películas, incluidas las de otras páginas.
             </label>

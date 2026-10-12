@@ -2,15 +2,13 @@
 
 import { useQueryResult, useMutation } from '@pelis/db/client';
 import Link from 'next/link';
-import { History, Play, Trash2 } from 'lucide-react';
+import { History, Play, Trash2, X } from 'lucide-react';
 import { api } from '@pelis/db/api';
 import { useUser } from '@pelis/auth/hooks';
 import { ContinueWatchingRowSkeleton } from '@pelis/ui/features/continue-watching-row';
 import { EmptyState, ErrorState } from '@pelis/ui/features/empty-state';
 import { MoviePoster } from '@pelis/ui/features/movie-poster';
-import { ContentSwiper } from '@pelis/ui/features/content-swiper';
 import { ScrollReveal } from '@pelis/ui/features/scroll-reveal';
-import { Button } from '@pelis/ui/components';
 import { formatDate, formatDuration, getProgressPercentage } from '@pelis/ui/utils';
 import { toast } from 'sonner';
 
@@ -95,20 +93,40 @@ export default function HistoryPage() {
 
   return (
     <div className="page-shell">
-      <ScrollReveal className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
-        <div>
-          <p className="text-cinema-accent text-sm font-medium uppercase tracking-widest mb-2">
-            Actividad
+      <ScrollReveal className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 mb-8 border-b border-cinema-border/60">
+        <div className="max-w-2xl">
+          <nav
+            aria-label="Ruta"
+            className="text-[11px] uppercase tracking-[0.16em] text-cinema-silver mb-3"
+          >
+            <Link href="/profile" className="hover:text-cinema-chalk">
+              Mi cuenta
+            </Link>{' '}
+            / <span className="text-cinema-chalk">Historial</span>
+          </nav>
+          <p className="text-label uppercase text-cinema-accent mb-2 inline-flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-cinema-accent" aria-hidden />
+            Actividad de visionado
           </p>
           <h1 className="font-display text-4xl md:text-5xl tracking-tight text-cinema-chalk">
-            Historial
+            Historial de reproducción
           </h1>
-          <p className="text-cinema-muted mt-2">{history?.length ?? 0} títulos en tu historial</p>
+          <p className="text-cinema-muted mt-3">
+            Retoma tus películas y series exactamente donde las dejaste.{' '}
+            <span className="text-cinema-silver">
+              {history?.length ?? 0} títulos en tu historial.
+            </span>
+          </p>
         </div>
         {(history?.length ?? 0) > 0 && (
-          <Button variant="outline" onClick={handleClearAll}>
-            Limpiar todo
-          </Button>
+          <button
+            type="button"
+            onClick={handleClearAll}
+            className="inline-flex items-center gap-2 self-start md:self-auto border border-cinema-danger-light/50 bg-cinema-danger/20 px-4 py-2 text-sm text-red-200 hover:bg-cinema-danger/35 transition-colors rounded-[2px]"
+          >
+            <Trash2 className="w-4 h-4" aria-hidden />
+            Borrar historial completo
+          </button>
         )}
       </ScrollReveal>
 
@@ -135,10 +153,11 @@ export default function HistoryPage() {
         <div className="space-y-12">
           {continueItems.length > 0 && (
             <section>
-              <h2 className="font-display text-2xl tracking-tight text-cinema-chalk mb-5">
+              <h2 className="flex items-center gap-3 font-display text-2xl tracking-tight text-cinema-chalk mb-5">
+                <span aria-hidden className="h-6 w-[3px] bg-cinema-accent" />
                 Continuar viendo
               </h2>
-              <ContentSwiper slideClassName="!w-[320px] sm:!w-[360px]">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                 {continueItems.map((item) => (
                   <HistoryCard
                     key={item._id}
@@ -147,15 +166,16 @@ export default function HistoryPage() {
                     resume
                   />
                 ))}
-              </ContentSwiper>
+              </div>
             </section>
           )}
 
           <section>
-            <h2 className="font-display text-2xl tracking-tight text-cinema-chalk mb-5">
+            <h2 className="flex items-center gap-3 font-display text-2xl tracking-tight text-cinema-chalk mb-5">
+              <span aria-hidden className="h-6 w-[3px] bg-cinema-accent" />
               {continueItems.length > 0 ? 'Visto recientemente' : 'Todo tu historial'}
             </h2>
-            <ContentSwiper slideClassName="!w-[320px] sm:!w-[360px]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
               {recentItems.map((item) => (
                 <HistoryCard
                   key={item._id}
@@ -163,7 +183,7 @@ export default function HistoryPage() {
                   onRemove={() => handleRemove(item.movieId)}
                 />
               ))}
-            </ContentSwiper>
+            </div>
           </section>
         </div>
       )}
@@ -182,12 +202,12 @@ function HistoryCard({
 }) {
   const pct = getProgressPercentage(item.progress, item.duration);
 
+  const href = `/movies/${item.movieId}${resume ? '?play=true' : ''}`;
+  const remaining = item.duration > 0 ? Math.max(item.duration - item.progress, 0) : 0;
+
   return (
-    <div className="bg-cinema-surface rounded-lg border border-cinema-border overflow-hidden hover:border-cinema-accent/50 motion-safe:transition-[border-color,box-shadow] motion-safe:duration-normal h-full flex flex-col group">
-      <Link
-        href={`/movies/${item.movieId}${resume ? '?play=true' : ''}`}
-        className="relative aspect-video block overflow-hidden"
-      >
+    <div className="bg-cinema-surface border border-cinema-border/70 overflow-hidden hover:border-cinema-accent/50 motion-safe:transition-[border-color] motion-safe:duration-normal h-full flex flex-col group rounded-[2px]">
+      <Link href={href} className="relative aspect-video block overflow-hidden">
         {item.movie ? (
           <MoviePoster
             src={item.movie.image}
@@ -199,56 +219,53 @@ function HistoryCard({
             <History className="w-8 h-8 text-cinema-ash" aria-hidden />
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-cinema-bg via-cinema-bg/40 to-transparent" />
-        {resume && (
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 [@media(hover:hover)_and_(pointer:fine)]:group-hover:opacity-100 motion-safe:transition-opacity">
-            <div className="p-3 rounded-full bg-cinema-accent text-cinema-bg shadow-glow">
-              <Play className="w-5 h-5" fill="currentColor" />
-            </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-cinema-bg/70 to-transparent" />
+        {item.duration > 0 && (
+          <div className="absolute inset-x-0 bottom-0 h-1 bg-cinema-bg/70">
+            <div className="h-full bg-cinema-accent" style={{ width: `${pct}%` }} />
           </div>
         )}
       </Link>
 
       <div className="p-4 flex-1 flex flex-col">
-        <div className="flex items-start justify-between gap-2 mb-2">
-          <div className="min-w-0">
-            <Link
-              href={`/movies/${item.movieId}${resume ? '?play=true' : ''}`}
-              className="font-medium hover:text-cinema-accent-light transition-colors truncate block"
-            >
-              {item.movie?.name ?? 'Título eliminado'}
-            </Link>
-            <p className="text-xs text-cinema-silver mt-1">
-              {item.movie?.genre}
-              {item.movie?.mediaType === 'series' && ' · Serie'}
-            </p>
-          </div>
+        <div className="flex items-center justify-between gap-2 text-[11px] uppercase tracking-[0.12em] text-cinema-silver mb-1.5">
+          <span className="truncate">
+            {item.movie?.mediaType === 'series' ? 'Serie' : 'Película'}
+            {item.movie?.genre ? ` · ${item.movie.genre}` : ''}
+          </span>
+          <span className="shrink-0 normal-case tracking-normal">
+            {formatDate(item.lastWatched)}
+          </span>
+        </div>
+        <Link
+          href={href}
+          className="font-display text-xl text-cinema-chalk hover:text-cinema-accent-light transition-colors truncate block"
+        >
+          {item.movie?.name ?? 'Título eliminado'}
+        </Link>
+        {item.duration > 0 && (
+          <p className="text-sm text-cinema-muted mt-1">
+            {pct >= 95 ? 'Completado' : `Quedan ${formatDuration(remaining)} · ${pct}% visto`}
+          </p>
+        )}
+
+        <div className="mt-auto pt-4 flex items-center justify-between">
+          <Link
+            href={`/movies/${item.movieId}?play=true`}
+            className="inline-flex items-center gap-1.5 bg-cinema-accent px-3 py-1.5 text-xs font-semibold text-cinema-bg hover:bg-cinema-accent-light transition-colors rounded-[2px]"
+          >
+            <Play className="w-3.5 h-3.5" fill="currentColor" aria-hidden />
+            {pct > 0 && pct < 95 ? 'Continuar' : 'Reproducir'}
+          </Link>
           <button
             type="button"
             onClick={onRemove}
-            className="p-1.5 text-cinema-ash hover:text-cinema-danger-light rounded-lg hover:bg-cinema-danger/10 shrink-0"
+            className="p-1.5 text-cinema-ash hover:text-cinema-danger-light hover:bg-cinema-danger/10 shrink-0 rounded"
             aria-label="Eliminar del historial"
           >
-            <Trash2 className="w-4 h-4" aria-hidden />
+            <X className="w-4 h-4" aria-hidden />
           </button>
         </div>
-
-        <p className="text-xs text-cinema-ash mb-3">{formatDate(item.lastWatched)}</p>
-
-        {item.duration > 0 && (
-          <div className="mt-auto">
-            <div className="flex items-center justify-between text-xs text-cinema-silver mb-1">
-              <span>{formatDuration(item.progress)}</span>
-              <span>{pct}%</span>
-            </div>
-            <div className="h-1.5 bg-cinema-elevated rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-cinema-accent to-cinema-accent rounded-full"
-                style={{ width: `${pct}%` }}
-              />
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

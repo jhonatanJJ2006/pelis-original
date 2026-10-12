@@ -140,7 +140,7 @@ export function BackdropPickerModal({ movie, onClose, onApplied }: BackdropPicke
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg sm:max-w-2xl bg-cinema-surface border border-cinema-border rounded-lg sm:rounded-lg shadow-2xl overflow-hidden max-h-[90vh] flex flex-col mx-auto"
+        className="w-full max-w-lg sm:max-w-2xl bg-cinema-surface border border-cinema-border rounded-[2px] sm:rounded-[2px] shadow-2xl overflow-hidden max-h-[90vh] flex flex-col mx-auto"
         role="dialog"
         aria-modal="true"
         aria-labelledby="backdrop-picker-title"
@@ -157,7 +157,7 @@ export function BackdropPickerModal({ movie, onClose, onApplied }: BackdropPicke
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-lg text-cinema-muted hover:text-cinema-chalk hover:bg-cinema-elevated transition-colors"
+            className="p-2 rounded-[2px] text-cinema-muted hover:text-cinema-chalk hover:bg-cinema-elevated transition-colors"
             aria-label="Cerrar"
           >
             <X className="w-5 h-5" />
@@ -192,12 +192,12 @@ export function BackdropPickerModal({ movie, onClose, onApplied }: BackdropPicke
                 )}
               </div>
 
-              <div className="rounded-lg border border-cinema-border bg-cinema-elevated/40 p-4 space-y-4">
+              <div className="rounded-[2px] border border-cinema-border bg-cinema-elevated/40 p-4 space-y-4">
                 <div>
                   <p className="text-xs text-cinema-muted mb-2">Actual (hero / reproductor)</p>
                   <div
                     className={cn(
-                      'w-full aspect-video max-h-36 rounded-lg overflow-hidden bg-cinema-elevated border',
+                      'w-full aspect-video max-h-36 rounded-[2px] overflow-hidden bg-cinema-elevated border',
                       preview.hasExistingBackdrop
                         ? 'border-cinema-border'
                         : 'border-dashed border-cinema-border'
@@ -223,7 +223,7 @@ export function BackdropPickerModal({ movie, onClose, onApplied }: BackdropPicke
 
                 <div>
                   <p className="text-xs text-cinema-muted mb-2">TMDB (imagen ancha)</p>
-                  <div className="w-full aspect-video rounded-lg overflow-hidden bg-cinema-elevated border border-cyan-500/30">
+                  <div className="w-full aspect-video rounded-[2px] overflow-hidden bg-cinema-elevated border border-cyan-500/30">
                     {preview.tmdb.backdropUrl ? (
                       <MoviePoster
                         src={preview.tmdb.backdropUrl}
