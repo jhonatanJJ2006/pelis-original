@@ -1,5 +1,6 @@
 package pro.verpelis.tv.ui.screens
 
+import androidx.compose.ui.text.font.FontFamily
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
@@ -302,7 +303,7 @@ fun LoginScreen(
             verticalArrangement = Arrangement.SpaceBetween,
         ) {
             Column {
-                Text("Pelis", color = MaisonNoir.Chalk, fontSize = 36.sp)
+                Text("PELIS", color = MaisonNoir.Gold, fontSize = 36.sp, fontFamily = FontFamily.Serif)
                 Text(
                     "TELEVISIÓN",
                     color = MaisonNoir.Gold,
@@ -460,7 +461,7 @@ private fun SignedInPanel(onGoLive: () -> Unit, onSignOut: () -> Unit) {
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Text("SESIÓN", color = MaisonNoir.Ash, fontSize = 12.sp)
-        Text("Activa en este televisor", color = MaisonNoir.Gold, fontSize = 28.sp)
+        Text("Activa en este televisor", color = MaisonNoir.Gold, fontSize = 28.sp, fontFamily = FontFamily.Serif)
         Text("Puedes cerrar sesión o volver a los canales en vivo.", color = MaisonNoir.Silver)
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             TvFocusButton(label = "Ir a canales", onClick = onGoLive)
@@ -574,7 +575,7 @@ private fun AuthFormPanel(
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-        Text(title, color = MaisonNoir.Chalk, fontSize = 28.sp)
+        Text(title, color = MaisonNoir.Chalk, fontSize = 28.sp, fontFamily = FontFamily.Serif)
         Text(subtitle, color = MaisonNoir.Silver)
         if (showName) {
             TvTextField(label = "Nombre", value = name, onValueChange = onName)
@@ -620,7 +621,7 @@ private fun OtpPanel(
             .padding(28.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-        Text("Verifica tu email", color = MaisonNoir.Chalk, fontSize = 28.sp)
+        Text("Verifica tu email", color = MaisonNoir.Chalk, fontSize = 28.sp, fontFamily = FontFamily.Serif)
         Text(
             "Enviamos un código de 6 dígitos a $email. Tras verificar, iniciamos sesión automáticamente.",
             color = MaisonNoir.Silver,

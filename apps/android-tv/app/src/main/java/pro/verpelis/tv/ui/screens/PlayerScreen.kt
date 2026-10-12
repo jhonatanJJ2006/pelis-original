@@ -26,6 +26,7 @@ import pro.verpelis.tv.LocalSessionStore
 import pro.verpelis.tv.LocalUiSounds
 import pro.verpelis.tv.ui.components.TvFocusButton
 import pro.verpelis.tv.ui.theme.MaisonNoir
+import pro.verpelis.tv.ui.theme.MaisonType
 
 @Composable
 fun PlayerScreen(
@@ -83,7 +84,7 @@ fun PlayerScreen(
         }
         Text(
             text = channelName,
-            color = MaisonNoir.Chalk,
+            style = MaisonType.Title,
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .padding(top = 28.dp),
