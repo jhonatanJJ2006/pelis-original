@@ -172,7 +172,7 @@ export function TvLoginScreen() {
             className="absolute inset-0 opacity-40 pointer-events-none"
             style={{
               backgroundImage:
-                'radial-gradient(ellipse 70% 50% at 20% 20%, rgba(196,163,90,0.16), transparent)',
+                'radial-gradient(ellipse 70% 50% at 20% 20%, rgba(229,194,118,0.16), transparent)',
             }}
             aria-hidden
           />

@@ -13,8 +13,8 @@ const navItems = [
   { href: '/', label: 'Inicio', exact: true },
   { href: '/movies', label: 'Películas' },
   { href: '/series', label: 'Series' },
-  { href: '/tv', label: 'TV en vivo' },
   { href: '/anime', label: 'Anime' },
+  { href: '/tv', label: 'TV en vivo' },
   { href: '/favorites', label: 'Mi lista' },
 ];
 
@@ -81,6 +81,9 @@ export function Header({ sticky = true, minimalNav = false, tvMode = false }: He
             <span className="font-display text-2xl font-semibold tracking-[0.12em] text-cinema-accent group-hover:text-cinema-accent-light transition-colors">
               PELIS
             </span>
+            <span className="hidden sm:inline text-[10px] font-medium uppercase tracking-[0.28em] text-cinema-silver">
+              Maison Noir
+            </span>
           </Link>
 
           <div
@@ -118,7 +121,7 @@ export function Header({ sticky = true, minimalNav = false, tvMode = false }: He
                     'relative flex items-center gap-1.5 px-3 py-2 text-sm font-medium transition-colors duration-200 tv-focus',
                     tvMode && 'px-4 py-3 text-base',
                     isActive(item.href, item.exact)
-                      ? 'text-cinema-chalk after:absolute after:inset-x-3 after:-bottom-0.5 after:h-0.5 after:rounded-full after:bg-cinema-accent'
+                      ? 'text-cinema-chalk after:absolute after:inset-x-3 after:-bottom-0.5 after:h-px after:bg-cinema-accent'
                       : 'text-cinema-muted hover:text-cinema-chalk'
                   )}
                 >

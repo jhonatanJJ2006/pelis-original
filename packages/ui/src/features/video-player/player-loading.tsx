@@ -18,7 +18,7 @@ export function PlayerLoadingOverlay({
         'absolute inset-0 z-20 flex items-center justify-center',
         opaque ? 'bg-cinema-bg' : 'bg-cinema-bg/70'
       )}
-      style={{ backgroundColor: opaque ? '#0B0B0D' : undefined }}
+      style={{ backgroundColor: opaque ? '#131315' : undefined }}
       role="status"
       aria-label={message}
     >

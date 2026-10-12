@@ -11,14 +11,14 @@ const config: Config = {
     extend: {
       colors: {
         cinema: {
-          bg: '#0B0B0D',
-          surface: '#141417',
-          elevated: '#1C1C21',
-          border: '#2A2A30',
-          accent: '#C4A35A',
-          'accent-light': '#D6B873',
-          'accent-pressed': '#A88A45',
-          'accent-glow': '#E8D4A0',
+          bg: '#131315',
+          surface: '#1C1B1D',
+          elevated: '#201F21',
+          border: '#353437',
+          accent: '#E5C276',
+          'accent-light': '#FFDF9C',
+          'accent-pressed': '#C4A35A',
+          'accent-glow': '#FFDF9C',
           gold: '#F5C842',
           'gold-light': '#FFD966',
           violet: '#D4B896',
@@ -27,8 +27,8 @@ const config: Config = {
           'teal-light': '#A8B89A',
           orange: '#F97316',
           'orange-light': '#FB923C',
-          muted: '#A9A39A',
-          silver: '#8A857C',
+          muted: '#D0C5B4',
+          silver: '#999080',
           ash: '#6B675F',
           chalk: '#F2EEE6',
           danger: '#7A1E2B',
@@ -41,8 +41,8 @@ const config: Config = {
         display: ['var(--font-display)', 'system-ui', 'sans-serif'],
       },
       borderRadius: {
-        card: '6px',
-        control: '6px',
+        card: '4px',
+        control: '4px',
       },
       fontSize: {
         hero: ['3.5rem', { lineHeight: '4rem', letterSpacing: '-0.01em' }],
@@ -107,8 +107,8 @@ const config: Config = {
           '50%': { opacity: '0.75' },
         },
         pulseAccent: {
-          '0%, 100%': { boxShadow: '0 0 0 0 rgba(196, 163, 90, 0.35)' },
-          '50%': { boxShadow: '0 0 0 10px rgba(196, 163, 90, 0)' },
+          '0%, 100%': { boxShadow: '0 0 0 0 rgba(229, 194, 118, 0.35)' },
+          '50%': { boxShadow: '0 0 0 10px rgba(229, 194, 118, 0)' },
         },
         shimmer: {
           '0%': { backgroundPosition: '-200% 0' },

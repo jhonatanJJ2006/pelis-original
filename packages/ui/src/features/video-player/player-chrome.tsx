@@ -383,7 +383,7 @@ export function PlayerChrome({
           >
             {scrubbing && (
               <div
-                className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-md border border-cinema-accent/30 bg-cinema-bg/95 px-2 py-1 font-display text-xs tabular-nums text-cinema-chalk shadow-[0_8px_24px_rgba(11,11,13,0.55)]"
+                className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-md border border-cinema-accent/30 bg-cinema-bg/95 px-2 py-1 font-display text-xs tabular-nums text-cinema-chalk shadow-[0_8px_24px_rgba(19,19,21,0.55)]"
                 role="status"
                 aria-live="polite"
               >

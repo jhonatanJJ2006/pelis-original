@@ -11,7 +11,7 @@ export default function LegalLayout({ children }: { children: React.ReactNode })
         className="absolute inset-0 opacity-30"
         style={{
           backgroundImage:
-            'radial-gradient(ellipse 60% 50% at 20% 20%, rgba(196,163,90,0.14), transparent), radial-gradient(ellipse 50% 40% at 80% 80%, rgba(139,30,45,0.10), transparent)',
+            'radial-gradient(ellipse 60% 50% at 20% 20%, rgba(229,194,118,0.14), transparent), radial-gradient(ellipse 50% 40% at 80% 80%, rgba(139,30,45,0.10), transparent)',
         }}
         aria-hidden
       />

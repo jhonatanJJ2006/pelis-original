@@ -1,4 +1,4 @@
-import { Fraunces, Inter } from 'next/font/google';
+import { Bodoni_Moda, Inter } from 'next/font/google';
 import './globals.css';
 import { Providers } from '@pelis/auth/providers';
 import { Toaster } from 'sonner';
@@ -9,7 +9,7 @@ const inter = Inter({
   variable: '--font-body',
 });
 
-const fraunces = Fraunces({
+const bodoni = Bodoni_Moda({
   subsets: ['latin'],
   variable: '--font-display',
 });
@@ -41,7 +41,7 @@ export const viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover' as const,
-  themeColor: '#0B0B0D',
+  themeColor: '#131315',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -49,8 +49,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="es" className="dark">
       <head>
         {/* Safari / iOS Add to Home Screen — Maison Noir */}
-        <meta name="theme-color" content="#0B0B0D" media="(prefers-color-scheme: dark)" />
-        <meta name="theme-color" content="#0B0B0D" />
+        <meta name="theme-color" content="#131315" media="(prefers-color-scheme: dark)" />
+        <meta name="theme-color" content="#131315" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Pelis" />
@@ -58,7 +58,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
         <link rel="icon" href="/favicon.ico" sizes="any" />
       </head>
-      <body className={`${inter.variable} ${fraunces.variable} font-sans`}>
+      <body className={`${inter.variable} ${bodoni.variable} font-sans`}>
         <Providers>
           <AppProviders>
             {children}
@@ -67,8 +67,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               position="top-right"
               toastOptions={{
                 style: {
-                  background: '#141417',
-                  border: '1px solid #2A2A30',
+                  background: '#1C1B1D',
+                  border: '1px solid #353437',
                   color: '#F2EEE6',
                 },
               }}

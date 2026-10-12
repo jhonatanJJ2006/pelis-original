@@ -31,7 +31,7 @@ export function EmptyState({
           'inline-flex items-center justify-center w-20 h-20 rounded-lg bg-cinema-surface mb-6',
           tone === 'danger'
             ? 'border border-cinema-danger/35 shadow-[0_4px_24px_rgba(139,30,45,0.12)]'
-            : 'border border-cinema-accent/25 shadow-[0_4px_24px_rgba(196,163,90,0.08)]'
+            : 'border border-cinema-accent/25 shadow-[0_4px_24px_rgba(229,194,118,0.08)]'
         )}
       >
         <Icon

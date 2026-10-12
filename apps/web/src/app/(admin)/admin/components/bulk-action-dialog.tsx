@@ -99,7 +99,7 @@ export function BulkActionDialog({
                   setScope(o.value);
                   setAcknowledged(false);
                 }}
-                className="mt-1 accent-[#C4A35A]"
+                className="mt-1 accent-[#E5C276]"
               />
               <span>
                 <span className="block text-sm font-medium text-cinema-chalk">{o.label}</span>
@@ -115,7 +115,7 @@ export function BulkActionDialog({
                 checked={acknowledged}
                 disabled={running}
                 onChange={(e) => setAcknowledged(e.target.checked)}
-                className="mt-0.5 accent-[#C4A35A]"
+                className="mt-0.5 accent-[#E5C276]"
               />
               Entiendo que esto modificará {filterCount} películas, incluidas las de otras páginas.
             </label>
