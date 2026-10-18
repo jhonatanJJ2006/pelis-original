@@ -154,6 +154,17 @@ class PelisApi private constructor(context: Context) {
         val o = JSONObject(post("/api/app-auth/exchange", JSONObject().put("code", cb.code).put("state", cb.state).put("verifier", cb.verifier)))
         storeCookieFallback(o)
     }
+
+    /** Login nativo (Credential Manager), paso 1: nonce de un solo uso + client id OAuth web. */
+    suspend fun googleNonce(): GoogleNonce {
+        val o = JSONObject(post("/api/app-auth/google/nonce", JSONObject()))
+        return GoogleNonce(o.getString("nonce"), o.getString("clientId"))
+    }
+    /** Paso 2: el servidor verifica el ID token de Google y crea la sesión (igual que el canje del código). */
+    suspend fun signInGoogleIdToken(idToken: String) {
+        val o = JSONObject(post("/api/app-auth/google/id-token", JSONObject().put("idToken", idToken)))
+        storeCookieFallback(o)
+    }
     private fun storeCookieFallback(o: JSONObject) {
         // El servidor ya envía Set-Cookie (lo guarda el CookieJar). Respaldo: cookieValue firmado.
         val name = o.str("cookieName"); val value = o.str("cookieValue")

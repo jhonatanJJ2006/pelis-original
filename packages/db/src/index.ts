@@ -29,6 +29,14 @@ export {
   exchangeAppAuthCode,
   isAppAuthToken,
 } from './lib/app-auth';
+export {
+  createGoogleNonce,
+  consumeGoogleNonce,
+  googleWebClientId,
+  signInWithGoogleIdToken,
+  GOOGLE_NONCE_TTL_MS,
+} from './lib/app-auth-google';
+export { verifyGoogleIdToken, GoogleIdTokenError } from './lib/google-id-token';
 export { uploadFile, deleteFile } from './storage';
 export {
   fetchTmdbMetadata,

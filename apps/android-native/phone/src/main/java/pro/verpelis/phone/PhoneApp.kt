@@ -2,6 +2,7 @@ package pro.verpelis.phone
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -82,6 +83,7 @@ import coil.compose.AsyncImage
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.async
+import pro.verpelis.core.data.ApiException
 import pro.verpelis.core.data.Kind
 import pro.verpelis.core.data.PelisApi
 import pro.verpelis.core.data.Title
@@ -184,6 +186,8 @@ fun LoginScreen(api: PelisApi, onDone: () -> Unit) {
     var error by remember { mutableStateOf<String?>(null) }
     var busy by remember { mutableStateOf(false) }
     var waitingGoogle by remember { mutableStateOf(false) }
+    var googleBusy by remember { mutableStateOf(false) }
+    var googleNote by remember { mutableStateOf<String?>(null) }
     // Deep link de vuelta del navegador: valida state (un solo uso) y canjea el código por la sesión.
     val callback by AuthCallback.uri.collectAsState()
     LaunchedEffect(callback) {
@@ -241,13 +245,39 @@ fun LoginScreen(api: PelisApi, onDone: () -> Unit) {
             Row(Modifier.fillMaxWidth().padding(vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
                 Box(Modifier.weight(1f).height(1.dp).background(Noir.Line)); Text("  o  ", color = Noir.Muted, fontSize = 12.sp); Box(Modifier.weight(1f).height(1.dp).background(Noir.Line))
             }
-            // Google: flujo web de verpelis.pro en una Custom Tab; vuelve por deep link con un código de un solo uso.
-            GhostButton("CONTINUAR CON GOOGLE", modifier = Modifier.fillMaxWidth(), onClick = {
-                error = null
+            // Google: hoja de cuentas nativa (Credential Manager) dentro de la app. Respaldo automático:
+            // flujo web de verpelis.pro en una Custom Tab (sin Google Play services, sin cuentas o sin cliente Android).
+            fun openWebGoogle(note: String?) {
+                googleNote = note
                 waitingGoogle = true
                 runCatching { openCustomTab(ctx, api.googleLogin.start()) }
                     .onFailure { waitingGoogle = false; error = "No se pudo abrir el navegador" }
+            }
+            GhostButton(if (googleBusy) "CONECTANDO CON GOOGLE..." else "CONTINUAR CON GOOGLE", modifier = Modifier.fillMaxWidth(), onClick = {
+                if (busy || googleBusy) return@GhostButton
+                error = null; googleNote = null; waitingGoogle = false; googleBusy = true
+                scope.launch {
+                    try {
+                        val n = try { api.googleNonce() } catch (e: ApiException) {
+                            if (e.status == 404 || e.status == 503) null else throw e
+                        }
+                        if (n == null) { openWebGoogle(null); return@launch }
+                        when (val r = NativeGoogleSignIn.request(ctx, n.clientId, n.nonce)) {
+                            is NativeGoogleSignIn.Result.Token -> { busy = true; api.signInGoogleIdToken(r.idToken); onDone() }
+                            NativeGoogleSignIn.Result.Cancelled -> Unit
+                            is NativeGoogleSignIn.Result.Fallback -> {
+                                Log.i("PelisGoogle", "Respaldo Custom Tab: ${r.reason}")
+                                openWebGoogle("El selector de cuentas de Google no está disponible en este dispositivo; continúa en el navegador.")
+                            }
+                        }
+                    } catch (e: Exception) {
+                        error = e.message ?: "No se pudo iniciar sesión con Google"
+                    } finally {
+                        googleBusy = false; busy = false
+                    }
+                }
             })
+            googleNote?.let { Text(it, color = Noir.Muted, fontSize = 12.sp, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 12.dp)) }
             if (waitingGoogle) Text("Completa el inicio de sesión con Google en el navegador; volverás a la app automáticamente.", style = NoirBody, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 12.dp))
             Spacer(Modifier.height(18.dp))
             Row {
