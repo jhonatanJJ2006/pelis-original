@@ -11,6 +11,7 @@ import {
   getEmbedProviders,
   getProviderById,
   getProvidersSortedByPriority,
+  preferConsumetHls,
 } from '../lib/anime-providers';
 import {
   fetchEpisodesWithFallback,
@@ -23,6 +24,7 @@ import {
 import { fetchVidnestEpisode } from '../lib/vidnest-client';
 import { fetchEpisodeList } from '../lib/anizip-client';
 import { ANIME_STEP_TIMEOUTS_MS, ANIME_STREAM_BUDGET_MS, TimeBudget } from '../lib/time-budget';
+import { toConsumetHlsSources } from '../lib/consumet-sources';
 
 /**
  * Id reported for VidNest's server-side HLS. It differs from the `vidnest`
@@ -170,10 +172,15 @@ export const getEpisodeStream = register({
     dub: z.boolean().optional(),
     tryFallback: z.boolean().optional(),
     excludeProviders: z.array(z.string()).optional(),
+    /**
+     * Clientes con reproductor nativo (app de TV): solo sirve HLS/mp4, así que
+     * se omiten los iframes y se responde en UNA búsqueda `hls` o `none`.
+     */
+    nativeOnly: z.boolean().optional(),
   }),
   handler: async (
     _ctx,
-    { animeId, episodeNumber, provider, dub, tryFallback = true, excludeProviders }
+    { animeId, episodeNumber, provider, dub, tryFallback = true, excludeProviders, nativeOnly }
   ) => {
     const budget = new TimeBudget(ANIME_STREAM_BUDGET_MS);
     const anime = await prisma.anime.findUnique({ where: { id: animeId } });
@@ -184,7 +191,7 @@ export const getEpisodeStream = register({
       ANIME_STEP_TIMEOUTS_MS.anilist,
       null
     );
-    const excluded = new Set(excludeProviders ?? []);
+    const excluded = new Set<string>(excludeProviders ?? []);
     const timedOut = () => ({
       kind: 'none' as const,
       provider: requested?.id ?? null,
@@ -249,12 +256,51 @@ export const getEpisodeStream = register({
       }
     };
 
+    const consumetHls = (
+      result: Awaited<ReturnType<typeof fetchVideoByEpisodeNumber>>,
+      fellBackFrom?: string | null
+    ) => {
+      if (!result.provider || result.video.sources.length === 0) return null;
+      const { sources, subtitles } = toConsumetHlsSources(result.video);
+      if (sources.length === 0) return null;
+      return {
+        kind: 'hls' as const,
+        provider: result.provider,
+        sources,
+        subtitles,
+        triedProviders: result.triedProviders,
+        fellBackFrom: fellBackFrom ?? null,
+      };
+    };
+    const emptyConsumet = {
+      provider: null,
+      video: { sources: [], subtitles: [] },
+      triedProviders: [],
+    } as Awaited<ReturnType<typeof fetchVideoByEpisodeNumber>>;
+
+    // ANIME_CONSUMET_HLS=1: Consumet HLS primero (reproductor nativo en la TV);
+    // VidNest y los iframes quedan como fallback.
+    if (
+      preferConsumetHls() &&
+      requested?.kind !== 'hls' &&
+      (!requested || requested.id === 'vidnest')
+    ) {
+      hlsTried = true;
+      const first = await budget.run(
+        () => fetchVideoByEpisodeNumber(anilistId, episodeNumber, undefined, anime.title, excluded),
+        ANIME_STEP_TIMEOUTS_MS.consumet,
+        emptyConsumet
+      );
+      const hit = consumetHls(first);
+      if (hit) return hit;
+    }
+
     if (!requested || requested.id === 'vidnest') {
       const vidnest = await tryVidnestHls();
       if (vidnest) return vidnest;
     }
 
-    if (requested?.kind === 'embed') {
+    if (requested?.kind === 'embed' && !nativeOnly) {
       if (requested.resolveEmbedUrl) {
         const resolve = requested.resolveEmbedUrl;
         const url = await budget.run(
@@ -290,21 +336,13 @@ export const getEpisodeStream = register({
     if (requested?.kind === 'hls') {
       hlsTried = true;
       const result = await budget.run(
-        () => fetchVideoByEpisodeNumber(anilistId, episodeNumber, requested.id, anime.title),
+        () =>
+          fetchVideoByEpisodeNumber(anilistId, episodeNumber, requested.id, anime.title, excluded),
         ANIME_STEP_TIMEOUTS_MS.consumet,
-        { provider: null, video: { sources: [], subtitles: [] }, triedProviders: [] } as Awaited<
-          ReturnType<typeof fetchVideoByEpisodeNumber>
-        >
+        emptyConsumet
       );
-      if (result.provider && result.video.sources.length > 0) {
-        return {
-          kind: 'hls' as const,
-          provider: result.provider,
-          sources: result.video.sources,
-          subtitles: result.video.subtitles,
-          triedProviders: result.triedProviders,
-        };
-      }
+      const hit = consumetHls(result);
+      if (hit) return hit;
       if (!tryFallback) {
         return {
           kind: 'none' as const,
@@ -336,22 +374,23 @@ export const getEpisodeStream = register({
     // Try the Consumet hls chain before giving up on native playback.
     if (!hlsTried) {
       const hls = await budget.run(
-        () => fetchVideoByEpisodeNumber(anilistId, episodeNumber, undefined, anime.title),
+        () => fetchVideoByEpisodeNumber(anilistId, episodeNumber, undefined, anime.title, excluded),
         ANIME_STEP_TIMEOUTS_MS.consumet,
-        { provider: null, video: { sources: [], subtitles: [] }, triedProviders: [] } as Awaited<
-          ReturnType<typeof fetchVideoByEpisodeNumber>
-        >
+        emptyConsumet
       );
-      if (hls.provider && hls.video.sources.length > 0) {
-        return {
-          kind: 'hls' as const,
-          provider: hls.provider,
-          sources: hls.video.sources,
-          subtitles: hls.video.subtitles,
-          triedProviders: hls.triedProviders,
-          fellBackFrom: requested?.id ?? null,
-        };
-      }
+      const hit = consumetHls(hls, requested?.id ?? null);
+      if (hit) return hit;
+    }
+
+    // El reproductor nativo no puede abrir iframes: responder ya, sin buscar más.
+    if (nativeOnly) {
+      return {
+        kind: 'none' as const,
+        provider: requested?.id ?? null,
+        embedAvailable: true,
+        error:
+          'Este episodio no tiene ahora mismo una fuente que la TV pueda reproducir (solo reproductor web).',
+      };
     }
 
     // Last resort: any embed player, which needs no scraping to work.

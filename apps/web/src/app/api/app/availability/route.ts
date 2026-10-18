@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { NextResponse } from 'next/server';
+import { apkFingerprint } from '@/lib/apk-fingerprint';
 
 /** Siempre leer disco: version.json / APK versions cambian en deploy sin rebuild. */
 export const dynamic = 'force-dynamic';
@@ -29,6 +30,9 @@ export async function GET() {
     apkVersionName: '',
   });
 
+  // La app de TV verifica tamaño y hash antes de abrir el instalador.
+  const tvApk = tvApkAvailable ? await apkFingerprint(join(downloadsDir, 'pelis-tv.apk')) : null;
+
   return NextResponse.json(
     {
       apkAvailable,
@@ -39,6 +43,8 @@ export async function GET() {
       apkVersionName: apkVersion.apkVersionName,
       tvApkVersionCode: tvApkAvailable ? tvApkVersion.apkVersionCode : null,
       tvApkVersionName: tvApkAvailable ? tvApkVersion.apkVersionName || null : null,
+      tvApkSizeBytes: tvApk?.sizeBytes ?? null,
+      tvApkSha256: tvApk?.sha256 ?? null,
     },
     {
       headers: {
