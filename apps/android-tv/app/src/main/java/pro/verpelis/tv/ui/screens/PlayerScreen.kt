@@ -136,7 +136,7 @@ fun PlayerScreen(
             Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0f to Color.Black.copy(alpha = 0.7f), 0.35f to Color.Transparent, 0.7f to Color.Transparent, 1f to Color.Black.copy(alpha = 0.85f))))
             Column(Modifier.fillMaxSize().padding(horizontal = 48.dp, vertical = 26.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    MnText("PELIS", color = Mn.Gold, size = 13.sp, family = Mn.Serif, spacing = 2.sp)
+                    pro.verpelis.tv.ui.components.PelisLogo(13.sp, 2.sp)
                     Spacer(Modifier.width(12.dp))
                     NoirBadge("En vivo", gold = true)
                 }

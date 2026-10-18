@@ -58,7 +58,7 @@ fun LinkedScreen(onContinue: () -> Unit) {
         onContinue()
     }
     Column(Modifier.fillMaxSize().background(Mn.Bg).padding(horizontal = 48.dp, vertical = 22.dp)) {
-        MnText("PELIS", color = Mn.Gold, size = 18.sp, family = Mn.Serif, spacing = 2.sp)
+        pro.verpelis.tv.ui.components.PelisLogo(18.sp, 2.sp)
         Box(Modifier.weight(1f).fillMaxSize(), contentAlignment = Alignment.Center) {
             Column(Modifier.widthIn(max = 520.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 Box(

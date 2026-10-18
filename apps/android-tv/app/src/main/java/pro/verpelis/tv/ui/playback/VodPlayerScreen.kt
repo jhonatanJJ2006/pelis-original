@@ -522,7 +522,7 @@ fun VodPlayerScreen(
 private fun LoadingOverlay(detail: TitleDetail?, title: String, message: String) {
     Box(Modifier.fillMaxSize().background(Brush.radialGradient(listOf(Mn.High, Mn.Low, Mn.Lowest)))) {
         Column(Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {
-            MnText("PELIS", color = Mn.Gold, size = 14.sp, family = Mn.Serif, spacing = 3.sp)
+            pro.verpelis.tv.ui.components.PelisLogo(14.sp, 3.sp)
             Spacer(Modifier.height(18.dp))
             NoirSpinner(size = 42.dp)
             Spacer(Modifier.height(16.dp))

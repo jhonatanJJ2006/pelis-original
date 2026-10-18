@@ -142,12 +142,7 @@ private fun TvNavRail(
             .padding(vertical = 18.dp),
     ) {
         Column(Modifier.width(RailWidth), horizontalAlignment = Alignment.CenterHorizontally) {
-            Box(
-                Modifier.size(28.dp).clip(RoundedCornerShape(3.dp)).border(1.dp, Mn.Gold, RoundedCornerShape(3.dp)),
-                contentAlignment = Alignment.Center,
-            ) { MnText("P", color = Mn.Gold, size = 15.sp, family = Mn.Serif) }
-            Spacer(Modifier.height(3.dp))
-            MnText("NOIR", color = Mn.Outline, size = 6.sp, spacing = 1.5.sp)
+            pro.verpelis.tv.ui.components.PelisMark(32.dp)
         }
         Spacer(Modifier.weight(1f))
         main.forEach { s ->
@@ -318,7 +313,7 @@ fun TvHeader(
         Column {
             if (eyebrow != null) MnText(eyebrow, color = Mn.Gold, size = 8.sp, weight = FontWeight.SemiBold, spacing = 1.6.sp)
             if (title != null) MnText(title, color = Mn.Text, size = 22.sp, family = Mn.Serif, lines = 1)
-            else MnText("PELIS", color = Mn.Gold, size = 16.sp, family = Mn.Serif, spacing = 3.sp)
+            else pro.verpelis.tv.ui.components.PelisLogo(16.sp, 3.sp)
         }
         Spacer(Modifier.weight(1f))
         trailing?.invoke()

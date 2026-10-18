@@ -254,7 +254,7 @@ private fun DetailContent(
           item(key = "hero") {
           Column(Modifier.fillParentMaxHeight(if (d.episodeCount > 0 || seasons.size > 1) 0.8f else 0.9f).padding(start = 48.dp, end = 40.dp, top = 22.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                MnText("PELIS", color = Mn.Gold, size = 13.sp, family = Mn.Serif, spacing = 2.sp)
+                pro.verpelis.tv.ui.components.PelisLogo(13.sp, 2.sp)
                 NoirDivider(Modifier.padding(horizontal = 6.dp))
                 NoirBadge(when (d.kind) { TitleKind.MOVIE -> "Película"; TitleKind.SERIES -> "Serie"; TitleKind.ANIME -> "Anime" })
                 Spacer(Modifier.width(6.dp))
