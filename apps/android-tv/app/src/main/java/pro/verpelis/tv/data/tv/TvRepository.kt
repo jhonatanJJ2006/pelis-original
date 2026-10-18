@@ -98,6 +98,12 @@ class TvRepository(baseUrl: String, private val http: OkHttpClient) {
         }
     }
 
+    /** Llama y convierte fuera del hilo principal (las listas grandes pesan cientos de KB). */
+    internal suspend inline fun <reified T> fetchList(name: String, body: String = "{}"): List<T> {
+        val text = call(name, body)
+        return withContext(Dispatchers.Default) { list<T>(text) }
+    }
+
     internal inline fun <reified T> list(text: String): List<T> {
         if (text.isBlank() || text == "null") return emptyList()
         val type = Types.newParameterizedType(List::class.java, T::class.java)
@@ -114,10 +120,10 @@ class TvRepository(baseUrl: String, private val http: OkHttpClient) {
     }
 
     // ---- Inicio ----
-    suspend fun featured(): List<TitleDto> = list(call("movies.getFeatured"))
+    suspend fun featured(): List<TitleDto> = fetchList("movies.getFeatured")
 
     suspend fun continueWatching(limit: Int = 12): List<ContinueItem> =
-        list<ContinueDto>(call("history.getContinueWatching", """{"limit":$limit}""")).mapNotNull { row ->
+        fetchList<ContinueDto>("history.getContinueWatching", """{"limit":$limit}""").mapNotNull { row ->
             val m = row.movie ?: return@mapNotNull null
             if (m.id.isBlank() || row.duration <= 0) return@mapNotNull null
             ContinueItem(

@@ -108,6 +108,9 @@ export const listSeries = register({
       genre: z.string().optional(),
       status: StatusEnum.optional(),
       search: z.string().optional(),
+      // Paginación opcional (app TV): sin limit devuelve todo, como antes.
+      limit: z.number().int().positive().max(200).optional(),
+      offset: z.number().int().min(0).optional(),
     })
     .optional(),
   handler: async (_ctx, args) => {
@@ -141,7 +144,8 @@ export const listSeries = register({
         return true;
       })
       .map(({ card }) => card)
-      .sort((x, y) => x.title.localeCompare(y.title));
+      .sort((x, y) => x.title.localeCompare(y.title))
+      .slice(a.offset ?? 0, a.limit != null ? (a.offset ?? 0) + a.limit : undefined);
   },
 });
 

@@ -28,12 +28,23 @@ import pro.verpelis.tv.ui.shell.TvShell
 import pro.verpelis.tv.data.tv.LocalTvRepository
 import pro.verpelis.tv.data.tv.TvRepository
 import androidx.compose.runtime.CompositionLocalProvider
+import pro.verpelis.tv.data.tv.CatalogKind
+import pro.verpelis.tv.ui.library.CatalogScreen
+import pro.verpelis.tv.ui.library.HistoryScreen
+import pro.verpelis.tv.ui.library.MyListScreen
+import pro.verpelis.tv.ui.library.ProfileScreen
 
 object Routes {
     const val Home = "home"
     const val Search = "search"
     const val Login = "login"
     const val Settings = "settings"
+    const val Movies = "movies"
+    const val Series = "series"
+    const val Anime = "anime"
+    const val MyList = "mylist"
+    const val History = "history"
+    const val Profile = "profile"
     const val Player = "player/{channelId}?name={name}"
 
     const val Detail = "title/{kind}/{id}"
@@ -52,6 +63,10 @@ object Routes {
     val RailSections: List<NavSection> = listOf(
         NavSection.SEARCH,
         NavSection.HOME,
+        NavSection.MOVIES,
+        NavSection.SERIES,
+        NavSection.ANIME,
+        NavSection.MY_LIST,
         NavSection.PROFILE,
         NavSection.SETTINGS,
     )
@@ -59,7 +74,11 @@ object Routes {
     fun forSection(s: NavSection): String = when (s) {
         NavSection.SEARCH -> Search
         NavSection.HOME -> Home
-        NavSection.PROFILE -> Login
+        NavSection.MOVIES -> Movies
+        NavSection.SERIES -> Series
+        NavSection.ANIME -> Anime
+        NavSection.MY_LIST -> MyList
+        NavSection.PROFILE -> Profile
         NavSection.SETTINGS -> Settings
         else -> Home
     }
@@ -173,6 +192,28 @@ fun PelisTvNavHost(
                     }
                 },
             )
+        }
+        val openTitle: (TitleKind, String) -> Unit = { kind, id -> navController.navigate(Routes.detail(kind, id)) }
+        composable(Routes.Movies) { Shelled(NavSection.MOVIES) { CatalogScreen(CatalogKind.MOVIES, openTitle) } }
+        composable(Routes.Series) { Shelled(NavSection.SERIES) { CatalogScreen(CatalogKind.SERIES, openTitle) } }
+        composable(Routes.Anime) { Shelled(NavSection.ANIME) { CatalogScreen(CatalogKind.ANIME, openTitle) } }
+        composable(Routes.MyList) {
+            Shelled(NavSection.MY_LIST) {
+                MyListScreen(openTitle, onOpenHistory = { navController.navigate(Routes.History) }, onNeedLogin = toLogin)
+            }
+        }
+        composable(Routes.History) {
+            Shelled(NavSection.MY_LIST) { HistoryScreen(openTitle, onNeedLogin = toLogin) }
+        }
+        composable(Routes.Profile) {
+            Shelled(NavSection.PROFILE) {
+                ProfileScreen(
+                    onOpenMyList = { goSection(NavSection.MY_LIST) },
+                    onOpenHistory = { navController.navigate(Routes.History) },
+                    onNeedLogin = toLogin,
+                    onSignedOut = { goSection(NavSection.HOME) },
+                )
+            }
         }
         composable(Routes.Settings) {
             Shelled(NavSection.SETTINGS) {

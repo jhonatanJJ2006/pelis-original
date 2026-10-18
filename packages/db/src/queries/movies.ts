@@ -235,8 +235,14 @@ export const getGenres = register({
   kind: 'query',
   name: 'movies.getGenres',
   reads: ['movie'],
-  handler: async () => {
-    const movies = await prisma.movie.findMany({ select: { genre: true } });
+  // mediaType opcional (app TV): solo los géneros de películas o de series.
+  args: z.object({ mediaType: MediaTypeEnum.optional() }).optional(),
+  handler: async (_ctx, args) => {
+    const mediaType = args?.mediaType;
+    const movies = await prisma.movie.findMany({
+      select: { genre: true },
+      ...(mediaType ? { where: { mediaType: mediaType === 'movie' ? 'MOVIE' : 'SERIES' } } : {}),
+    });
     const set = new Set<string>();
     for (const m of movies) {
       for (const g of splitMovieGenres(m.genre)) set.add(g);

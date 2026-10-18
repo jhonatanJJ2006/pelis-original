@@ -22,6 +22,7 @@ const PUBLIC_CACHED_QUERIES = new Set([
   'movies.getTrending',
   'movies.listSeries',
   'movies.getGenres',
+  'anime.getGenres',
 ]);
 const PUBLIC_QUERY_TTL_MS = 60_000;
 const publicQueryCache = new TtlCache<string>(500);

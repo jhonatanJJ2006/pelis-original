@@ -146,7 +146,11 @@ fun HomeScreen(
     }
     // "Continuar viendo" se relee cada vez que se vuelve a la portada (p. ej. tras ver algo).
     LaunchedEffect(Unit) {
-        if (!session.hasSession()) return@LaunchedEffect
+        if (!session.hasSession()) {
+            HomeCache.continueItems = emptyList()
+            continueItems = emptyList()
+            return@LaunchedEffect
+        }
         runCatching { repo.continueWatching() }.getOrNull()?.let {
             HomeCache.continueItems = it
             continueItems = it
