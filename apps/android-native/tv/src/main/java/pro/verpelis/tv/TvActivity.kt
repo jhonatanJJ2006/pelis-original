@@ -48,6 +48,9 @@ import androidx.tv.material3.Text
 import coil.compose.AsyncImage
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.material.icons.Icons
@@ -455,16 +458,34 @@ fun TvChannels(api: PelisApi) {
     }
 }
 
-/** Inicio de sesión en TV con código / QR (flujo link-tv existente). */
+/**
+ * Inicio de sesión en TV — diseño Google Stitch "PELIS - Iniciar sesión (Android TV 10-Foot) |
+ * Maison Noir" (fe4203145f55480985b6537208384423). QR/código de vinculación (flujo link-tv) y
+ * correo/contraseña visibles a la vez; el campo de correo recibe el foco al abrir, así el
+ * control remoto siempre tiene dónde estar (antes la pantalla de correo abría sin foco).
+ */
 @Composable
 fun PairingScreen(api: PelisApi, onDone: () -> Unit) {
+    val ctx = LocalContext.current
+    val scope = rememberCoroutineScope()
     var pairing by remember { mutableStateOf<Pairing?>(null) }
-    var error by remember { mutableStateOf<String?>(null) }
+    var pairError by remember { mutableStateOf<String?>(null) }
     var attempt by remember { mutableStateOf(0) }
-    var useEmail by remember { mutableStateOf(false) }
-    if (useEmail) { TvEmailLogin(api, onBack = { useEmail = false }, onDone = onDone); return }
+    var email by remember { mutableStateOf("") }
+    var pass by remember { mutableStateOf("") }
+    var error by remember { mutableStateOf<String?>(null) }
+    var busy by remember { mutableStateOf(false) }
+    val firstField = remember { FocusRequester() }
+    val regenButton = remember { FocusRequester() }
+    val host = remember { api.base.removePrefix("https://").removePrefix("http://").trimEnd('/') }
+    val versionName = remember { runCatching { ctx.packageManager.getPackageInfo(ctx.packageName, 0).versionName }.getOrNull() ?: "" }
+
+    LaunchedEffect(Unit) {
+        delay(150)
+        runCatching { firstField.requestFocus() }
+    }
     LaunchedEffect(attempt) {
-        error = null
+        pairError = null
         try {
             val p = api.createPairing(); pairing = p
             while (true) {
@@ -474,66 +495,67 @@ fun PairingScreen(api: PelisApi, onDone: () -> Unit) {
                     "expired" -> { attempt++; return@LaunchedEffect }
                 }
             }
-        } catch (e: Exception) { error = e.message ?: "Sin conexión"; delay(5000); attempt++ }
+        } catch (e: Exception) { pairError = e.message ?: "Sin conexión"; pairing = null; delay(5000); attempt++ }
     }
-    Row(Modifier.fillMaxSize().background(Noir.Ink).padding(64.dp), verticalAlignment = Alignment.CenterVertically) {
-        Column(Modifier.weight(1f)) {
-            Text("PELIS", style = NoirTitle.copy(color = Noir.Gold, fontSize = 48.sp))
-            Spacer(Modifier.height(16.dp))
-            Text("Vincula esta TV", style = NoirTitle)
-            Spacer(Modifier.height(8.dp))
-            Text("1. En tu celular o computadora abre ${api.base.removePrefix("https://")}/link-tv", color = Noir.Text, fontSize = 18.sp)
-            Text("2. Inicia sesión e ingresa este código, o escanea el QR", color = Noir.Text, fontSize = 18.sp)
-            Spacer(Modifier.height(24.dp))
-            Text(pairing?.displayCode ?: "......", color = Noir.Gold, fontSize = 56.sp, letterSpacing = 8.sp, fontFamily = Noir.Display)
-            error?.let { Text(it, style = NoirBody) }
-            Spacer(Modifier.height(24.dp))
-            TvButton("Usar correo y contraseña") { useEmail = true }
-        }
-        pairing?.let { p ->
-            AsyncImage(api.qrUrl(p.verifyUrl), "Código QR", modifier = Modifier.size(280.dp).background(Noir.Text, RoundedCornerShape(8.dp)).padding(12.dp))
+    fun login() {
+        if (busy) return
+        if (email.isBlank() || pass.isBlank()) { error = "Completa correo y contraseña"; return }
+        busy = true; error = null
+        scope.launch {
+            try { api.signInEmail(email, pass); onDone() } catch (e: Exception) { error = e.message ?: "No se pudo iniciar sesión" }
+            busy = false
         }
     }
-}
 
-/** Alternativa en TV: correo y contraseña con el teclado en pantalla (misma sesión better-auth). */
-@Composable
-fun TvEmailLogin(api: PelisApi, onBack: () -> Unit, onDone: () -> Unit) {
-    val scope = rememberCoroutineScope()
-    var email by remember { mutableStateOf("") }
-    var pass by remember { mutableStateOf("") }
-    var error by remember { mutableStateOf<String?>(null) }
-    androidx.activity.compose.BackHandler(onBack = onBack)
-    val focus = androidx.compose.ui.platform.LocalFocusManager.current
-    fun login() { scope.launch { try { api.signInEmail(email, pass); onDone() } catch (e: Exception) { error = e.message ?: "No se pudo iniciar sesión" } } }
-    // En TV el D-pad no sale de un campo de texto por defecto: arriba/abajo mueven el foco.
-    val dpad = Modifier.onPreviewKeyEvent { ev ->
-        if (ev.type != androidx.compose.ui.input.key.KeyEventType.KeyDown) return@onPreviewKeyEvent false
-        when (ev.key) {
-            androidx.compose.ui.input.key.Key.DirectionDown -> focus.moveFocus(androidx.compose.ui.focus.FocusDirection.Down)
-            androidx.compose.ui.input.key.Key.DirectionUp -> focus.moveFocus(androidx.compose.ui.focus.FocusDirection.Up)
-            else -> false
+    MnTvLoginFrame(versionName = versionName, host = host) {
+        MnPanel(0.59f, right = firstField) {
+            MnEyebrow(MnIcon.Phone, "VINCULAR CON TU TELÉFONO")
+            MnTitle("Escanea para entrar", "Accede al instante sin escribir credenciales en pantalla usando la cámara de tu smartphone o tableta.")
+            Spacer(Modifier.height(14.dp))
+            Row(Modifier.fillMaxWidth().weight(1f), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                MnQrCard(
+                    qr = null,
+                    loading = pairing == null,
+                    modifier = Modifier.width(168.dp),
+                    image = pairing?.let { p -> { AsyncImage(api.qrUrl(p.verifyUrl), "Código QR para vincular la TV", modifier = Modifier.fillMaxSize().padding(8.dp)) } },
+                )
+                Column(Modifier.weight(1f)) {
+                    MnCodeCard(pairing?.displayCode?.ifBlank { null } ?: pairing?.code, if (pairing != null) "ACTIVO" else "GENERANDO", host)
+                    Spacer(Modifier.height(10.dp))
+                    MnSteps(host)
+                    Spacer(Modifier.height(10.dp))
+                    MnStatusLine(pairError ?: if (pairing != null) "Esperando confirmación en el celular…" else "Generando código…", isError = pairError != null)
+                }
+            }
+            MnPanelFooter {
+                MnExpiry(parseIsoMillis(pairing?.expiresAt))
+                Spacer(Modifier.weight(1f))
+                MnOutlineButton("GENERAR NUEVO CÓDIGO", onClick = { pairing = null; attempt++ }, icon = MnIcon.Refresh, focusRequester = regenButton)
+            }
         }
-    }
-    Column(Modifier.fillMaxSize().background(Noir.Ink).padding(64.dp).width(520.dp)) {
-        Wordmark(32.sp)
-        Spacer(Modifier.height(20.dp))
-        Text("Iniciar sesión", style = NoirTitle)
-        Spacer(Modifier.height(16.dp))
-        androidx.compose.material3.OutlinedTextField(email, { email = it }, label = { androidx.compose.material3.Text("Correo electrónico") }, singleLine = true,
-            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(imeAction = androidx.compose.ui.text.input.ImeAction.Next),
-            modifier = Modifier.width(520.dp).then(dpad))
-        Spacer(Modifier.height(12.dp))
-        androidx.compose.material3.OutlinedTextField(pass, { pass = it }, label = { androidx.compose.material3.Text("Contraseña") }, singleLine = true,
-            visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation(),
-            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(imeAction = androidx.compose.ui.text.input.ImeAction.Done),
-            keyboardActions = androidx.compose.foundation.text.KeyboardActions(onDone = { login() }),
-            modifier = Modifier.width(520.dp).then(dpad))
-        error?.let { Text(it, color = Color(0xFFE08A95), modifier = Modifier.padding(top = 8.dp)) }
-        Spacer(Modifier.height(20.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            TvButton("Iniciar sesión", primary = true) { login() }
-            TvButton("Volver al código", onClick = onBack)
+        MnPanel(0.41f, left = regenButton) {
+            MnEyebrow(MnIcon.Remote, "CON TU CUENTA")
+            MnTitle("Correo y contraseña", "Usa el control remoto para escribir tus credenciales")
+            Spacer(Modifier.height(16.dp))
+            MnInputField(
+                label = "Correo electrónico", icon = MnIcon.Mail, value = email, onValueChange = { email = it },
+                placeholder = "tu@correo.com", keyboardType = KeyboardType.Email, focusRequester = firstField,
+            )
+            Spacer(Modifier.height(10.dp))
+            MnInputField(
+                label = "Contraseña", icon = MnIcon.Lock, value = pass, onValueChange = { pass = it },
+                placeholder = "••••••••", isPassword = true, keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Done, onImeAction = { login() },
+            )
+            error?.let { Spacer(Modifier.height(8.dp)); MnStatusLine(it, isError = true) }
+            Spacer(Modifier.height(14.dp))
+            MnPrimaryButton(if (busy) "ENTRANDO…" else "INICIAR SESIÓN", onClick = { login() })
+            Spacer(Modifier.weight(1f))
+            MnPanelFooter {
+                MnText("¿No tienes cuenta?", color = Mn.Variant, size = 9.sp)
+                Spacer(Modifier.weight(1f))
+                MnText("Regístrate en $host", color = Mn.Gold, size = 9.sp, weight = FontWeight.SemiBold)
+            }
         }
     }
 }
