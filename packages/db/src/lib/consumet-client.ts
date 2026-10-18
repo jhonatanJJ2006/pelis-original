@@ -63,6 +63,35 @@ async function consumetFetch(path: string, timeoutMs = 10000): Promise<Response 
   return fetch(`${base}${path}`, { signal: AbortSignal.timeout(timeoutMs) });
 }
 
+/**
+ * Circuit breaker por proveedor: si Consumet no responde o da error (sitio
+ * caído, dominio muerto), ese proveedor se salta 10 min. Sin esto cada
+ * reproducción gastaba ~10 s del presupuesto de 25 s esperando a un scraper
+ * muerto y la búsqueda acababa en "tardó demasiado" antes de llegar a los iframes.
+ * Un 200 sin episodios (el anime no está en ese sitio) NO abre el circuito.
+ */
+const PROVIDER_DOWN_MS = 10 * 60 * 1000;
+const providerDownUntil = new Map<string, number>();
+
+export function markConsumetProviderDown(providerId: string, now = Date.now()): void {
+  providerDownUntil.set(providerId, now + PROVIDER_DOWN_MS);
+}
+
+export function isConsumetProviderDown(providerId: string, now = Date.now()): boolean {
+  const until = providerDownUntil.get(providerId);
+  if (until === undefined) return false;
+  if (now >= until) {
+    providerDownUntil.delete(providerId);
+    return false;
+  }
+  return true;
+}
+
+/** Solo para tests. */
+export function resetConsumetCircuit(): void {
+  providerDownUntil.clear();
+}
+
 /** Map a provider id to the slug Consumet expects (HiAnime is `zoro` there). */
 function consumetSlug(providerId: string): string {
   return getProviderById(providerId)?.consumetId ?? providerId;
@@ -143,10 +172,15 @@ export async function fetchEpisodesFromProvider(
 ): Promise<AnimeEpisode[]> {
   const pageParam = episodePage ? `&page=${episodePage}` : '';
   try {
+    if (isConsumetProviderDown(providerId)) return [];
     const response = await consumetFetch(
       `/meta/anilist/info/${anilistId}?provider=${consumetSlug(providerId)}${pageParam}`
     );
-    if (!response || !response.ok) return [];
+    if (!response) return [];
+    if (!response.ok) {
+      if (response.status >= 500) markConsumetProviderDown(providerId);
+      return [];
+    }
     const data = (await response.json()) as {
       episodes?: Array<{
         id: string;
@@ -164,6 +198,8 @@ export async function fetchEpisodesFromProvider(
       description: ep.description ?? '',
     }));
   } catch {
+    // Timeout o red: el scraper no responde.
+    markConsumetProviderDown(providerId);
     return [];
   }
 }
@@ -175,7 +211,11 @@ export async function fetchVideoFromProvider(
   const path = `/meta/anilist/watch/${encodeURIComponent(episodeId)}?provider=${consumetSlug(providerId)}`;
   try {
     const response = await consumetFetch(path, 10000);
-    if (!response || !response.ok) return { sources: [], subtitles: [] };
+    if (!response) return { sources: [], subtitles: [] };
+    if (!response.ok) {
+      if (response.status >= 500) markConsumetProviderDown(providerId);
+      return { sources: [], subtitles: [] };
+    }
     const data = (await response.json()) as {
       sources?: Array<{ url: string; quality?: string; isM3U8?: boolean }>;
       subtitles?: Array<{ url: string; lang?: string }>;
@@ -196,6 +236,7 @@ export async function fetchVideoFromProvider(
       subtitles: (data.subtitles ?? []).map((s) => ({ url: s.url, lang: s.lang ?? 'English' })),
     };
   } catch {
+    markConsumetProviderDown(providerId);
     return { sources: [], subtitles: [] };
   }
 }
@@ -261,7 +302,9 @@ export async function fetchVideoByEpisodeNumber(
   // Sin Consumet configurado no hay nada que probar (y no se gasta presupuesto).
   if (!getConsumetApiUrl())
     return { provider: null, video: { sources: [], subtitles: [] }, triedProviders: [] };
-  const order = getHlsProviders().filter((p) => !exclude?.has(p.id));
+  const order = getHlsProviders().filter(
+    (p) => !exclude?.has(p.id) && !isConsumetProviderDown(p.id)
+  );
   const preferred = preferredProviderId ? getProviderById(preferredProviderId) : undefined;
   const queue =
     preferred && preferred.kind === 'hls'
