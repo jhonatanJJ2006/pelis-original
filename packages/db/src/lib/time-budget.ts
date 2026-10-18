@@ -10,7 +10,7 @@ export const ANIME_STEP_TIMEOUTS_MS = {
   vidnest: 10_000,
   resolveEmbed: 8_000,
   embedHealth: 5_000,
-  consumet: 10_000,
+  consumet: 6_000,
 } as const;
 
 /** Resolves to `fallback` if `promise` takes longer than `ms` (or rejects). */

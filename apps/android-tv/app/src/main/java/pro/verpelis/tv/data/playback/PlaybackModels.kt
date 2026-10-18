@@ -52,7 +52,12 @@ data class TitleDetail(
 }
 
 /** Fuente reproducible por ExoPlayer (HLS o archivo progresivo). */
-data class PlayableSource(val url: String, val isHls: Boolean)
+data class PlayableSource(
+    val url: String,
+    val isHls: Boolean,
+    /** Cabeceras que exige el CDN (p. ej. Referer de Consumet); vacío para nuestro dominio. */
+    val headers: Map<String, String> = emptyMap(),
+)
 
 object ResumePolicy {
     private const val MIN_PROGRESS_SEC = 15L

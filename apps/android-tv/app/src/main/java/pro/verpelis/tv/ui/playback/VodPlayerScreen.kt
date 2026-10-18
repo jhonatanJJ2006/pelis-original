@@ -106,8 +106,12 @@ private sealed interface Phase {
 private const val CONTROLS_TIMEOUT_MS = 5_000L
 private const val SAVE_EVERY_MS = 30_000L
 
+/** Factoría compartida para poder fijar las cabeceras de cada fuente (Referer de Consumet). */
 @OptIn(UnstableApi::class)
-private fun buildVodPlayer(context: android.content.Context, repository: PlaybackRepository): Pair<ExoPlayer, Int> {
+private class VodPlayerParts(val player: ExoPlayer, val displayHeight: Int, val http: OkHttpDataSource.Factory)
+
+@OptIn(UnstableApi::class)
+private fun buildVodPlayer(context: android.content.Context, repository: PlaybackRepository): VodPlayerParts {
     val display = Util.getCurrentDisplayModeSize(context)
     val selector = DefaultTrackSelector(context).apply {
         setParameters(
@@ -125,14 +129,15 @@ private fun buildVodPlayer(context: android.content.Context, repository: Playbac
         .setTargetBufferBytes(60 * 1024 * 1024)
         .setPrioritizeTimeOverSizeThresholds(false)
         .build()
+    val http = OkHttpDataSource.Factory(repository.streamHttp)
     val player = ExoPlayer.Builder(context)
         .setTrackSelector(selector)
         .setLoadControl(loadControl)
-        .setMediaSourceFactory(DefaultMediaSourceFactory(OkHttpDataSource.Factory(repository.streamHttp)))
+        .setMediaSourceFactory(DefaultMediaSourceFactory(http))
         .setSeekBackIncrementMs(10_000)
         .setSeekForwardIncrementMs(10_000)
         .build()
-    return player to display.y
+    return VodPlayerParts(player, display.y, http)
 }
 
 @OptIn(UnstableApi::class)
@@ -210,7 +215,10 @@ fun VodPlayerScreen(
     val context = LocalContext.current
     val uiSounds = LocalUiSounds.current
     val loader = remember { PlaybackLoader(repository) }
-    val (player, displayHeight) = remember { buildVodPlayer(context, repository) }
+    val parts = remember { buildVodPlayer(context, repository) }
+    val player = parts.player
+    val displayHeight = parts.displayHeight
+    val httpFactory = parts.http
 
     var phase by remember { mutableStateOf<Phase>(Phase.Loading("Preparando…")) }
     var detail by remember { mutableStateOf<TitleDetail?>(TitleCache.get(kind, id)) }
@@ -253,6 +261,7 @@ fun VodPlayerScreen(
         val src = sources.getOrNull(index) ?: return
         sourceIndex = index
         ended = false
+        httpFactory.setDefaultRequestProperties(src.headers)
         player.setMediaItem(mediaItemFor(src, title, subtitles), atMs.coerceAtLeast(0))
         player.prepare()
         player.playWhenReady = true

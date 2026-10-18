@@ -79,6 +79,11 @@ class PlaybackLoader(private val backend: PlaybackBackend, private val maxAnimeA
             } catch (e: Exception) {
                 return LoadResult.Failed(apiError(e), detail)
             }
+            // nativeOnly: el servidor ya buscó todas las fuentes nativas en UNA llamada;
+            // repetirla excluyendo iframes sería la "doble búsqueda".
+            if (response?.kind == "none" && response.embedAvailable == true) {
+                return embedOnly(detail, skipped.ifEmpty { listOf("VidNest/Mega") })
+            }
             when (val pick = AnimeSources.pick(backend.base, response)) {
                 is AnimePick.Playable -> {
                     val notice = if (skipped.isEmpty()) null
