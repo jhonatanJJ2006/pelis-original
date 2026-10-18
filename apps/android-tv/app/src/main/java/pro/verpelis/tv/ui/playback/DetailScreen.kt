@@ -52,6 +52,12 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import pro.verpelis.tv.data.TvImages
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import pro.verpelis.tv.data.tv.addFavorite
+import pro.verpelis.tv.data.tv.animeSeasons
+import pro.verpelis.tv.data.tv.isFavorite
+import pro.verpelis.tv.data.tv.removeFavorite
+import pro.verpelis.tv.data.tv.similar
 import pro.verpelis.tv.LocalSessionStore
 import pro.verpelis.tv.LocalUiSounds
 import pro.verpelis.tv.data.api.PelisApiClient
@@ -82,8 +88,14 @@ fun DetailScreen(
     onPlay: (kind: TitleKind, id: String, episode: Int, startMs: Long) -> Unit,
     onNeedLogin: () -> Unit,
     onBack: () -> Unit,
+    onOpenTitle: (TitleKind, String) -> Unit = { _, _ -> },
 ) {
     val uiSounds = LocalUiSounds.current
+    val tvRepo = pro.verpelis.tv.data.tv.LocalTvRepository.current
+    val scope = rememberCoroutineScope()
+    var favorite by remember(id) { mutableStateOf<Boolean?>(null) }
+    var similar by remember(id) { mutableStateOf<List<pro.verpelis.tv.data.api.CatalogItem>>(emptyList()) }
+    var seasons by remember(id) { mutableStateOf<List<pro.verpelis.tv.data.tv.SeasonDto>>(emptyList()) }
     val session = LocalSessionStore.current
     var detail by remember(kind, id) { mutableStateOf(TitleCache.get(kind, id)) }
     var loadError by remember { mutableStateOf<String?>(null) }
@@ -114,6 +126,17 @@ fun DetailScreen(
         }
     }
     LaunchedEffect(detail != null) { if (detail != null) runCatching { playFocus.requestFocus() } }
+    // Mi lista (solo películas y series: favorites usa Movie) y "Más como esto" (mismo género).
+    LaunchedEffect(detail?.id) {
+        val d = detail ?: return@LaunchedEffect
+        if (d.kind != TitleKind.ANIME && session.hasSession()) {
+            favorite = runCatching { tvRepo.isFavorite(d.id) }.getOrNull()
+        }
+        if (d.kind == TitleKind.ANIME) {
+            seasons = runCatching { tvRepo.animeSeasons(d.id) }.getOrDefault(emptyList()).filter { it.isExtra != true }
+        }
+        similar = runCatching { tvRepo.similar(d.kind, d.genre, d.id).map { with(pro.verpelis.tv.data.tv.TvLibraryMappers) { it.item() } } }.getOrDefault(emptyList())
+    }
 
     CompositionLocalProvider(LocalMnFocusSound provides { uiSounds.playFocus() }) {
         Box(
@@ -147,6 +170,19 @@ fun DetailScreen(
                 return@Box
             }
             DetailContent(
+                favorite = favorite,
+                onToggleFavorite = {
+                    uiSounds.playClick()
+                    val now = favorite ?: return@DetailContent
+                    favorite = !now
+                    scope.launch {
+                        runCatching { if (now) tvRepo.removeFavorite(d.id) else tvRepo.addFavorite(d.id) }
+                            .onFailure { favorite = now; message = "No se pudo actualizar Mi lista. Inténtalo de nuevo." }
+                    }
+                },
+                similar = similar,
+                seasons = seasons,
+                onOpenTitle = { k, i -> uiSounds.playClick(); onOpenTitle(k, i) },
                 d = d,
                 episode = episode,
                 resumeMs = resumeMs,
@@ -182,6 +218,11 @@ fun DetailScreen(
 
 @Composable
 private fun DetailContent(
+    favorite: Boolean?,
+    onToggleFavorite: () -> Unit,
+    similar: List<pro.verpelis.tv.data.api.CatalogItem>,
+    seasons: List<pro.verpelis.tv.data.tv.SeasonDto>,
+    onOpenTitle: (TitleKind, String) -> Unit,
     d: TitleDetail,
     episode: Int,
     resumeMs: Long?,
@@ -209,12 +250,15 @@ private fun DetailContent(
         Box(Modifier.fillMaxSize().background(Brush.horizontalGradient(0f to Mn.Bg, 0.42f to Mn.Bg.copy(alpha = 0.88f), 1f to Mn.Bg.copy(alpha = 0.15f))))
         Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0f to Mn.Bg.copy(alpha = 0.55f), 0.3f to Color.Transparent, 0.62f to Color.Transparent, 1f to Mn.Bg)))
 
-        Column(Modifier.fillMaxSize().padding(start = 48.dp, end = 40.dp, top = 22.dp, bottom = 20.dp)) {
+        val listState = androidx.compose.foundation.lazy.rememberLazyListState()
+        val scope = rememberCoroutineScope()
+        androidx.compose.foundation.lazy.LazyColumn(Modifier.fillMaxSize(), state = listState, contentPadding = PaddingValues(bottom = 44.dp)) {
+          item(key = "hero") {
+          // Con el foco en los botones, la ficha se ve entera (sin desplazar la cabecera).
+          Column(Modifier.onFocusChanged { if (it.hasFocus) scope.launch { delay(16); listState.scrollToItem(0) } }.fillParentMaxHeight(if (d.episodeCount > 0 || seasons.size > 1) 0.72f else 0.9f).padding(start = 48.dp, end = 40.dp, top = 22.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                MnText("PELIS", color = Mn.Gold, size = 13.sp, family = Mn.Serif, spacing = 2.sp)
+                pro.verpelis.tv.ui.components.PelisLogo(13.sp, 2.sp)
                 NoirDivider(Modifier.padding(horizontal = 6.dp))
-                NoirBadge("Exclusivo Maison Noir", gold = true)
-                Spacer(Modifier.width(6.dp))
                 NoirBadge(when (d.kind) { TitleKind.MOVIE -> "Película"; TitleKind.SERIES -> "Serie"; TitleKind.ANIME -> "Anime" })
                 Spacer(Modifier.width(6.dp))
                 NoirBadge("HD · HLS")
@@ -247,6 +291,9 @@ private fun DetailContent(
                     if (resumeMs != null && available) {
                         NoirButton("Desde el inicio", { onPlay(true) }, icon = NoirIcon.Restart)
                     }
+                    if (favorite != null) {
+                        NoirButton(if (favorite) "En Mi lista" else "Mi lista", onToggleFavorite, icon = if (favorite) NoirIcon.Check else null, selected = favorite)
+                    }
                 }
                 if (message != null) {
                     Spacer(Modifier.height(10.dp))
@@ -261,15 +308,29 @@ private fun DetailContent(
                     }
                 }
             }
-            if (d.episodeCount > 0) {
-                Spacer(Modifier.height(18.dp))
-                EpisodePicker(d, episode, onSelectEpisode)
-            } else {
-                Spacer(Modifier.height(24.dp))
+          }
+          }
+            if (seasons.size > 1) item(key = "seasons") {
+                Column(Modifier.padding(start = 48.dp, top = 10.dp)) {
+                    MnText("TEMPORADAS", color = Mn.Gold, size = 8.sp, weight = FontWeight.SemiBold, spacing = 1.6.sp)
+                    Spacer(Modifier.height(8.dp))
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(end = 40.dp, top = 2.dp, bottom = 2.dp)) {
+                        items(seasons, key = { it.id }) { s ->
+                            NoirButton(s.seasonLabel ?: s.title ?: "Temporada", { if (s.id != d.id) onOpenTitle(TitleKind.ANIME, s.id) }, selected = s.id == d.id)
+                        }
+                    }
+                }
             }
-            Spacer(Modifier.height(8.dp))
-            TvHintBar(listOf(TvHints.Select, TvHints.Move, TvHints.Back))
+            if (d.episodeCount > 0) item(key = "episodes") {
+                Box(Modifier.padding(start = 48.dp, end = 40.dp, top = 14.dp)) { EpisodePicker(d, episode, onSelectEpisode) }
+            }
+            if (similar.isNotEmpty()) item(key = "similar") {
+                Box(Modifier.padding(top = 16.dp)) {
+                    pro.verpelis.tv.ui.components.CatalogRow(title = "Más como esto", items = similar, onOpen = { onOpenTitle(if (d.kind == TitleKind.ANIME) TitleKind.ANIME else if (it.mediaType == "series") TitleKind.SERIES else TitleKind.MOVIE, it.id) })
+                }
+            }
         }
+        TvHintBar(listOf(TvHints.Select, TvHints.Move, TvHints.Back), Modifier.align(Alignment.BottomStart).background(Mn.Bg.copy(alpha = 0.94f)).padding(start = 48.dp, end = 40.dp, bottom = 14.dp, top = 10.dp))
     }
 }
 

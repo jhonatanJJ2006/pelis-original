@@ -30,6 +30,8 @@ import pro.verpelis.tv.data.tv.TvRepository
 import androidx.compose.runtime.CompositionLocalProvider
 import pro.verpelis.tv.data.tv.CatalogKind
 import pro.verpelis.tv.ui.library.CatalogScreen
+import pro.verpelis.tv.ui.library.LinkedScreen
+import pro.verpelis.tv.ui.library.LiveScreen
 import pro.verpelis.tv.ui.library.HistoryScreen
 import pro.verpelis.tv.ui.library.MyListScreen
 import pro.verpelis.tv.ui.library.ProfileScreen
@@ -45,13 +47,15 @@ object Routes {
     const val MyList = "mylist"
     const val History = "history"
     const val Profile = "profile"
-    const val Player = "player/{channelId}?name={name}"
+    const val Player = "player/{channelId}?name={name}&cat={cat}"
+    const val Live = "live"
+    const val Linked = "linked"
 
     const val Detail = "title/{kind}/{id}"
     const val Watch = "watch/{kind}/{id}?ep={ep}&start={start}"
 
-    fun player(channelId: String, name: String): String {
-        return "player/$channelId?name=${Uri.encode(name)}"
+    fun player(channelId: String, name: String, category: String = ""): String {
+        return "player/$channelId?name=${Uri.encode(name)}&cat=${Uri.encode(category)}"
     }
 
     fun detail(kind: TitleKind, id: String): String = "title/${kind.routeKey}/${Uri.encode(id)}"
@@ -66,6 +70,7 @@ object Routes {
         NavSection.MOVIES,
         NavSection.SERIES,
         NavSection.ANIME,
+        NavSection.LIVE,
         NavSection.MY_LIST,
         NavSection.PROFILE,
         NavSection.SETTINGS,
@@ -77,6 +82,7 @@ object Routes {
         NavSection.MOVIES -> Movies
         NavSection.SERIES -> Series
         NavSection.ANIME -> Anime
+        NavSection.LIVE -> Live
         NavSection.MY_LIST -> MyList
         NavSection.PROFILE -> Profile
         NavSection.SETTINGS -> Settings
@@ -149,6 +155,7 @@ fun PelisTvNavHost(
                 onPlay = { kind, id, ep, start -> navController.navigate(Routes.watch(kind, id, ep, start)) },
                 onNeedLogin = toLogin,
                 onBack = { navController.popBackStack() },
+                onOpenTitle = { k, i -> navController.navigate(Routes.detail(k, i)) },
             )
         }
         composable(
@@ -182,7 +189,7 @@ fun PelisTvNavHost(
         composable(Routes.Login) {
             LoginScreen(
                 onSignedIn = {
-                    navController.navigate(Routes.Home) {
+                    navController.navigate(Routes.Linked) {
                         popUpTo(Routes.Login) { inclusive = true }
                     }
                 },
@@ -217,14 +224,30 @@ fun PelisTvNavHost(
         }
         composable(Routes.Settings) {
             Shelled(NavSection.SETTINGS) {
-                SettingsScreen(onBack = { navController.popBackStack() })
+                SettingsScreen(onBack = { navController.popBackStack() }, onNeedLogin = toLogin)
             }
+        }
+        composable(Routes.Live) {
+            Shelled(NavSection.LIVE) {
+                LiveScreen(onPlayChannel = { c -> navController.navigate(Routes.player(c.id, c.name, c.category)) })
+            }
+        }
+        composable(Routes.Linked) {
+            LinkedScreen(onContinue = {
+                if (!navController.popBackStack(Routes.Home, inclusive = false)) {
+                    navController.navigate(Routes.Home) { popUpTo(Routes.Linked) { inclusive = true } }
+                }
+            })
         }
         composable(
             route = Routes.Player,
             arguments = listOf(
                 navArgument("channelId") { type = NavType.StringType },
                 navArgument("name") {
+                    type = NavType.StringType
+                    defaultValue = ""
+                },
+                navArgument("cat") {
                     type = NavType.StringType
                     defaultValue = ""
                 },
@@ -235,6 +258,7 @@ fun PelisTvNavHost(
             PlayerScreen(
                 channelId = channelId,
                 channelName = name,
+                category = entry.arguments?.getString("cat").orEmpty(),
                 onBack = { navController.popBackStack() },
                 onNeedLogin = {
                     navController.navigate(Routes.Login) {

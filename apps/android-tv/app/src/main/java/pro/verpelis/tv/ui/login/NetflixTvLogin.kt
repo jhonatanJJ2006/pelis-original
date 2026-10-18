@@ -80,7 +80,7 @@ fun NetflixLoginFrame(
             Modifier.fillMaxSize().padding(horizontal = 40.dp, vertical = 22.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            MnText("PELIS", color = Mn.Gold, size = 26.sp, family = Mn.Serif, spacing = 6.sp)
+            pro.verpelis.tv.ui.components.PelisLogo(26.sp, 6.sp)
             MnText("MAISON NOIR · ANDROID TV", color = Mn.Outline, size = 7.5.sp, spacing = 2.sp)
             Spacer(Modifier.weight(0.7f))
             content()

@@ -175,7 +175,10 @@ fun NoirButton(
             NoirGlyph(icon, color = fg, size = if (primary) 11.dp else 10.dp)
             Spacer(Modifier.width(8.dp))
         }
-        MnText(label, color = fg, size = if (primary) 10.sp else 9.sp, weight = FontWeight.SemiBold, spacing = 0.6.sp, lines = 1)
+        // key(label): al cambiar el texto (Reproducir → Continuar) se vuelve a medir; si no, a veces se cortaba la última letra.
+        androidx.compose.runtime.key(label) {
+            MnText(label, color = fg, size = if (primary) 10.sp else 9.sp, weight = FontWeight.SemiBold, spacing = 0.6.sp, lines = 1)
+        }
     }
 }
 

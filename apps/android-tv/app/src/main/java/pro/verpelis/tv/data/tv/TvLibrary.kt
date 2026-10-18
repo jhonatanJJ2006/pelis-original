@@ -1,6 +1,7 @@
 package pro.verpelis.tv.data.tv
 
 import pro.verpelis.tv.data.api.CatalogItem
+import pro.verpelis.tv.data.playback.TitleKind
 
 /** Catálogo con pantalla propia en el menú lateral. */
 enum class CatalogKind(val title: String) { MOVIES("Películas"), SERIES("Series"), ANIME("Anime") }
@@ -78,3 +79,36 @@ suspend fun TvRepository.removeHistory(movieId: String) { call("history.remove",
 suspend fun TvRepository.clearHistory() { call("history.clearAll") }
 
 suspend fun TvRepository.plans(): List<PlanDto> = fetchList("subscriptions.list")
+
+// ---- Ficha: más como esto y temporadas de anime ----
+data class SeasonDto(
+    @com.squareup.moshi.Json(name = "_id") val id: String = "",
+    val title: String? = null,
+    val seasonLabel: String? = null,
+    val isExtra: Boolean? = null,
+)
+
+data class AnimeSeriesDto(val seasons: List<SeasonDto> = emptyList())
+
+/** Títulos del mismo género (movies.getByGenre / anime.list), sin el actual. */
+suspend fun TvRepository.similar(kind: TitleKind, genre: String, excludeId: String): List<TitleDto> {
+    val g = genre.split(',').map { it.trim() }.firstOrNull { it.isNotEmpty() } ?: return emptyList()
+    val items: List<TitleDto> = if (kind == TitleKind.ANIME) {
+        fetchList("anime.list", """{"genre":${quote(g)},"limit":13}""")
+    } else {
+        fetchList("movies.getByGenre", """{"genre":${quote(g)},"limit":13}""")
+    }
+    return items.filter { it.id != excludeId }.take(12)
+}
+
+suspend fun TvRepository.animeSeasons(id: String): List<SeasonDto> {
+    val text = call("anime.getSeries", """{"id":${quote(id)}}""")
+    if (text.isBlank() || text == "null") return emptyList()
+    return kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+        moshi.adapter(AnimeSeriesDto::class.java).fromJson(text)?.seasons.orEmpty()
+    }
+}
+
+object TvLibraryMappers {
+    fun TitleDto.item(): CatalogItem = toCatalogItem()
+}

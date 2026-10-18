@@ -113,7 +113,7 @@ fun TvLoadError(
     CompositionLocalProvider(LocalMnFocusSound provides { sounds.playFocus() }) {
         Column(modifier.fillMaxSize().background(Mn.Bg).padding(horizontal = 48.dp, vertical = 22.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                MnText("PELIS", color = Mn.Gold, size = 18.sp, family = Mn.Serif, spacing = 2.sp)
+                pro.verpelis.tv.ui.components.PelisLogo(18.sp, 2.sp)
                 Spacer(Modifier.weight(1f))
                 if (offline) {
                     Row(
