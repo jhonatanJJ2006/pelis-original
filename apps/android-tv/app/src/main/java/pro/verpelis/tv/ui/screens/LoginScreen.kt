@@ -169,7 +169,7 @@ fun LoginScreen(
                             pairError = claim.error ?: "No se pudo completar el acceso"
                             continue
                         }
-                        session.persistClaim(claim.cookieName, claim.token)
+                        session.persistClaim(claim.cookieName, claim.token, claim.cookieValue)
                         signedIn = true
                         onSignedIn()
                         return@LaunchedEffect

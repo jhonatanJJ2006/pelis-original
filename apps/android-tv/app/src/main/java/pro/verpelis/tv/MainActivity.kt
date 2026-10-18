@@ -29,7 +29,11 @@ class MainActivity : ComponentActivity() {
                         pro.verpelis.tv.ui.navigation.Routes.Login
                     }
                     ApkUpdateHost {
-                        PelisTvNavHost(navController = navController, startDestination = start)
+                        PelisTvNavHost(
+                            navController = navController,
+                            startDestination = start,
+                            debugPlayUrl = if (BuildConfig.DEBUG) intent?.getStringExtra("pelis.debugPlayUrl") else null,
+                        )
                     }
                 }
             }

@@ -27,7 +27,9 @@ import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import pro.verpelis.tv.BuildConfig
 import pro.verpelis.tv.LocalUiSounds
+import pro.verpelis.tv.data.playback.PlaybackUrls
 import pro.verpelis.tv.data.api.CatalogItem
 import pro.verpelis.tv.ui.theme.MaisonNoir
 
@@ -72,7 +74,7 @@ fun PosterCard(
             ) {
                 AsyncImage(
                     model = ImageRequest.Builder(context)
-                        .data(item.image)
+                        .data(PlaybackUrls.absolute(BuildConfig.API_BASE_URL, item.image))
                         .size(232, 336)
                         .crossfade(true)
                         .build(),

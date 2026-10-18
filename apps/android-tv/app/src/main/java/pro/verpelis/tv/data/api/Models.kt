@@ -87,6 +87,8 @@ data class PairingClaimResponse(
     val status: String? = null,
     val token: String? = null,
     val cookieName: String? = null,
+    /** Valor firmado de la cookie (lo que Better Auth acepta). */
+    val cookieValue: String? = null,
     val error: String? = null,
     val message: String? = null,
 )
