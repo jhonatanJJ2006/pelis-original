@@ -59,6 +59,17 @@ export {
   PLAYER_LANDSCAPE_COVER_CLASS,
 } from './player-landscape';
 
+/** The real cause when the stream API refuses a playlist/segment mid-playback. */
+export function hlsFailureMessage(status?: number): string {
+  if (status === 401) return 'Tu sesión expiró. Inicia sesión de nuevo para seguir viendo.';
+  if (status === 403) return 'Necesitas un plan activo para reproducir este contenido.';
+  if (status === 404) return 'Este video no está disponible en el servidor.';
+  if (status === 503) {
+    return 'El almacenamiento de video no está disponible ahora. Vuelve a intentarlo en unos minutos.';
+  }
+  return 'Error de conexión al cargar el video. Revisa tu conexión e intenta de nuevo.';
+}
+
 const DEMO_VIDEO =
   'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
 
@@ -93,6 +104,8 @@ export function VideoPlayer({
   const [bufferedPercent, setBufferedPercent] = useState(0);
   const [fullscreen, setFullscreen] = useState(false);
   const [metadataTick, setMetadataTick] = useState(0);
+  /** Bumped by "Reintentar" to rebuild the hls.js pipeline. */
+  const [reloadKey, setReloadKey] = useState(0);
   const hlsRef = useRef<Hls | null>(null);
   const [qualityOptions, setQualityOptions] = useState<QualityLevelOption[]>([]);
   const [selectedLevel, setSelectedLevel] = useState(-1);
@@ -149,8 +162,8 @@ export function VideoPlayer({
 
       let networkRetries = 0;
       let mediaRetries = 0;
-      const failLoad = () => {
-        setError('No se pudo cargar el video. Intenta de nuevo más tarde.');
+      const failLoad = (status?: number) => {
+        setError(hlsFailureMessage(status));
         setPlaying(false);
         setBuffering(false);
       };
@@ -172,7 +185,7 @@ export function VideoPlayer({
               data.details === Hls.ErrorDetails.MANIFEST_LOAD_TIMEOUT ||
               data.details === Hls.ErrorDetails.MANIFEST_PARSING_ERROR;
             if (manifestDead || networkRetries >= 1) {
-              failLoad();
+              failLoad(data.response?.code);
             } else {
               networkRetries += 1;
               hls.startLoad();
@@ -205,7 +218,7 @@ export function VideoPlayer({
       video.preload = 'auto';
       video.src = src;
     }
-  }, [src, isHls, useHlsJs]);
+  }, [src, isHls, useHlsJs, reloadKey]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -470,6 +483,13 @@ export function VideoPlayer({
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-cinema-bg/90 p-6 text-center">
           <AlertCircle className="mb-3 h-10 w-10 text-cinema-danger" aria-hidden />
           <p className="text-sm text-cinema-chalk">{error}</p>
+          <button
+            type="button"
+            onClick={() => setReloadKey((value) => value + 1)}
+            className="mt-4 rounded-full bg-cinema-accent px-5 py-2 text-sm font-medium text-cinema-bg"
+          >
+            Reintentar
+          </button>
         </div>
       )}
       <PlayerChrome

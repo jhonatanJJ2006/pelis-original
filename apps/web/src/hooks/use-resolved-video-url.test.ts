@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { resolveVideoUrl } from './use-resolved-video-url';
+import { resolveVideoPlayback, resolveVideoUrl } from './use-resolved-video-url';
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -75,5 +75,71 @@ describe('resolveVideoUrl', () => {
       )
     );
     await expect(resolveVideoUrl('  ', 'tok')).resolves.toBe('/api/stream/tok/master.m3u8');
+  });
+});
+
+describe('resolveVideoPlayback errors', () => {
+  const stub = (handler: (url: string, init?: RequestInit) => Response | Promise<Response>) =>
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => handler(String(input), init))
+    );
+  const json = (body: unknown, status: number) =>
+    new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
+
+  it('401 → inicia sesión', async () => {
+    stub(() => json({ error: 'No autenticado', code: 'unauthenticated' }, 401));
+    const result = await resolveVideoPlayback('/api/stream/tok/tok/playlist.m3u8', 'tok');
+    expect(result.url).toBeNull();
+    expect(result.error?.kind).toBe('unauthenticated');
+    expect(result.error?.message).toMatch(/Inicia sesión/);
+  });
+
+  it('403 → necesitas un plan activo', async () => {
+    stub(() => json({ error: 'Requiere plan activo', code: 'no_plan' }, 403));
+    const result = await resolveVideoPlayback(undefined, 'tok');
+    expect(result.error?.kind).toBe('no_plan');
+  });
+
+  it('404 → video no disponible en el servidor', async () => {
+    stub((url) =>
+      url.startsWith('/api/stream/resolve')
+        ? json({ url: null, code: 'video_missing' }, 404)
+        : new Response(null, { status: 404 })
+    );
+    const result = await resolveVideoPlayback('/api/stream/tok/tok/playlist.m3u8', 'tok');
+    expect(result.error?.kind).toBe('missing');
+    expect(result.error?.message).toMatch(/servidor/);
+  });
+
+  it('disk not mounted → disk (retryable)', async () => {
+    stub((url) =>
+      url.startsWith('/api/stream/resolve')
+        ? json({ url: null, code: 'disk_unavailable' }, 503)
+        : new Response(null, { status: 503 })
+    );
+    const result = await resolveVideoPlayback('/api/stream/tok/tok/playlist.m3u8', 'tok');
+    expect(result.error?.kind).toBe('disk');
+    expect(result.error?.retryable).toBe(true);
+  });
+
+  it('network failure → error de conexión + reintentar', async () => {
+    stub(() => {
+      throw new TypeError('Failed to fetch');
+    });
+    const result = await resolveVideoPlayback(undefined, 'tok');
+    expect(result.error?.kind).toBe('network');
+    expect(result.error?.retryable).toBe(true);
+  });
+
+  it('prefers the resolver (master.m3u8) over a working single-rendition videoUrl', async () => {
+    stub((url) =>
+      url.startsWith('/api/stream/resolve')
+        ? json({ url: '/api/stream/tok/tok/master.m3u8' }, 200)
+        : new Response(null, { status: 200 })
+    );
+    await expect(resolveVideoPlayback('/api/stream/tok/tok/playlist.m3u8', 'tok')).resolves.toEqual(
+      { url: '/api/stream/tok/tok/master.m3u8' }
+    );
   });
 });

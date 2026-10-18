@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { findManifestForToken } from '@/lib/movie-stream-paths';
+import { findManifestForToken, missingVideoStatus } from '@/lib/movie-stream-paths';
 import { denyUnlessStreamAccess } from '@/lib/require-stream-access';
 
 export async function GET(request: NextRequest) {
@@ -12,6 +12,14 @@ export async function GET(request: NextRequest) {
   }
 
   const manifest = await findManifestForToken(token);
+  if (!manifest) {
+    // 404 = this movie has no file; 503 = the video disk is not mounted.
+    const missing = await missingVideoStatus();
+    return NextResponse.json(
+      { url: null, code: missing.code, error: missing.error },
+      { status: missing.status, headers: { 'Cache-Control': 'no-store' } }
+    );
+  }
 
   return NextResponse.json(
     {
