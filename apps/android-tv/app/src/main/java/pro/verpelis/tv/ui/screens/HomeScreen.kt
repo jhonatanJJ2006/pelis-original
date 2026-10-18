@@ -1,7 +1,5 @@
 package pro.verpelis.tv.ui.screens
 
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,7 +17,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Text
 import kotlinx.coroutines.async
@@ -32,7 +29,7 @@ import pro.verpelis.tv.LocalUiSounds
 import pro.verpelis.tv.data.api.CatalogItem
 import pro.verpelis.tv.data.api.CatalogListArgs
 import pro.verpelis.tv.data.api.PelisApi
-import pro.verpelis.tv.data.api.PelisApiClient
+import pro.verpelis.tv.data.playback.TitleKind
 import pro.verpelis.tv.data.api.TvChannel
 import pro.verpelis.tv.data.api.TvListArgs
 import pro.verpelis.tv.ui.components.CatalogRow
@@ -55,10 +52,10 @@ fun HomeScreen(
     onOpenSettings: () -> Unit,
     onOpenLogin: () -> Unit,
     onPlayChannel: (String, String) -> Unit,
+    onOpenTitle: (TitleKind, String) -> Unit,
 ) {
     val apiClient = LocalApiClient.current
     val uiSounds = LocalUiSounds.current
-    val context = LocalContext.current
 
     var rows by remember { mutableStateOf<List<Pair<String, List<TvChannel>>>>(emptyList()) }
     var catalog by remember { mutableStateOf(HomeCatalog()) }
@@ -111,7 +108,7 @@ fun HomeScreen(
                                 title = "Películas",
                                 items = catalog.movies,
                                 onOpen = { catalogItem ->
-                                    openWebItem(context, apiClient, "movies", catalogItem.id)
+                                    onOpenTitle(TitleKind.MOVIE, catalogItem.id)
                                 },
                             )
                         }
@@ -122,7 +119,7 @@ fun HomeScreen(
                                 title = "Series",
                                 items = catalog.series,
                                 onOpen = { catalogItem ->
-                                    openWebItem(context, apiClient, "movies", catalogItem.id)
+                                    onOpenTitle(TitleKind.SERIES, catalogItem.id)
                                 },
                             )
                         }
@@ -133,7 +130,7 @@ fun HomeScreen(
                                 title = "Anime",
                                 items = catalog.anime,
                                 onOpen = { catalogItem ->
-                                    openWebItem(context, apiClient, "anime", catalogItem.id)
+                                    onOpenTitle(TitleKind.ANIME, catalogItem.id)
                                 },
                             )
                         }
@@ -149,11 +146,6 @@ fun HomeScreen(
             }
         }
     }
-}
-
-private fun openWebItem(context: android.content.Context, client: PelisApiClient, kind: String, id: String) {
-    val url = "${client.baseUrl}$kind/$id"
-    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
 }
 
 private data class HomeLoadLimits(

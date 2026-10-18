@@ -28,4 +28,11 @@ interface PelisApi {
         @Path(value = "name", encoded = true) name: String,
         @Body args: CatalogListArgs,
     ): List<CatalogItem>
+
+    /** movies.search ({q, limit}) y anime.search ({query, limit}). */
+    @POST("api/function/{name}")
+    suspend fun invokeCatalogSearch(
+        @Path(value = "name", encoded = true) name: String,
+        @Body args: Map<String, @JvmSuppressWildcards Any>,
+    ): List<CatalogItem>
 }
