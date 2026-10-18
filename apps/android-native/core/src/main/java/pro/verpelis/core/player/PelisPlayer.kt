@@ -297,7 +297,7 @@ fun TrackMenu(player: ExoPlayer, modifier: Modifier = Modifier) {
     }
 }
 
-/** Opción de pista: en video, una por altura (1080p, 720p, 480p, 360p) de mayor a menor. */
+/** Opción de pista: en video, una por nivel (1080p, 720p, 480p, 360p) de mayor a menor. */
 @OptIn(UnstableApi::class)
 internal class TrackOption(val key: String, val label: String, val selected: Boolean, val override: TrackSelectionOverride)
 
@@ -306,9 +306,9 @@ internal fun trackOptions(player: ExoPlayer, type: Int): List<TrackOption> {
     val all = player.currentTracks.groups.filter { it.type == type }.flatMapIndexed { gi, g ->
         (0 until g.length).filter { g.isTrackSupported(it) || type != C.TRACK_TYPE_VIDEO }.map { i ->
             val f = g.getTrackFormat(i)
-            val label = if (type == C.TRACK_TYPE_VIDEO) (if (f.height > 0) "${f.height}p" else "Pista ${i + 1}")
+            val label = if (type == C.TRACK_TYPE_VIDEO) (QualityLabel.of(f.width, f.height) ?: "Pista ${i + 1}")
             else (f.label ?: f.language ?: "Pista ${i + 1}")
-            Triple(f.height, TrackOption("$gi-$i", label, g.isTrackSelected(i), TrackSelectionOverride(g.mediaTrackGroup, i)), f.bitrate)
+            Triple(maxOf(f.height, f.width * 9 / 16), TrackOption("$gi-$i", label, g.isTrackSelected(i), TrackSelectionOverride(g.mediaTrackGroup, i)), f.bitrate)
         }
     }
     if (type != C.TRACK_TYPE_VIDEO) return all.map { it.second }
@@ -319,4 +319,4 @@ internal fun trackOptions(player: ExoPlayer, type: Int): List<TrackOption> {
 
 /** "Automática (720p)": muestra el nivel que eligió el ABR de HLS. */
 internal fun autoLabel(player: ExoPlayer): String =
-    player.videoFormat?.height?.takeIf { it > 0 }?.let { "Automática (${it}p)" } ?: "Automática"
+    player.videoFormat?.let { QualityLabel.of(it.width, it.height) }?.let { "Automática ($it)" } ?: "Automática"
