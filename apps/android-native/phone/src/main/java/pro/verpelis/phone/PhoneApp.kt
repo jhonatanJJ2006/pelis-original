@@ -52,6 +52,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -80,7 +81,6 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.async
 import pro.verpelis.core.data.Kind
 import pro.verpelis.core.data.PelisApi
@@ -184,22 +184,22 @@ fun LoginScreen(api: PelisApi, onDone: () -> Unit) {
     var error by remember { mutableStateOf<String?>(null) }
     var busy by remember { mutableStateOf(false) }
     var waitingGoogle by remember { mutableStateOf(false) }
-    var pending by remember { mutableStateOf<pro.verpelis.core.data.Pairing?>(null) }
-    val lifecycle = androidx.lifecycle.compose.LocalLifecycleOwner.current.lifecycle
-    LaunchedEffect(pending) {
-        val p = pending ?: return@LaunchedEffect
-        lifecycle.repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.RESUMED) {
-            while (pending != null) {
-                when (runCatching { api.pairingStatus(p) }.getOrNull()) {
-                    "approved", "claimed" -> {
-                        try { api.claimPairing(p); pending = null; waitingGoogle = false; onDone() }
-                        catch (e: Exception) { pending = null; waitingGoogle = false; error = e.message }
-                    }
-                    "expired" -> { pending = null; waitingGoogle = false; error = "El código expiró, intenta de nuevo" }
-                }
-                delay(2500)
-            }
+    // Deep link de vuelta del navegador: valida state (un solo uso) y canjea el código por la sesión.
+    val callback by AuthCallback.uri.collectAsState()
+    LaunchedEffect(callback) {
+        val uri = callback ?: return@LaunchedEffect
+        AuthCallback.uri.value = null
+        busy = true; error = null
+        try {
+            val cb = api.googleLogin.consume(uri.scheme, uri.host, uri.path, uri.getQueryParameter("code"), uri.getQueryParameter("state"))
+            api.exchangeGoogleCode(cb)
+            waitingGoogle = false
+            onDone()
+        } catch (e: Exception) {
+            waitingGoogle = false
+            error = e.message ?: "No se pudo iniciar sesión con Google"
         }
+        busy = false
     }
 
     Column(Modifier.fillMaxSize().background(Noir.Ink).statusBarsPadding().verticalScroll(rememberScrollState()).padding(20.dp)) {
@@ -241,20 +241,14 @@ fun LoginScreen(api: PelisApi, onDone: () -> Unit) {
             Row(Modifier.fillMaxWidth().padding(vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
                 Box(Modifier.weight(1f).height(1.dp).background(Noir.Line)); Text("  o  ", color = Noir.Muted, fontSize = 12.sp); Box(Modifier.weight(1f).height(1.dp).background(Noir.Line))
             }
-            // Google: se abre en el navegador (Custom Tab) con el flujo de vinculación /link-tv.
-            // Android congela la app en segundo plano, así que el estado se consulta al volver (RESUMED).
+            // Google: flujo web de verpelis.pro en una Custom Tab; vuelve por deep link con un código de un solo uso.
             GhostButton("CONTINUAR CON GOOGLE", modifier = Modifier.fillMaxWidth(), onClick = {
                 error = null
-                scope.launch {
-                    try {
-                        val p = api.createPairing()
-                        pending = p
-                        waitingGoogle = true
-                        openCustomTab(ctx, p.verifyUrl)
-                    } catch (e: Exception) { waitingGoogle = false; error = e.message }
-                }
+                waitingGoogle = true
+                runCatching { openCustomTab(ctx, api.googleLogin.start()) }
+                    .onFailure { waitingGoogle = false; error = "No se pudo abrir el navegador" }
             })
-            if (waitingGoogle) Text("Inicia sesión con Google en el navegador, pulsa Vincular y vuelve a esta app para entrar.", style = NoirBody, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 12.dp))
+            if (waitingGoogle) Text("Completa el inicio de sesión con Google en el navegador; volverás a la app automáticamente.", style = NoirBody, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 12.dp))
             Spacer(Modifier.height(18.dp))
             Row {
                 Text("¿No tienes cuenta? ", color = Noir.Muted, fontSize = 13.sp)

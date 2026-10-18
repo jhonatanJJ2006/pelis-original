@@ -6,10 +6,17 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:theme="@style/Theme.Pelis"
         android:supportsRtl="true">
-        <activity android:name=".MainActivity" android:exported="true">
+        <activity android:name=".MainActivity" android:exported="true" android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <!-- Vuelta del login con Google en el navegador: pro.verpelis.app://auth/callback?code=…&state=… -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="pro.verpelis.app" android:host="auth" android:path="/callback" />
             </intent-filter>
         </activity>
         <activity
