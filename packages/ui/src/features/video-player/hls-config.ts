@@ -7,8 +7,12 @@ import type { HlsConfig } from 'hls.js';
  */
 export const HLS_TARGET_FORWARD_BUFFER_SECONDS = 30;
 
-/** 180MB holds ~30s of a ~50Mbps encode, which the default 60MB does not. */
-export const HLS_MAX_BUFFER_SIZE_BYTES = 180 * 1000 * 1000;
+/**
+ * hls.js default (60 MB). Fire TV / Android TV boxes have little RAM; the
+ * previous 180 MB override could get the tab/app killed. maxBufferLength
+ * still bounds the buffer by time.
+ */
+export const HLS_MAX_BUFFER_SIZE_BYTES = 60 * 1000 * 1000;
 
 export function createVodHlsConfig(): Partial<HlsConfig> {
   return {
@@ -17,6 +21,9 @@ export function createVodHlsConfig(): Partial<HlsConfig> {
     maxBufferLength: HLS_TARGET_FORWARD_BUFFER_SECONDS,
     maxMaxBufferLength: HLS_TARGET_FORWARD_BUFFER_SECONDS * 2,
     maxBufferSize: HLS_MAX_BUFFER_SIZE_BYTES,
+    // With a multi-variant master.m3u8, never pick a rendition larger than the
+    // player on screen (a 720p TV box does not download 1080p).
+    capLevelToPlayerSize: true,
     maxBufferHole: 0.5,
     manifestLoadingMaxRetry: 4,
     levelLoadingMaxRetry: 4,
