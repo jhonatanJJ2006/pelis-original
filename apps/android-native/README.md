@@ -5,10 +5,10 @@ Apps nativas que reemplazarán al contenedor TWA de `apps/android` (que se manti
 Módulos:
 
 - `core`: cliente de la API (`/api/function/<nombre>`, better-auth y `tv-auth`), sesión con las mismas cookies que la web, tema Maison Noir, reproductor Media3 compartido (HLS, gestos, HUD, calidad y subtítulos) y lógica de gestos con tests.
-- `phone`: app de celular (`pro.verpelis.app.native`). Login con correo y contraseña, o con Google en el navegador (Custom Tab) usando el flujo de vinculación `/link-tv`. Inicio, Buscar (películas, series, géneros), Anime, TV en vivo, detalle, Mi lista, Historial, Perfil y Planes (el pago abre el checkout web).
+- `phone`: app de celular (`pro.verpelis.app.native`). Login con correo y contraseña, o con Google en el navegador (Custom Tab): `/app-auth/google` hace el flujo web de Google y vuelve por `pro.verpelis.app://auth/callback` con un código de un solo uso (2 min, atado a state + PKCE) que la app canjea en `POST /api/app-auth/exchange`. No requiere cliente OAuth de Android. Inicio, Buscar (películas, series, géneros), Anime, TV en vivo, detalle, Mi lista, Historial, Perfil y Planes (el pago abre el checkout web).
 - `tv`: app Android TV (`pro.verpelis.tv.native`) con Compose for TV, entrada `LEANBACK_LAUNCHER`, foco D-pad (escala 1.1, borde dorado 3 dp), vinculación por código o QR y reproductor controlado con D-pad.
 
-No se agregaron endpoints nuevos en `apps/web`: todo usa rutas existentes.
+Endpoints propios de la app en `apps/web`: `/app-auth/google`, `/api/app-auth/google/complete` y `/api/app-auth/exchange` (login con Google); el resto usa rutas existentes.
 
 ## Compilar
 

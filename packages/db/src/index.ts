@@ -20,6 +20,15 @@ export {
   getTvPairingForDevice,
 } from './lib/tv-pairing';
 export { issueTvSession, betterAuthSessionCookieName } from './lib/tv-session';
+export {
+  APP_AUTH_CODE_TTL_MS,
+  buildAppAuthCompletePath,
+  buildAppCallbackUrl,
+  buildAppIntentUrl,
+  createAppAuthCode,
+  exchangeAppAuthCode,
+  isAppAuthToken,
+} from './lib/app-auth';
 export { uploadFile, deleteFile } from './storage';
 export {
   fetchTmdbMetadata,
