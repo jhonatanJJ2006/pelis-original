@@ -279,6 +279,9 @@ public class ApkUpdateActivity extends Activity {
         }
         promptVisible = false;
         Intent launch = new Intent(this, LauncherActivity.class);
+        // Sin NEW_TASK, LauncherActivity se relanza en otra tarea y, al seguir viva la
+        // primera instancia, la segunda se cierra sin abrir la web (el icono no hacía nada).
+        launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(launch);
         finish();
     }

@@ -4,6 +4,10 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
+// Firma de release: lee la keystore de variables de entorno (nunca se commitea).
+// Sin PELIS_STORE_FILE (p. ej. en CI) el release se firma con la clave debug.
+val pelisStoreFile: String? = System.getenv("PELIS_STORE_FILE")?.takeIf { it.isNotBlank() }
+
 val apiBase: String = (findProperty("pelisApiBase") as String?)
     ?.trim()
     ?.let { if (it.endsWith("/")) it else "$it/" }
@@ -17,11 +21,26 @@ android {
         applicationId = "pro.verpelis.tv"
         minSdk = 21
         targetSdk = 35
-        versionCode = 5
-        versionName = "1.4.0"
+        versionCode = 6
+        versionName = "1.5.0"
         buildConfigField("String", "API_BASE_URL", "\"$apiBase\"")
     }
 
+    signingConfigs {
+        if (pelisStoreFile != null) {
+            create("pelis") {
+                storeFile = file(pelisStoreFile)
+                storePassword = System.getenv("PELIS_STORE_PASS")
+                keyAlias = System.getenv("PELIS_KEY_ALIAS")?.takeIf { it.isNotBlank() } ?: "android"
+                keyPassword = System.getenv("PELIS_KEY_PASS")?.takeIf { it.isNotBlank() } ?: System.getenv("PELIS_STORE_PASS")
+            }
+        }
+    }
+    buildTypes {
+        getByName("release") {
+            signingConfig = signingConfigs.getByName(if (pelisStoreFile != null) "pelis" else "debug")
+        }
+    }
     buildFeatures {
         compose = true
         buildConfig = true
