@@ -148,7 +148,21 @@ class PelisApi private constructor(context: Context) {
         session.clear()
     }
 
-    // Emparejamiento (link-tv / TvPairing): usado por la TV y por el login con Google del celular
+    // Login con Google (celular): la web emite un código de un solo uso y la app lo canjea.
+    val googleLogin = GoogleLoginFlow(context.applicationContext, base)
+    suspend fun exchangeGoogleCode(cb: GoogleCallback) {
+        val o = JSONObject(post("/api/app-auth/exchange", JSONObject().put("code", cb.code).put("state", cb.state).put("verifier", cb.verifier)))
+        storeCookieFallback(o)
+    }
+    private fun storeCookieFallback(o: JSONObject) {
+        // El servidor ya envía Set-Cookie (lo guarda el CookieJar). Respaldo: cookieValue firmado.
+        val name = o.str("cookieName"); val value = o.str("cookieValue")
+        if (!session.hasSession && name != null && value != null) {
+            session.putSessionCookie(base.removePrefix("https://").removePrefix("http://"), name, java.net.URLEncoder.encode(value, "UTF-8"))
+        }
+    }
+
+    // Emparejamiento (link-tv / TvPairing): usado por la TV
     suspend fun createPairing(): Pairing {
         val o = JSONObject(post("/api/tv-auth/pairing", JSONObject().put("deviceId", deviceId)))
         return Pairing(o.getString("code"), o.optString("displayCode"), o.optString("deviceId", deviceId), o.optString("verifyUrl"), o.optString("expiresAt"))
@@ -157,11 +171,7 @@ class PelisApi private constructor(context: Context) {
         JSONObject(get("/api/tv-auth/pairing?code=${p.code}&deviceId=${p.deviceId}")).optString("status")
     suspend fun claimPairing(p: Pairing) {
         val o = JSONObject(post("/api/tv-auth/claim", JSONObject().put("code", p.code).put("deviceId", p.deviceId)))
-        // El servidor ya envía Set-Cookie (lo guarda el CookieJar). Respaldo: cookieValue firmado.
-        val name = o.str("cookieName"); val value = o.str("cookieValue")
-        if (!session.hasSession && name != null && value != null) {
-            session.putSessionCookie(base.removePrefix("https://").removePrefix("http://"), name, java.net.URLEncoder.encode(value, "UTF-8"))
-        }
+        storeCookieFallback(o)
     }
     fun qrUrl(data: String) = "$base/api/tv-auth/qr?format=png&data=" + java.net.URLEncoder.encode(data, "UTF-8")
 
