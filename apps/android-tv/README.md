@@ -73,3 +73,10 @@ En cualquier pantalla (login o home), compara `BuildConfig.VERSION_CODE` con `GE
 ## Qué no copiar de `apps/android/`
 
 `apps/android/app/` está gitignorado (TWA Bubblewrap). **No** aplicar ese patrón aquí: `apps/android-tv/app/src` debe ir al repo. Solo se ignoran `.gradle/`, `build/`, `local.properties` y APKs generados.
+
+## 1.9.0 (10)
+
+- Login estilo Netflix (Stitch `0e67b58f9e0f425fb7d8371c664dd76e`): "¿Cómo quieres iniciar sesión?", tarjeta recomendada "Usa tu celular" (QR real a `/link-tv?code=` + código) y "Usar correo y contraseña". Fondo: `res/drawable-nodpi/tv_login_backdrop.jpg` (960x540, ~40 KB, pósters reales oscurecidos, sin animación).
+- Estado de error compartido `TvLoadError` (portada, ficha y reproductor): "Reintentar" y "Ver estado de conexión" (comprobación real de red + `/api/app/availability`). Sin caché offline: no se ofrece.
+- Barra de ayudas del control `TvHintBar` en login, portada, búsqueda, ficha y errores.
+- Avisos de actualización apuntan a `verpelis.pro/descargas`.

@@ -65,6 +65,9 @@ import pro.verpelis.tv.data.playback.TitleKind
 import pro.verpelis.tv.ui.login.LocalMnFocusSound
 import pro.verpelis.tv.ui.login.Mn
 import pro.verpelis.tv.ui.login.MnText
+import pro.verpelis.tv.ui.components.TvHintBar
+import pro.verpelis.tv.ui.components.TvHints
+import pro.verpelis.tv.ui.components.TvLoadError
 
 /**
  * Ficha Maison Noir de película / serie / anime (diseño Stitch
@@ -126,17 +129,20 @@ fun DetailScreen(
         ) {
             val d = detail
             if (d == null) {
-                Column(Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {
-                    if (loadError == null) {
+                if (loadError == null) {
+                    Column(Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {
                         NoirSpinner()
                         Spacer(Modifier.height(12.dp))
                         MnText("Cargando ficha…", color = Mn.Variant, size = 10.sp)
-                    } else {
-                        MnText(loadError ?: "", color = Mn.Error, size = 11.sp)
-                        Spacer(Modifier.height(12.dp))
-                        NoirButton("Reintentar", { attempt++ }, primary = true, focusRequester = playFocus)
-                        LaunchedEffect(Unit) { runCatching { playFocus.requestFocus() } }
                     }
+                } else {
+                    TvLoadError(
+                        onRetry = { attempt++ },
+                        title = "No pudimos cargar esta ficha",
+                        message = loadError ?: "Revisa la conexión a internet de tu TV e inténtalo de nuevo.",
+                        retryFocus = playFocus,
+                        extraActions = { NoirButton("Volver", { uiSounds.playClick(); onBack() }, icon = NoirIcon.ArrowLeft) },
+                    )
                 }
                 return@Box
             }
@@ -213,10 +219,6 @@ private fun DetailContent(
                 Spacer(Modifier.width(6.dp))
                 NoirBadge("HD · HLS")
                 if (d.classification.isNotBlank()) { Spacer(Modifier.width(6.dp)); NoirBadge(d.classification) }
-                Spacer(Modifier.weight(1f))
-                NoirKeyHint("OK", "Seleccionar")
-                Spacer(Modifier.width(14.dp))
-                NoirKeyHint("BACK", "Regresar")
             }
             Spacer(Modifier.weight(1f))
             Column(Modifier.width(470.dp)) {
@@ -263,8 +265,10 @@ private fun DetailContent(
                 Spacer(Modifier.height(18.dp))
                 EpisodePicker(d, episode, onSelectEpisode)
             } else {
-                Spacer(Modifier.height(30.dp))
+                Spacer(Modifier.height(24.dp))
             }
+            Spacer(Modifier.height(8.dp))
+            TvHintBar(listOf(TvHints.Select, TvHints.Move, TvHints.Back))
         }
     }
 }

@@ -371,17 +371,18 @@ class PelisApiClient(private val sessionStore: SessionStore) {
             return cookies.firstOrNull { it.name.contains("session", ignoreCase = true) }
         }
 
+        /** Error de red en español claro (nunca el mensaje técnico del sistema). */
         fun friendlyNetworkError(ex: Throwable): String {
-            val root = generateSequence(ex) { it.cause }.last()
-            return when (root) {
-                is UnknownHostException -> "Sin DNS/red hacia el servidor"
-                is SocketTimeoutException -> "Tiempo de espera agotado"
-                is android.os.NetworkOnMainThreadException ->
-                    "Error interno de red (hilo principal)"
-                is IOException -> root.message?.takeIf { it.isNotBlank() }
-                    ?: "Error de conexión. Reintenta."
-                else -> root.message?.takeIf { it.isNotBlank() }
-                    ?: "Error de conexión. Reintenta."
+            val chain = generateSequence(ex) { it.cause }.toList()
+            fun has(test: (Throwable) -> Boolean) = chain.any(test)
+            return when {
+                has { it is UnknownHostException } -> "No hay conexión con el servidor. Revisa el internet de tu TV."
+                has { it is SocketTimeoutException } -> "El servidor tardó demasiado en responder."
+                has { it is android.os.NetworkOnMainThreadException } -> "Error interno de la app. Reintenta."
+                has { it is java.net.ConnectException || it is java.net.NoRouteToHostException } ->
+                    "No se pudo conectar con el servidor."
+                has { it is javax.net.ssl.SSLException } -> "No se pudo abrir una conexión segura con el servidor."
+                else -> "Error de conexión. Reintenta."
             }
         }
 

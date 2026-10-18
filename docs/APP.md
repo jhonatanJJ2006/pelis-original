@@ -4,6 +4,20 @@ Rutas de apps/web/src/app. Grupo (protected) = header/footer, NO exige login. Gr
 
 ## Publicas (catálogo + auth pages)
 
+### `/inicio`
+
+- Hace: landing para visitantes (diseño Stitch «PELIS - Landing para Visitantes»): hero con collage de pósters reales, qué incluye, dispositivos, teaser de planes, FAQ y footer con /privacidad y /terminos. Fuera de (protected): sin chrome del catálogo.
+- Archivos: apps/web/src/app/inicio/page.tsx, app/inicio/lib/landing-data.ts, components/public-site/*.
+- Auth: ninguna. ISR 1 h. Datos: movies.getFeatured, movies.getTrending, movies.list, movies.listSeries, anime.listSeries, tv.list, subscriptions.list via preloadQuery.
+- El enlace a /descargas lleva `.web-only` (se oculta en la app instalada).
+
+### `/descargas`
+
+- Hace: landing de descargas (celular `pelis.apk` y TV `pelis-tv.apk`) con versión y tamaño reales (`readAppAvailability`, la misma fuente que `/api/app/availability`), QR (librería `qrcode`) y pasos. `/descargar` → 308 a `/descargas` (next.config redirects).
+- Archivos: apps/web/src/app/descargas/page.tsx, lib/app-availability.ts, lib/download-qr.ts, lib/in-app-user-agent.ts.
+- Solo web: es la única página que enlaza los APK (lib/apk-download-surface.test.ts). En TWA/PWA instalada `.web-only` se oculta por `display-mode: standalone`; las apps nativas (UA `PelisTV` / `PelisAndroid`) reciben solo un aviso. Downloader / navegador de la tele sí la ven.
+- Auth: ninguna. force-dynamic.
+
 ### `/`
 
 - Hace: home, carruseles featured/trending/peliculas/series.
@@ -334,8 +348,8 @@ Rutas de apps/web/src/app. Grupo (protected) = header/footer, NO exige login. Gr
 
 ### `/api/app/availability`
 
-- Hace: version web + APK celular/TV disponible
-- Archivos: api/app/availability/route.ts
+- Hace: version web + APK celular/TV disponible (incluye `apkSizeBytes` y `tvApkSizeBytes`/`tvApkSha256`)
+- Archivos: api/app/availability/route.ts → lib/app-availability.ts (compartido con /descargas)
 - Auth: publico. Datos: public/version.json, public/downloads/.
 
 ### `/api/tv-auth/pairing`
