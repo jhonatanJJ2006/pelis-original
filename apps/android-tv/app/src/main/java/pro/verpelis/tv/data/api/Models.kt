@@ -98,6 +98,9 @@ data class TvApkAvailability(
     val tvApkVersionCode: Int? = null,
     val tvApkVersionName: String? = null,
     val apkDownloadUrl: String? = null,
+    /** Para verificar la descarga antes de abrir el instalador (servidor ≥ 2026-10-18). */
+    val tvApkSizeBytes: Long? = null,
+    val tvApkSha256: String? = null,
 )
 
 data class AuthEmailResponse(

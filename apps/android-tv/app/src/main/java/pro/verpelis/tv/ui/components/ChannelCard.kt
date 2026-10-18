@@ -80,7 +80,6 @@ fun ChannelCard(
                         model = ImageRequest.Builder(context)
                             .data(channel.logo)
                             .size(304, 172)
-                            .crossfade(true)
                             .build(),
                         contentDescription = channel.name,
                         contentScale = ContentScale.Fit,

@@ -1,6 +1,14 @@
 package pro.verpelis.tv.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.withFrameNanos
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import pro.verpelis.tv.ui.components.TvPivotScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -44,7 +52,9 @@ private data class HomeCatalog(
     val movies: List<CatalogItem> = emptyList(),
     val series: List<CatalogItem> = emptyList(),
     val anime: List<CatalogItem> = emptyList(),
-)
+) {
+    val isEmpty: Boolean get() = movies.isEmpty() && series.isEmpty() && anime.isEmpty()
+}
 
 @Composable
 fun HomeScreen(
@@ -57,29 +67,60 @@ fun HomeScreen(
     val apiClient = LocalApiClient.current
     val uiSounds = LocalUiSounds.current
 
-    var rows by remember { mutableStateOf<List<Pair<String, List<TvChannel>>>>(emptyList()) }
-    var catalog by remember { mutableStateOf(HomeCatalog()) }
-    var loading by remember { mutableStateOf(true) }
+    // Se conserva al volver de una ficha: la portada no se recarga (caduca a los 15 min).
+    remember { HomeCache.expireIfStale() }
+    var rows by rememberSaveableRows()
+    var catalog by remember { mutableStateOf(HomeCache.catalog) }
+    var catalogLoading by remember { mutableStateOf(HomeCache.catalog == null) }
+    var rowsLoading by remember { mutableStateOf(HomeCache.rows == null) }
     var error by remember { mutableStateOf<String?>(null) }
-    LaunchedEffect(Unit) {
-        loading = true
+    var attempt by remember { mutableStateOf(0) }
+    val firstPoster = remember { FocusRequester() }
+    var focusedOnce by remember { mutableStateOf(false) }
+
+    // Catálogo primero (3 llamadas en paralelo) y se pinta en cuanto llega; las
+    // filas de canales (hasta ~13 llamadas) se cargan después sin bloquear la portada.
+    LaunchedEffect(attempt) {
         error = null
-        try {
-            rows = loadHomeRows(apiClient.api)
-            catalog = loadCatalogRows(apiClient.api)
-        } catch (ex: Exception) {
-            error = ex.message ?: "No se pudo cargar el catálogo"
-        } finally {
-            loading = false
+        if (catalog == null) {
+            catalogLoading = true
+            val loaded = runCatching { loadCatalogRows(apiClient.api) }.getOrNull()
+            if (loaded != null && !loaded.isEmpty) {
+                HomeCache.catalog = loaded
+                catalog = loaded
+            }
+            catalogLoading = false
+        }
+        if (rows == null) {
+            rowsLoading = true
+            try {
+                val loaded = loadHomeRows(apiClient.api)
+                HomeCache.rows = loaded
+                rows = loaded
+            } catch (ex: Exception) {
+                if (catalog == null) error = ex.message ?: "No se pudo cargar el catálogo"
+            } finally {
+                rowsLoading = false
+            }
+        }
+    }
+    LaunchedEffect(catalog) {
+        if (catalog != null && !focusedOnce) {
+            withFrameNanos { }
+            if (runCatching { firstPoster.requestFocus() }.isSuccess) focusedOnce = true
         }
     }
 
-    Box(Modifier.fillMaxSize()) {
+    val openMovie = remember(onOpenTitle) { { item: CatalogItem -> onOpenTitle(TitleKind.MOVIE, item.id) } }
+    val openSeries = remember(onOpenTitle) { { item: CatalogItem -> onOpenTitle(TitleKind.SERIES, item.id) } }
+    val openAnime = remember(onOpenTitle) { { item: CatalogItem -> onOpenTitle(TitleKind.ANIME, item.id) } }
+
+    Box(Modifier.fillMaxSize().background(MaisonNoir.Background)) {
         Column(Modifier.fillMaxSize()) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 48.dp, vertical = 24.dp),
+                    .padding(start = 48.dp, end = 48.dp, top = 22.dp, bottom = 6.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -94,54 +135,103 @@ fun HomeScreen(
                 }
             }
 
+            val c = catalog
+            val r = rows
             when {
-                loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Cargando…", color = MaisonNoir.Silver)
+                c == null && catalogLoading -> HomeSkeleton()
+                c == null && r.isNullOrEmpty() && error != null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(error ?: "", color = MaisonNoir.Danger)
+                        TvFocusButton("Reintentar", { uiSounds.playClick(); attempt++ }, modifier = Modifier.padding(top = 16.dp))
+                    }
                 }
-                error != null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(error ?: "", color = MaisonNoir.Danger)
+                else -> TvPivotScroll(0.18f) {
+                    LazyColumn(
+                        Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(top = 4.dp, bottom = 48.dp),
+                    ) {
+                        if (c != null && c.movies.isNotEmpty()) {
+                            item(key = "catalog-movies", contentType = "catalog") {
+                                CatalogRow("Películas", c.movies, openMovie, firstItemFocus = firstPoster)
+                            }
+                        }
+                        if (c != null && c.series.isNotEmpty()) {
+                            item(key = "catalog-series", contentType = "catalog") {
+                                CatalogRow(
+                                    "Series",
+                                    c.series,
+                                    openSeries,
+                                    firstItemFocus = if (c.movies.isEmpty()) firstPoster else null,
+                                )
+                            }
+                        }
+                        if (c != null && c.anime.isNotEmpty()) {
+                            item(key = "catalog-anime", contentType = "catalog") {
+                                CatalogRow("Anime", c.anime, openAnime)
+                            }
+                        }
+                        items(r.orEmpty(), key = { it.first }, contentType = { "channels" }) { (title, channels) ->
+                            CategoryRow(
+                                title = title,
+                                channels = channels,
+                                onPlayChannel = { onPlayChannel(it.id, it.name) },
+                            )
+                        }
+                        if (rowsLoading) {
+                            item(key = "rows-loading", contentType = "loading") {
+                                Text(
+                                    "Cargando canales en vivo…",
+                                    style = MaisonType.Eyebrow.copy(color = MaisonNoir.Silver),
+                                    modifier = Modifier.padding(horizontal = 48.dp, vertical = 18.dp),
+                                )
+                            }
+                        }
+                    }
                 }
-                else -> LazyColumn(Modifier.fillMaxSize()) {
-                    if (catalog.movies.isNotEmpty()) {
-                        item(key = "catalog-movies") {
-                            CatalogRow(
-                                title = "Películas",
-                                items = catalog.movies,
-                                onOpen = { catalogItem ->
-                                    onOpenTitle(TitleKind.MOVIE, catalogItem.id)
-                                },
-                            )
-                        }
-                    }
-                    if (catalog.series.isNotEmpty()) {
-                        item(key = "catalog-series") {
-                            CatalogRow(
-                                title = "Series",
-                                items = catalog.series,
-                                onOpen = { catalogItem ->
-                                    onOpenTitle(TitleKind.SERIES, catalogItem.id)
-                                },
-                            )
-                        }
-                    }
-                    if (catalog.anime.isNotEmpty()) {
-                        item(key = "catalog-anime") {
-                            CatalogRow(
-                                title = "Anime",
-                                items = catalog.anime,
-                                onOpen = { catalogItem ->
-                                    onOpenTitle(TitleKind.ANIME, catalogItem.id)
-                                },
-                            )
-                        }
-                    }
-                    items(rows, key = { it.first }) { (title, channels) ->
-                        CategoryRow(
-                            title = title,
-                            channels = channels,
-                            onPlayChannel = { onPlayChannel(it.id, it.name) },
-                        )
-                    }
+            }
+        }
+    }
+}
+
+/** Filas en memoria del proceso: volver a la portada es instantáneo. */
+private object HomeCache {
+    private const val TTL_MS = 15 * 60 * 1000L
+    private var at = 0L
+    var catalog: HomeCatalog? = null
+        set(value) { field = value; at = System.currentTimeMillis() }
+    var rows: List<Pair<String, List<TvChannel>>>? = null
+
+    fun expireIfStale() {
+        if (catalog != null && System.currentTimeMillis() - at > TTL_MS) {
+            catalog = null
+            rows = null
+        }
+    }
+}
+
+@Composable
+private fun rememberSaveableRows() = remember { mutableStateOf(HomeCache.rows) }
+
+/** Esqueleto ligero (cajas planas, sin animación) mientras llega el catálogo. */
+@Composable
+private fun HomeSkeleton() {
+    Column(Modifier.fillMaxSize().padding(top = 14.dp)) {
+        repeat(2) {
+            Box(
+                Modifier
+                    .padding(start = 48.dp, bottom = 14.dp)
+                    .size(width = 140.dp, height = 16.dp)
+                    .clip(RoundedCornerShape(3.dp))
+                    .background(MaisonNoir.Surface),
+            )
+            Row(Modifier.padding(start = 48.dp, bottom = 26.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                repeat(7) {
+                    Box(
+                        Modifier
+                            .size(width = 120.dp, height = 180.dp)
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(MaisonNoir.Surface),
+                    )
                 }
             }
         }
