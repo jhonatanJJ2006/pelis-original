@@ -1,7 +1,11 @@
 import { stat } from 'fs/promises';
 import path from 'path';
 
-export const MANIFEST_CANDIDATES = ['playlist.m3u8', 'index.m3u8', 'master.m3u8'] as const;
+/**
+ * Order matters: a multi-variant master.m3u8 placed next to the single
+ * rendition must win, otherwise the player never sees the other qualities.
+ */
+export const MANIFEST_CANDIDATES = ['master.m3u8', 'playlist.m3u8', 'index.m3u8'] as const;
 
 const DEFAULT_ROOTS = ['/run/media/det/Pelis-A/output', '/run/media/det/Pelis-B/output'];
 

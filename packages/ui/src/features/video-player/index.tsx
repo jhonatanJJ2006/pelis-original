@@ -17,6 +17,12 @@ import { PlayerLoadingOverlay } from './player-loading';
 import { isMobilePlayerViewport, useMobileLandscapePlayer } from './player-landscape';
 import { createVodHlsConfig } from './hls-config';
 import { attachHlsSeekWatchdog } from './hls-seek-watchdog';
+import { QualityMenu } from './quality-menu';
+import {
+  hlsQualityOptions,
+  shouldShowQualitySelector,
+  type QualityLevelOption,
+} from './quality-levels';
 import { resumeSeekSeconds, shouldWritePlaybackProgress } from './resume';
 
 export {
@@ -39,6 +45,13 @@ export {
 export { PlayerLoadingOverlay } from './player-loading';
 export { createVodHlsConfig, HLS_TARGET_FORWARD_BUFFER_SECONDS } from './hls-config';
 export { attachHlsSeekWatchdog } from './hls-seek-watchdog';
+export { QualityMenu } from './quality-menu';
+export {
+  hlsQualityOptions,
+  qualityButtonLabel,
+  shouldShowQualitySelector,
+  type QualityLevelOption,
+} from './quality-levels';
 export {
   useMobileLandscapePlayer,
   isMobilePlayerViewport,
@@ -80,6 +93,11 @@ export function VideoPlayer({
   const [bufferedPercent, setBufferedPercent] = useState(0);
   const [fullscreen, setFullscreen] = useState(false);
   const [metadataTick, setMetadataTick] = useState(0);
+  const hlsRef = useRef<Hls | null>(null);
+  const [qualityOptions, setQualityOptions] = useState<QualityLevelOption[]>([]);
+  const [selectedLevel, setSelectedLevel] = useState(-1);
+  const [playingLevel, setPlayingLevel] = useState(-1);
+  const [qualityMenuOpen, setQualityMenuOpen] = useState(false);
   const lastSaved = useRef(0);
   const resumeSettledRef = useRef(false);
   const resumeTargetRef = useRef<number | null>(null);
@@ -104,6 +122,10 @@ export function VideoPlayer({
     setMediaReady(false);
     setBuffering(false);
     setBufferedPercent(0);
+    setQualityOptions([]);
+    setSelectedLevel(-1);
+    setPlayingLevel(-1);
+    setQualityMenuOpen(false);
 
     if (!isHls) {
       video.src = src;
@@ -113,6 +135,15 @@ export function VideoPlayer({
     if (useHlsJs) {
       const hls = new Hls(createVodHlsConfig());
       const stopSeekWatchdog = attachHlsSeekWatchdog(hls, video);
+      hlsRef.current = hls;
+      // Single-rendition playlists give one level (selector hidden); a
+      // master.m3u8 with variants lists them all.
+      hls.on(Hls.Events.MANIFEST_PARSED, (_event, data) => {
+        setQualityOptions(hlsQualityOptions(data.levels));
+      });
+      hls.on(Hls.Events.LEVEL_SWITCHED, (_event, data) => {
+        setPlayingLevel(data.level);
+      });
       hls.loadSource(src);
       hls.attachMedia(video);
 
@@ -165,6 +196,7 @@ export function VideoPlayer({
 
       return () => {
         stopSeekWatchdog();
+        hlsRef.current = null;
         hls.destroy();
       };
     }
@@ -466,6 +498,24 @@ export function VideoPlayer({
         visible={showControls}
         title={title}
         onRewind={() => seek(Math.max(0, progress - 10))}
+        trailingExtras={
+          shouldShowQualitySelector(qualityOptions) ? (
+            <QualityMenu
+              options={qualityOptions}
+              selected={selectedLevel}
+              playingLevel={playingLevel}
+              open={qualityMenuOpen}
+              onOpenChange={setQualityMenuOpen}
+              onSelect={(index) => {
+                const hls = hlsRef.current;
+                // -1 hands control back to ABR (still capped to the player size).
+                if (hls) hls.currentLevel = index;
+                setSelectedLevel(index);
+                setQualityMenuOpen(false);
+              }}
+            />
+          ) : undefined
+        }
       />
       {!playing && !error && mediaReady && !buffering && (
         <button

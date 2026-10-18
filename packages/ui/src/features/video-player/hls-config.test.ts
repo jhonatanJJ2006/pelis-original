@@ -14,6 +14,9 @@ describe('createVodHlsConfig', () => {
     expect(config.maxMaxBufferLength).toBeGreaterThanOrEqual(config.maxBufferLength!);
     expect(config.maxMaxBufferLength).toBeLessThanOrEqual(60);
     expect(config.maxBufferSize).toBe(HLS_MAX_BUFFER_SIZE_BYTES);
+    // hls.js default: low-memory TV boxes.
+    expect(config.maxBufferSize).toBeLessThanOrEqual(60 * 1000 * 1000);
+    expect(config.capLevelToPlayerSize).toBe(true);
     expect(config.fragLoadingTimeOut).toBeGreaterThanOrEqual(60_000);
   });
 
