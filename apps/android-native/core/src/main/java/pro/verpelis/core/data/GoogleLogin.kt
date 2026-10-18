@@ -27,6 +27,9 @@ object Pkce {
 
 data class GoogleCallback(val code: String, val state: String, val verifier: String)
 
+/** Nonce de un solo uso y client id OAuth web para el login nativo (Credential Manager). */
+data class GoogleNonce(val nonce: String, val clientId: String)
+
 /**
  * Login con Google sin cliente OAuth de Android:
  * 1. [start] genera state + verifier, los guarda y devuelve la URL web

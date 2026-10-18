@@ -15,8 +15,8 @@ android {
         applicationId = "pro.verpelis.app.native"
         minSdk = 24
         targetSdk = 35
-        versionCode = 2
-        versionName = "1.1.0"
+        versionCode = 3
+        versionName = "1.2.0"
     }
     signingConfigs {
         if (pelisStoreFile != null) {
@@ -44,4 +44,8 @@ android {
 dependencies {
     implementation(project(":core"))
     implementation("androidx.browser:browser:1.8.0")
+    // "Continuar con Google" nativo: hoja de cuentas del sistema (Credential Manager + Google Identity).
+    implementation("androidx.credentials:credentials:1.3.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
 }
