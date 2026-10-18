@@ -1,5 +1,5 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
-import { join, relative, resolve } from 'node:path';
+import { join, relative, resolve, sep } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { APK_DOWNLOAD_PATH, PRODUCTION_URL, TV_APK_DOWNLOAD_PATH } from './app-download';
 
@@ -58,7 +58,7 @@ describe('superficie de descarga de APK en la web', () => {
 
   it('ninguna otra página enlaza los APK', () => {
     const offenders = walk(WEB_SRC)
-      .map((file) => relative(WEB_SRC, file))
+      .map((file) => relative(WEB_SRC, file).split(sep).join('/'))
       .filter((rel) => rel !== LANDING && rel !== CONSTANTS)
       .filter((rel) => offersApkDownload(readFileSync(join(WEB_SRC, rel), 'utf8')));
 
