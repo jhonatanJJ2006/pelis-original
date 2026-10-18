@@ -23,6 +23,11 @@ import pro.verpelis.tv.ui.screens.LoginScreen
 import pro.verpelis.tv.ui.screens.PlayerScreen
 import pro.verpelis.tv.ui.screens.SearchScreen
 import pro.verpelis.tv.ui.screens.SettingsScreen
+import pro.verpelis.tv.ui.shell.NavSection
+import pro.verpelis.tv.ui.shell.TvShell
+import pro.verpelis.tv.data.tv.LocalTvRepository
+import pro.verpelis.tv.data.tv.TvRepository
+import androidx.compose.runtime.CompositionLocalProvider
 
 object Routes {
     const val Home = "home"
@@ -42,6 +47,22 @@ object Routes {
 
     fun watch(kind: TitleKind, id: String, episode: Int, startMs: Long): String =
         "watch/${kind.routeKey}/${Uri.encode(id)}?ep=$episode&start=$startMs"
+
+    /** Secciones del menú lateral que ya tienen pantalla. */
+    val RailSections: List<NavSection> = listOf(
+        NavSection.SEARCH,
+        NavSection.HOME,
+        NavSection.PROFILE,
+        NavSection.SETTINGS,
+    )
+
+    fun forSection(s: NavSection): String = when (s) {
+        NavSection.SEARCH -> Search
+        NavSection.HOME -> Home
+        NavSection.PROFILE -> Login
+        NavSection.SETTINGS -> Settings
+        else -> Home
+    }
 }
 
 @Composable
@@ -53,6 +74,22 @@ fun PelisTvNavHost(
 ) {
     val apiClient = LocalApiClient.current
     val playback = remember(apiClient) { PlaybackRepository(apiClient.baseUrl, apiClient.okHttp) }
+    val tvRepo = remember(apiClient) { TvRepository(apiClient.baseUrl, apiClient.okHttp) }
+    val goSection: (NavSection) -> Unit = { s ->
+        val route = Routes.forSection(s)
+        if (s == NavSection.HOME) {
+            if (!navController.popBackStack(Routes.Home, inclusive = false)) navController.navigate(Routes.Home)
+        } else {
+            navController.navigate(route) {
+                popUpTo(Routes.Home) { saveState = true }
+                launchSingleTop = true
+                restoreState = true
+            }
+        }
+    }
+    @Composable
+    fun Shelled(section: NavSection, content: @Composable () -> Unit) =
+        TvShell(section = section, sections = Routes.RailSections, onNavigate = goSection, content = content)
     val toLogin: () -> Unit = {
         navController.navigate(Routes.Login) { popUpTo(Routes.Home) }
     }
@@ -64,19 +101,20 @@ fun PelisTvNavHost(
             navController.navigate(Routes.watch(TitleKind.MOVIE, "debug-hls", 1, 0L))
         }
     }
+    CompositionLocalProvider(LocalTvRepository provides tvRepo) {
     NavHost(
         navController = navController,
         startDestination = startDestination,
         modifier = modifier,
     ) {
         composable(Routes.Home) {
-            HomeScreen(
-                onOpenSearch = { navController.navigate(Routes.Search) },
-                onOpenSettings = { navController.navigate(Routes.Settings) },
-                onOpenLogin = { navController.navigate(Routes.Login) },
-                onPlayChannel = { id, name -> navController.navigate(Routes.player(id, name)) },
-                onOpenTitle = { kind, id -> navController.navigate(Routes.detail(kind, id)) },
-            )
+            Shelled(NavSection.HOME) {
+                HomeScreen(
+                    onOpenSettings = { goSection(NavSection.SETTINGS) },
+                    onPlayChannel = { id, name -> navController.navigate(Routes.player(id, name)) },
+                    onOpenTitle = { kind, id -> navController.navigate(Routes.detail(kind, id)) },
+                )
+            }
         }
         composable(
             route = Routes.Detail,
@@ -114,11 +152,13 @@ fun PelisTvNavHost(
             )
         }
         composable(Routes.Search) {
-            SearchScreen(
-                onBack = { navController.popBackStack() },
-                onPlayChannel = { id, name -> navController.navigate(Routes.player(id, name)) },
-                onOpenTitle = { kind, id -> navController.navigate(Routes.detail(kind, id)) },
-            )
+            Shelled(NavSection.SEARCH) {
+                SearchScreen(
+                    onBack = { navController.popBackStack() },
+                    onPlayChannel = { id, name -> navController.navigate(Routes.player(id, name)) },
+                    onOpenTitle = { kind, id -> navController.navigate(Routes.detail(kind, id)) },
+                )
+            }
         }
         composable(Routes.Login) {
             LoginScreen(
@@ -135,7 +175,9 @@ fun PelisTvNavHost(
             )
         }
         composable(Routes.Settings) {
-            SettingsScreen(onBack = { navController.popBackStack() })
+            Shelled(NavSection.SETTINGS) {
+                SettingsScreen(onBack = { navController.popBackStack() })
+            }
         }
         composable(
             route = Routes.Player,
@@ -160,5 +202,6 @@ fun PelisTvNavHost(
                 },
             )
         }
+    }
     }
 }

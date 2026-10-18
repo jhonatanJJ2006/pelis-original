@@ -96,6 +96,7 @@ fun SettingsScreen(onBack: () -> Unit) {
                         onClick = {
                             uiSounds.playClick()
                             session.clear()
+                            pro.verpelis.tv.data.tv.MeCache.clear()
                         },
                         focusedContainer = MaisonNoir.Danger,
                         focusedContent = MaisonNoir.Chalk,

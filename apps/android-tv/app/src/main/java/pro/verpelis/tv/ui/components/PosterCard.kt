@@ -5,6 +5,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -48,6 +50,8 @@ fun PosterCard(
     item: CatalogItem,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    /** Fracción vista (0–1) para "Continuar viendo"; null = sin barra. */
+    progress: Float? = null,
 ) {
     val uiSounds = LocalUiSounds.current
     var focused by remember { mutableStateOf(false) }
@@ -95,6 +99,14 @@ fun PosterCard(
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize(),
                 )
+                if (progress != null) {
+                    Box(
+                        Modifier.align(Alignment.BottomStart).fillMaxWidth().height(4.dp)
+                            .background(MaisonNoir.Background.copy(alpha = 0.8f)),
+                    ) {
+                        Box(Modifier.fillMaxWidth(progress.coerceIn(0.03f, 1f)).height(4.dp).background(MaisonNoir.Gold))
+                    }
+                }
             }
         }
         Text(
