@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Hls from 'hls.js';
-import { AlertCircle, Play } from 'lucide-react';
+import { AlertCircle, Play, RotateCcw } from 'lucide-react';
 import {
   PlayerChrome,
   PlayerGestureHud,
@@ -15,14 +15,22 @@ import {
   usePlayerSurfaceGestures,
 } from '@pelis/ui/features/video-player';
 import { cn } from '@pelis/ui/utils';
+import type { TvStreamKind } from '@pelis/db/tv-stream-kind';
 import { buildTvProxyUrl } from '@/lib/tv-stream-proxy';
+import {
+  tvRecoveryDelayMs,
+  TV_MAX_MEDIA_RECOVERIES,
+  TV_MAX_NETWORK_RECOVERIES,
+} from '@/lib/tv-recovery';
 
 interface TVPlayerProps {
   channelId: string;
   channelName: string;
+  /** How the channel must be played (from the public channel shape). Defaults to HLS. */
+  streamKind?: TvStreamKind;
 }
 
-export default function TVPlayer({ channelId, channelName }: TVPlayerProps) {
+export default function TVPlayer({ channelId, channelName, streamKind = 'hls' }: TVPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -30,6 +38,9 @@ export default function TVPlayer({ channelId, channelName }: TVPlayerProps) {
   const [error, setError] = useState<string | null>(null);
   const [playbackHelp, setPlaybackHelp] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [reconnecting, setReconnecting] = useState(false);
+  /** Bumped by the Reintentar button: tears the player down and starts over. */
+  const [attempt, setAttempt] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const [controlsVisible, setControlsVisible] = useState(true);
@@ -55,12 +66,23 @@ export default function TVPlayer({ channelId, channelName }: TVPlayerProps) {
     setError(null);
     setPlaybackHelp(null);
     setLoading(true);
+    setReconnecting(false);
 
-    const isHls = streamUrl.includes('.m3u8') || streamUrl.includes('/api/tv/stream/');
+    if (streamKind === 'mpegts') {
+      setError(
+        'Este canal transmite en un formato (MPEG-TS directo) que el reproductor web no soporta. Prueba otro canal.'
+      );
+      setLoading(false);
+      return;
+    }
+
+    // The proxy URL has no extension; the channel shape says what it serves.
+    const isHls = streamKind === 'hls';
 
     const onFatalError = (message: string) => {
       setError(message);
       setLoading(false);
+      setReconnecting(false);
     };
 
     const PLAY_BLOCKED =
@@ -127,17 +149,76 @@ export default function TVPlayer({ channelId, channelName }: TVPlayerProps) {
       hls.loadSource(streamUrl);
       hls.attachMedia(video);
 
+      let manifestParsed = false;
+      let networkRecoveries = 0;
+      let mediaRecoveries = 0;
+      let recoveryTimer: ReturnType<typeof setTimeout> | null = null;
+      const clearRecovery = () => {
+        if (recoveryTimer) {
+          clearTimeout(recoveryTimer);
+          recoveryTimer = null;
+        }
+      };
+
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        manifestParsed = true;
         startOrExplain();
       });
 
+      // A fragment made it into the buffer: the connection is healthy again.
+      hls.on(Hls.Events.FRAG_BUFFERED, () => {
+        networkRecoveries = 0;
+        mediaRecoveries = 0;
+        setReconnecting(false);
+      });
+
+      const unavailableMessage = (code: number | undefined) => {
+        if (code === 401) return 'Tu sesión expiró. Inicia sesión de nuevo para ver TV.';
+        if (code === 403) return 'Necesitas un plan activo para ver este canal.';
+        if (code === 404) return 'Este canal no está disponible ahora. Prueba otro de la lista.';
+        if (code === 502 || code === 504) {
+          return 'Este canal no está disponible en este momento. El proveedor del stream no responde. Prueba otro canal o vuelve más tarde.';
+        }
+        return 'Se perdió la conexión con el canal.';
+      };
+
       hls.on(Hls.Events.ERROR, (_, data) => {
         if (!data.fatal) return;
+        const code = data.response?.code;
 
-        if (data.response?.code === 504 || data.response?.code === 502) {
-          onFatalError(
-            'Este canal no está disponible en este momento. El proveedor del stream no responde. Prueba otro canal o vuelve más tarde.'
-          );
+        if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+          // Access/missing channel will not fix itself with a retry.
+          if (code === 401 || code === 403 || code === 404) {
+            onFatalError(unavailableMessage(code));
+            return;
+          }
+          if (networkRecoveries >= TV_MAX_NETWORK_RECOVERIES) {
+            onFatalError(unavailableMessage(code));
+            return;
+          }
+          const delay = tvRecoveryDelayMs(networkRecoveries);
+          networkRecoveries += 1;
+          setReconnecting(true);
+          clearRecovery();
+          recoveryTimer = setTimeout(() => {
+            recoveryTimer = null;
+            // Before the first manifest there is nothing to resume: load it again.
+            if (!manifestParsed) hls.loadSource(streamUrl);
+            else hls.startLoad();
+          }, delay);
+          return;
+        }
+
+        if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+          if (mediaRecoveries >= TV_MAX_MEDIA_RECOVERIES) {
+            onFatalError('El canal envió video que no se puede reproducir. Prueba otro canal.');
+            return;
+          }
+          mediaRecoveries += 1;
+          setReconnecting(true);
+          // Second attempt: some live channels flip the audio codec mid-stream.
+          if (mediaRecoveries === 2) hls.swapAudioCodec();
+          hls.recoverMediaError();
           return;
         }
 
@@ -145,6 +226,7 @@ export default function TVPlayer({ channelId, channelName }: TVPlayerProps) {
       });
 
       return () => {
+        clearRecovery();
         clearStall();
         video.removeEventListener('playing', clearHelpIfPlaying);
         video.removeEventListener('loadeddata', clearHelpIfPlaying);
@@ -206,7 +288,7 @@ export default function TVPlayer({ channelId, channelName }: TVPlayerProps) {
       video.src = '';
       video.load();
     };
-  }, [streamUrl]);
+  }, [streamUrl, streamKind, attempt]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -238,6 +320,11 @@ export default function TVPlayer({ channelId, channelName }: TVPlayerProps) {
     videoRef,
     enterOnMount: true,
   });
+
+  const restartPlayer = useCallback(() => {
+    setError(null);
+    setAttempt((value) => value + 1);
+  }, []);
 
   const retryPlayback = useCallback(() => {
     const video = videoRef.current;
@@ -315,8 +402,12 @@ export default function TVPlayer({ channelId, channelName }: TVPlayerProps) {
       style={landscapeStyle}
       onMouseMove={bumpControls}
     >
-      {loading && !error && !playbackHelp && (
-        <PlayerLoadingOverlay message={`Conectando con ${channelName}…`} />
+      {(loading || reconnecting) && !error && !playbackHelp && (
+        <PlayerLoadingOverlay
+          message={
+            reconnecting ? `Reconectando con ${channelName}…` : `Conectando con ${channelName}…`
+          }
+        />
       )}
       {landscapeActive && hud && (
         <PlayerGestureHud kind={hud.kind} value={hud.value} visible={hudVisible} />
@@ -327,6 +418,16 @@ export default function TVPlayer({ channelId, channelName }: TVPlayerProps) {
           <div className="max-w-md px-6 text-center">
             <AlertCircle className="mx-auto mb-4 h-12 w-12 text-cinema-danger" />
             <p className="text-sm text-cinema-muted">{error}</p>
+            {streamKind !== 'mpegts' && (
+              <button
+                type="button"
+                onClick={restartPlayer}
+                className="mt-4 inline-flex items-center gap-2 rounded-full bg-white px-5 py-2 text-sm font-medium text-black"
+              >
+                <RotateCcw className="h-4 w-4" aria-hidden />
+                Reintentar
+              </button>
+            )}
           </div>
         </div>
       )}
