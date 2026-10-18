@@ -650,3 +650,19 @@
     @apply bg-cinema-elevated/70;
   }
 }
+
+/*
+ * Superficie solo web (landing /inicio y /descargas): dentro de la app instalada
+ * (TWA / PWA en pantalla de inicio) no se ofrecen descargas de APK.
+ */
+.in-app-only {
+  display: none;
+}
+@media (display-mode: standalone), (display-mode: fullscreen) {
+  .web-only {
+    display: none !important;
+  }
+  .in-app-only {
+    display: block;
+  }
+}

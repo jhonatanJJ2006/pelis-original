@@ -31,6 +31,10 @@ const nextConfig = {
   images: {
     remotePatterns: imageRemotePatterns,
   },
+  async redirects() {
+    // La landing de descargas vive en /descargas; /descargar queda como alias permanente.
+    return [{ source: '/descargar', destination: '/descargas', permanent: true }];
+  },
   async headers() {
     return [
       {
