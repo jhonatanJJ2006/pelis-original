@@ -22,6 +22,11 @@ import { Spinner } from '@pelis/ui/components';
 import { cn } from '@pelis/ui/utils';
 import { AnimeHlsPlayer } from '@/components/anime-hls-player';
 import {
+  animeProviderButtonId,
+  animeStreamRequestKey,
+  createLatestRequestGuard,
+} from '@/lib/latest-request';
+import {
   PlayerChrome,
   PlayerGestureHud,
   PlayerLoadingOverlay,
@@ -68,6 +73,7 @@ interface EpisodesResponse {
 }
 
 const EMBED_STALL_TIMEOUT_MS = 9000;
+const NO_FAILED_PROVIDERS: string[] = [];
 
 export default function AnimeWatchPage() {
   const params = useParams();
@@ -84,7 +90,29 @@ export default function AnimeWatchPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [embedStalled, setEmbedStalled] = useState(false);
-  const [failedProviders, setFailedProviders] = useState<string[]>([]);
+  // Providers that failed for THIS episode/server/language. Keyed so that
+  // changing episode needs no reset effect (the reset used to change
+  // loadStream's identity and fire a second, racing lookup).
+  const episodeKey = `${animeId}|${episodeNumber}|${provider ?? ''}|${dub ? 'dub' : 'sub'}`;
+  const [failedState, setFailedState] = useState<{ key: string; list: string[] }>({
+    key: '',
+    list: [],
+  });
+  const failedProviders = useMemo(
+    () => (failedState.key === episodeKey ? failedState.list : NO_FAILED_PROVIDERS),
+    [failedState, episodeKey]
+  );
+  const setFailedProviders = useCallback(
+    (update: (prev: string[]) => string[]) => {
+      setFailedState((prev) => ({
+        key: episodeKey,
+        list: update(prev.key === episodeKey ? prev.list : NO_FAILED_PROVIDERS),
+      }));
+    },
+    [episodeKey]
+  );
+  const requestGuardRef = useRef(createLatestRequestGuard());
+  const lastRequestKeyRef = useRef<string | null>(null);
   const [embedControlsVisible, setEmbedControlsVisible] = useState(true);
   const embedSurfaceRef = useRef<HTMLDivElement>(null);
   const { brightness, setBrightness, volume, setVolume, muted, toggleMute } = usePlayerSettings();
@@ -134,10 +162,6 @@ export default function AnimeWatchPage() {
   );
 
   useEffect(() => {
-    setFailedProviders([]);
-  }, [animeId, episodeNumber, provider, dub]);
-
-  useEffect(() => {
     let cancelled = false;
     getSeasonEpisodes({ animeId })
       .then((result) => {
@@ -153,6 +177,8 @@ export default function AnimeWatchPage() {
   }, [animeId, episodeNumber, getSeasonEpisodes]);
 
   const loadStream = useCallback(async () => {
+    const guard = requestGuardRef.current;
+    const token = guard.begin();
     setLoading(true);
     setError(null);
     setStream(null);
@@ -166,6 +192,8 @@ export default function AnimeWatchPage() {
         tryFallback: true,
         excludeProviders: failedProviders,
       })) as StreamResult;
+      // A newer lookup (other episode/server/language) started meanwhile.
+      if (!guard.isCurrent(token)) return;
       setStream(result);
       if (result.kind === 'none') {
         setError(result.error ?? 'No se encontraron fuentes para este episodio.');
@@ -173,10 +201,19 @@ export default function AnimeWatchPage() {
         setError('No se encontraron fuentes para este episodio.');
       }
     } catch {
+      if (!guard.isCurrent(token)) return;
       setError('Error al cargar el episodio. Prueba con otro proveedor.');
     }
     setLoading(false);
   }, [animeId, episodeNumber, provider, dub, failedProviders, getEpisodeStream]);
+
+  const requestKey = animeStreamRequestKey({
+    animeId,
+    episodeNumber,
+    provider,
+    dub,
+    excludeProviders: failedProviders,
+  });
 
   // `user` is a fresh object on every render, so the effect must depend on
   // stable primitives (`userId`, `entitled`) — otherwise loadStream
@@ -186,8 +223,22 @@ export default function AnimeWatchPage() {
       setLoading(false);
       return;
     }
+    // One lookup per (episode, server, language, exclusions).
+    if (lastRequestKeyRef.current === requestKey) return;
+    lastRequestKeyRef.current = requestKey;
     void loadStream();
-  }, [userId, entitled, episodeNumber, loadStream]);
+    // loadStream is keyed by requestKey; listing it would not add information.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId, entitled, episodeNumber, requestKey]);
+
+  // Leaving the page: drop any response still in flight.
+  useEffect(() => {
+    const guard = requestGuardRef.current;
+    return () => {
+      guard.cancel();
+      lastRequestKeyRef.current = null;
+    };
+  }, []);
 
   // An iframe from a blocked domain never fires `load`, and being cross-origin
   // we cannot inspect it — a timeout is the only signal available. Once the
@@ -221,7 +272,7 @@ export default function AnimeWatchPage() {
       return;
     }
     setError('Este servidor no está disponible ahora mismo. Prueba otro servidor.');
-  }, [provider, failedProviders]);
+  }, [provider, failedProviders, setFailedProviders]);
 
   const goToEpisode = (target: number) => {
     const query = new URLSearchParams(searchParams.toString());
@@ -259,7 +310,10 @@ export default function AnimeWatchPage() {
       ? episodeNumbers[currentIndex + 1]
       : null;
 
-  const activeProviderId = stream && stream.kind !== 'none' ? stream.provider : provider;
+  // vidnest-hls (our player) and vidnest (iframe) share the VidNest button.
+  const activeProviderId = animeProviderButtonId(
+    stream && stream.kind !== 'none' ? stream.provider : provider
+  );
   const activeProvider = providers?.find((p) => p.id === activeProviderId);
   const activeProviderName = activeProvider?.name ?? activeProviderId ?? '—';
   const fellBackFrom = stream && stream.kind !== 'none' ? stream.fellBackFrom : null;

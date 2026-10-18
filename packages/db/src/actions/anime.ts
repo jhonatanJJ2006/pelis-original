@@ -22,6 +22,14 @@ import {
 } from '../lib/consumet-client';
 import { fetchVidnestEpisode } from '../lib/vidnest-client';
 import { fetchEpisodeList } from '../lib/anizip-client';
+import { ANIME_STEP_TIMEOUTS_MS, ANIME_STREAM_BUDGET_MS, TimeBudget } from '../lib/time-budget';
+
+/**
+ * Id reported for VidNest's server-side HLS. It differs from the `vidnest`
+ * iframe embed on purpose: when the HLS fails in the player the client
+ * excludes `vidnest-hls`, and the (stable) VidNest iframe stays available.
+ */
+export const VIDNEST_HLS_PROVIDER_ID = 'vidnest-hls';
 import { searchAnilist, getAnilistById } from '../lib/anilist';
 import {
   ANILIST_CATALOG_DEFAULT_LIMIT,
@@ -167,11 +175,22 @@ export const getEpisodeStream = register({
     _ctx,
     { animeId, episodeNumber, provider, dub, tryFallback = true, excludeProviders }
   ) => {
+    const budget = new TimeBudget(ANIME_STREAM_BUDGET_MS);
     const anime = await prisma.anime.findUnique({ where: { id: animeId } });
     if (!anime) throw new Error('Anime no encontrado');
 
-    const anilistId = await ensureAnilistId(anime);
+    const anilistId = await budget.run(
+      () => ensureAnilistId(anime),
+      ANIME_STEP_TIMEOUTS_MS.anilist,
+      null
+    );
     const excluded = new Set(excludeProviders ?? []);
+    const timedOut = () => ({
+      kind: 'none' as const,
+      provider: requested?.id ?? null,
+      error:
+        'La búsqueda de fuentes tardó demasiado. Prueba otro servidor o vuelve a intentarlo en un momento.',
+    });
     const requestedId = provider ?? DEFAULT_ANIME_PROVIDER_ID;
     const requested = excluded.has(requestedId) ? undefined : getProviderById(requestedId);
 
@@ -191,9 +210,14 @@ export const getEpisodeStream = register({
     // see vidnest-client). Serving them through our own proxy gives every
     // provider the same clean <video> player — no iframes, no popups.
     const tryVidnestHls = async (fellBackFrom?: string | null) => {
-      if (excluded.has('vidnest')) return null;
+      if (excluded.has(VIDNEST_HLS_PROVIDER_ID)) return null;
       try {
-        const data = await fetchVidnestEpisode(anilistId, episodeNumber, dub ? 'dub' : 'sub');
+        const data = await budget.run(
+          () => fetchVidnestEpisode(anilistId, episodeNumber, dub ? 'dub' : 'sub'),
+          ANIME_STEP_TIMEOUTS_MS.vidnest,
+          null
+        );
+        if (!data) return null;
         const master =
           data.sources.find((s) => s.type === 'hls' || s.file.includes('.m3u8')) ?? data.sources[0];
         if (!master?.file) return null;
@@ -201,7 +225,7 @@ export const getEpisodeStream = register({
         if (master.referer) proxyParams.set('r', master.referer);
         return {
           kind: 'hls' as const,
-          provider: 'vidnest',
+          provider: VIDNEST_HLS_PROVIDER_ID,
           sources: [
             {
               url: `/api/anime/stream?${proxyParams.toString()}`,
@@ -217,7 +241,7 @@ export const getEpisodeStream = register({
             })),
           intro: data.intro ?? null,
           outro: data.outro ?? null,
-          triedProviders: ['vidnest'],
+          triedProviders: [VIDNEST_HLS_PROVIDER_ID],
           fellBackFrom: fellBackFrom ?? null,
         };
       } catch {
@@ -232,7 +256,12 @@ export const getEpisodeStream = register({
 
     if (requested?.kind === 'embed') {
       if (requested.resolveEmbedUrl) {
-        const url = await requested.resolveEmbedUrl(embedCtx, { title: anime.title });
+        const resolve = requested.resolveEmbedUrl;
+        const url = await budget.run(
+          () => resolve(embedCtx, { title: anime.title }),
+          ANIME_STEP_TIMEOUTS_MS.resolveEmbed,
+          null
+        );
         if (url) {
           return { kind: 'embed' as const, provider: requested.id, url, dub: Boolean(dub) };
         }
@@ -244,7 +273,13 @@ export const getEpisodeStream = register({
         if (url && tryFallback === false) {
           return { kind: 'embed' as const, provider: requested.id, url, dub: Boolean(dub) };
         }
-        const healthy = url ? await isEmbedProviderHealthy(requested.id) : false;
+        const healthy = url
+          ? await budget.run(
+              () => isEmbedProviderHealthy(requested.id),
+              ANIME_STEP_TIMEOUTS_MS.embedHealth,
+              false
+            )
+          : false;
         if (url && healthy) {
           return { kind: 'embed' as const, provider: requested.id, url, dub: Boolean(dub) };
         }
@@ -254,11 +289,12 @@ export const getEpisodeStream = register({
 
     if (requested?.kind === 'hls') {
       hlsTried = true;
-      const result = await fetchVideoByEpisodeNumber(
-        anilistId,
-        episodeNumber,
-        requested.id,
-        anime.title
+      const result = await budget.run(
+        () => fetchVideoByEpisodeNumber(anilistId, episodeNumber, requested.id, anime.title),
+        ANIME_STEP_TIMEOUTS_MS.consumet,
+        { provider: null, video: { sources: [], subtitles: [] }, triedProviders: [] } as Awaited<
+          ReturnType<typeof fetchVideoByEpisodeNumber>
+        >
       );
       if (result.provider && result.video.sources.length > 0) {
         return {
@@ -295,10 +331,17 @@ export const getEpisodeStream = register({
       const vidnest = await tryVidnestHls(requested?.id ?? null);
       if (vidnest) return vidnest;
     }
+    if (budget.expired()) return timedOut();
 
     // Try the Consumet hls chain before giving up on native playback.
     if (!hlsTried) {
-      const hls = await fetchVideoByEpisodeNumber(anilistId, episodeNumber, undefined, anime.title);
+      const hls = await budget.run(
+        () => fetchVideoByEpisodeNumber(anilistId, episodeNumber, undefined, anime.title),
+        ANIME_STEP_TIMEOUTS_MS.consumet,
+        { provider: null, video: { sources: [], subtitles: [] }, triedProviders: [] } as Awaited<
+          ReturnType<typeof fetchVideoByEpisodeNumber>
+        >
+      );
       if (hls.provider && hls.video.sources.length > 0) {
         return {
           kind: 'hls' as const,
@@ -320,10 +363,16 @@ export const getEpisodeStream = register({
     for (const embed of getEmbedProviders()) {
       if (embed.id === requested?.id || failedEmbeds.has(embed.id) || excluded.has(embed.id))
         continue;
+      if (budget.expired()) return timedOut();
 
       let url: string | null = null;
       if (embed.resolveEmbedUrl) {
-        url = await embed.resolveEmbedUrl(embedCtx, { title: anime.title });
+        const resolve = embed.resolveEmbedUrl;
+        url = await budget.run(
+          () => resolve(embedCtx, { title: anime.title }),
+          ANIME_STEP_TIMEOUTS_MS.resolveEmbed,
+          null
+        );
         if (!url) {
           failedEmbeds.add(embed.id);
           continue;
@@ -333,7 +382,11 @@ export const getEpisodeStream = register({
         if (!url) continue;
       }
 
-      const healthy = await isEmbedProviderHealthy(embed.id);
+      const healthy = await budget.run(
+        () => isEmbedProviderHealthy(embed.id),
+        ANIME_STEP_TIMEOUTS_MS.embedHealth,
+        false
+      );
       if (!healthy) {
         failedEmbeds.add(embed.id);
         continue;
@@ -348,6 +401,7 @@ export const getEpisodeStream = register({
       };
     }
 
+    if (budget.expired()) return timedOut();
     return {
       kind: 'none' as const,
       provider: requested?.id ?? null,

@@ -153,9 +153,10 @@ export function AnimeHlsPlayer({
       let mediaRetries = 0;
       hls.on(Hls.Events.ERROR, (_event, data) => {
         if (!data.fatal) {
-          if (data.details === Hls.ErrorDetails.BUFFER_STALLED_ERROR) {
-            hls.startLoad();
-          }
+          // Never startLoad() on BUFFER_STALLED: it calls stopLoad() first and
+          // throws away the segment that is downloading, so every stall
+          // restarted the same download. hls.js nudges small gaps itself and
+          // fatal errors below still recover (startLoad / recoverMediaError).
           return;
         }
         switch (data.type) {
