@@ -16,7 +16,7 @@ import { PlayerGestureHud, usePlayerSurfaceGestures } from './player-gestures';
 import { PlayerLoadingOverlay } from './player-loading';
 import { isMobilePlayerViewport, useMobileLandscapePlayer } from './player-landscape';
 import { createVodHlsConfig } from './hls-config';
-import { attachHlsForwardPrefetch, attachNativeHlsPrefetch } from './hls-prefetch';
+import { attachHlsSeekWatchdog } from './hls-seek-watchdog';
 import { resumeSeekSeconds, shouldWritePlaybackProgress } from './resume';
 
 export {
@@ -37,8 +37,8 @@ export {
   usePlayerSurfaceGestures,
 } from './player-gestures';
 export { PlayerLoadingOverlay } from './player-loading';
-export { createVodHlsConfig, HLS_PREFETCH_SEGMENTS } from './hls-config';
-export { attachHlsForwardPrefetch, attachNativeHlsPrefetch } from './hls-prefetch';
+export { createVodHlsConfig, HLS_TARGET_FORWARD_BUFFER_SECONDS } from './hls-config';
+export { attachHlsSeekWatchdog } from './hls-seek-watchdog';
 export {
   useMobileLandscapePlayer,
   isMobilePlayerViewport,
@@ -112,7 +112,7 @@ export function VideoPlayer({
 
     if (useHlsJs) {
       const hls = new Hls(createVodHlsConfig());
-      const stopPrefetch = attachHlsForwardPrefetch(hls, video);
+      const stopSeekWatchdog = attachHlsSeekWatchdog(hls, video);
       hls.loadSource(src);
       hls.attachMedia(video);
 
@@ -164,7 +164,7 @@ export function VideoPlayer({
       });
 
       return () => {
-        stopPrefetch();
+        stopSeekWatchdog();
         hls.destroy();
       };
     }
@@ -172,10 +172,6 @@ export function VideoPlayer({
     if (video.canPlayType('application/vnd.apple.mpegurl')) {
       video.preload = 'auto';
       video.src = src;
-      const stopPrefetch = attachNativeHlsPrefetch(video, src);
-      return () => {
-        stopPrefetch();
-      };
     }
   }, [src, isHls, useHlsJs]);
 

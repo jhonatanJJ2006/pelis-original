@@ -7,8 +7,7 @@ import {
   PlayerChrome,
   PlayerGestureHud,
   PlayerLoadingOverlay,
-  attachHlsForwardPrefetch,
-  attachNativeHlsPrefetch,
+  attachHlsSeekWatchdog,
   createVodHlsConfig,
   isMobilePlayerViewport,
   playerVideoFilter,
@@ -127,7 +126,7 @@ export function AnimeHlsPlayer({
 
     if (isHlsSource && Hls.isSupported()) {
       const hls = new Hls(createVodHlsConfig());
-      const stopPrefetch = attachHlsForwardPrefetch(hls, video);
+      const stopSeekWatchdog = attachHlsSeekWatchdog(hls, video);
       hlsRef.current = hls;
       hls.loadSource(source.url);
       hls.attachMedia(video);
@@ -189,7 +188,7 @@ export function AnimeHlsPlayer({
       });
 
       return () => {
-        stopPrefetch();
+        stopSeekWatchdog();
         hls.destroy();
         hlsRef.current = null;
       };
@@ -198,7 +197,6 @@ export function AnimeHlsPlayer({
     if (isHlsSource) {
       video.preload = 'auto';
       video.src = source.url;
-      const stopNativePrefetch = attachNativeHlsPrefetch(video, source.url);
       const onLoaded = () => {
         setLoading(false);
         video.play().catch(() => {});
@@ -207,7 +205,6 @@ export function AnimeHlsPlayer({
       const onError = () => onFatal('Error al reproducir el video.');
       video.addEventListener('error', onError);
       return () => {
-        stopNativePrefetch();
         video.removeEventListener('loadedmetadata', onLoaded);
         video.removeEventListener('error', onError);
         video.removeAttribute('src');
