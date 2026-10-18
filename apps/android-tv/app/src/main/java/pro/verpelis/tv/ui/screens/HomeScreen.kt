@@ -43,6 +43,10 @@ import pro.verpelis.tv.data.api.TvListArgs
 import pro.verpelis.tv.ui.components.CatalogRow
 import pro.verpelis.tv.ui.components.CategoryRow
 import pro.verpelis.tv.ui.components.TvFocusButton
+import pro.verpelis.tv.ui.components.TvHintBar
+import pro.verpelis.tv.ui.components.TvHints
+import pro.verpelis.tv.ui.components.TvLoadError
+import pro.verpelis.tv.data.api.PelisApiClient
 import pro.verpelis.tv.ui.theme.MaisonNoir
 import pro.verpelis.tv.ui.theme.MaisonType
 
@@ -98,7 +102,7 @@ fun HomeScreen(
                 HomeCache.rows = loaded
                 rows = loaded
             } catch (ex: Exception) {
-                if (catalog == null) error = ex.message ?: "No se pudo cargar el catálogo"
+                if (catalog == null) error = PelisApiClient.friendlyNetworkError(ex)
             } finally {
                 rowsLoading = false
             }
@@ -139,15 +143,10 @@ fun HomeScreen(
             val r = rows
             when {
                 c == null && catalogLoading -> HomeSkeleton()
-                c == null && r.isNullOrEmpty() && error != null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(error ?: "", color = MaisonNoir.Danger)
-                        TvFocusButton("Reintentar", { uiSounds.playClick(); attempt++ }, modifier = Modifier.padding(top = 16.dp))
-                    }
-                }
+                c == null && r.isNullOrEmpty() && error != null -> Unit
                 else -> TvPivotScroll(0.18f) {
                     LazyColumn(
-                        Modifier.fillMaxSize(),
+                        Modifier.fillMaxWidth().weight(1f),
                         contentPadding = PaddingValues(top = 4.dp, bottom = 48.dp),
                     ) {
                         if (c != null && c.movies.isNotEmpty()) {
@@ -189,6 +188,23 @@ fun HomeScreen(
                     }
                 }
             }
+            if (catalog != null || !rows.isNullOrEmpty()) {
+                TvHintBar(
+                    listOf(TvHints.Select, TvHints.Move, TvHints.Exit),
+                    Modifier.padding(start = 48.dp, end = 48.dp, top = 6.dp, bottom = 14.dp),
+                )
+            }
+        }
+        if (catalog == null && rows.isNullOrEmpty() && error != null) {
+            // Error de carga compartido: Reintentar + estado de conexión real.
+            TvLoadError(
+                onRetry = { attempt++ },
+                detail = error,
+                extraActions = {
+                    pro.verpelis.tv.ui.playback.NoirButton("Ajustes", { uiSounds.playClick(); onOpenSettings() })
+                },
+                hints = listOf(TvHints.Select, TvHints.Move, TvHints.Exit),
+            )
         }
     }
 }

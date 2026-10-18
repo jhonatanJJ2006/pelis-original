@@ -46,32 +46,32 @@ import pro.verpelis.tv.data.api.PairingCreateResponse
 import pro.verpelis.tv.data.qr.PairingVerifyUrl
 import pro.verpelis.tv.data.qr.QrBitmap
 import pro.verpelis.tv.ui.components.TvFocusButton
+import pro.verpelis.tv.ui.components.TvHint
+import pro.verpelis.tv.ui.components.TvHints
+import pro.verpelis.tv.ui.login.NetflixLoginFrame
+import pro.verpelis.tv.ui.login.PhoneLoginCard
+import pro.verpelis.tv.ui.login.ChoiceButton
+import pro.verpelis.tv.ui.login.FormPanel
 import pro.verpelis.tv.ui.login.LocalMnFocusSound
 import pro.verpelis.tv.ui.login.Mn
-import pro.verpelis.tv.ui.login.MnCodeCard
-import pro.verpelis.tv.ui.login.MnEyebrow
-import pro.verpelis.tv.ui.login.MnExpiry
 import pro.verpelis.tv.ui.login.MnIcon
 import pro.verpelis.tv.ui.login.MnInputField
 import pro.verpelis.tv.ui.login.MnLink
 import pro.verpelis.tv.ui.login.MnOutlineButton
-import pro.verpelis.tv.ui.login.MnPanel
 import pro.verpelis.tv.ui.login.MnPanelFooter
 import pro.verpelis.tv.ui.login.MnPrimaryButton
-import pro.verpelis.tv.ui.login.MnQrCard
 import pro.verpelis.tv.ui.login.MnStatusLine
-import pro.verpelis.tv.ui.login.MnSteps
 import pro.verpelis.tv.ui.login.MnText
-import pro.verpelis.tv.ui.login.MnTitle
-import pro.verpelis.tv.ui.login.MnTvLoginFrame
 import pro.verpelis.tv.ui.login.parseIsoMillis
 import pro.verpelis.tv.ui.theme.MaisonNoir
 
 /**
- * Inicio de sesión TV — diseño Google Stitch "PELIS - Iniciar sesión (Android TV 10-Foot) |
- * Maison Noir" (fe4203145f55480985b6537208384423): QR de vinculación y correo/contraseña lado a lado.
+ * Inicio de sesión TV estilo Netflix — diseño Google Stitch "PELIS Rediseño"
+ * (0e67b58f9e0f425fb7d8371c664dd76e): "¿Cómo quieres iniciar sesión?" con la tarjeta
+ * recomendada "Usa tu celular" (QR real hacia /link-tv + código) o "Usar correo y contraseña".
+ * Fondo: un único JPEG pequeño (960x540) sin animación, apto para TV con poca RAM.
  */
-private enum class LoginMode { SignIn, SignUp, VerifyOtp }
+private enum class LoginMode { Choose, SignIn, SignUp, VerifyOtp }
 
 @Composable
 fun LoginScreen(
@@ -83,7 +83,7 @@ fun LoginScreen(
     val uiSounds = LocalUiSounds.current
     val scope = rememberCoroutineScope()
 
-    var mode by remember { mutableStateOf(LoginMode.SignIn) }
+    var mode by remember { mutableStateOf(LoginMode.Choose) }
     var pairing by remember { mutableStateOf<PairingCreateResponse?>(null) }
     var qr by remember { mutableStateOf<Bitmap?>(null) }
     var error by remember { mutableStateOf("") }
@@ -308,13 +308,14 @@ fun LoginScreen(
     val host = remember { BuildConfig.API_BASE_URL.removePrefix("https://").removePrefix("http://").trimEnd('/') }
     val qrImage = remember(qr) { qr?.asImageBitmap() }
     val firstField = remember { FocusRequester() }
-    val regenButton = remember { FocusRequester() }
     LaunchedEffect(mode, signedIn) {
         if (signedIn) return@LaunchedEffect
         delay(120)
         runCatching { firstField.requestFocus() }
     }
-    BackHandler(enabled = !signedIn && mode != LoginMode.SignIn) { switchMode(LoginMode.SignIn) }
+    BackHandler(enabled = !signedIn && mode != LoginMode.Choose) {
+        switchMode(if (mode == LoginMode.VerifyOtp) LoginMode.SignIn else LoginMode.Choose)
+    }
 
     if (signedIn) {
         Box(Modifier.fillMaxSize().background(MaisonNoir.Background), contentAlignment = Alignment.Center) {
@@ -327,7 +328,7 @@ fun LoginScreen(
                     uiSounds.playClick()
                     session.clear()
                     signedIn = false
-                    mode = LoginMode.SignIn
+                    mode = LoginMode.Choose
                     requestPairing()
                 },
             )
@@ -336,143 +337,149 @@ fun LoginScreen(
     }
 
     CompositionLocalProvider(LocalMnFocusSound provides { uiSounds.playFocus() }) {
-        MnTvLoginFrame(versionName = BuildConfig.VERSION_NAME, host = host) {
-            // Panel izquierdo: vincular con el teléfono (QR + código + pasos).
-            MnPanel(0.59f, right = firstField) {
-                MnEyebrow(MnIcon.Phone, "VINCULAR CON TU TELÉFONO")
-                MnTitle(
-                    "Escanea para entrar",
-                    "Accede al instante sin escribir credenciales en pantalla usando la cámara de tu smartphone o tableta.",
-                )
-                Spacer(Modifier.height(14.dp))
-                Row(Modifier.fillMaxWidth().weight(1f), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    MnQrCard(qrImage, loading = pairBusy, modifier = Modifier.width(168.dp))
-                    Column(Modifier.weight(1f)) {
-                        MnCodeCard(
+        NetflixLoginFrame(
+            hints = if (mode == LoginMode.Choose) {
+                listOf(TvHints.Select, TvHint("◀ ▶", "Cambiar opción"), TvHints.Exit)
+            } else {
+                listOf(TvHints.Select, TvHints.Move, TvHints.Back)
+            },
+            trailing = "$host · v${BuildConfig.VERSION_NAME}",
+        ) {
+            when (mode) {
+                LoginMode.Choose -> {
+                    MnText("¿Cómo quieres iniciar sesión?", size = 26.sp, family = Mn.Serif, color = Mn.Text, lines = 1)
+                    Spacer(Modifier.height(18.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        PhoneLoginCard(
+                            qr = qrImage,
+                            loading = pairBusy,
                             code = pairing?.displayCode?.ifBlank { null } ?: pairing?.code,
-                            badge = when {
-                                pairing != null -> "ACTIVO"
-                                pairBusy -> "GENERANDO"
-                                else -> "SIN CÓDIGO"
-                            },
                             host = host,
+                            status = pairError.ifBlank { null },
+                            expiresAtMillis = parseIsoMillis(pairing?.expiresAt),
+                            focusRequester = firstField,
+                            onRegenerate = {
+                                uiSounds.playClick()
+                                requestPairing()
+                            },
                         )
-                        Spacer(Modifier.height(10.dp))
-                        MnSteps(host)
-                        Spacer(Modifier.height(10.dp))
-                        MnStatusLine(pairError.ifBlank { statusText }, isError = pairError.isNotBlank())
+                        Column(Modifier.width(56.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                            Box(Modifier.width(1.dp).height(70.dp).background(Mn.Highest))
+                            Spacer(Modifier.height(6.dp))
+                            MnText("o", color = Mn.Outline, size = 11.sp, family = Mn.Serif)
+                            Spacer(Modifier.height(6.dp))
+                            Box(Modifier.width(1.dp).height(70.dp).background(Mn.Highest))
+                        }
+                        Column(Modifier.width(250.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                            ChoiceButton(
+                                label = "Usar correo y contraseña",
+                                icon = MnIcon.Lock,
+                                onClick = { switchMode(LoginMode.SignIn) },
+                            )
+                            Spacer(Modifier.height(14.dp))
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                MnText("¿No tienes cuenta?", color = Mn.Variant, size = 9.sp)
+                                Spacer(Modifier.width(4.dp))
+                                MnLink("Crear cuenta", onClick = { switchMode(LoginMode.SignUp) })
+                            }
+                            Spacer(Modifier.height(4.dp))
+                            MnText("También puedes registrarte en $host", color = Mn.Outline, size = 8.sp)
+                        }
                     }
                 }
-                MnPanelFooter {
-                    MnExpiry(parseIsoMillis(pairing?.expiresAt))
-                    Spacer(Modifier.weight(1f))
+                LoginMode.SignIn -> FormPanel(
+                    eyebrow = "CON TU CUENTA",
+                    title = "Correo y contraseña",
+                    subtitle = "Pulsa OK en un campo para escribir con el teclado de la TV.",
+                ) {
+                    MnInputField(
+                        label = "Correo electrónico", icon = MnIcon.Mail, value = email, onValueChange = { email = it },
+                        placeholder = "tu@correo.com", keyboardType = KeyboardType.Email, focusRequester = firstField,
+                    )
+                    Spacer(Modifier.height(10.dp))
+                    MnInputField(
+                        label = "Contraseña", icon = MnIcon.Lock, value = password, onValueChange = { password = it },
+                        placeholder = "••••••••", isPassword = true, keyboardType = KeyboardType.Password,
+                        imeAction = ImeAction.Done, onImeAction = { submitSignIn() },
+                    )
+                    FormError(error)
+                    Spacer(Modifier.height(14.dp))
+                    MnPrimaryButton(if (busy) "ENTRANDO…" else "INICIAR SESIÓN", onClick = {
+                        uiSounds.playClick()
+                        submitSignIn()
+                    })
+                    Spacer(Modifier.height(12.dp))
+                    MnPanelFooter {
+                        MnLink("← Usar el celular", onClick = { switchMode(LoginMode.Choose) })
+                        Spacer(Modifier.weight(1f))
+                        MnLink("Crear cuenta →", onClick = { switchMode(LoginMode.SignUp) })
+                    }
+                }
+                LoginMode.SignUp -> FormPanel(
+                    eyebrow = "NUEVA CUENTA",
+                    title = "Crear cuenta",
+                    subtitle = "La contraseña debe tener al menos 8 caracteres.",
+                ) {
+                    MnInputField(
+                        label = "Nombre", icon = MnIcon.Remote, value = name, onValueChange = { name = it },
+                        placeholder = "Tu nombre", focusRequester = firstField,
+                    )
+                    Spacer(Modifier.height(6.dp))
+                    MnInputField(
+                        label = "Correo electrónico", icon = MnIcon.Mail, value = email, onValueChange = { email = it },
+                        placeholder = "tu@correo.com", keyboardType = KeyboardType.Email,
+                    )
+                    Spacer(Modifier.height(6.dp))
+                    MnInputField(
+                        label = "Contraseña", icon = MnIcon.Lock, value = password, onValueChange = { password = it },
+                        placeholder = "••••••••", isPassword = true, keyboardType = KeyboardType.Password,
+                        imeAction = ImeAction.Done, onImeAction = { submitSignUp() },
+                    )
+                    FormError(error)
+                    Spacer(Modifier.height(10.dp))
+                    MnPrimaryButton(if (busy) "CREANDO…" else "CREAR CUENTA", onClick = {
+                        uiSounds.playClick()
+                        submitSignUp()
+                    })
+                    Spacer(Modifier.height(10.dp))
+                    MnPanelFooter {
+                        MnLink("← Volver", onClick = { switchMode(LoginMode.Choose) })
+                        Spacer(Modifier.weight(1f))
+                        MnLink("Ya tengo cuenta →", onClick = { switchMode(LoginMode.SignIn) })
+                    }
+                }
+                LoginMode.VerifyOtp -> FormPanel(
+                    eyebrow = "VERIFICACIÓN",
+                    title = "Verifica tu correo",
+                    subtitle = "Enviamos un código de 6 dígitos a $email. Al verificar, entras automáticamente.",
+                ) {
+                    MnInputField(
+                        label = "Código de 6 dígitos", icon = MnIcon.Lock, value = otp,
+                        onValueChange = { otp = it.filter { ch -> ch.isDigit() }.take(6) },
+                        placeholder = "000000", keyboardType = KeyboardType.Number, imeAction = ImeAction.Done,
+                        onImeAction = { submitOtp() }, focusRequester = firstField,
+                    )
+                    if (error.isNotBlank()) FormError(error) else if (otpStatus.isNotBlank()) {
+                        Spacer(Modifier.height(8.dp))
+                        MnStatusLine(otpStatus, isError = false)
+                    }
+                    Spacer(Modifier.height(14.dp))
+                    MnPrimaryButton(if (busy) "VERIFICANDO…" else "VERIFICAR", onClick = {
+                        uiSounds.playClick()
+                        submitOtp()
+                    })
+                    Spacer(Modifier.height(10.dp))
                     MnOutlineButton(
-                        label = if (pairBusy) "GENERANDO…" else "GENERAR NUEVO CÓDIGO",
+                        label = if (resendCooldown > 0) "REENVIAR (${resendCooldown}s)" else "REENVIAR CÓDIGO",
                         icon = MnIcon.Refresh,
-                        focusRequester = regenButton,
                         onClick = {
                             uiSounds.playClick()
-                            requestPairing()
+                            resendOtp()
                         },
                     )
-                }
-            }
-            // Panel derecho: correo y contraseña (y registro / verificación en el mismo panel).
-            MnPanel(0.41f, left = regenButton) {
-                when (mode) {
-                    LoginMode.SignIn -> {
-                        MnEyebrow(MnIcon.Remote, "CON TU CUENTA")
-                        MnTitle("Correo y contraseña", "Usa el control remoto para escribir tus credenciales")
-                        Spacer(Modifier.height(16.dp))
-                        MnInputField(
-                            label = "Correo electrónico", icon = MnIcon.Mail, value = email, onValueChange = { email = it },
-                            placeholder = "tu@correo.com", keyboardType = KeyboardType.Email, focusRequester = firstField,
-                        )
-                        Spacer(Modifier.height(10.dp))
-                        MnInputField(
-                            label = "Contraseña", icon = MnIcon.Lock, value = password, onValueChange = { password = it },
-                            placeholder = "••••••••", isPassword = true, keyboardType = KeyboardType.Password,
-                            imeAction = ImeAction.Done, onImeAction = { submitSignIn() },
-                        )
-                        FormError(error)
-                        Spacer(Modifier.height(14.dp))
-                        MnPrimaryButton(if (busy) "ENTRANDO…" else "INICIAR SESIÓN", onClick = {
-                            uiSounds.playClick()
-                            submitSignIn()
-                        })
-                        Spacer(Modifier.weight(1f))
-                        MnPanelFooter {
-                            MnText("¿No tienes cuenta?", color = Mn.Variant, size = 9.sp)
-                            Spacer(Modifier.weight(1f))
-                            MnLink("Regístrate aquí →", onClick = { switchMode(LoginMode.SignUp) })
-                        }
-                    }
-                    LoginMode.SignUp -> {
-                        MnEyebrow(MnIcon.Remote, "NUEVA CUENTA")
-                        MnTitle("Crear cuenta", "Mínimo 8 caracteres en la contraseña")
-                        Spacer(Modifier.height(10.dp))
-                        MnInputField(
-                            label = "Nombre", icon = MnIcon.Remote, value = name, onValueChange = { name = it },
-                            placeholder = "Tu nombre", focusRequester = firstField,
-                        )
-                        Spacer(Modifier.height(6.dp))
-                        MnInputField(
-                            label = "Correo electrónico", icon = MnIcon.Mail, value = email, onValueChange = { email = it },
-                            placeholder = "tu@correo.com", keyboardType = KeyboardType.Email,
-                        )
-                        Spacer(Modifier.height(6.dp))
-                        MnInputField(
-                            label = "Contraseña", icon = MnIcon.Lock, value = password, onValueChange = { password = it },
-                            placeholder = "••••••••", isPassword = true, keyboardType = KeyboardType.Password,
-                            imeAction = ImeAction.Done, onImeAction = { submitSignUp() },
-                        )
-                        FormError(error)
-                        Spacer(Modifier.height(10.dp))
-                        MnPrimaryButton(if (busy) "CREANDO…" else "CREAR CUENTA", onClick = {
-                            uiSounds.playClick()
-                            submitSignUp()
-                        })
-                        Spacer(Modifier.weight(1f))
-                        MnPanelFooter {
-                            MnText("¿Ya tienes cuenta?", color = Mn.Variant, size = 9.sp)
-                            Spacer(Modifier.weight(1f))
-                            MnLink("Inicia sesión →", onClick = { switchMode(LoginMode.SignIn) })
-                        }
-                    }
-                    LoginMode.VerifyOtp -> {
-                        MnEyebrow(MnIcon.Mail, "VERIFICACIÓN")
-                        MnTitle("Verifica tu correo", "Enviamos un código de 6 dígitos a $email. Al verificar, entras automáticamente.")
-                        Spacer(Modifier.height(16.dp))
-                        MnInputField(
-                            label = "Código de 6 dígitos", icon = MnIcon.Lock, value = otp,
-                            onValueChange = { otp = it.filter { ch -> ch.isDigit() }.take(6) },
-                            placeholder = "000000", keyboardType = KeyboardType.Number, imeAction = ImeAction.Done,
-                            onImeAction = { submitOtp() }, focusRequester = firstField,
-                        )
-                        if (error.isNotBlank()) FormError(error) else if (otpStatus.isNotBlank()) {
-                            Spacer(Modifier.height(8.dp))
-                            MnStatusLine(otpStatus, isError = false)
-                        }
-                        Spacer(Modifier.height(14.dp))
-                        MnPrimaryButton(if (busy) "VERIFICANDO…" else "VERIFICAR", onClick = {
-                            uiSounds.playClick()
-                            submitOtp()
-                        })
-                        Spacer(Modifier.height(10.dp))
-                        MnOutlineButton(
-                            label = if (resendCooldown > 0) "REENVIAR (${resendCooldown}s)" else "REENVIAR CÓDIGO",
-                            icon = MnIcon.Refresh,
-                            onClick = {
-                                uiSounds.playClick()
-                                resendOtp()
-                            },
-                        )
-                        Spacer(Modifier.weight(1f))
-                        MnPanelFooter {
-                            MnText("¿Otro correo?", color = Mn.Variant, size = 9.sp)
-                            Spacer(Modifier.weight(1f))
-                            MnLink("Volver a iniciar sesión →", onClick = { switchMode(LoginMode.SignIn) })
-                        }
+                    Spacer(Modifier.height(10.dp))
+                    MnPanelFooter {
+                        MnLink("← Volver a iniciar sesión", onClick = { switchMode(LoginMode.SignIn) })
                     }
                 }
             }

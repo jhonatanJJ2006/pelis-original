@@ -121,7 +121,7 @@ fun SearchScreen(
         )
         LazyColumn(
             contentPadding = PaddingValues(top = 16.dp),
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxWidth().weight(1f),
         ) {
             if (titles.isNotEmpty()) {
                 item(key = "titles") {
@@ -150,5 +150,13 @@ fun SearchScreen(
                 }
             }
         }
+        pro.verpelis.tv.ui.components.TvHintBar(
+            listOf(
+                pro.verpelis.tv.ui.components.TvHints.Select,
+                pro.verpelis.tv.ui.components.TvHints.Move,
+                pro.verpelis.tv.ui.components.TvHints.Back,
+            ),
+            Modifier.padding(top = 8.dp),
+        )
     }
 }
