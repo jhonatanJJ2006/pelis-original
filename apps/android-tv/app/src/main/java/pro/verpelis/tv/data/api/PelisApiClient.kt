@@ -33,7 +33,7 @@ class PelisApiClient(private val sessionStore: SessionStore) {
             memory[url.host] = cookies
             val session = pickSessionCookie(cookies)
             if (session != null) {
-                sessionStore.persistClaim(session.name, session.value)
+                sessionStore.persistCookie(session.name, session.value)
             }
         }
 
@@ -61,6 +61,9 @@ class PelisApiClient(private val sessionStore: SessionStore) {
         val builder = chain.request().newBuilder()
             .header("User-Agent", USER_AGENT)
             .header("Accept", "application/json")
+            // Better Auth exige Origin cuando la petición lleva cookie (CSRF): sin él,
+            // volver a iniciar sesión con una cookie guardada fallaba con "Missing or null Origin".
+            .header("Origin", baseUrl.trimEnd('/'))
         sessionStore.sessionToken?.let { builder.header("Authorization", "Bearer $it") }
         chain.proceed(builder.build())
     }

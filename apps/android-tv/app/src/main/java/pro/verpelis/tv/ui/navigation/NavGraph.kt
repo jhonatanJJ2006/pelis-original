@@ -8,6 +8,16 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import pro.verpelis.tv.BuildConfig
+import pro.verpelis.tv.data.playback.TitleCache
+import pro.verpelis.tv.data.playback.TitleDetail
+import pro.verpelis.tv.LocalApiClient
+import pro.verpelis.tv.data.playback.PlaybackRepository
+import pro.verpelis.tv.data.playback.TitleKind
+import pro.verpelis.tv.ui.playback.DetailScreen
+import pro.verpelis.tv.ui.playback.VodPlayerScreen
 import pro.verpelis.tv.ui.screens.HomeScreen
 import pro.verpelis.tv.ui.screens.LoginScreen
 import pro.verpelis.tv.ui.screens.PlayerScreen
@@ -21,9 +31,17 @@ object Routes {
     const val Settings = "settings"
     const val Player = "player/{channelId}?name={name}"
 
+    const val Detail = "title/{kind}/{id}"
+    const val Watch = "watch/{kind}/{id}?ep={ep}&start={start}"
+
     fun player(channelId: String, name: String): String {
         return "player/$channelId?name=${Uri.encode(name)}"
     }
+
+    fun detail(kind: TitleKind, id: String): String = "title/${kind.routeKey}/${Uri.encode(id)}"
+
+    fun watch(kind: TitleKind, id: String, episode: Int, startMs: Long): String =
+        "watch/${kind.routeKey}/${Uri.encode(id)}?ep=$episode&start=$startMs"
 }
 
 @Composable
@@ -31,7 +49,21 @@ fun PelisTvNavHost(
     navController: NavHostController,
     modifier: Modifier = Modifier,
     startDestination: String = Routes.Home,
+    debugPlayUrl: String? = null,
 ) {
+    val apiClient = LocalApiClient.current
+    val playback = remember(apiClient) { PlaybackRepository(apiClient.baseUrl, apiClient.okHttp) }
+    val toLogin: () -> Unit = {
+        navController.navigate(Routes.Login) { popUpTo(Routes.Home) }
+    }
+    // Solo builds debug: `am start ... --es pelis.debugPlayUrl <m3u8>` abre el reproductor con
+    // un HLS arbitrario (p. ej. uno multicalidad para probar el selector de calidad).
+    if (BuildConfig.DEBUG && !debugPlayUrl.isNullOrBlank()) {
+        LaunchedEffect(debugPlayUrl) {
+            TitleCache.put(TitleDetail(id = "debug-hls", kind = TitleKind.MOVIE, name = "Prueba HLS multicalidad", videoUrl = debugPlayUrl))
+            navController.navigate(Routes.watch(TitleKind.MOVIE, "debug-hls", 1, 0L))
+        }
+    }
     NavHost(
         navController = navController,
         startDestination = startDestination,
@@ -43,12 +75,49 @@ fun PelisTvNavHost(
                 onOpenSettings = { navController.navigate(Routes.Settings) },
                 onOpenLogin = { navController.navigate(Routes.Login) },
                 onPlayChannel = { id, name -> navController.navigate(Routes.player(id, name)) },
+                onOpenTitle = { kind, id -> navController.navigate(Routes.detail(kind, id)) },
+            )
+        }
+        composable(
+            route = Routes.Detail,
+            arguments = listOf(
+                navArgument("kind") { type = NavType.StringType },
+                navArgument("id") { type = NavType.StringType },
+            ),
+        ) { entry ->
+            DetailScreen(
+                kind = TitleKind.fromRoute(entry.arguments?.getString("kind")),
+                id = entry.arguments?.getString("id").orEmpty(),
+                repository = playback,
+                onPlay = { kind, id, ep, start -> navController.navigate(Routes.watch(kind, id, ep, start)) },
+                onNeedLogin = toLogin,
+                onBack = { navController.popBackStack() },
+            )
+        }
+        composable(
+            route = Routes.Watch,
+            arguments = listOf(
+                navArgument("kind") { type = NavType.StringType },
+                navArgument("id") { type = NavType.StringType },
+                navArgument("ep") { type = NavType.IntType; defaultValue = 1 },
+                navArgument("start") { type = NavType.LongType; defaultValue = 0L },
+            ),
+        ) { entry ->
+            VodPlayerScreen(
+                kind = TitleKind.fromRoute(entry.arguments?.getString("kind")),
+                id = entry.arguments?.getString("id").orEmpty(),
+                episode = entry.arguments?.getInt("ep") ?: 1,
+                startMs = entry.arguments?.getLong("start") ?: 0L,
+                repository = playback,
+                onBack = { navController.popBackStack() },
+                onNeedLogin = toLogin,
             )
         }
         composable(Routes.Search) {
             SearchScreen(
                 onBack = { navController.popBackStack() },
                 onPlayChannel = { id, name -> navController.navigate(Routes.player(id, name)) },
+                onOpenTitle = { kind, id -> navController.navigate(Routes.detail(kind, id)) },
             )
         }
         composable(Routes.Login) {

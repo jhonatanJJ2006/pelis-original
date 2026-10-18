@@ -30,15 +30,31 @@ class SessionStore(context: Context) {
             prefs.edit().putString(KEY_DEVICE, value).apply()
         }
 
-    fun hasSession(): Boolean {
-        return !sessionCookie.isNullOrBlank() || !sessionToken.isNullOrBlank()
+    /**
+     * Solo cuenta una cookie firmada ("token.firma"): Better Auth rechaza el token
+     * sin firmar, así que una sesión guardada así (versiones ≤ 1.6.0) obliga a entrar de nuevo.
+     */
+    fun hasSession(): Boolean = SessionCookies.isUsable(sessionCookie)
+
+    /** Cookie tal como la emitió el servidor en Set-Cookie (valor firmado). */
+    fun persistCookie(name: String, value: String) {
+        if (name.isNotBlank() && value.isNotBlank()) sessionCookie = "$name=$value"
     }
 
-    fun persistClaim(cookieName: String?, token: String?) {
-        if (!token.isNullOrBlank()) {
-            sessionToken = token
-            val name = cookieName?.takeIf { it.isNotBlank() } ?: DEFAULT_COOKIE_NAME
-            sessionCookie = "$name=$token"
+    /**
+     * Guarda la sesión tras el login. [cookieValue] es el valor firmado (claim del QR);
+     * si no viene, se conserva la cookie firmada que el CookieJar ya capturó para este
+     * mismo token y solo como último recurso se usa el token sin firmar.
+     */
+    fun persistClaim(cookieName: String?, token: String?, cookieValue: String? = null) {
+        if (token.isNullOrBlank() && cookieValue.isNullOrBlank()) return
+        if (!token.isNullOrBlank()) sessionToken = token
+        val name = cookieName?.takeIf { it.isNotBlank() } ?: DEFAULT_COOKIE_NAME
+        val current = sessionCookie?.substringAfter("=", "")
+        sessionCookie = when {
+            !cookieValue.isNullOrBlank() -> "$name=$cookieValue"
+            token != null && SessionCookies.isSignedFor(current, token) -> sessionCookie
+            else -> "$name=$token"
         }
     }
 
@@ -58,5 +74,23 @@ class SessionStore(context: Context) {
         /** Prod Better Auth (HTTPS). */
         const val DEFAULT_COOKIE_NAME = "__Secure-better-auth.session_token"
         const val FALLBACK_COOKIE_NAME = "better-auth.session_token"
+    }
+}
+
+/** Reglas puras de la cookie de sesión de Better Auth (valor "token.firma", URL-encoded). */
+object SessionCookies {
+    fun isSigned(value: String?): Boolean {
+        if (value.isNullOrBlank()) return false
+        val dot = value.indexOf('.').takeIf { it > 0 } ?: value.indexOf("%2E", ignoreCase = true).takeIf { it > 0 } ?: return false
+        return dot < value.length - 1
+    }
+
+    fun isSignedFor(value: String?, token: String): Boolean =
+        value != null && token.isNotBlank() &&
+            (value.startsWith("$token.") || value.startsWith("$token%2E", ignoreCase = true))
+
+    fun isUsable(cookie: String?): Boolean {
+        val value = cookie?.substringAfter("=", "") ?: return false
+        return isSigned(value)
     }
 }

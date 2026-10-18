@@ -1,0 +1,312 @@
+package pro.verpelis.tv.ui.playback
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import kotlinx.coroutines.delay
+import pro.verpelis.tv.LocalSessionStore
+import pro.verpelis.tv.LocalUiSounds
+import pro.verpelis.tv.data.api.PelisApiClient
+import pro.verpelis.tv.data.playback.ApiCallException
+import pro.verpelis.tv.data.playback.PlaybackErrors
+import pro.verpelis.tv.data.playback.PlaybackRepository
+import pro.verpelis.tv.data.playback.ResumePolicy
+import pro.verpelis.tv.data.playback.TitleCache
+import pro.verpelis.tv.data.playback.TitleDetail
+import pro.verpelis.tv.data.playback.TitleKind
+import pro.verpelis.tv.ui.login.LocalMnFocusSound
+import pro.verpelis.tv.ui.login.Mn
+import pro.verpelis.tv.ui.login.MnText
+
+/**
+ * Ficha Maison Noir de película / serie / anime (diseño Stitch
+ * "PELIS - Detalle de Película (Android TV)"): fondo a sangre, insignias,
+ * título serif, metadatos, sinopsis, Reproducir / Continuar y selector de episodios.
+ */
+@Composable
+fun DetailScreen(
+    kind: TitleKind,
+    id: String,
+    repository: PlaybackRepository,
+    onPlay: (kind: TitleKind, id: String, episode: Int, startMs: Long) -> Unit,
+    onNeedLogin: () -> Unit,
+    onBack: () -> Unit,
+) {
+    val uiSounds = LocalUiSounds.current
+    val session = LocalSessionStore.current
+    var detail by remember(kind, id) { mutableStateOf(TitleCache.get(kind, id)) }
+    var loadError by remember { mutableStateOf<String?>(null) }
+    var message by remember { mutableStateOf<String?>(null) }
+    var resumeMs by remember { mutableStateOf<Long?>(null) }
+    var episode by remember { mutableIntStateOf(1) }
+    var attempt by remember { mutableIntStateOf(0) }
+    val playFocus = remember { FocusRequester() }
+    val lifecycle = LocalLifecycleOwner.current
+
+    LaunchedEffect(kind, id, attempt) {
+        loadError = null
+        try {
+            val loaded = repository.title(kind, id)
+            TitleCache.put(loaded)
+            detail = loaded
+        } catch (e: Exception) {
+            if (detail == null) loadError = detailLoadError(e)
+        }
+    }
+    // Al volver del reproductor se relee el historial (Continuar desde…).
+    LaunchedEffect(detail?.id) {
+        val d = detail ?: return@LaunchedEffect
+        if (!d.savesProgress || !session.hasSession()) return@LaunchedEffect
+        lifecycle.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            delay(700)
+            resumeMs = repository.history(d.id)?.let { (p, dur) -> ResumePolicy.resumeFromMs(p, dur) }
+        }
+    }
+    LaunchedEffect(detail != null) { if (detail != null) runCatching { playFocus.requestFocus() } }
+
+    CompositionLocalProvider(LocalMnFocusSound provides { uiSounds.playFocus() }) {
+        Box(
+            Modifier
+                .fillMaxSize()
+                .background(Mn.Bg)
+                // Una sola pulsación de Atrás vuelve (Compose usaría la primera para soltar el foco).
+                .onPreviewKeyEvent { ev ->
+                    if (ev.nativeKeyEvent.keyCode != android.view.KeyEvent.KEYCODE_BACK) return@onPreviewKeyEvent false
+                    if (ev.type == KeyEventType.KeyUp) onBack()
+                    true
+                },
+        ) {
+            val d = detail
+            if (d == null) {
+                Column(Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {
+                    if (loadError == null) {
+                        NoirSpinner()
+                        Spacer(Modifier.height(12.dp))
+                        MnText("Cargando ficha…", color = Mn.Variant, size = 10.sp)
+                    } else {
+                        MnText(loadError ?: "", color = Mn.Error, size = 11.sp)
+                        Spacer(Modifier.height(12.dp))
+                        NoirButton("Reintentar", { attempt++ }, primary = true, focusRequester = playFocus)
+                        LaunchedEffect(Unit) { runCatching { playFocus.requestFocus() } }
+                    }
+                }
+                return@Box
+            }
+            DetailContent(
+                d = d,
+                episode = episode,
+                resumeMs = resumeMs,
+                message = message,
+                playFocus = playFocus,
+                onSelectEpisode = { ep ->
+                    uiSounds.playClick()
+                    episode = ep
+                    if (d.isEpisodeAvailable(ep)) {
+                        message = null
+                        onPlay(d.kind, d.id, ep, 0L)
+                    } else {
+                        message = "El episodio $ep aún no está disponible: Próximamente."
+                    }
+                },
+                onPlay = { fromStart ->
+                    uiSounds.playClick()
+                    when {
+                        !session.hasSession() -> onNeedLogin()
+                        !d.isEpisodeAvailable(episode) -> message =
+                            if (d.comingSoon) "Próximamente: este título todavía no tiene video."
+                            else "El episodio $episode aún no está disponible: Próximamente."
+                        else -> {
+                            message = null
+                            onPlay(d.kind, d.id, episode, if (fromStart) 0L else resumeMs ?: 0L)
+                        }
+                    }
+                },
+            )
+        }
+    }
+}
+
+@Composable
+private fun DetailContent(
+    d: TitleDetail,
+    episode: Int,
+    resumeMs: Long?,
+    message: String?,
+    playFocus: FocusRequester,
+    onSelectEpisode: (Int) -> Unit,
+    onPlay: (fromStart: Boolean) -> Unit,
+) {
+    val context = LocalContext.current
+    Box(Modifier.fillMaxSize()) {
+        AsyncImage(
+            model = ImageRequest.Builder(context).data(d.backdrop).crossfade(true).build(),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize(),
+        )
+        Box(Modifier.fillMaxSize().background(Brush.horizontalGradient(0f to Mn.Bg, 0.42f to Mn.Bg.copy(alpha = 0.88f), 1f to Mn.Bg.copy(alpha = 0.15f))))
+        Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0f to Mn.Bg.copy(alpha = 0.55f), 0.3f to Color.Transparent, 0.62f to Color.Transparent, 1f to Mn.Bg)))
+
+        Column(Modifier.fillMaxSize().padding(start = 48.dp, end = 40.dp, top = 22.dp, bottom = 20.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                MnText("PELIS", color = Mn.Gold, size = 13.sp, family = Mn.Serif, spacing = 2.sp)
+                NoirDivider(Modifier.padding(horizontal = 6.dp))
+                NoirBadge("Exclusivo Maison Noir", gold = true)
+                Spacer(Modifier.width(6.dp))
+                NoirBadge(when (d.kind) { TitleKind.MOVIE -> "Película"; TitleKind.SERIES -> "Serie"; TitleKind.ANIME -> "Anime" })
+                Spacer(Modifier.width(6.dp))
+                NoirBadge("HD · HLS")
+                if (d.classification.isNotBlank()) { Spacer(Modifier.width(6.dp)); NoirBadge(d.classification) }
+                Spacer(Modifier.weight(1f))
+                NoirKeyHint("OK", "Seleccionar")
+                Spacer(Modifier.width(14.dp))
+                NoirKeyHint("BACK", "Regresar")
+            }
+            Spacer(Modifier.weight(1f))
+            Column(Modifier.width(470.dp)) {
+                MnText(d.name, color = Mn.Text, size = 30.sp, family = Mn.Serif, lines = 2)
+                Spacer(Modifier.height(8.dp))
+                val meta = listOfNotNull(
+                    d.year.takeIf { it.isNotBlank() },
+                    d.classification.takeIf { it.isNotBlank() },
+                    d.genre.takeIf { it.isNotBlank() }?.replace(",", " •"),
+                    if (d.episodeCount > 0) "${d.episodeCount} episodios" else null,
+                )
+                MnText(meta.joinToString("  ·  "), color = Mn.Variant, size = 8.5.sp, lines = 1)
+                Spacer(Modifier.height(10.dp))
+                MnText(d.synopsis.ifBlank { "Sin sinopsis disponible." }, color = Mn.Text.copy(alpha = 0.86f), size = 10.sp, lines = 4)
+                Spacer(Modifier.height(16.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+                    val available = d.isEpisodeAvailable(episode)
+                    val label = when {
+                        d.comingSoon && d.kind != TitleKind.ANIME -> "Próximamente"
+                        !available -> "Episodio $episode · Próximamente"
+                        resumeMs != null -> "Continuar · ${ResumePolicy.formatClock(resumeMs)}"
+                        d.kind == TitleKind.MOVIE -> "Reproducir"
+                        else -> "Reproducir episodio $episode"
+                    }
+                    NoirButton(label, { onPlay(false) }, icon = NoirIcon.Play, primary = true, enabled = available, focusRequester = playFocus)
+                    if (resumeMs != null && available) {
+                        NoirButton("Desde el inicio", { onPlay(true) }, icon = NoirIcon.Restart)
+                    }
+                }
+                if (message != null) {
+                    Spacer(Modifier.height(10.dp))
+                    MnText(message, color = Mn.Error, size = 9.sp)
+                }
+                if (d.cast.isNotBlank()) {
+                    Spacer(Modifier.height(14.dp))
+                    Row(verticalAlignment = Alignment.Top) {
+                        MnText("REPARTO\nPRINCIPAL", color = Mn.Outline, size = 6.5.sp, weight = FontWeight.SemiBold, spacing = 1.2.sp)
+                        Spacer(Modifier.width(14.dp))
+                        MnText(d.cast, color = Mn.Variant, size = 8.5.sp, lines = 2)
+                    }
+                }
+            }
+            if (d.episodeCount > 0) {
+                Spacer(Modifier.height(18.dp))
+                EpisodePicker(d, episode, onSelectEpisode)
+            } else {
+                Spacer(Modifier.height(30.dp))
+            }
+        }
+    }
+}
+
+@Composable
+private fun EpisodePicker(d: TitleDetail, selected: Int, onSelect: (Int) -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        MnText(if (d.kind == TitleKind.ANIME) "Episodios" else "Temporada 1 · Episodios", color = Mn.Text, size = 12.sp, family = Mn.Serif)
+        Spacer(Modifier.width(10.dp))
+        NoirBadge(if (d.kind == TitleKind.SERIES) "Solo episodios en el servidor" else "${d.episodeCount} episodios", gold = true)
+    }
+    Spacer(Modifier.height(8.dp))
+    val state = rememberLazyListState(initialFirstVisibleItemIndex = (selected - 1).coerceAtLeast(0))
+    LazyRow(state = state, horizontalArrangement = Arrangement.spacedBy(10.dp), contentPadding = PaddingValues(vertical = 6.dp, horizontal = 2.dp)) {
+        items((1..d.episodeCount).toList(), key = { it }) { ep ->
+            EpisodeCard(ep, d.isEpisodeAvailable(ep), ep == selected) { onSelect(ep) }
+        }
+    }
+}
+
+@Composable
+private fun EpisodeCard(ep: Int, available: Boolean, selected: Boolean, onClick: () -> Unit) {
+    val sound = LocalMnFocusSound.current
+    var focused by remember { mutableStateOf(false) }
+    val shape = RoundedCornerShape(4.dp)
+    Column(
+        Modifier
+            .width(104.dp)
+            .onFocusChanged { if (it.isFocused && !focused) sound(); focused = it.isFocused }
+            .noirFocus(focused, shape, 1.06f)
+            .clip(shape)
+            .background(if (selected) Mn.Gold.copy(alpha = 0.12f) else Mn.Low.copy(alpha = 0.9f))
+            .border(if (focused) 2.dp else 1.dp, if (focused) Mn.Gold else if (selected) Mn.Gold.copy(alpha = 0.5f) else Mn.OutlineVar, shape)
+            .clickable(remember { MutableInteractionSource() }, null, onClick = onClick)
+            .padding(horizontal = 10.dp, vertical = 8.dp),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            MnText("EP. %02d".format(ep), color = if (focused || selected) Mn.Gold else Mn.Text, size = 12.sp, family = Mn.Serif)
+            Spacer(Modifier.weight(1f))
+            if (available) NoirGlyph(NoirIcon.Play, color = if (focused) Mn.Gold else Mn.Outline, size = 8.dp)
+        }
+        Spacer(Modifier.height(4.dp))
+        Box(Modifier.fillMaxWidth().height(1.dp).background(Mn.OutlineVar))
+        Spacer(Modifier.height(4.dp))
+        MnText(if (available) "Disponible" else "Próximamente", color = if (available) Mn.Variant else Mn.Outline, size = 7.5.sp, spacing = 0.6.sp)
+    }
+}
+
+private fun detailLoadError(e: Throwable): String = when {
+    e is ApiCallException && e.status == 404 -> "No encontramos este título."
+    e is ApiCallException && e.status in listOf(401, 403, 503) -> PlaybackErrors.fromStatus(e.status).message
+    e is ApiCallException -> "No se pudo cargar la ficha (${e.status})."
+    else -> PelisApiClient.friendlyNetworkError(e)
+}
