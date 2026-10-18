@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { hasInFlightHlsFragment, shouldRestartHlsLoad } from './hls-prefetch';
+import { hasInFlightHlsFragment, shouldRestartHlsLoad } from './hls-seek-watchdog';
 
 describe('shouldRestartHlsLoad', () => {
   it('does not abort a healthy segment that is still downloading', () => {
@@ -31,5 +31,13 @@ describe('shouldRestartHlsLoad', () => {
     expect(
       shouldRestartHlsLoad({ seeking: false, readyState: 0, hasInFlightFragment: false })
     ).toBe(false);
+  });
+});
+
+describe('hls-seek-watchdog module', () => {
+  it('does not export the removed prefetch helpers', async () => {
+    const mod = await import('./hls-seek-watchdog');
+    expect('attachHlsForwardPrefetch' in mod).toBe(false);
+    expect('attachNativeHlsPrefetch' in mod).toBe(false);
   });
 });
