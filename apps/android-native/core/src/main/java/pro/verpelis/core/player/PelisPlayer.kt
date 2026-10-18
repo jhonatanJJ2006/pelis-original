@@ -212,6 +212,12 @@ fun Hud(zone: GestureMath.Zone, level: Float, modifier: Modifier = Modifier) {
 @Composable
 fun SettingsPanel(player: ExoPlayer, req: PlaybackRequest, modifier: Modifier = Modifier, onClose: () -> Unit) {
     var tick by remember { mutableStateOf(0) }
+    DisposableEffect(player) {
+        // Refresca "Automática (720p)" cuando el ABR cambia de nivel.
+        val l = object : Player.Listener { override fun onTracksChanged(tracks: androidx.media3.common.Tracks) { tick++ } }
+        player.addListener(l)
+        onDispose { player.removeListener(l) }
+    }
     Column(modifier.fillMaxHeight().width(320.dp).background(Noir.Surface).padding(16.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Ajustes de reproducción", color = Noir.Text, fontFamily = Noir.Display, fontSize = 18.sp, modifier = Modifier.weight(1f))
@@ -227,22 +233,17 @@ fun SettingsPanel(player: ExoPlayer, req: PlaybackRequest, modifier: Modifier = 
                 val disabled = params.disabledTrackTypes.contains(type)
                 val hasOverride = params.overrides.values.any { it.type == type }
                 item(key = "o$type$tick") {
-                    PanelOption(if (type == C.TRACK_TYPE_VIDEO) "Automática" else "Desactivados",
+                    PanelOption(if (type == C.TRACK_TYPE_VIDEO) autoLabel(player) else "Desactivados",
                         if (type == C.TRACK_TYPE_VIDEO) !hasOverride else disabled) {
                         player.trackSelectionParameters = params.buildUpon().clearOverridesOfType(type)
                             .setTrackTypeDisabled(type, type == C.TRACK_TYPE_TEXT).build(); tick++
                     }
                 }
-                player.currentTracks.groups.filter { it.type == type }.forEachIndexed { gi, g ->
-                    for (i in 0 until g.length) {
-                        val f = g.getTrackFormat(i)
-                        val label = if (type == C.TRACK_TYPE_VIDEO) (if (f.height > 0) "${f.height}p" else "Pista ${i + 1}")
-                        else (f.label ?: f.language ?: "Pista ${i + 1}")
-                        item(key = "t$type-$gi-$i-$tick") {
-                            PanelOption(label, !disabled && g.isTrackSelected(i) && (type == C.TRACK_TYPE_TEXT || hasOverride)) {
-                                player.trackSelectionParameters = params.buildUpon().setTrackTypeDisabled(type, false)
-                                    .setOverrideForType(TrackSelectionOverride(g.mediaTrackGroup, i)).build(); tick++
-                            }
+                trackOptions(player, type).forEach { o ->
+                    item(key = "t$type-${o.key}-$tick") {
+                        PanelOption(o.label, !disabled && o.selected && (type == C.TRACK_TYPE_TEXT || hasOverride)) {
+                            player.trackSelectionParameters = params.buildUpon().setTrackTypeDisabled(type, false)
+                                .setOverrideForType(o.override).build(); tick++
                         }
                     }
                 }
@@ -278,25 +279,44 @@ fun TrackMenu(player: ExoPlayer, modifier: Modifier = Modifier) {
             val type = open ?: return@DropdownMenu
             val params = player.trackSelectionParameters
             DropdownMenuItem(
-                text = { Text(if (type == C.TRACK_TYPE_VIDEO) "Automática" else "Desactivados") },
+                text = { Text(if (type == C.TRACK_TYPE_VIDEO) autoLabel(player) else "Desactivados") },
                 onClick = {
                     player.trackSelectionParameters = params.buildUpon().clearOverridesOfType(type)
                         .setTrackTypeDisabled(type, type == C.TRACK_TYPE_TEXT).build()
                     open = null
                 },
             )
-            player.currentTracks.groups.filter { it.type == type }.forEach { g ->
-                for (i in 0 until g.length) {
-                    val f = g.getTrackFormat(i)
-                    val label = if (type == C.TRACK_TYPE_VIDEO) (if (f.height > 0) "${f.height}p" else "Pista ${i + 1}")
-                    else (f.label ?: f.language ?: "Pista ${i + 1}")
-                    DropdownMenuItem(text = { Text(label) }, onClick = {
-                        player.trackSelectionParameters = params.buildUpon().setTrackTypeDisabled(type, false)
-                            .setOverrideForType(TrackSelectionOverride(g.mediaTrackGroup, i)).build()
-                        open = null
-                    })
-                }
+            trackOptions(player, type).forEach { o ->
+                DropdownMenuItem(text = { Text(o.label) }, onClick = {
+                    player.trackSelectionParameters = params.buildUpon().setTrackTypeDisabled(type, false)
+                        .setOverrideForType(o.override).build()
+                    open = null
+                })
             }
         }
     }
 }
+
+/** Opción de pista: en video, una por altura (1080p, 720p, 480p, 360p) de mayor a menor. */
+@OptIn(UnstableApi::class)
+internal class TrackOption(val key: String, val label: String, val selected: Boolean, val override: TrackSelectionOverride)
+
+@OptIn(UnstableApi::class)
+internal fun trackOptions(player: ExoPlayer, type: Int): List<TrackOption> {
+    val all = player.currentTracks.groups.filter { it.type == type }.flatMapIndexed { gi, g ->
+        (0 until g.length).filter { g.isTrackSupported(it) || type != C.TRACK_TYPE_VIDEO }.map { i ->
+            val f = g.getTrackFormat(i)
+            val label = if (type == C.TRACK_TYPE_VIDEO) (if (f.height > 0) "${f.height}p" else "Pista ${i + 1}")
+            else (f.label ?: f.language ?: "Pista ${i + 1}")
+            Triple(f.height, TrackOption("$gi-$i", label, g.isTrackSelected(i), TrackSelectionOverride(g.mediaTrackGroup, i)), f.bitrate)
+        }
+    }
+    if (type != C.TRACK_TYPE_VIDEO) return all.map { it.second }
+    // Misma altura repetida (p. ej. dos bitrates): se queda la de mayor bitrate.
+    return all.sortedWith(compareByDescending<Triple<Int, TrackOption, Int>> { it.first }.thenByDescending { it.third })
+        .distinctBy { it.second.label }.map { it.second }
+}
+
+/** "Automática (720p)": muestra el nivel que eligió el ABR de HLS. */
+internal fun autoLabel(player: ExoPlayer): String =
+    player.videoFormat?.height?.takeIf { it > 0 }?.let { "Automática (${it}p)" } ?: "Automática"
