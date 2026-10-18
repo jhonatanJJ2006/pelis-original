@@ -80,7 +80,7 @@ fun SettingsScreen(onBack: () -> Unit, onNeedLogin: () -> Unit = {}) {
                         checking = true
                         check = null
                         scope.launch {
-                            check = ConnectionCheck.describe(ConnectionCheck.run(context, BuildConfig.API_BASE_URL))
+                            check = ConnectionCheck.describe(ConnectionCheck.run(context, BuildConfig.API_BASE_URL)).replace(" Pulsa Reintentar.", "").replace(" Pulsa «Reintentar».", "")
                             checking = false
                         }
                     })
@@ -104,7 +104,9 @@ fun SettingsScreen(onBack: () -> Unit, onNeedLogin: () -> Unit = {}) {
                             confirmOut = false
                         }, selected = confirmOut, onFocus = { if (!it) confirmOut = false })
                     } else {
-                        NoirButton("Iniciar sesión", { uiSounds.playClick(); onNeedLogin() }, primary = true)
+                        val loginFocus = remember { FocusRequester() }
+                        NoirButton("Iniciar sesión", { uiSounds.playClick(); onNeedLogin() }, primary = true, focusRequester = loginFocus)
+                        LaunchedEffect(Unit) { runCatching { loginFocus.requestFocus() } }
                     }
                 }
                 Panel("Acerca de", "Pelis TV ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})") {

@@ -93,8 +93,8 @@ fun TvShell(
     val sounds = LocalUiSounds.current
     val repo = LocalTvRepository.current
     val session = LocalSessionStore.current
-    var me by remember { mutableStateOf(MeCache.me) }
-    LaunchedEffect(session.hasSession()) { if (session.hasSession()) me = MeCache.get(repo) }
+    val me = MeCache.me
+    LaunchedEffect(session.hasSession()) { if (session.hasSession()) MeCache.get(repo) }
     val requesters = remember(sections) { sections.associateWith { FocusRequester() } }
     var railFocused by remember { mutableStateOf(false) }
     // En Inicio, ATRÁS primero lleva al menú (como en Netflix); otra vez ATRÁS sale.

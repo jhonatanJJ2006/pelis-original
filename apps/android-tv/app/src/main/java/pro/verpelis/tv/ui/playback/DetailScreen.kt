@@ -250,9 +250,12 @@ private fun DetailContent(
         Box(Modifier.fillMaxSize().background(Brush.horizontalGradient(0f to Mn.Bg, 0.42f to Mn.Bg.copy(alpha = 0.88f), 1f to Mn.Bg.copy(alpha = 0.15f))))
         Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0f to Mn.Bg.copy(alpha = 0.55f), 0.3f to Color.Transparent, 0.62f to Color.Transparent, 1f to Mn.Bg)))
 
-        androidx.compose.foundation.lazy.LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 44.dp)) {
+        val listState = androidx.compose.foundation.lazy.rememberLazyListState()
+        val scope = rememberCoroutineScope()
+        androidx.compose.foundation.lazy.LazyColumn(Modifier.fillMaxSize(), state = listState, contentPadding = PaddingValues(bottom = 44.dp)) {
           item(key = "hero") {
-          Column(Modifier.fillParentMaxHeight(if (d.episodeCount > 0 || seasons.size > 1) 0.8f else 0.9f).padding(start = 48.dp, end = 40.dp, top = 22.dp)) {
+          // Con el foco en los botones, la ficha se ve entera (sin desplazar la cabecera).
+          Column(Modifier.onFocusChanged { if (it.hasFocus) scope.launch { delay(16); listState.scrollToItem(0) } }.fillParentMaxHeight(if (d.episodeCount > 0 || seasons.size > 1) 0.8f else 0.9f).padding(start = 48.dp, end = 40.dp, top = 22.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 pro.verpelis.tv.ui.components.PelisLogo(13.sp, 2.sp)
                 NoirDivider(Modifier.padding(horizontal = 6.dp))

@@ -1,5 +1,7 @@
 package pro.verpelis.tv.data.tv
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import com.squareup.moshi.Json
 import com.squareup.moshi.Moshi
@@ -141,7 +143,8 @@ val LocalTvRepository = staticCompositionLocalOf<TvRepository> { error("TvReposi
 
 /** Sesión en memoria: se pide una vez y se comparte entre pantallas (rail, cabecera, perfil). */
 object MeCache {
-    var me: MeDto? = null
+    /** Estado observable: el menú y la cabecera se actualizan al cerrar o iniciar sesión. */
+    var me by androidx.compose.runtime.mutableStateOf<MeDto?>(null)
     var loadedAt = 0L
     fun clear() { me = null; loadedAt = 0L }
     suspend fun get(repo: TvRepository, force: Boolean = false): MeDto? {
