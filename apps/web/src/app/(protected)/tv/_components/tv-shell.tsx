@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useState } from 'react';
 import { Crown, List, Tv } from 'lucide-react';
-import { useUser } from '@pelis/auth/hooks';
+import { canStream, useUser } from '@pelis/auth/hooks';
 import { PageSpinner } from '@pelis/ui/components';
 import { ErrorState } from '@pelis/ui/features/empty-state';
 import { ChannelSidebar, type SidebarChannel } from './channel-sidebar';
@@ -41,9 +41,7 @@ export function TVShell({
 }: TVShellProps) {
   const { user } = useUser();
   // Match requireActivePlan: ADMIN bypasses the subscription gate.
-  // users.me returns "ADMIN"; the session store may also hold "admin".
-  const isAdmin = String(user?.role ?? '').toUpperCase() === 'ADMIN';
-  const hasActivePlan = isAdmin || !!(user?.planExpiresAt && user.planExpiresAt > Date.now());
+  const hasActivePlan = canStream(user);
   const [channelsOpen, setChannelsOpen] = useState(false);
   const currentChannel = currentChannelId
     ? channels.find((c) => c._id === currentChannelId)

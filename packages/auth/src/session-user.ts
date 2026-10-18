@@ -27,6 +27,20 @@ export function hasActivePlan(
   return !!(user?.planExpiresAt && user.planExpiresAt > now);
 }
 
+/**
+ * Same rule as the server's requireActivePlan: ADMIN always streams, everyone
+ * else needs a plan that has not expired. users.me returns "ADMIN"; the
+ * session store holds "admin".
+ */
+export function canStream(
+  user: { role?: string | null; planExpiresAt?: number } | null | undefined,
+  now = Date.now()
+): boolean {
+  if (!user) return false;
+  if (String(user.role ?? '').toUpperCase() === 'ADMIN') return true;
+  return hasActivePlan(user, now);
+}
+
 function roleFrom(value?: string | null): User['role'] {
   return (value ?? 'USER').toString().toUpperCase() === 'ADMIN' ? 'admin' : 'user';
 }

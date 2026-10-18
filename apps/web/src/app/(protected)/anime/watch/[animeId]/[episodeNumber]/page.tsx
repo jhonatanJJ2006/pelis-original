@@ -17,7 +17,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { api } from '@pelis/db/api';
-import { hasActivePlan, useUser } from '@pelis/auth/hooks';
+import { canStream, useUser } from '@pelis/auth/hooks';
 import { Spinner } from '@pelis/ui/components';
 import { cn } from '@pelis/ui/utils';
 import { AnimeHlsPlayer } from '@/components/anime-hls-player';
@@ -149,7 +149,8 @@ export default function AnimeWatchPage() {
   const [episodeNumbers, setEpisodeNumbers] = useState<number[]>([]);
   const [episodeTitle, setEpisodeTitle] = useState<string | null>(null);
 
-  const entitled = hasActivePlan(user);
+  // Same rule as the server (requireActivePlan): ADMIN streams without a plan.
+  const entitled = canStream(user);
   const userId = user?._id;
   const season = series?.seasons.find((s) => s._id === animeId);
 

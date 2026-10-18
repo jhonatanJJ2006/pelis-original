@@ -4,6 +4,7 @@ import { readFile, stat } from 'fs/promises';
 import path from 'path';
 import {
   getOutputRoots,
+  missingVideoStatus,
   parseByteRange,
   resolveStreamPath,
   rewriteM3u8Manifest,
@@ -38,7 +39,11 @@ async function serveStreamFile(
   const resolved = await resolveStreamPath(raw);
 
   if (!resolved) {
-    return NextResponse.json({ error: 'not found' }, { status: 404 });
+    const missing = await missingVideoStatus();
+    return NextResponse.json(
+      { error: missing.error, code: missing.code },
+      { status: missing.status, headers: { 'Cache-Control': 'no-store' } }
+    );
   }
 
   const { filePath } = resolved;

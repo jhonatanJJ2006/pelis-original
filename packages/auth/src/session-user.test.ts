@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   applyHydratedUser,
   decideSessionSync,
+  canStream,
   hasActivePlan,
   mergeStoredAndSession,
   resolveUseUser,
@@ -175,5 +176,19 @@ describe('applyHydratedUser', () => {
     });
     expect(unsubscribed.planId).toBeUndefined();
     expect(hasActivePlan(unsubscribed)).toBe(false);
+  });
+});
+
+describe('canStream', () => {
+  it('lets ADMIN through without a plan, like requireActivePlan on the server', () => {
+    expect(canStream({ role: 'ADMIN' })).toBe(true);
+    expect(canStream({ role: 'admin', planExpiresAt: Date.now() - 1000 })).toBe(true);
+  });
+
+  it('requires an unexpired plan for everyone else', () => {
+    expect(canStream({ role: 'user', planExpiresAt: Date.now() + 60_000 })).toBe(true);
+    expect(canStream({ role: 'user', planExpiresAt: Date.now() - 60_000 })).toBe(false);
+    expect(canStream({ role: 'USER' })).toBe(false);
+    expect(canStream(null)).toBe(false);
   });
 });

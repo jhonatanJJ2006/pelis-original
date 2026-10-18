@@ -36,6 +36,33 @@ function isSafeToken(token: string): boolean {
   );
 }
 
+/**
+ * True when at least one output root (external disk) is mounted. Lets the API
+ * tell "the disk is not mounted" apart from "this movie has no file".
+ */
+export async function anyOutputRootAvailable(roots = getOutputRoots()): Promise<boolean> {
+  for (const root of roots) {
+    try {
+      if ((await stat(root)).isDirectory()) return true;
+    } catch {
+      // not mounted
+    }
+  }
+  return false;
+}
+
+/** 404 video_missing vs 503 disk_unavailable, same shape for every stream route. */
+export async function missingVideoStatus(): Promise<{
+  status: 404 | 503;
+  code: 'video_missing' | 'disk_unavailable';
+  error: string;
+}> {
+  if (await anyOutputRootAvailable()) {
+    return { status: 404, code: 'video_missing', error: 'Video no disponible en el servidor' };
+  }
+  return { status: 503, code: 'disk_unavailable', error: 'Almacenamiento de video no disponible' };
+}
+
 async function fileExists(filePath: string): Promise<boolean> {
   try {
     const info = await stat(filePath);
