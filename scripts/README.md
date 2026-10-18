@@ -33,3 +33,10 @@ pnpm typecheck:scripts
 Varios scripts de TMDB (`download-*-posters.mjs`, `fetch-tmdb-details.mjs`,
 `fix-tmdb-entries.mjs`, `link-orphan-movies.mjs`, `redownload-posters.mjs`) tienen la API key de
 TMDB embebida. Pendiente: leerla de `process.env.TMDB_API_KEY` y rotar la clave.
+
+## Vídeo (máquina Movies)
+
+- `transcode-abr.sh` — HLS multicalidad (1080/720/480/360, H.264) dentro de la carpeta-token, sin
+  tocar la rendición original. Ver [`docs/TRANSCODE-ABR.md`](../docs/TRANSCODE-ABR.md).
+- `media-inventory.sh` — inventario CSV (códec, pix_fmt, resolución, audio, duración, tamaño) de
+  los discos de vídeo, solo lectura.
