@@ -100,4 +100,4 @@ el encoder H.264 de Haswell da peor calidad por bit que x264 veryfast, que es lo
 
 ## Piloto 2026-10-18
 
-Resultados en `docs/TRANSCODE-ABR-PILOT-2026-10-18.md` .
+Resultados en `docs/TRANSCODE-ABR-PILOT-2026-10-18.md`.
