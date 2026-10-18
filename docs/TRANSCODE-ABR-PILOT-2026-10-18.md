@@ -20,11 +20,11 @@ CRF 21 con tope VBV, `nice 19`/`ionice -c3`, con dos emuladores Android y Gradle
 
 ## Resultados
 
-| Película (fuente)                  | Duración  | Peldaños         | Tiempo            | Velocidad | Tamaño por peldaño                                    |
-| ---------------------------------- | --------- | ---------------- | ----------------- | --------- | ----------------------------------------------------- |
-| GOAT (HEVC 1918×802, AAC 2.0)      | 99,7 min  | 1080/720/480/360 | 56,6 min          | 1,76×     | 2967 / 1607 / 805 / 519 MB (5,9 GB; original 2,46 GB) |
-| The Wrecking Crew (H.264 1920×800) | 124,3 min | 1080/720/480/360 | en curso (~1,78×) |           |                                                       |
-| Leviticus (HEVC 1920×800)          | 88,0 min  | 1080/720/480/360 | en cola           |           |                                                       |
+| Película (fuente)                           | Duración  | Peldaños         | Tiempo   | Velocidad | Tamaño por peldaño                                    |
+| ------------------------------------------- | --------- | ---------------- | -------- | --------- | ----------------------------------------------------- |
+| GOAT (HEVC 1918×802, AAC 2.0)               | 99,7 min  | 1080/720/480/360 | 56,6 min | 1,76×     | 2967 / 1607 / 805 / 519 MB (5,9 GB; original 2,46 GB) |
+| The Wrecking Crew (H.264 1920×800, AAC 2.0) | 124,3 min | 1080/720/480/360 | 70,2 min | 1,77×     | 3255 / 1612 / 864 / 574 MB (6,3 GB; original 3,72 GB) |
+| Leviticus (HEVC 1920×800, AAC 2.0)          | 88,0 min  | 1080/720/480/360 | 44,6 min | 1,97×     | 1283 / 658 / 374 / 262 MB (2,6 GB; original 2,38 GB)  |
 
 `master.m3u8` de GOAT (bit/s medidos):
 
@@ -46,6 +46,25 @@ Verificación GOAT:
   Chromium no soporta HEVC (`isTypeSupported(hvc1…)` = false): por eso GOAT nunca reproducía.
 - Sin cambios en la DB: `videoUrl` sigue en `playlist.m3u8`, pero la web y la TV resuelven por token
   primero. La app nativa de móvil usa `videoUrl` primero → seguirá con la rendición HEVC.
+
+Verificación The Wrecking Crew y Leviticus (misma prueba que GOAT, 2026-10-18 ~19:50 UTC):
+
+- `ffprobe master.m3u8`: duración 7456,4 s y 5279,0 s (= fuente); 1865 y 1320 segmentos por peldaño,
+  iguales en los 4 peldaños.
+- Producción, cuenta QA: `/api/stream/resolve` devuelve `…/master.m3u8` para los dos tokens; primer,
+  medio y último segmento de cada peldaño: 206 (Range).
+- hls.js en Chromium headless: 4 niveles (266/356/534/800 px) y reproduce en los dos (arranca en 360p).
+
+| Película          | Peldaño | Resolución | AVERAGE-BANDWIDTH | BANDWIDTH |
+| ----------------- | ------- | ---------- | ----------------- | --------- |
+| The Wrecking Crew | 1080    | 1920×800   | 3 657 161         | 7 012 174 |
+| The Wrecking Crew | 720     | 1280×534   | 1 808 486         | 4 033 013 |
+| The Wrecking Crew | 480     | 854×356    | 966 381           | 1 802 468 |
+| The Wrecking Crew | 360     | 640×266    | 640 062           | 1 109 275 |
+| Leviticus         | 1080    | 1920×800   | 2 033 831         | 6 831 431 |
+| Leviticus         | 720     | 1280×534   | 1 040 819         | 3 879 154 |
+| Leviticus         | 480     | 854×356    | 589 594           | 1 798 746 |
+| Leviticus         | 360     | 640×266    | 410 930           | 1 107 620 |
 
 ## Peldaño 360p
 
