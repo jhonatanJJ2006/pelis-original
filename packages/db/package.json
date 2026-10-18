@@ -15,7 +15,8 @@
     "./realtime": "./src/realtime.ts",
     "./storage": "./src/storage.ts",
     "./lib/vidnest-client": "./src/lib/vidnest-client.ts",
-    "./tv-pairing-code": "./src/lib/tv-pairing-code.ts"
+    "./tv-pairing-code": "./src/lib/tv-pairing-code.ts",
+    "./tv-stream-kind": "./src/lib/tv-stream-kind.ts"
   },
   "scripts": {
     "dev": "prisma generate && echo 'db: ready'",

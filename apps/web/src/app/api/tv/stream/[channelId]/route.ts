@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@pelis/db';
 import {
+  UPSTREAM_IDLE_TIMEOUT_MS,
   contentTypeForTvUpstream,
   fetchUpstream,
   isHlsManifestResponse,
   isSafeUpstreamUrl,
+  readTextWithIdleTimeout,
   resolvePublicOrigin,
   rewriteTvManifest,
+  upstreamUrlFromSearchParams,
+  withIdleTimeout,
 } from '@/lib/tv-stream-proxy';
 import { denyUnlessStreamAccess } from '@/lib/require-stream-access';
 
@@ -31,7 +35,9 @@ export async function GET(req: NextRequest, { params }: { params: { channelId: s
     return NextResponse.json({ error: 'missing channel id' }, { status: 400 });
   }
 
-  const upstreamParam = req.nextUrl.searchParams.get('u');
+  // Decoded once by URLSearchParams. Never decodeURIComponent() it again:
+  // signed segment URLs carry %2F / %3D / %2B that must reach the CDN intact.
+  const upstreamParam = upstreamUrlFromSearchParams(req.nextUrl.searchParams);
   let upstreamUrl: string;
 
   try {
@@ -41,7 +47,7 @@ export async function GET(req: NextRequest, { params }: { params: { channelId: s
     }
 
     if (upstreamParam) {
-      upstreamUrl = decodeURIComponent(upstreamParam);
+      upstreamUrl = upstreamParam;
       if (!isSafeUpstreamUrl(upstreamUrl)) {
         return NextResponse.json({ error: 'invalid upstream url' }, { status: 400 });
       }
@@ -54,14 +60,17 @@ export async function GET(req: NextRequest, { params }: { params: { channelId: s
 
   const range = req.headers.get('range');
 
+  // Aborted when the viewer leaves or the upstream goes idle. There is no
+  // total timeout: a live channel streams for as long as someone watches.
+  const upstreamAbort = new AbortController();
+  req.signal?.addEventListener('abort', () => upstreamAbort.abort(), { once: true });
+  const abortUpstream = () => upstreamAbort.abort();
+
   let upstreamResp: Response;
   try {
-    upstreamResp = await fetchUpstream(upstreamUrl, { range });
+    upstreamResp = await fetchUpstream(upstreamUrl, { range, signal: upstreamAbort.signal });
   } catch {
-    return NextResponse.json(
-      { error: 'upstream unreachable', upstream: upstreamUrl },
-      { status: 502 }
-    );
+    return NextResponse.json({ error: 'upstream unreachable' }, { status: 502 });
   }
 
   if (!upstreamResp.ok) {
@@ -82,7 +91,6 @@ export async function GET(req: NextRequest, { params }: { params: { channelId: s
       {
         error: errorMessage,
         status: upstreamResp.status,
-        upstream: upstreamUrl,
       },
       { status }
     );
@@ -92,7 +100,12 @@ export async function GET(req: NextRequest, { params }: { params: { channelId: s
   const upstreamType = upstreamResp.headers.get('content-type');
 
   if (isHlsManifestResponse(finalUrl, upstreamType)) {
-    const text = await upstreamResp.text();
+    let text: string;
+    try {
+      text = await readTextWithIdleTimeout(upstreamResp, UPSTREAM_IDLE_TIMEOUT_MS, abortUpstream);
+    } catch {
+      return NextResponse.json({ error: 'upstream playlist interrupted' }, { status: 502 });
+    }
     const proxyOrigin = resolvePublicOrigin(req.headers);
     const rewritten = rewriteTvManifest(text, finalUrl, channelId, proxyOrigin ?? undefined);
     return new NextResponse(rewritten, {
@@ -119,7 +132,11 @@ export async function GET(req: NextRequest, { params }: { params: { channelId: s
   const acceptRanges = upstreamResp.headers.get('accept-ranges');
   if (acceptRanges) headers.set('Accept-Ranges', acceptRanges);
 
-  return new NextResponse(upstreamResp.body, {
+  const body = upstreamResp.body
+    ? withIdleTimeout(upstreamResp.body, UPSTREAM_IDLE_TIMEOUT_MS, abortUpstream)
+    : null;
+
+  return new NextResponse(body, {
     status: upstreamResp.status,
     headers,
   });

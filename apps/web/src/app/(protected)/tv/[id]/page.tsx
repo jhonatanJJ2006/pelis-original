@@ -36,6 +36,7 @@ export default function TVChannelPage() {
       channels={channels}
       currentChannelId={unavailable ? undefined : channel?._id}
       currentChannelName={channel?.name}
+      currentChannelKind={channel?.streamKind}
       playerMessage={channel === undefined ? undefined : unavailable}
       channelsLoading={isLoading}
       channelsError={error}

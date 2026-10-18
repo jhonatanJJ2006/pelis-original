@@ -22,6 +22,12 @@ import { readFileSync, existsSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import pg from 'pg';
+import {
+  detectKind,
+  isFormatVerdict,
+  nextChannelState,
+  verdictForKind,
+} from './lib/tv-probe-rules.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
@@ -47,6 +53,8 @@ if (!process.env.DATABASE_URL) {
 }
 
 const PROBE_TIMEOUT_MS = 12000;
+/** Pause before re-probing a failure inside the same run (network blips). */
+const RETRY_DELAY_MS = 3000;
 const args = process.argv.slice(2);
 const getArg = (n, fb) => {
   const a = args.find((x) => x.startsWith(`--${n}=`));
@@ -112,6 +120,39 @@ function httpError(response, text) {
   return detail;
 }
 
+async function readFirstBytes(response, max = 2048) {
+  const reader = response.body?.getReader();
+  if (!reader) return null;
+  const chunks = [];
+  let total = 0;
+  try {
+    while (total < max) {
+      const { done, value } = await reader.read();
+      if (done || !value) break;
+      chunks.push(value);
+      total += value.length;
+    }
+  } finally {
+    await reader.cancel().catch(() => {});
+  }
+  const out = new Uint8Array(Math.min(total, max));
+  let offset = 0;
+  for (const c of chunks) {
+    const take = Math.min(c.length, out.length - offset);
+    out.set(c.subarray(0, take), offset);
+    offset += take;
+    if (offset >= out.length) break;
+  }
+  return out;
+}
+
+async function probeWithRetry(streamUrl) {
+  const first = await probeUpstream(streamUrl);
+  if (first.streamStatus === 'online' || isFormatVerdict(first)) return first;
+  await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
+  return probeUpstream(streamUrl);
+}
+
 /** Downloads the first bytes of a segment: it must answer 2xx with a body. */
 async function probeSegment(url) {
   const r = await fetchWithTimeout(url, { Range: 'bytes=0-2047' });
@@ -144,8 +185,10 @@ async function probeUpstream(streamUrl, depth = 0) {
     const isManifest =
       contentType.toLowerCase().includes('mpegurl') || finalUrl.toLowerCase().includes('.m3u8');
     if (!isManifest) {
-      await response.body?.cancel().catch(() => {});
-      return { streamStatus: 'online' };
+      // Same rule as the web player: progressive mp4/webm plays natively, raw
+      // MPEG-TS (often labeled octet-stream) does not. Sniff the first bytes.
+      const firstBytes = await readFirstBytes(response);
+      return verdictForKind(detectKind(finalUrl, contentType, firstBytes));
     }
     const text = await response.text();
     if (!text.startsWith('#EXTM3U') && !text.includes('#EXT-X-')) {
@@ -198,7 +241,7 @@ async function main() {
   const limitClause = limit ? `LIMIT ${limit}` : '';
 
   const channelsRes = await pool.query(
-    `SELECT id, name, "streamUrl", "consecutiveFailures", "isPopular"
+    `SELECT id, name, "streamUrl", "streamStatus", "consecutiveFailures", "isPopular"
      FROM tv_channel
      WHERE ${whereClause}
      ORDER BY "isPopular" DESC, name ASC
@@ -217,16 +260,14 @@ async function main() {
     const slice = channels.slice(i, i + batchSize);
     const results = await Promise.all(
       slice.map(async (ch) => {
-        const result = await probeUpstream(ch.streamUrl);
+        const result = await probeWithRetry(ch.streamUrl);
         return { ch, result };
       })
     );
 
     for (const { ch, result } of results) {
-      const previousFailures = ch.consecutiveFailures ?? 0;
-      let nextFailures = previousFailures;
-      if (result.streamStatus === 'online') nextFailures = 0;
-      else if (result.streamStatus === 'offline') nextFailures = previousFailures + 1;
+      const next = nextChannelState(ch.streamStatus, ch.consecutiveFailures ?? 0, result);
+      const nextFailures = next.failures;
 
       const shouldDeactivate = deactivate && !ch.isPopular && nextFailures >= 2;
 
@@ -238,13 +279,7 @@ async function main() {
              "consecutiveFailures" = $3,
              "isActive" = CASE WHEN $4 THEN false ELSE "isActive" END
          WHERE id = $5`,
-        [
-          result.streamStatus === 'online' ? 'ONLINE' : 'OFFLINE',
-          result.lastStreamError ?? null,
-          nextFailures,
-          shouldDeactivate,
-          ch.id,
-        ]
+        [next.status, result.lastStreamError ?? null, nextFailures, shouldDeactivate, ch.id]
       );
 
       if (result.streamStatus === 'online') online++;

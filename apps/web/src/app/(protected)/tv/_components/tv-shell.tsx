@@ -22,6 +22,7 @@ interface TVShellProps {
   channels: SidebarChannel[];
   currentChannelId?: string;
   currentChannelName?: string;
+  currentChannelKind?: 'hls' | 'native' | 'mpegts';
   playerMessage?: string;
   channelsLoading?: boolean;
   channelsError?: Error | null;
@@ -32,6 +33,7 @@ export function TVShell({
   channels,
   currentChannelId,
   currentChannelName,
+  currentChannelKind,
   playerMessage,
   channelsLoading = false,
   channelsError = null,
@@ -138,7 +140,11 @@ export function TVShell({
             <p className="text-cinema-muted text-sm max-w-sm">{playerMessage}</p>
           </div>
         ) : currentChannelId ? (
-          <TVPlayer channelId={currentChannelId} channelName={currentChannelName || ''} />
+          <TVPlayer
+            channelId={currentChannelId}
+            channelName={currentChannelName || ''}
+            streamKind={currentChannelKind}
+          />
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-6 text-center">
             <Tv className="w-12 h-12 text-cinema-muted/30" aria-hidden />
