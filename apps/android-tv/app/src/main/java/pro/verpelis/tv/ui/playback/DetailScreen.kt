@@ -255,7 +255,7 @@ private fun DetailContent(
         androidx.compose.foundation.lazy.LazyColumn(Modifier.fillMaxSize(), state = listState, contentPadding = PaddingValues(bottom = 44.dp)) {
           item(key = "hero") {
           // Con el foco en los botones, la ficha se ve entera (sin desplazar la cabecera).
-          Column(Modifier.onFocusChanged { if (it.hasFocus) scope.launch { delay(16); listState.scrollToItem(0) } }.fillParentMaxHeight(if (d.episodeCount > 0 || seasons.size > 1) 0.8f else 0.9f).padding(start = 48.dp, end = 40.dp, top = 22.dp)) {
+          Column(Modifier.onFocusChanged { if (it.hasFocus) scope.launch { delay(16); listState.scrollToItem(0) } }.fillParentMaxHeight(if (d.episodeCount > 0 || seasons.size > 1) 0.72f else 0.9f).padding(start = 48.dp, end = 40.dp, top = 22.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 pro.verpelis.tv.ui.components.PelisLogo(13.sp, 2.sp)
                 NoirDivider(Modifier.padding(horizontal = 6.dp))
@@ -330,7 +330,7 @@ private fun DetailContent(
                 }
             }
         }
-        TvHintBar(listOf(TvHints.Select, TvHints.Move, TvHints.Back), Modifier.align(Alignment.BottomStart).background(Brush.verticalGradient(listOf(Color.Transparent, Mn.Bg))).padding(start = 48.dp, end = 40.dp, bottom = 14.dp, top = 10.dp))
+        TvHintBar(listOf(TvHints.Select, TvHints.Move, TvHints.Back), Modifier.align(Alignment.BottomStart).background(Mn.Bg.copy(alpha = 0.94f)).padding(start = 48.dp, end = 40.dp, bottom = 14.dp, top = 10.dp))
     }
 }
 
