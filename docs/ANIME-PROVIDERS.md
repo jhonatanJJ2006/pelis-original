@@ -37,55 +37,76 @@ Definidos en `packages/db/src/lib/anime-providers.ts`.
 Se direccionan con AniList ID + número de episodio y cargan **en el navegador del usuario**,
 así que funcionan aunque el servidor no pueda alcanzar los sitios de streaming.
 
-| ID | Nombre UI | Idioma | Prioridad | Estado |
-|----|-----------|--------|-----------|--------|
-| vidnest | VidNest | sub/dub | 1 (default) | Estable |
-| vidlink | VidLink | sub/dub | 2 | Roto: su bundle sigue llamando a `localhost:8080` |
-| videasy | Videasy | sub/dub | 3 | Dominio cambió a `.to`; sin verificar |
-| animeflv | AnimeFLV | sub/dub | 5 | Roto: ya no inyecta iframes en `/ver/…` |
+| ID       | Nombre UI | Idioma  | Prioridad   | Estado                                            |
+| -------- | --------- | ------- | ----------- | ------------------------------------------------- |
+| vidnest  | VidNest   | sub/dub | 1 (default) | Estable                                           |
+| vidlink  | VidLink   | sub/dub | 2           | Roto: su bundle sigue llamando a `localhost:8080` |
+| videasy  | Videasy   | sub/dub | 3           | Dominio cambió a `.to`; sin verificar             |
+| animeflv | AnimeFLV  | sub/dub | 5           | Roto: ya no inyecta iframes en `/ver/…`           |
 
 `animeunity` se quitó de la lista: el dominio `www.animeunity.to` ahora redirige a
 `www.animeunity.so`, que no resuelve.
 
 ### `hls` — scraping vía Consumet
 
-Devuelven un `.m3u8` que se reproduce en el player nativo con pistas de subtítulos. Mejor
-integración, pero **frágiles**: dependen de que Consumet siga funcionando y de que la IP del
-servidor no esté bloqueada. Hoy por hoy la imagen `riimuru/consumet-api` devuelve 500 para
-todos los providers; solo funcionan con un fork mantenenido.
+Devuelven un `.m3u8` que se reproduce en el player nativo (web y ExoPlayer en la TV) con
+pistas de subtítulos. Mejor integración, pero **frágiles**: dependen de que el sitio scrapeado
+siga en línea, de su dominio actual y de que la IP del servidor no esté bloqueada.
 
-| ID | Nombre UI | Idioma | Prioridad |
-|----|-----------|--------|-----------|
-| gogoanime | GogoAnime | sub | 10 |
-| zoro | HiAnime | sub/dub | 11 |
-| animepahe | AnimePahe | sub | 12 |
-| 9anime | 9anime | sub/dub | 13 |
-| animekai | AnimeKai | sub | 14 |
-| marin | Marin | sub | 15 |
-| animefox | AnimeFox | sub | 16 |
+| ID           | Nombre UI    | Slug Consumet  | Idioma  | Prioridad |
+| ------------ | ------------ | -------------- | ------- | --------- |
+| zoro         | HiAnime      | `hianime`      | sub/dub | 10        |
+| animepahe    | AnimePahe    | `animepahe`    | sub     | 11        |
+| animekai     | AnimeKai     | `animekai`     | sub     | 12        |
+| kickassanime | KickAssAnime | `kickassanime` | sub/dub | 13        |
+
+`gogoanime`, `9anime`, `marin` y `animefox` ya no existen en Consumet; `zoro` se llama
+`hianime` en la imagen actual.
+
+**Estado 2026-10-18 (Movies, `riimuru/consumet-api`, `@consumet/extensions` 1.8.7; 1.8.8 en npm
+usa los mismos dominios):** ningún proveedor útil devuelve HLS. `hianime.to` responde 521 (origen
+caído detrás de Cloudflare), `anikai.to` y `kickass-anime.ro` no resuelven, AnimePahe se mudó a
+`animepahe.su` y el scraper no entiende la página nueva, AnimeSaturn da 404. Solo AnimeUnity
+(italiano) contesta. Los repos `consumet/*` en GitHub están bloqueados por DMCA desde 2026-03,
+así que no hay fork oficial que actualizar.
 
 ---
 
 ## Variables de entorno
 
 ```env
-# Consumet self-hosted, solo necesario para los proveedores `hls`.
-# Sin esta variable, los `hls` se omiten automáticamente y la app usa los
-# `embed`. El fallback a https://api.consumet.org ya no existe (esa URL
-# apunta hoy a una página de GitHub).
-CONSUMET_API_URL=http://localhost:3001
+# Consumet self-hosted. Sin esta variable los `hls` se omiten sin gastar tiempo.
+CONSUMET_API_URL=http://127.0.0.1:3001
+
+# Opcional: probar Consumet HLS ANTES que VidNest y los iframes (reproductor nativo en la
+# TV). Sin CONSUMET_API_URL no hace nada. Dejar apagado mientras los scrapers estén caídos:
+# solo añade latencia.
+ANIME_CONSUMET_HLS=1
 ```
 
-Levantar Consumet:
+Levantar Consumet en Movies (solo escucha en `127.0.0.1`, `restart: unless-stopped`, Consumet
+limitado a 512 MB y 1 CPU, Redis a 96 MB sin persistencia):
 
 ```bash
-docker compose up -d redis consumet
-curl "http://localhost:3001/meta/anilist/info/21?provider=gogoanime"
+docker compose -p pelis-original up -d redis consumet
+curl "http://127.0.0.1:3001/meta/anilist/info/21?provider=hianime"
 ```
 
-Si eso devuelve `{"message":"Something went wrong. Please try again later."}`, el scraper está
-roto (situación habitual: el proyecto `consumet-api` ya no se mantiene). Los proveedores
-`embed` siguen funcionando de todos modos.
+Si eso devuelve `{"message":"Something went wrong..."}` o tarda 40 s, el scraper está roto o el
+sitio está caído. Los proveedores `embed` siguen funcionando de todos modos.
+
+### Fuentes que devuelve el servidor
+
+`anime.getEpisodeStream` con fuente Consumet:
+
+- Sin `Referer` exigido por el CDN: URL directa del CDN. No pasa por Movies, así que no gasta
+  la subida (150–220 KB/s).
+- Con `Referer`: `url` va por `/api/anime/stream` (mismo proxy que VidNest, sin prefetch), y
+  además `directUrl` + `headers` para que ExoPlayer las pida directo con esas cabeceras.
+
+`nativeOnly: true` (lo manda la app de TV): se omiten los iframes y la respuesta es `hls` o
+`none` en una sola búsqueda, en lugar de que la TV tenga que repetir la llamada excluyendo
+reproductores web.
 
 ---
 
@@ -112,6 +133,10 @@ Admin → `/admin/anime` → panel "Estado de proveedores".
 Vía API: `anime.checkProvidersHealth` (cache 15 min). Los `embed` se comprueban por
 alcanzabilidad del reproductor; los `hls`, por si devuelven episodios de One Piece
 (AniList ID 21).
+
+**DNS en Movies:** el router (192.168.0.1) a veces falla al resolver `api.ani.zip` por DNSSEC.
+El contenedor de Consumet usa `1.1.1.1`/`8.8.8.8` (ver `docker-compose.yml`); pelis-web usa el
+resolver del sistema.
 
 ---
 
@@ -151,15 +176,15 @@ Desde admin: botón "Importar catálogo AniList".
 
 ## Troubleshooting
 
-| Problema | Solución |
-|----------|----------|
-| Animes repetidos en el catálogo | `pnpm --filter @pelis/db group:anime` |
-| Temporadas como animes separados | Igual que arriba; el script las une por relaciones de AniList |
-| Sin episodios en una temporada | Falta `anilistId`; `getSeasonEpisodes` lo resuelve solo, o usar `anime.resolveAnilistId` |
-| Todos los proveedores `hls` fallan | Normal si Consumet está roto; se usa `embed` automáticamente |
-| Ningún proveedor reproduce | Comprobar que el DNS del servidor/cliente resuelve los dominios; algunos ISP los bloquean |
-| Redis connection refused | `docker compose up -d redis` antes de consumet |
-| Rate limit AniList (429) | `anilistQuery` reintenta respetando `Retry-After` |
+| Problema                           | Solución                                                                                  |
+| ---------------------------------- | ----------------------------------------------------------------------------------------- |
+| Animes repetidos en el catálogo    | `pnpm --filter @pelis/db group:anime`                                                     |
+| Temporadas como animes separados   | Igual que arriba; el script las une por relaciones de AniList                             |
+| Sin episodios en una temporada     | Falta `anilistId`; `getSeasonEpisodes` lo resuelve solo, o usar `anime.resolveAnilistId`  |
+| Todos los proveedores `hls` fallan | Normal si Consumet está roto; se usa `embed` automáticamente                              |
+| Ningún proveedor reproduce         | Comprobar que el DNS del servidor/cliente resuelve los dominios; algunos ISP los bloquean |
+| Redis connection refused           | `docker compose up -d redis` antes de consumet                                            |
+| Rate limit AniList (429)           | `anilistQuery` reintenta respetando `Retry-After`                                         |
 
 ---
 

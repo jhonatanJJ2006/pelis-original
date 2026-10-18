@@ -182,7 +182,7 @@ export const searchExternalAction = register({
   args: z.object({ query: z.string() }),
   handler: async (_ctx, { query }) => {
     const results: unknown[] = [];
-    const providers = ['gogoanime', 'zoro', 'animepahe'];
+    const providers = ['hianime', 'animepahe'];
     for (const provider of providers) {
       try {
         const response = await fetch(

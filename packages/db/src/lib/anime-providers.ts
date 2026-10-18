@@ -59,7 +59,10 @@ export interface AnimeStreamingProvider {
  * - `vidlink`, `videasy` y `animeflv` siguen rotos upstream ("We Couldn't
  *   Find This Episode", backend 404, "no hay vídeos"). Se mantienen como
  *   fallback iframe por si upstream se recupera.
- * - Los `hls` vía Consumet devuelven HTTP 500: el scraper está muerto.
+ * - Los `hls` vía Consumet (self-hosted) solo se usan con CONSUMET_API_URL;
+ *   con ANIME_CONSUMET_HLS=1 además se prueban antes que VidNest/iframes.
+ *   Verificado el 2026-10-18: hianime.to da 521, anikai.to y kickass-anime.ro
+ *   no resuelven y animepahe cambió de dominio, así que hoy no devuelven nada.
  *
  * El cambio entre servidores es MANUAL: la UI muestra los botones y el
  * usuario elige; el servidor nunca sustituye el proveedor pedido.
@@ -153,25 +156,19 @@ export const ANIME_STREAMING_PROVIDERS: AnimeStreamingProvider[] = [
       return resolveAnimeflvEmbedUrl(ctx, { title });
     },
   },
-  {
-    id: 'gogoanime',
-    name: 'GogoAnime',
-    kind: 'hls',
-    baseUrl: 'https://gogoanime.by',
-    language: 'sub',
-    priority: 10,
-    note: 'Consumet (suele estar caído; se usa solo como último recurso)',
-    consumetId: 'gogoanime',
-  },
+  // `hls` vía Consumet self-hosted (docker compose: consumet + redis en
+  // 127.0.0.1:3001). Los slugs son los de la imagen actual de Consumet
+  // (/anime/<slug> y /meta/anilist/*?provider=<slug>); gogoanime, 9anime,
+  // marin y animefox ya no existen ahí y `zoro` pasó a llamarse `hianime`.
   {
     id: 'zoro',
     name: 'HiAnime',
     kind: 'hls',
     baseUrl: 'https://hianime.to',
     language: 'sub/dub',
-    priority: 11,
-    note: 'Scraping via Consumet (HiAnime). Suele estar caído',
-    consumetId: 'zoro',
+    priority: 10,
+    note: 'Consumet (HiAnime). Depende de que hianime.to esté en línea',
+    consumetId: 'hianime',
   },
   {
     id: 'animepahe',
@@ -179,19 +176,9 @@ export const ANIME_STREAMING_PROVIDERS: AnimeStreamingProvider[] = [
     kind: 'hls',
     baseUrl: 'https://animepahe.si',
     language: 'sub',
-    priority: 12,
-    note: 'Scraping via Consumet. Suele estar caído',
+    priority: 11,
+    note: 'Consumet. El dominio cambia a menudo',
     consumetId: 'animepahe',
-  },
-  {
-    id: '9anime',
-    name: '9anime',
-    kind: 'hls',
-    baseUrl: 'https://9animetv.to',
-    language: 'sub/dub',
-    priority: 13,
-    note: 'Scraping via Consumet. Suele estar caído',
-    consumetId: '9anime',
   },
   {
     id: 'animekai',
@@ -199,29 +186,19 @@ export const ANIME_STREAMING_PROVIDERS: AnimeStreamingProvider[] = [
     kind: 'hls',
     baseUrl: 'https://anikai.to',
     language: 'sub',
-    priority: 14,
-    note: 'Scraping via Consumet. Suele estar caído',
+    priority: 12,
+    note: 'Consumet. El dominio cambia a menudo',
     consumetId: 'animekai',
   },
   {
-    id: 'marin',
-    name: 'Marin',
+    id: 'kickassanime',
+    name: 'KickAssAnime',
     kind: 'hls',
-    baseUrl: 'https://marin.moe',
-    language: 'sub',
-    priority: 15,
-    note: 'Scraping via Consumet. Suele estar caído',
-    consumetId: 'marin',
-  },
-  {
-    id: 'animefox',
-    name: 'AnimeFox',
-    kind: 'hls',
-    baseUrl: 'https://animefox.live',
-    language: 'sub',
-    priority: 16,
-    note: 'Scraping via Consumet. Suele estar caído',
-    consumetId: 'animefox',
+    baseUrl: 'https://kickass-anime.ru',
+    language: 'sub/dub',
+    priority: 13,
+    note: 'Consumet. El dominio cambia a menudo',
+    consumetId: 'kickassanime',
   },
 ];
 
@@ -233,6 +210,17 @@ export const HEALTH_CHECK_ANILIST_ID = '21';
 export function getConsumetApiUrl(): string | null {
   const url = process.env.CONSUMET_API_URL?.replace(/\/$/, '');
   return url ? url : null;
+}
+
+/**
+ * ANIME_CONSUMET_HLS=1: probar primero las fuentes HLS de Consumet (reproductor
+ * nativo en la TV) y dejar VidNest/iframes como fallback. Sin CONSUMET_API_URL
+ * no hace nada.
+ */
+export function preferConsumetHls(): boolean {
+  if (!getConsumetApiUrl()) return false;
+  const flag = process.env.ANIME_CONSUMET_HLS?.trim().toLowerCase();
+  return flag === '1' || flag === 'true' || flag === 'yes';
 }
 
 export function getProviderById(id: string): AnimeStreamingProvider | undefined {
