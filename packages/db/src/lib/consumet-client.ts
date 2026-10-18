@@ -32,6 +32,8 @@ export interface AnimeEpisode {
 export interface VideoSourceResult {
   sources: Array<{ url: string; quality: string; isM3U8?: boolean }>;
   subtitles: Array<{ url: string; lang: string }>;
+  /** Cabeceras que pide el CDN (normalmente `Referer`), tal como las da Consumet. */
+  headers?: Record<string, string>;
 }
 
 export interface ProviderHealthResult {
@@ -170,15 +172,22 @@ export async function fetchVideoFromProvider(
   episodeId: string,
   providerId: string
 ): Promise<VideoSourceResult> {
-  const path = `/meta/anilist/watch/${episodeId}?provider=${consumetSlug(providerId)}`;
+  const path = `/meta/anilist/watch/${encodeURIComponent(episodeId)}?provider=${consumetSlug(providerId)}`;
   try {
     const response = await consumetFetch(path, 10000);
     if (!response || !response.ok) return { sources: [], subtitles: [] };
     const data = (await response.json()) as {
       sources?: Array<{ url: string; quality?: string; isM3U8?: boolean }>;
       subtitles?: Array<{ url: string; lang?: string }>;
+      headers?: Record<string, unknown>;
     };
+    const headers = Object.fromEntries(
+      Object.entries(data.headers ?? {}).filter(
+        (entry): entry is [string, string] => typeof entry[1] === 'string' && entry[1].length > 0
+      )
+    );
     return {
+      headers: Object.keys(headers).length > 0 ? headers : undefined,
       sources: (data.sources ?? []).map((s) => ({
         url: s.url,
         quality: s.quality ?? 'default',
@@ -246,9 +255,13 @@ export async function fetchVideoByEpisodeNumber(
   anilistId: string | number,
   episodeNumber: number,
   preferredProviderId?: string,
-  title?: string
+  title?: string,
+  exclude?: ReadonlySet<string>
 ): Promise<{ provider: string | null; video: VideoSourceResult; triedProviders: string[] }> {
-  const order = getHlsProviders();
+  // Sin Consumet configurado no hay nada que probar (y no se gasta presupuesto).
+  if (!getConsumetApiUrl())
+    return { provider: null, video: { sources: [], subtitles: [] }, triedProviders: [] };
+  const order = getHlsProviders().filter((p) => !exclude?.has(p.id));
   const preferred = preferredProviderId ? getProviderById(preferredProviderId) : undefined;
   const queue =
     preferred && preferred.kind === 'hls'

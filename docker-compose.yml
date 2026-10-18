@@ -1,14 +1,21 @@
+# Consumet self-hosted (opcional, ver docs/ANIME-PROVIDERS.md).
+# Solo escucha en 127.0.0.1: pelis-web lo consulta en local y no se expone ni
+# en la LAN ni por el túnel. Memoria acotada para no quitarle RAM a ffmpeg ni a
+# los emuladores de Movies.
 services:
   redis:
     image: redis:7-alpine
     restart: unless-stopped
-    # Sin puerto en host: evita conflicto si ya tienes Redis local en 6379
+    # Sin puerto en host: evita conflicto con el Redis local en 6379.
+    command:
+      ['redis-server', '--maxmemory', '48mb', '--maxmemory-policy', 'allkeys-lru', '--save', '']
+    mem_limit: 96m
 
   consumet:
     image: riimuru/consumet-api:latest
     restart: unless-stopped
     ports:
-      - "3001:3000"
+      - '127.0.0.1:3001:3000'
     dns:
       - 1.1.1.1
       - 8.8.8.8
@@ -17,5 +24,7 @@ services:
       REDIS_PORT: 6379
       PORT: 3000
       NODE_ENV: PROD
+    mem_limit: 512m
+    cpus: 1.0
     depends_on:
       - redis
