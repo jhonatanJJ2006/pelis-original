@@ -8,6 +8,8 @@ data class EpisodeStreamResponse(
     val subtitles: List<AnimeSubtitleDto>? = null,
     val url: String? = null,
     val error: String? = null,
+    /** nativeOnly: hay reproductor web pero ninguna fuente nativa. */
+    val embedAvailable: Boolean? = null,
 )
 
 data class AnimeSourceDto(
@@ -15,6 +17,9 @@ data class AnimeSourceDto(
     val quality: String? = null,
     val isM3U8: Boolean? = null,
     val type: String? = null,
+    /** Consumet con Referer: URL del CDN para pedirla directo con [headers] (sin pasar por Movies). */
+    val directUrl: String? = null,
+    val headers: Map<String, String>? = null,
 )
 
 data class AnimeSubtitleDto(val url: String? = null, val lang: String? = null, val label: String? = null)
@@ -39,15 +44,20 @@ object AnimeSources {
 
     /** null si la fuente no se puede reproducir de forma nativa. */
     fun toPlayable(base: String, src: AnimeSourceDto): PlayableSource? {
-        val url = PlaybackUrls.absolute(base, src.url) ?: return null
+        val direct = src.directUrl?.takeIf { it.startsWith("https://") || it.startsWith("http://") }
+        val headers = src.headers.orEmpty().filter { (k, v) -> k.isNotBlank() && v.isNotBlank() }
+        // ExoPlayer sí puede mandar Referer: va directo al CDN y no gasta la subida de Movies.
+        val url = (if (direct != null && headers.isNotEmpty()) direct else null)
+            ?: PlaybackUrls.absolute(base, src.url) ?: return null
+        val sourceHeaders = if (url == direct) headers else emptyMap()
         if (isIframe(url)) return null
         val lower = url.substringBefore('?').lowercase()
         val hls = src.isM3U8 == true || src.type.equals("hls", true) || PlaybackUrls.looksHls(url)
         val mp4 = lower.endsWith(".mp4") || src.type.equals("mp4", true) ||
             url.lowercase().contains(".mp4")
         return when {
-            hls -> PlayableSource(url, isHls = true)
-            mp4 -> PlayableSource(url, isHls = false)
+            hls -> PlayableSource(url, isHls = true, headers = sourceHeaders)
+            mp4 -> PlayableSource(url, isHls = false, headers = sourceHeaders)
             else -> null
         }
     }

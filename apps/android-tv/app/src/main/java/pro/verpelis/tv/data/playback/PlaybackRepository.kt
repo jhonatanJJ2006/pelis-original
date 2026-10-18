@@ -174,7 +174,7 @@ class PlaybackRepository(baseUrl: String, apiHttp: OkHttpClient) : PlaybackBacke
         val excluded = exclude.joinToString(",", "[", "]") { quote(it) }
         val text = function(
             "anime.getEpisodeStream",
-            """{"animeId":${quote(animeId)},"episodeNumber":$episode,"excludeProviders":$excluded}""",
+            """{"animeId":${quote(animeId)},"episodeNumber":$episode,"excludeProviders":$excluded,"nativeOnly":true}""",
             slowHttp,
         )
         return moshi.adapter(EpisodeStreamResponse::class.java).fromJson(text)

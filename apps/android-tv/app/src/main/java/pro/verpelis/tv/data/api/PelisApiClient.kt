@@ -26,6 +26,11 @@ import java.util.concurrent.TimeUnit
 class PelisApiClient(private val sessionStore: SessionStore) {
     val baseUrl: String = BuildConfig.API_BASE_URL
 
+    /** Solo nuestro dominio recibe la sesión: los CDN de anime e imágenes no. */
+    private val apiHost: String? = runCatching { baseUrl.toHttpUrl().host }.getOrNull()
+
+    private fun isApiHost(url: HttpUrl): Boolean = apiHost != null && url.host.equals(apiHost, ignoreCase = true)
+
     private val cookieJar = object : CookieJar {
         private val memory = LinkedHashMap<String, List<Cookie>>()
 
@@ -38,6 +43,7 @@ class PelisApiClient(private val sessionStore: SessionStore) {
         }
 
         override fun loadForRequest(url: HttpUrl): List<Cookie> {
+            if (!isApiHost(url)) return memory[url.host].orEmpty()
             val stored = sessionStore.sessionCookie
             if (stored != null) {
                 val parts = stored.split("=", limit = 2)
@@ -58,6 +64,9 @@ class PelisApiClient(private val sessionStore: SessionStore) {
     }
 
     private val authInterceptor = Interceptor { chain ->
+        if (!isApiHost(chain.request().url)) {
+            return@Interceptor chain.proceed(chain.request().newBuilder().header("User-Agent", USER_AGENT).build())
+        }
         val builder = chain.request().newBuilder()
             .header("User-Agent", USER_AGENT)
             .header("Accept", "application/json")
@@ -78,6 +87,23 @@ class PelisApiClient(private val sessionStore: SessionStore) {
         .readTimeout(30, TimeUnit.SECONDS)
         .writeTimeout(30, TimeUnit.SECONDS)
         .build()
+
+    /**
+     * Imágenes (Coil): sin sesión ni log por petición; comparte el pool de conexiones
+     * con el API para no abrir sockets nuevos al bajar posters.
+     */
+    val imageHttp: OkHttpClient = okHttp.newBuilder().apply {
+        interceptors().clear()
+        cookieJar(CookieJar.NO_COOKIES)
+        addInterceptor(Interceptor { chain ->
+            chain.proceed(
+                chain.request().newBuilder()
+                    .header("User-Agent", USER_AGENT)
+                    .header("Accept", "image/webp,image/*;q=0.8")
+                    .build(),
+            )
+        })
+    }.build()
 
     /** No logging interceptor: the QR payload is the pairing URL and must not land in logcat. */
     private val quietHttp: OkHttpClient = OkHttpClient.Builder()

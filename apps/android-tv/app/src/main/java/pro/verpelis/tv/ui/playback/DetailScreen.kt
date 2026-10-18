@@ -50,6 +50,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import pro.verpelis.tv.data.images.TvImages
 import kotlinx.coroutines.delay
 import pro.verpelis.tv.LocalSessionStore
 import pro.verpelis.tv.LocalUiSounds
@@ -185,8 +186,16 @@ private fun DetailContent(
 ) {
     val context = LocalContext.current
     Box(Modifier.fillMaxSize()) {
+        val lowRam = (context.applicationContext as? pro.verpelis.tv.PelisTvApp)?.lowRam == true
+        val backdrop = remember(d.backdrop, lowRam) {
+            val width = if (lowRam) TvImages.BACKDROP_WIDTH_LOW_RAM else TvImages.BACKDROP_WIDTH
+            ImageRequest.Builder(context)
+                .data(TvImages.sized(pro.verpelis.tv.BuildConfig.API_BASE_URL, d.backdrop, width))
+                .size(width, width * 9 / 16)
+                .build()
+        }
         AsyncImage(
-            model = ImageRequest.Builder(context).data(d.backdrop).crossfade(true).build(),
+            model = backdrop,
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize(),
