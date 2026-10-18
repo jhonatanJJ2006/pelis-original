@@ -81,7 +81,7 @@ fun UpdateModal(
                     Text(
                         "Esta copia de Pelis TV está firmada con una clave antigua y Android no deja actualizarla " +
                             "encima (por eso aparecía «App no instalada»). Desinstálala con el botón de abajo y " +
-                            "luego instala Pelis TV$version desde verpelis.pro/descargar. Solo hace falta una vez; " +
+                            "luego instala Pelis TV$version desde verpelis.pro/descargas. Solo hace falta una vez; " +
                             "después vuelves a entrar con el QR o tu email.",
                         color = MaisonNoir.Silver,
                     )

@@ -741,22 +741,19 @@ private fun ErrorOverlay(
     onLogin: () -> Unit,
     onBack: () -> Unit,
 ) {
-    Box(Modifier.fillMaxSize().background(Mn.Lowest.copy(alpha = 0.94f))) {
-        Column(
-            Modifier.align(Alignment.Center).width(520.dp).clip(RoundedCornerShape(6.dp)).background(Mn.Low)
-                .border(1.dp, Mn.OutlineVar, RoundedCornerShape(6.dp)).padding(28.dp),
-        ) {
-            MnText("NO SE PUEDE REPRODUCIR", color = Mn.Error, size = 8.sp, weight = FontWeight.Bold, spacing = 2.sp)
-            Spacer(Modifier.height(8.dp))
-            MnText(title.ifBlank { detail?.name ?: "Video" }, color = Mn.Text, size = 18.sp, family = Mn.Serif, lines = 2)
-            Spacer(Modifier.height(10.dp))
-            MnText(error.message, color = Mn.Variant, size = 10.5.sp)
-            Spacer(Modifier.height(20.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                NoirButton("Reintentar", onRetry, icon = NoirIcon.Restart, primary = true, focusRequester = retryFocus)
-                if (error.needsLogin) NoirButton("Iniciar sesión", onLogin)
-                NoirButton("Volver", onBack, icon = NoirIcon.ArrowLeft)
-            }
-        }
-    }
+    // Mismo estado de error compartido que la portada y la ficha, con la causa real.
+    val network = error.kind == pro.verpelis.tv.data.playback.PlaybackErrorKind.NETWORK ||
+        error.kind == pro.verpelis.tv.data.playback.PlaybackErrorKind.DISK
+    pro.verpelis.tv.ui.components.TvLoadError(
+        onRetry = onRetry,
+        eyebrow = "NO SE PUEDE REPRODUCIR",
+        title = title.ifBlank { detail?.name ?: "No se puede reproducir" },
+        message = error.message,
+        showConnectionCheck = network,
+        retryFocus = retryFocus,
+        extraActions = {
+            if (error.needsLogin) NoirButton("Iniciar sesión", onLogin)
+            NoirButton("Volver", onBack, icon = NoirIcon.ArrowLeft)
+        },
+    )
 }

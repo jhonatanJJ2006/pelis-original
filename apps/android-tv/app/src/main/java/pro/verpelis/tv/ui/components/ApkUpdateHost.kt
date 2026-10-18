@@ -151,9 +151,9 @@ fun ApkUpdateHost(content: @Composable () -> Unit) {
                     val opened = runCatching { context.startActivity(installer.uninstallIntent()) }.isSuccess ||
                         runCatching { context.startActivity(installer.appDetailsIntent()) }.isSuccess
                     status = if (opened) {
-                        "Después de desinstalar, instala la nueva versión desde verpelis.pro/descargar."
+                        "Después de desinstalar, instala la nueva versión desde verpelis.pro/descargas."
                     } else {
-                        "Desinstala Pelis TV desde Ajustes › Aplicaciones y luego instala la nueva desde verpelis.pro/descargar."
+                        "Desinstala Pelis TV desde Ajustes › Aplicaciones y luego instala la nueva desde verpelis.pro/descargas."
                     }
                 },
                 onLater = {
