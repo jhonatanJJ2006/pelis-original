@@ -16,7 +16,13 @@ import { PlayerGestureHud, usePlayerSurfaceGestures } from './player-gestures';
 import { PlayerLoadingOverlay } from './player-loading';
 import { isMobilePlayerViewport, useMobileLandscapePlayer } from './player-landscape';
 import { createVodHlsConfig } from './hls-config';
-import { attachHlsForwardPrefetch, attachNativeHlsPrefetch } from './hls-prefetch';
+import { attachHlsSeekWatchdog } from './hls-seek-watchdog';
+import { QualityMenu } from './quality-menu';
+import {
+  hlsQualityOptions,
+  shouldShowQualitySelector,
+  type QualityLevelOption,
+} from './quality-levels';
 import { resumeSeekSeconds, shouldWritePlaybackProgress } from './resume';
 
 export {
@@ -37,14 +43,32 @@ export {
   usePlayerSurfaceGestures,
 } from './player-gestures';
 export { PlayerLoadingOverlay } from './player-loading';
-export { createVodHlsConfig, HLS_PREFETCH_SEGMENTS } from './hls-config';
-export { attachHlsForwardPrefetch, attachNativeHlsPrefetch } from './hls-prefetch';
+export { createVodHlsConfig, HLS_TARGET_FORWARD_BUFFER_SECONDS } from './hls-config';
+export { attachHlsSeekWatchdog } from './hls-seek-watchdog';
+export { QualityMenu } from './quality-menu';
+export {
+  hlsQualityOptions,
+  qualityButtonLabel,
+  shouldShowQualitySelector,
+  type QualityLevelOption,
+} from './quality-levels';
 export {
   useMobileLandscapePlayer,
   isMobilePlayerViewport,
   pickLandscapeFallback,
   PLAYER_LANDSCAPE_COVER_CLASS,
 } from './player-landscape';
+
+/** The real cause when the stream API refuses a playlist/segment mid-playback. */
+export function hlsFailureMessage(status?: number): string {
+  if (status === 401) return 'Tu sesión expiró. Inicia sesión de nuevo para seguir viendo.';
+  if (status === 403) return 'Necesitas un plan activo para reproducir este contenido.';
+  if (status === 404) return 'Este video no está disponible en el servidor.';
+  if (status === 503) {
+    return 'El almacenamiento de video no está disponible ahora. Vuelve a intentarlo en unos minutos.';
+  }
+  return 'Error de conexión al cargar el video. Revisa tu conexión e intenta de nuevo.';
+}
 
 const DEMO_VIDEO =
   'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
@@ -80,6 +104,13 @@ export function VideoPlayer({
   const [bufferedPercent, setBufferedPercent] = useState(0);
   const [fullscreen, setFullscreen] = useState(false);
   const [metadataTick, setMetadataTick] = useState(0);
+  /** Bumped by "Reintentar" to rebuild the hls.js pipeline. */
+  const [reloadKey, setReloadKey] = useState(0);
+  const hlsRef = useRef<Hls | null>(null);
+  const [qualityOptions, setQualityOptions] = useState<QualityLevelOption[]>([]);
+  const [selectedLevel, setSelectedLevel] = useState(-1);
+  const [playingLevel, setPlayingLevel] = useState(-1);
+  const [qualityMenuOpen, setQualityMenuOpen] = useState(false);
   const lastSaved = useRef(0);
   const resumeSettledRef = useRef(false);
   const resumeTargetRef = useRef<number | null>(null);
@@ -104,6 +135,10 @@ export function VideoPlayer({
     setMediaReady(false);
     setBuffering(false);
     setBufferedPercent(0);
+    setQualityOptions([]);
+    setSelectedLevel(-1);
+    setPlayingLevel(-1);
+    setQualityMenuOpen(false);
 
     if (!isHls) {
       video.src = src;
@@ -112,14 +147,23 @@ export function VideoPlayer({
 
     if (useHlsJs) {
       const hls = new Hls(createVodHlsConfig());
-      const stopPrefetch = attachHlsForwardPrefetch(hls, video);
+      const stopSeekWatchdog = attachHlsSeekWatchdog(hls, video);
+      hlsRef.current = hls;
+      // Single-rendition playlists give one level (selector hidden); a
+      // master.m3u8 with variants lists them all.
+      hls.on(Hls.Events.MANIFEST_PARSED, (_event, data) => {
+        setQualityOptions(hlsQualityOptions(data.levels));
+      });
+      hls.on(Hls.Events.LEVEL_SWITCHED, (_event, data) => {
+        setPlayingLevel(data.level);
+      });
       hls.loadSource(src);
       hls.attachMedia(video);
 
       let networkRetries = 0;
       let mediaRetries = 0;
-      const failLoad = () => {
-        setError('No se pudo cargar el video. Intenta de nuevo más tarde.');
+      const failLoad = (status?: number) => {
+        setError(hlsFailureMessage(status));
         setPlaying(false);
         setBuffering(false);
       };
@@ -141,7 +185,7 @@ export function VideoPlayer({
               data.details === Hls.ErrorDetails.MANIFEST_LOAD_TIMEOUT ||
               data.details === Hls.ErrorDetails.MANIFEST_PARSING_ERROR;
             if (manifestDead || networkRetries >= 1) {
-              failLoad();
+              failLoad(data.response?.code);
             } else {
               networkRetries += 1;
               hls.startLoad();
@@ -164,7 +208,8 @@ export function VideoPlayer({
       });
 
       return () => {
-        stopPrefetch();
+        stopSeekWatchdog();
+        hlsRef.current = null;
         hls.destroy();
       };
     }
@@ -172,12 +217,8 @@ export function VideoPlayer({
     if (video.canPlayType('application/vnd.apple.mpegurl')) {
       video.preload = 'auto';
       video.src = src;
-      const stopPrefetch = attachNativeHlsPrefetch(video, src);
-      return () => {
-        stopPrefetch();
-      };
     }
-  }, [src, isHls, useHlsJs]);
+  }, [src, isHls, useHlsJs, reloadKey]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -442,6 +483,13 @@ export function VideoPlayer({
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-cinema-bg/90 p-6 text-center">
           <AlertCircle className="mb-3 h-10 w-10 text-cinema-danger" aria-hidden />
           <p className="text-sm text-cinema-chalk">{error}</p>
+          <button
+            type="button"
+            onClick={() => setReloadKey((value) => value + 1)}
+            className="mt-4 rounded-full bg-cinema-accent px-5 py-2 text-sm font-medium text-cinema-bg"
+          >
+            Reintentar
+          </button>
         </div>
       )}
       <PlayerChrome
@@ -470,6 +518,24 @@ export function VideoPlayer({
         visible={showControls}
         title={title}
         onRewind={() => seek(Math.max(0, progress - 10))}
+        trailingExtras={
+          shouldShowQualitySelector(qualityOptions) ? (
+            <QualityMenu
+              options={qualityOptions}
+              selected={selectedLevel}
+              playingLevel={playingLevel}
+              open={qualityMenuOpen}
+              onOpenChange={setQualityMenuOpen}
+              onSelect={(index) => {
+                const hls = hlsRef.current;
+                // -1 hands control back to ABR (still capped to the player size).
+                if (hls) hls.currentLevel = index;
+                setSelectedLevel(index);
+                setQualityMenuOpen(false);
+              }}
+            />
+          ) : undefined
+        }
       />
       {!playing && !error && mediaReady && !buffering && (
         <button

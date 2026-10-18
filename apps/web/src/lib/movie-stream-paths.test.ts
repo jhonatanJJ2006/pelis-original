@@ -88,7 +88,7 @@ describe('findManifestForToken', () => {
     delete process.env.MOVIE_OUTPUT_ROOT;
   });
 
-  it('finds token/token/playlist.m3u8 (first candidate)', async () => {
+  it('finds token/token/playlist.m3u8 when there is no master', async () => {
     const dir = join(tmpRoot, 'token-1', 'token-1');
     mkdirSync(dir, { recursive: true });
     writeFileSync(join(dir, 'playlist.m3u8'), '#EXTM3U');
@@ -110,6 +110,23 @@ describe('findManifestForToken', () => {
     const result = await findManifestForToken('token-3');
     expect(result?.apiPath).toBe('token-3/token-3/index.m3u8');
     expect(MANIFEST_CANDIDATES).toContain('index.m3u8');
+  });
+
+  it('prefers a master.m3u8 with variants over the single-rendition playlist', async () => {
+    const dir = join(tmpRoot, 'token-4', 'token-4');
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(join(dir, 'playlist.m3u8'), '#EXTM3U');
+    writeFileSync(join(dir, 'master.m3u8'), '#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=1');
+    expect((await findManifestForToken('token-4'))?.apiPath).toBe('token-4/token-4/master.m3u8');
+    expect(MANIFEST_CANDIDATES[0]).toBe('master.m3u8');
+  });
+
+  it('prefers a master.m3u8 in the token folder over a nested playlist', async () => {
+    const nested = join(tmpRoot, 'token-5', 'token-5');
+    mkdirSync(nested, { recursive: true });
+    writeFileSync(join(nested, 'playlist.m3u8'), '#EXTM3U');
+    writeFileSync(join(tmpRoot, 'token-5', 'master.m3u8'), '#EXTM3U');
+    expect((await findManifestForToken('token-5'))?.apiPath).toBe('token-5/master.m3u8');
   });
 
   it('returns null for unsafe tokens', async () => {

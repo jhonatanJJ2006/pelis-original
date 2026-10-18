@@ -5,6 +5,7 @@
 // - `image` / `backdropImage` resueltos a una URL servible (sin URLs legacy de Convex).
 
 import { enrichMovieImage } from './resolveMovieImage';
+import { tvStreamKindFromUrl } from './tv-stream-kind';
 
 interface PrismaMovie {
   id: string;
@@ -77,6 +78,10 @@ export function toPlanShape<T extends { id: string }>(p: T) {
 /** Public catalog card: never leak upstream URLs or probe errors. */
 export function toPublicTvChannelShape<T extends PrismaTvChannel>(c: T) {
   const shaped = toTvChannelShape(c) as Record<string, unknown> & { _id: string };
+  // The URL stays private; the player only needs to know how to play it.
+  shaped.streamKind = tvStreamKindFromUrl(
+    typeof shaped.streamUrl === 'string' ? shaped.streamUrl : null
+  );
   delete shaped.streamUrl;
   delete shaped.lastStreamError;
   return shaped;

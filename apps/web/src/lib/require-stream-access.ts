@@ -13,6 +13,20 @@ const ALLOW_TTL_MS = 60_000;
 const DENY_TTL_MS = 5_000;
 const decisions = new TtlCache<{ status: number; message: string } | null>(10_000);
 
+/** Machine-readable cause so the client can explain the failure. */
+export type StreamDenyCode = 'unauthenticated' | 'no_plan';
+
+export function streamDenyCode(status: number): StreamDenyCode {
+  return status === 403 ? 'no_plan' : 'unauthenticated';
+}
+
+function denyResponse(status: number, message: string): NextResponse {
+  return NextResponse.json(
+    { error: message, code: streamDenyCode(status) },
+    { status, headers: { 'Cache-Control': 'no-store' } }
+  );
+}
+
 function sessionKey(req: Request): string | null {
   const cookie = req.headers.get('cookie') ?? '';
   const auth = req.headers.get('authorization') ?? '';
@@ -31,7 +45,7 @@ export async function denyUnlessStreamAccess(req: Request): Promise<NextResponse
   if (key) {
     const cached = decisions.get(key);
     if (cached === null) return null;
-    if (cached) return NextResponse.json({ error: cached.message }, { status: cached.status });
+    if (cached) return denyResponse(cached.status, cached.message);
   }
   try {
     const ctx = await getRequestCtx(req);
@@ -42,7 +56,7 @@ export async function denyUnlessStreamAccess(req: Request): Promise<NextResponse
     const status = err instanceof AuthError ? err.status : 401;
     const message = err instanceof AuthError ? err.message : 'No autenticado';
     if (key) decisions.set(key, { status, message }, DENY_TTL_MS);
-    return NextResponse.json({ error: message }, { status });
+    return denyResponse(status, message);
   }
 }
 

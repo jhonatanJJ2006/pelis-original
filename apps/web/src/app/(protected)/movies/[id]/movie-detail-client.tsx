@@ -5,7 +5,7 @@ import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Calendar, Crown, Heart, Play, Tag, User } from 'lucide-react';
 import { api } from '@pelis/db/api';
-import { hasActivePlan, useUser } from '@pelis/auth/hooks';
+import { canStream, useUser } from '@pelis/auth/hooks';
 import { MovieDetailSkeleton } from '@pelis/ui/features/movie-detail-skeleton';
 import { Badge, Skeleton } from '@pelis/ui/components';
 import { VideoPlayer } from '@pelis/ui/features/video-player';
@@ -54,10 +54,12 @@ export default function MovieDetailPageClient({ preloaded }: MovieDetailPageClie
     user && resolvedMovie ? { userId: user._id as any, movieId: resolvedMovie._id as any } : 'skip'
   );
 
-  const { resolvedUrl, loading: resolvingVideo } = useResolvedVideoUrl(
-    resolvedMovie?.videoUrl,
-    resolvedMovie?.token
-  );
+  const {
+    resolvedUrl,
+    loading: resolvingVideo,
+    error: videoError,
+    retry: retryVideo,
+  } = useResolvedVideoUrl(resolvedMovie?.videoUrl, resolvedMovie?.token);
 
   const handleFavorite = async () => {
     if (!user || !resolvedMovie) {
@@ -106,7 +108,8 @@ export default function MovieDetailPageClient({ preloaded }: MovieDetailPageClie
 
   const isSeries = resolvedMovie.mediaType === 'series';
   const relatedFiltered = (resolvedRelated ?? []).filter((m) => m._id !== resolvedMovie._id);
-  const entitled = hasActivePlan(user);
+  // Same rule as the server (requireActivePlan): ADMIN streams without a plan.
+  const entitled = canStream(user);
   const heroImage = resolvedMovie.backdropImage ?? resolvedMovie.image;
   const castList = (resolvedMovie.actors ?? '')
     .split(',')
@@ -265,10 +268,24 @@ export default function MovieDetailPageClient({ preloaded }: MovieDetailPageClie
               autoPlay={shouldPlay}
             />
           ) : (
-            <div className="aspect-video rounded-lg card-feature border border-cinema-border flex items-center justify-center p-8">
-              <p className="text-cinema-muted text-center">
-                No hay video disponible para esta película en el servidor.
+            <div className="aspect-video rounded-lg card-feature border border-cinema-border flex flex-col items-center justify-center gap-4 p-8">
+              <p className="text-cinema-muted text-center max-w-md">
+                {videoError?.message ?? 'Este video no está disponible en el servidor.'}
               </p>
+              {videoError?.kind === 'unauthenticated' ? (
+                <Link href="/login" className="btn-primary">
+                  Iniciar sesión
+                </Link>
+              ) : videoError?.kind === 'no_plan' ? (
+                <Link href="/subscribe" className="btn-primary-glow inline-flex items-center gap-2">
+                  <Crown className="w-4 h-4" aria-hidden />
+                  Ver planes
+                </Link>
+              ) : videoError?.retryable ? (
+                <button type="button" onClick={retryVideo} className="btn-primary">
+                  Reintentar
+                </button>
+              ) : null}
             </div>
           )}
         </ScrollReveal>

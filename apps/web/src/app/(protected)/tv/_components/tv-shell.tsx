@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useState } from 'react';
 import { Crown, List, Tv } from 'lucide-react';
-import { useUser } from '@pelis/auth/hooks';
+import { canStream, useUser } from '@pelis/auth/hooks';
 import { PageSpinner } from '@pelis/ui/components';
 import { ErrorState } from '@pelis/ui/features/empty-state';
 import { ChannelSidebar, type SidebarChannel } from './channel-sidebar';
@@ -22,6 +22,7 @@ interface TVShellProps {
   channels: SidebarChannel[];
   currentChannelId?: string;
   currentChannelName?: string;
+  currentChannelKind?: 'hls' | 'native' | 'mpegts';
   playerMessage?: string;
   channelsLoading?: boolean;
   channelsError?: Error | null;
@@ -32,6 +33,7 @@ export function TVShell({
   channels,
   currentChannelId,
   currentChannelName,
+  currentChannelKind,
   playerMessage,
   channelsLoading = false,
   channelsError = null,
@@ -39,9 +41,7 @@ export function TVShell({
 }: TVShellProps) {
   const { user } = useUser();
   // Match requireActivePlan: ADMIN bypasses the subscription gate.
-  // users.me returns "ADMIN"; the session store may also hold "admin".
-  const isAdmin = String(user?.role ?? '').toUpperCase() === 'ADMIN';
-  const hasActivePlan = isAdmin || !!(user?.planExpiresAt && user.planExpiresAt > Date.now());
+  const hasActivePlan = canStream(user);
   const [channelsOpen, setChannelsOpen] = useState(false);
   const currentChannel = currentChannelId
     ? channels.find((c) => c._id === currentChannelId)
@@ -138,7 +138,11 @@ export function TVShell({
             <p className="text-cinema-muted text-sm max-w-sm">{playerMessage}</p>
           </div>
         ) : currentChannelId ? (
-          <TVPlayer channelId={currentChannelId} channelName={currentChannelName || ''} />
+          <TVPlayer
+            channelId={currentChannelId}
+            channelName={currentChannelName || ''}
+            streamKind={currentChannelKind}
+          />
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-6 text-center">
             <Tv className="w-12 h-12 text-cinema-muted/30" aria-hidden />

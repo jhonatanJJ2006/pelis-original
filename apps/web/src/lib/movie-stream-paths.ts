@@ -1,7 +1,11 @@
 import { stat } from 'fs/promises';
 import path from 'path';
 
-export const MANIFEST_CANDIDATES = ['playlist.m3u8', 'index.m3u8', 'master.m3u8'] as const;
+/**
+ * Order matters: a multi-variant master.m3u8 placed next to the single
+ * rendition must win, otherwise the player never sees the other qualities.
+ */
+export const MANIFEST_CANDIDATES = ['master.m3u8', 'playlist.m3u8', 'index.m3u8'] as const;
 
 const DEFAULT_ROOTS = ['/run/media/det/Pelis-A/output', '/run/media/det/Pelis-B/output'];
 
@@ -30,6 +34,33 @@ function isSafeToken(token: string): boolean {
     !normalized.includes('..') &&
     !normalized.includes('/')
   );
+}
+
+/**
+ * True when at least one output root (external disk) is mounted. Lets the API
+ * tell "the disk is not mounted" apart from "this movie has no file".
+ */
+export async function anyOutputRootAvailable(roots = getOutputRoots()): Promise<boolean> {
+  for (const root of roots) {
+    try {
+      if ((await stat(root)).isDirectory()) return true;
+    } catch {
+      // not mounted
+    }
+  }
+  return false;
+}
+
+/** 404 video_missing vs 503 disk_unavailable, same shape for every stream route. */
+export async function missingVideoStatus(): Promise<{
+  status: 404 | 503;
+  code: 'video_missing' | 'disk_unavailable';
+  error: string;
+}> {
+  if (await anyOutputRootAvailable()) {
+    return { status: 404, code: 'video_missing', error: 'Video no disponible en el servidor' };
+  }
+  return { status: 503, code: 'disk_unavailable', error: 'Almacenamiento de video no disponible' };
 }
 
 async function fileExists(filePath: string): Promise<boolean> {

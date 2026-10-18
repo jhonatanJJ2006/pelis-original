@@ -16,6 +16,7 @@ export interface SidebarChannel {
   source?: string;
   isPopular?: boolean;
   streamStatus?: 'online' | 'offline' | 'unknown';
+  streamKind?: 'hls' | 'native' | 'mpegts';
 }
 
 const CHIPS = [

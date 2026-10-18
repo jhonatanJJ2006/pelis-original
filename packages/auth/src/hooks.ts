@@ -5,7 +5,7 @@ import { authClient } from './client';
 import { useAppStore } from './store';
 import { resolveUseUser } from './session-user';
 
-export { hasActivePlan } from './session-user';
+export { canStream, hasActivePlan } from './session-user';
 
 interface UseUserReturn {
   user: ReturnType<typeof resolveUseUser>;
