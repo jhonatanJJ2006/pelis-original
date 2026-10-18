@@ -20,6 +20,7 @@
     "lint": "turbo run lint --continue -- --cache --cache-location .cache/.eslintcache",
     "lint:fix": "turbo run lint --continue -- --fix --cache --cache-location .cache/.eslintcache",
     "typecheck": "turbo run typecheck",
+    "typecheck:scripts": "tsc -p scripts/tsconfig.json",
     "ui-add": "turbo run ui-add",
     "test": "vitest run",
     "test:watch": "vitest",
