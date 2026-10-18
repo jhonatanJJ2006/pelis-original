@@ -50,7 +50,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import pro.verpelis.tv.data.images.TvImages
+import pro.verpelis.tv.data.TvImages
 import kotlinx.coroutines.delay
 import pro.verpelis.tv.LocalSessionStore
 import pro.verpelis.tv.LocalUiSounds

@@ -31,7 +31,7 @@ import coil.request.ImageRequest
 import pro.verpelis.tv.BuildConfig
 import pro.verpelis.tv.LocalUiSounds
 import pro.verpelis.tv.data.api.CatalogItem
-import pro.verpelis.tv.data.images.TvImages
+import pro.verpelis.tv.data.TvImages
 import pro.verpelis.tv.ui.theme.MaisonNoir
 
 private val PosterShape = RoundedCornerShape(6.dp)
