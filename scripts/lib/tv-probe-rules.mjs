@@ -5,10 +5,19 @@
  * the web player can actually play.
  */
 
+/** @typedef {{ streamStatus: 'online' | 'offline', lastStreamError?: string }} ProbeResult */
+/** @typedef {'hls' | 'native' | 'mpegts' | 'unknown'} StreamKind */
+
 /** A channel turns OFFLINE only after this many consecutive failed runs. */
 export const OFFLINE_AFTER_FAILURES = 2;
 
-/** Mirrors detectTvStreamKind in apps/web/src/lib/tv-stream-proxy.ts. */
+/**
+ * Mirrors detectTvStreamKind in apps/web/src/lib/tv-stream-proxy.ts.
+ * @param {string} url
+ * @param {string | null | undefined} contentType
+ * @param {Uint8Array | null | undefined} bytes
+ * @returns {StreamKind}
+ */
 export function detectKind(url, contentType, bytes) {
   const ct = (contentType ?? '').toLowerCase();
   if (bytes && bytes.length > 0) {
@@ -24,7 +33,7 @@ export function detectKind(url, contentType, bytes) {
   }
   if (ct.includes('video/mp2t')) return 'mpegts';
   if (/video\/(mp4|webm|quicktime)|audio\/mp4/.test(ct)) return 'native';
-  let pathname = url.split('?')[0];
+  let pathname = url.split('?')[0] ?? url;
   try {
     pathname = new URL(url).pathname;
   } catch {
@@ -35,6 +44,10 @@ export function detectKind(url, contentType, bytes) {
   return 'unknown';
 }
 
+/**
+ * @param {StreamKind} kind
+ * @returns {ProbeResult}
+ */
 export function verdictForKind(kind) {
   if (kind === 'native' || kind === 'hls') return { streamStatus: 'online' };
   if (kind === 'mpegts') {
@@ -46,7 +59,10 @@ export function verdictForKind(kind) {
   return { streamStatus: 'offline', lastStreamError: 'Formato de stream no reconocido' };
 }
 
-/** Format verdicts are not network blips: retrying or waiting will not change them. */
+/**
+ * Format verdicts are not network blips: retrying or waiting will not change them.
+ * @param {ProbeResult} result
+ */
 export function isFormatVerdict(result) {
   return /^Formato /.test(result.lastStreamError ?? '');
 }
@@ -55,6 +71,10 @@ export function isFormatVerdict(result) {
  * Hysteresis: one bad run must not hide a channel for 6 h. A failure is
  * retried once within the run; the channel only becomes OFFLINE after
  * OFFLINE_AFTER_FAILURES consecutive failed runs (format problems at once).
+ * @param {string | null | undefined} previousStatus
+ * @param {number | null | undefined} previousFailures
+ * @param {ProbeResult} result
+ * @returns {{ status: string, failures: number }}
  */
 export function nextChannelState(previousStatus, previousFailures, result) {
   if (result.streamStatus === 'online') return { status: 'ONLINE', failures: 0 };

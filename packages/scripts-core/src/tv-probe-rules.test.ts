@@ -1,19 +1,12 @@
 import { describe, expect, it } from 'vitest';
-// @ts-expect-error plain .mjs module without types (run directly by node)
-import * as rules from '../../../scripts/lib/tv-probe-rules.mjs';
+import {
+  OFFLINE_AFTER_FAILURES,
+  detectKind,
+  nextChannelState,
+  verdictForKind,
+} from '../../../scripts/lib/tv-probe-rules.mjs';
 
-const { OFFLINE_AFTER_FAILURES, detectKind, nextChannelState, verdictForKind } = rules as {
-  OFFLINE_AFTER_FAILURES: number;
-  detectKind: (url: string, ct: string | null, bytes: Uint8Array | null) => string;
-  nextChannelState: (
-    status: string | null,
-    failures: number,
-    result: { streamStatus: string; lastStreamError?: string }
-  ) => { status: string; failures: number };
-  verdictForKind: (kind: string) => { streamStatus: string; lastStreamError?: string };
-};
-
-const offline = { streamStatus: 'offline', lastStreamError: 'HTTP 503' };
+const offline = { streamStatus: 'offline' as const, lastStreamError: 'HTTP 503' };
 
 describe('probe hysteresis', () => {
   it('keeps an ONLINE channel online after a single failed run', () => {
@@ -29,7 +22,7 @@ describe('probe hysteresis', () => {
   });
 
   it('resets on success and does not resurrect an OFFLINE channel on a failure', () => {
-    expect(nextChannelState('OFFLINE', 5, { streamStatus: 'online' })).toEqual({
+    expect(nextChannelState('OFFLINE', 5, { streamStatus: 'online' as const })).toEqual({
       status: 'ONLINE',
       failures: 0,
     });
