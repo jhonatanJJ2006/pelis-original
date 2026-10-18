@@ -1,0 +1,30 @@
+{
+  "name": "@pelis/scripts-core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./slugify": "./src/slugify.ts",
+    "./posters": "./src/posters.ts",
+    "./seed": "./src/seed.ts",
+    "./tmdb": "./src/tmdb.ts"
+  },
+  "scripts": {
+    "clean": "git clean -xdf .cache .turbo node_modules",
+    "format": "prettier --check . --ignore-path ../../.gitignore",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@pelis/prettier-config": "workspace:*",
+    "@pelis/tsconfig": "workspace:*",
+    "@types/node": "^22.19.0",
+    "prettier": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "^2.1.9"
+  },
+  "prettier": "@pelis/prettier-config"
+}
