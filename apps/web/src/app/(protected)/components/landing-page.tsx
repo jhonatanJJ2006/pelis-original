@@ -120,6 +120,12 @@ export function LandingPage() {
             >
               Explorar catálogo
             </Link>
+            <Link
+              href="/inicio"
+              className="text-sm text-cinema-accent hover:text-cinema-accent-light px-2"
+            >
+              Conoce todo lo que incluye
+            </Link>
           </div>
         </ScrollReveal>
       </section>

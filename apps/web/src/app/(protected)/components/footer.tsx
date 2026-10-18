@@ -10,6 +10,7 @@ const exploreLinks = [
   { href: '/series', label: 'Series' },
   { href: '/tv', label: 'TV' },
   { href: '/anime', label: 'Anime' },
+  { href: '/inicio', label: 'Conoce Pelis' },
 ];
 
 export function Footer({ className }: { className?: string }) {
