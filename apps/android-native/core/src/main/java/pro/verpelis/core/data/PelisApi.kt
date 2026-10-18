@@ -125,13 +125,23 @@ class PelisApi private constructor(context: Context) {
         Parse.movie(base, m).copy(progress = if (dur > 0) (h.optDouble("progress", 0.0) / dur).toFloat().coerceIn(0f, 1f) else 0f)
     }
 
-    /** URL reproducible: videoUrl directo o resuelta por token (/api/stream/resolve), igual que la web. */
-    suspend fun playableUrl(t: Title): String? {
-        t.videoUrl?.let { return it }
-        val token = t.token ?: return null
-        return runCatching {
-            JSONObject(get("/api/stream/resolve?token=" + java.net.URLEncoder.encode(token, "UTF-8"))).str("url")
-        }.getOrNull()?.let { Parse.absolute(base, it) }
+    /**
+     * URL reproducible, igual que la web y apps/android-tv: con token llama primero a
+     * /api/stream/resolve (master.m3u8 multicalidad) y usa videoUrl solo si el resolver falla.
+     */
+    suspend fun playableUrl(t: Title): String? =
+        StreamResolution.pick(base, t.videoUrl, t.token) { token -> resolveStream(token) }
+
+    private suspend fun resolveStream(token: String): ResolveReply = withContext(Dispatchers.IO) {
+        val req = Request.Builder().url(base + "/api/stream/resolve?token=" + java.net.URLEncoder.encode(token, "UTF-8")).build()
+        try {
+            http.newCall(req).execute().use { res ->
+                val text = res.body?.string().orEmpty()
+                ResolveReply(res.code, runCatching { JSONObject(text).str("url") }.getOrNull())
+            }
+        } catch (e: java.io.IOException) {
+            ResolveReply(0)
+        }
     }
     suspend fun saveProgress(movieId: String, progressSec: Long, durationSec: Long) {
         runCatching { call("history.upsert", JSONObject().put("movieId", movieId).put("progress", progressSec).put("duration", durationSec)) }

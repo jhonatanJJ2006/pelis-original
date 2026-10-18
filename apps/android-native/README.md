@@ -24,6 +24,8 @@ APKs: `phone/build/outputs/apk/debug/phone-debug.apk` y `tv/build/outputs/apk/de
 
 - Celular: se abre siempre horizontal y en pantalla completa. Arrastre vertical en la mitad izquierda ajusta el brillo (atributos de ventana) y en la mitad derecha el volumen (AudioManager), solo en pantalla completa. HUD horizontal arriba al centro. Carga con indicador dorado sobre fondo no negro.
 - TV: controles de PlayerView con D-pad.
+- Fuente: con token se llama primero a `/api/stream/resolve?token=<token>` (igual que la web y `apps/android-tv`), que devuelve el `master.m3u8` multicalidad cuando existe; `videoUrl` solo es respaldo si el resolver falla o no responde (401/403 no hacen respaldo). URLs externas se reproducen directo. Lógica en `core/.../data/StreamResolution.kt` con tests.
+- HLS adaptativo con el buffer por defecto de ExoPlayer (sin precarga extra). Calidad: "Automática (nivel actual)" o una altura fija (1080p/720p/480p/360p) por selección de pistas.
 
 ## Pendiente
 
