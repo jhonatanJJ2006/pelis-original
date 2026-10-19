@@ -238,18 +238,21 @@ fun SearchScreen(
                         query.trim().length < 2 -> SearchHint("Escribe al menos 2 letras con el teclado de la izquierda.")
                         searching && !showTitles && !showAnime && !showChannels -> NoirSpinner(Modifier.align(Alignment.Center))
                         !showTitles && !showAnime && !showChannels -> SearchHint("No encontramos resultados para “${query.trim()}”.")
-                        else -> LazyColumn(contentPadding = PaddingValues(top = 4.dp, bottom = 16.dp), modifier = Modifier.fillMaxSize().focusRequester(resultsFocus)) {
+                        else -> LazyColumn(contentPadding = PaddingValues(top = 4.dp, bottom = 16.dp), modifier = Modifier.fillMaxSize()) {
                             if (showTitles) item(key = "titles") {
-                                Box(rowMod("titles")) { CatalogRow(title = "Películas y series", items = titles, onOpen = { onOpenTitle(if (it.mediaType == "series") TitleKind.SERIES else TitleKind.MOVIE, it.id) }) }
+                                Box(rowMod("titles")) { CatalogRow(title = "Películas y series", items = titles, onOpen = { onOpenTitle(if (it.mediaType == "series") TitleKind.SERIES else TitleKind.MOVIE, it.id) }, firstItemFocus = if (firstRow == "titles") resultsFocus else null) }
                             }
                             if (showAnime) item(key = "anime") {
-                                Box(rowMod("anime")) { CatalogRow(title = "Anime", items = anime, onOpen = { onOpenTitle(TitleKind.ANIME, it.id) }) }
+                                Box(rowMod("anime")) { CatalogRow(title = "Anime", items = anime, onOpen = { onOpenTitle(TitleKind.ANIME, it.id) }, firstItemFocus = if (firstRow == "anime") resultsFocus else null) }
                             }
                             if (showChannels) item(key = "channels") {
                                 Column(rowMod("channels").padding(vertical = 8.dp)) {
                                     MnText("Canales", color = Mn.Text, size = 15.sp, family = Mn.Serif, modifier = Modifier.padding(start = 8.dp, bottom = 8.dp))
                                     LazyRow(horizontalArrangement = Arrangement.spacedBy(14.dp), contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp)) {
-                                        items(channels, key = { it.id }) { ch -> ChannelCard(channel = ch, onClick = { onPlayChannel(ch.id, ch.name) }) }
+                                        items(channels, key = { it.id }) { ch ->
+                                            val m = if (firstRow == "channels" && ch.id == channels.first().id) Modifier.focusRequester(resultsFocus) else Modifier
+                                            ChannelCard(channel = ch, onClick = { onPlayChannel(ch.id, ch.name) }, modifier = m)
+                                        }
                                     }
                                 }
                             }
