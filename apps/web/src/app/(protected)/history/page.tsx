@@ -2,7 +2,11 @@
 
 import { useQueryResult, useMutation } from '@pelis/db/client';
 import Link from 'next/link';
+import { useState } from 'react';
 import { History, Play, Trash2, X } from 'lucide-react';
+import { Paginator } from '@pelis/ui/features/paginator';
+
+const HISTORY_PAGE_SIZE = 24;
 import { api } from '@pelis/db/api';
 import { useUser } from '@pelis/auth/hooks';
 import { ContinueWatchingRowSkeleton } from '@pelis/ui/features/continue-watching-row';
@@ -33,22 +37,29 @@ export default function HistoryPage() {
   const removeHistory = useMutation(api.history.remove);
   const clearAll = useMutation(api.history.clearAll);
 
+  const [page, setPage] = useState(1);
   const {
-    data: history,
+    data: historyPage,
     error: historyError,
     isLoading: historyLoading,
     refetch,
-  } = useQueryResult<HistoryItem[]>(
-    api.history.listByUser,
-    user ? { userId: user._id as any } : 'skip'
+  } = useQueryResult<{ items: HistoryItem[]; total: number }>(
+    api.history.listByUserPage,
+    user
+      ? {
+          userId: user._id as any,
+          limit: HISTORY_PAGE_SIZE,
+          offset: (page - 1) * HISTORY_PAGE_SIZE,
+        }
+      : 'skip'
   );
-
-  const continueItems = (history ?? []).filter(
-    (h) => h.duration > 0 && h.progress > 0 && h.progress < h.duration * 0.95
+  const { data: continueData } = useQueryResult<HistoryItem[]>(
+    api.history.getContinueWatching,
+    user ? { userId: user._id as any, limit: 12 } : 'skip'
   );
-  const completedItems = (history ?? []).filter(
-    (h) => h.duration > 0 && h.progress >= h.duration * 0.95
-  );
+  const history = historyPage?.items;
+  const total = historyPage?.total ?? 0;
+  const continueItems = page === 1 ? (continueData ?? []) : [];
 
   const handleRemove = async (movieId: string) => {
     if (!user) return;
@@ -84,12 +95,7 @@ export default function HistoryPage() {
 
   const isLoading = historyLoading;
 
-  const recentItems =
-    continueItems.length > 0
-      ? completedItems.concat(
-          (history ?? []).filter((h) => !continueItems.includes(h) && !completedItems.includes(h))
-        )
-      : (history ?? []);
+  const recentItems = history ?? [];
 
   return (
     <div className="page-shell">
@@ -113,12 +119,10 @@ export default function HistoryPage() {
           </h1>
           <p className="text-cinema-muted mt-3">
             Retoma tus películas y series exactamente donde las dejaste.{' '}
-            <span className="text-cinema-silver">
-              {history?.length ?? 0} títulos en tu historial.
-            </span>
+            <span className="text-cinema-silver">{total} títulos en tu historial.</span>
           </p>
         </div>
-        {(history?.length ?? 0) > 0 && (
+        {total > 0 && (
           <button
             type="button"
             onClick={handleClearAll}
@@ -130,7 +134,7 @@ export default function HistoryPage() {
         )}
       </ScrollReveal>
 
-      {isLoading ? (
+      {isLoading && !historyPage ? (
         <div className="space-y-12">
           <ContinueWatchingRowSkeleton />
           <ContinueWatchingRowSkeleton count={6} />
@@ -141,7 +145,7 @@ export default function HistoryPage() {
           description="Revisa tu conexión e inténtalo de nuevo."
           onRetry={refetch}
         />
-      ) : (history?.length ?? 0) === 0 ? (
+      ) : total === 0 ? (
         <EmptyState
           icon={History}
           title="Sin historial todavía"
@@ -160,7 +164,7 @@ export default function HistoryPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                 {continueItems.map((item) => (
                   <HistoryCard
-                    key={item._id}
+                    key={item.movieId}
                     item={item}
                     onRemove={() => handleRemove(item.movieId)}
                     resume
@@ -173,17 +177,23 @@ export default function HistoryPage() {
           <section>
             <h2 className="flex items-center gap-3 font-display text-2xl tracking-tight text-cinema-chalk mb-5">
               <span aria-hidden className="h-6 w-[3px] bg-cinema-accent" />
-              {continueItems.length > 0 ? 'Visto recientemente' : 'Todo tu historial'}
+              Todo tu historial
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
               {recentItems.map((item) => (
                 <HistoryCard
-                  key={item._id}
+                  key={item.movieId}
                   item={item}
                   onRemove={() => handleRemove(item.movieId)}
                 />
               ))}
             </div>
+            <Paginator
+              page={page}
+              total={total}
+              pageSize={HISTORY_PAGE_SIZE}
+              onPageChange={setPage}
+            />
           </section>
         </div>
       )}
@@ -210,8 +220,8 @@ function HistoryCard({
       <Link href={href} className="relative aspect-video block overflow-hidden">
         {item.movie ? (
           <MoviePoster
-            src={item.movie.image}
-            alt=""
+            src={(item.movie as { backdropImage?: string }).backdropImage ?? item.movie.image}
+            alt={item.movie.name}
             className="w-full h-full object-cover motion-safe:transition-transform motion-safe:duration-normal [@media(hover:hover)_and_(pointer:fine)]:group-hover:scale-105"
           />
         ) : (

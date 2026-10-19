@@ -97,10 +97,11 @@ export const clearAll = register({
  * `mediaType` en mayúsculas para las APK de TV ≤ 2.0.1, que leían la fila cruda.
  */
 function shapeHistoryMovie<M extends { id: string; mediaType: string }>(movie: M) {
-  return { ...toMovieShape(movie as never), id: movie.id, mediaType: movie.mediaType } as Record<
-    string,
-    unknown
-  >;
+  return {
+    ...(toMovieShape(movie as never) as object),
+    id: movie.id,
+    mediaType: movie.mediaType,
+  } as Record<string, unknown>;
 }
 
 const continueWhere = (userId: string) => ({ userId, duration: { gt: 0 }, progress: { gt: 0 } });

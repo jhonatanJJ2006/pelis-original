@@ -274,3 +274,101 @@ export const getClassifications = register({
 });
 
 void AuthError;
+
+// ---------------------------------------------------------------------------
+// Paginación en servidor (web, app de celular y TV). Las funciones viejas
+// (`movies.list`, `movies.listSeries`, `movies.search`) siguen igual para las
+// APK ya instaladas.
+// ---------------------------------------------------------------------------
+
+export interface PageResult<T> {
+  items: T[];
+  total: number;
+  offset: number;
+  limit: number;
+  hasMore: boolean;
+}
+
+export function pageOf<T>(all: T[], offset: number, limit: number): PageResult<T> {
+  const total = all.length;
+  return {
+    items: all.slice(offset, offset + limit),
+    total,
+    offset,
+    limit,
+    hasMore: offset + limit < total,
+  };
+}
+
+const SortEnum = z.enum(['name', 'recent', 'popular']);
+
+export const pageArgs = z
+  .object({
+    genre: z.string().optional(),
+    year: z.string().optional(),
+    classification: z.string().optional(),
+    search: z.string().optional(),
+    mediaType: MediaTypeEnum.optional(),
+    sort: SortEnum.optional(),
+    limit: z.number().int().positive().max(100).optional(),
+    offset: z.number().int().min(0).optional(),
+  })
+  .optional();
+
+/** Vistas por película (filas de historial) para ordenar por «populares». */
+async function viewCounts(): Promise<Map<string, number>> {
+  const rows = await prisma.history.groupBy({ by: ['movieId'], _count: { movieId: true } });
+  return new Map(rows.map((r) => [r.movieId, r._count.movieId]));
+}
+
+export const page = register({
+  kind: 'query',
+  name: 'movies.page',
+  reads: ['movie', 'history'],
+  args: pageArgs,
+  handler: async (_ctx, args) => {
+    const a = args ?? {};
+    const limit = a.limit ?? 24;
+    const offset = a.offset ?? 0;
+    const where: Record<string, unknown> = {};
+    if (a.mediaType) where.mediaType = a.mediaType === 'movie' ? 'MOVIE' : 'SERIES';
+    if (a.year) where.releaseYear = a.year;
+    if (a.classification) where.classification = a.classification;
+    const genre = a.genre?.trim();
+    const search = a.search?.trim().toLowerCase();
+    const and: Record<string, unknown>[] = [];
+    if (genre) and.push(genreTokenWhere(genre));
+    if (search) {
+      and.push({
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { actors: { contains: search, mode: 'insensitive' } },
+          { genre: { contains: search, mode: 'insensitive' } },
+        ],
+      });
+    }
+    if (and.length) where.AND = and;
+
+    // Búsqueda vacía → populares; con texto o filtros → por nombre.
+    const sort = a.sort ?? 'name';
+    const orderBy =
+      sort === 'name'
+        ? { name: 'asc' as const }
+        : [{ releaseYear: 'desc' as const }, { createdAt: 'desc' as const }];
+    const rows = await prisma.movie.findMany({ where, orderBy });
+    let list = await filterPlayableCatalog(rows);
+    if (genre) list = list.filter((m) => movieMatchesGenre(m.genre, genre));
+    if (sort === 'popular') {
+      const counts = await viewCounts();
+      list = list
+        .map((m, i) => ({ m, i, n: counts.get(m.id) ?? 0 }))
+        .sort((x, y) => y.n - x.n || x.i - y.i)
+        .map((x) => x.m);
+    }
+    // Las series sin vídeo («Próximamente») van al final para no llenar la primera página.
+    if (sort !== 'name')
+      list = [...list.filter((m) => !m.comingSoon), ...list.filter((m) => m.comingSoon)];
+    const result = pageOf(list, offset, limit);
+    return { ...result, items: result.items.map(toMovieShape) };
+  },
+});

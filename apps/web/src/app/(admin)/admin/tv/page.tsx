@@ -1,6 +1,7 @@
 'use client';
 
 import { useAction, useMutation, useQuery } from '@pelis/db/client';
+import { AdminPaginator } from '../components/admin-paginator';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import {
@@ -147,15 +148,7 @@ export default function AdminTVPage() {
   }, [search, statusFilter, mode]);
 
   useEffect(() => {
-    if (!channels) return;
-    if (channels.offset === 0) {
-      setAcc(channels.items);
-      return;
-    }
-    setAcc((prev) => {
-      const seen = new Set(prev.map((c) => c._id));
-      return [...prev, ...channels.items.filter((c) => !seen.has(c._id))];
-    });
+    if (channels) setAcc(channels.items);
   }, [channels]);
 
   const [deletingChannelId, setDeletingChannelId] = useState<string | null>(null);
@@ -629,20 +622,13 @@ export default function AdminTVPage() {
                 </table>
               </div>
 
-              {channels.hasMore && (
-                <div className="mt-6 flex flex-col items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setOffset((n) => n + 48)}
-                    className="px-4 py-2 rounded-[10px] border border-cinema-border text-sm text-cinema-chalk hover:border-cinema-accent/40"
-                  >
-                    Cargar más
-                  </button>
-                  <p className="text-xs text-cinema-ash">
-                    Mostrando {channelItems.length} de {channels.total}
-                  </p>
-                </div>
-              )}
+              <AdminPaginator
+                page={Math.floor(offset / 48) + 1}
+                total={channels.total}
+                pageSize={48}
+                onPageChange={(p) => setOffset((p - 1) * 48)}
+                noun="canales"
+              />
             </>
           )}
         </>
