@@ -5,9 +5,11 @@ Eres un modelo que acaba de aterrizar. No improvises. Este archivo manda. Si CON
 ## Leer primero
 
 **Lee `docs/ESTADO-Y-DECISIONES.md` antes de tocar nada.** Es el handoff canónico: reglas, decisiones,
-formatos, estilo, estado y pendientes. Registro del último día de trabajo: `docs/HANDOFF-2026-10-18.md`.
+formatos, estilo, estado y pendientes. Registro del último día de trabajo: `docs/HANDOFF-2026-10-19.md`.
 
 Reglas no negociables (detalle en ese documento):
+
+- **Emuladores: siempre `scripts/emu-run.sh` (RAM limitada, scope propio, se apaga solo) y siempre `scripts/emu-stop.sh` al terminar.** Un emulador olvidado tumbó producción el 18-oct (OOM).
 
 - Solo git y gh locales en la máquina Movies, como `jhonatanJJ2006`. Sin agentes en la nube de Cursor, sin force-push, sin tocar otros repos. No edites el checkout de producción: usa un worktree desde `origin/staging`.
 - Ramas `feat/`, `fix/` o `chore/` (un prefijo `docs/` falla el Soft branch gate). PR a `staging`, squash-merge solo con format, test, build y Soft branch gate en verde (Vercel se ignora). Promoción `staging → main` con merge commit y luego `./scripts/deploy-prod.sh` en Movies si hay cambios de la web.
