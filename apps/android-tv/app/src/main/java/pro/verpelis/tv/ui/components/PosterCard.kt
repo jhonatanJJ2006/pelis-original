@@ -18,6 +18,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -52,6 +54,8 @@ fun PosterCard(
     modifier: Modifier = Modifier,
     /** Fracción vista (0–1) para "Continuar viendo"; null = sin barra. */
     progress: Float? = null,
+    /** Va en la superficie enfocable (no en la columna): así el foco se dibuja al volver con requestFocus. */
+    focusRequester: FocusRequester? = null,
 ) {
     val uiSounds = LocalUiSounds.current
     var focused by remember { mutableStateOf(false) }
@@ -71,6 +75,7 @@ fun PosterCard(
             },
             modifier = Modifier
                 .size(width = 120.dp, height = 180.dp)
+                .let { if (focusRequester != null) it.focusRequester(focusRequester) else it }
                 .onFocusChanged { state ->
                     if (state.isFocused && !focused) uiSounds.playFocus()
                     focused = state.isFocused

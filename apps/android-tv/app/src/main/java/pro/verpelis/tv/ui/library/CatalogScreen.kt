@@ -139,22 +139,19 @@ fun CatalogScreen(kind: CatalogKind, onOpenTitle: (TitleKind, String) -> Unit) {
         Spacer(Modifier.height(4.dp))
         // Los géneros van como cabecera de la misma cuadrícula: así ▲/▼ entre chips y pósters
         // funciona con la búsqueda de foco normal (dos listas perezosas hermanas no se cruzan).
+        val chipFilter = rememberChipFocusFilter()
         val chips: @Composable () -> Unit = {
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(horizontal = 2.dp, vertical = 4.dp),
             ) {
                 item(key = "all") {
-                    NoirButton("Todos", {
-                        sounds.playClick()
-                        if (state.genre != null) { state.reset(null); scope.launch { gridState.scrollToItem(0); state.loadMore(repo, kind) } }
-                    }, selected = state.genre == null)
+                    val pick = { if (state.genre != null) { state.reset(null); scope.launch { gridState.scrollToItem(0); state.loadMore(repo, kind) } } }
+                    NoirButton("Todos", { chipFilter.cancel(); sounds.playClick(); pick() }, selected = state.genre == null, onFocus = { chipFilter.onFocus(it) { pick() } })
                 }
                 items(state.genres, key = { it }) { g ->
-                    NoirButton(g, {
-                        sounds.playClick()
-                        if (state.genre != g) { state.reset(g); scope.launch { gridState.scrollToItem(0); state.loadMore(repo, kind) } }
-                    }, selected = state.genre == g)
+                    val pick = { if (state.genre != g) { state.reset(g); scope.launch { gridState.scrollToItem(0); state.loadMore(repo, kind) } } }
+                    NoirButton(g, { chipFilter.cancel(); sounds.playClick(); pick() }, selected = state.genre == g, onFocus = { chipFilter.onFocus(it) { pick() } })
                 }
             }
         }
