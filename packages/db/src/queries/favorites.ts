@@ -65,3 +65,47 @@ export const remove = register({
     return true;
   },
 });
+
+/** Mi lista paginada en servidor: { items, total, offset, limit, hasMore }. */
+export const listByUserPage = register({
+  kind: 'query',
+  name: 'favorites.listByUserPage',
+  reads: ['favorite', 'movie'],
+  args: z
+    .object({
+      userId: z.string().optional(),
+      mediaType: z.enum(['movie', 'series']).optional(),
+      limit: z.number().int().positive().max(100).optional(),
+      offset: z.number().int().min(0).optional(),
+    })
+    .optional(),
+  handler: async (ctx, args) => {
+    const userId = requireUser(ctx);
+    const limit = args?.limit ?? 24;
+    const offset = args?.offset ?? 0;
+    const base = { userId };
+    const where = args?.mediaType
+      ? { userId, movie: { mediaType: args.mediaType === 'series' ? 'SERIES' : 'MOVIE' } }
+      : base;
+    const [total, seriesCount, all, rows] = await Promise.all([
+      prisma.favorite.count({ where: where as never }),
+      prisma.favorite.count({ where: { userId, movie: { mediaType: 'SERIES' } } }),
+      prisma.favorite.count({ where: base }),
+      prisma.favorite.findMany({
+        where: where as never,
+        include: { movie: true },
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        skip: offset,
+      }),
+    ]);
+    return {
+      items: rows.map((f) => (f.movie ? toMovieShape(f.movie) : null)).filter(Boolean),
+      total,
+      counts: { all, series: seriesCount, movies: all - seriesCount },
+      offset,
+      limit,
+      hasMore: offset + limit < total,
+    };
+  },
+});

@@ -254,3 +254,39 @@ export const getProviders = register({
   reads: [],
   handler: async () => PROVIDERS.map(toProviderListItem),
 });
+
+/** Catálogo de anime (una tarjeta por franquicia) paginado en servidor con total. */
+export const listSeriesPage = register({
+  kind: 'query',
+  name: 'anime.listSeriesPage',
+  reads: ['anime'],
+  args: z
+    .object({
+      genre: z.string().optional(),
+      status: StatusEnum.optional(),
+      search: z.string().optional(),
+      limit: z.number().int().positive().max(100).optional(),
+      offset: z.number().int().min(0).optional(),
+    })
+    .optional(),
+  handler: async (ctx, args) => {
+    const a = args ?? {};
+    const limit = a.limit ?? 24;
+    const offset = a.offset ?? 0;
+    const all = (await listSeries.handler(
+      ctx as never,
+      {
+        genre: a.genre,
+        status: a.status,
+        search: a.search,
+      } as never
+    )) as unknown[];
+    return {
+      items: all.slice(offset, offset + limit),
+      total: all.length,
+      offset,
+      limit,
+      hasMore: offset + limit < all.length,
+    };
+  },
+});
