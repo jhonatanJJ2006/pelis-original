@@ -322,7 +322,7 @@ private fun DetailContent(
                 }
             }
             if (d.episodeCount > 0) item(key = "episodes") {
-                Box(Modifier.padding(start = 48.dp, end = 40.dp, top = 14.dp)) { EpisodePicker(d, episode, onSelectEpisode) }
+                Column(Modifier.padding(start = 48.dp, end = 40.dp, top = 14.dp)) { EpisodePicker(d, episode, onSelectEpisode) }
             }
             if (similar.isNotEmpty()) item(key = "similar") {
                 Box(Modifier.padding(top = 16.dp)) {
