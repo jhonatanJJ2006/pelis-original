@@ -111,6 +111,7 @@ fun SearchScreen(
     var searching by remember { mutableStateOf(false) }
     val firstKey = remember { FocusRequester() }
     val resultsFocus = remember { FocusRequester() }
+    val chipsFocus = remember { FocusRequester() }
     var phone by remember { mutableStateOf(PhoneKeyboardStore.fresh()) }
     var focusResults by remember { mutableStateOf(false) }
 
@@ -173,6 +174,12 @@ fun SearchScreen(
     val showAnime = (type_ == SearchType.ALL || type_ == SearchType.ANIME) && anime.isNotEmpty()
     val showChannels = (type_ == SearchType.ALL || type_ == SearchType.CHANNELS) && channels.isNotEmpty()
     val hasResults = query.trim().length >= 2 && (showTitles || showAnime || showChannels)
+    val firstRow = when { showTitles -> "titles"; showAnime -> "anime"; else -> "channels" }
+    // ▲ desde la primera fila de resultados va a los filtros (no al teclado).
+    val upToChips = Modifier.onPreviewKeyEvent { e ->
+        e.type == KeyEventType.KeyDown && e.key == Key.DirectionUp && runCatching { chipsFocus.requestFocus() }.isSuccess
+    }
+    fun rowMod(key: String) = if (key == firstRow) upToChips else Modifier
     // ► desde la última tecla de cada fila va a los resultados (los filtros quedan con ▲/▼).
     val toResults: () -> Boolean = { if (hasResults) runCatching { resultsFocus.requestFocus() }; true }
     LaunchedEffect(focusResults, hasResults) {
@@ -216,7 +223,7 @@ fun SearchScreen(
             Column(Modifier.weight(1f)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     SearchType.entries.forEach { t ->
-                        NoirButton(t.label, { sounds.playClick(); type = t }, selected = type == t)
+                        NoirButton(t.label, { sounds.playClick(); type = t }, selected = type == t, focusRequester = if (type == t) chipsFocus else null)
                     }
                 }
                 Spacer(Modifier.height(6.dp))
@@ -227,13 +234,13 @@ fun SearchScreen(
                         !showTitles && !showAnime && !showChannels -> SearchHint("No encontramos resultados para “${query.trim()}”.")
                         else -> LazyColumn(contentPadding = PaddingValues(top = 4.dp, bottom = 16.dp), modifier = Modifier.fillMaxSize().focusRequester(resultsFocus)) {
                             if (showTitles) item(key = "titles") {
-                                CatalogRow(title = "Películas y series", items = titles, onOpen = { onOpenTitle(if (it.mediaType == "series") TitleKind.SERIES else TitleKind.MOVIE, it.id) })
+                                Box(rowMod("titles")) { CatalogRow(title = "Películas y series", items = titles, onOpen = { onOpenTitle(if (it.mediaType == "series") TitleKind.SERIES else TitleKind.MOVIE, it.id) }) }
                             }
                             if (showAnime) item(key = "anime") {
-                                CatalogRow(title = "Anime", items = anime, onOpen = { onOpenTitle(TitleKind.ANIME, it.id) })
+                                Box(rowMod("anime")) { CatalogRow(title = "Anime", items = anime, onOpen = { onOpenTitle(TitleKind.ANIME, it.id) }) }
                             }
                             if (showChannels) item(key = "channels") {
-                                Column(Modifier.padding(vertical = 8.dp)) {
+                                Column(rowMod("channels").padding(vertical = 8.dp)) {
                                     MnText("Canales", color = Mn.Text, size = 15.sp, family = Mn.Serif, modifier = Modifier.padding(start = 8.dp, bottom = 8.dp))
                                     LazyRow(horizontalArrangement = Arrangement.spacedBy(14.dp), contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp)) {
                                         items(channels, key = { it.id }) { ch -> ChannelCard(channel = ch, onClick = { onPlayChannel(ch.id, ch.name) }) }
