@@ -1,5 +1,7 @@
 package pro.verpelis.tv.ui.screens
 
+import pro.verpelis.tv.data.tv.searchPage
+import pro.verpelis.tv.data.tv.toCatalogItem
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -111,6 +113,47 @@ fun SearchScreen(
     var titles by remember { mutableStateOf<List<CatalogItem>>(emptyList()) }
     var anime by remember { mutableStateOf<List<CatalogItem>>(emptyList()) }
     var searching by remember { mutableStateOf(false) }
+    val repo = pro.verpelis.tv.data.tv.LocalTvRepository.current
+    // Paginación en servidor: resultados de títulos y, sin texto, películas populares.
+    var titlesTotal by remember { mutableStateOf(0) }
+    var titlesHasMore by remember { mutableStateOf(false) }
+    var titlesFocus by remember { mutableStateOf(0) }
+    var popular by remember { mutableStateOf<List<CatalogItem>>(emptyList()) }
+    var popularTotal by remember { mutableStateOf(0) }
+    var popularHasMore by remember { mutableStateOf(true) }
+    var popularFocus by remember { mutableStateOf(0) }
+    var pageLoading by remember { mutableStateOf(false) }
+    val pageScope = androidx.compose.runtime.rememberCoroutineScope()
+    fun loadPopular() {
+        if (pageLoading || !popularHasMore) return
+        pageLoading = true
+        pageScope.launch {
+            runCatching { repo.searchPage("", popular.size) }.onSuccess { p ->
+                val seen = popular.mapTo(HashSet()) { it.id }
+                popular = popular + p.items.map { it.toCatalogItem() }.filter { seen.add(it.id) }
+                popularTotal = p.total
+                popularHasMore = p.hasMore && p.items.isNotEmpty()
+            }
+            pageLoading = false
+        }
+    }
+    fun loadMoreTitles() {
+        val q = query.trim()
+        if (pageLoading || !titlesHasMore || q.length < 2) return
+        pageLoading = true
+        pageScope.launch {
+            runCatching { repo.searchPage(q, titles.size) }.onSuccess { p ->
+                if (q == query.trim()) {
+                    val seen = titles.mapTo(HashSet()) { it.id }
+                    titles = titles + p.items.map { it.toCatalogItem() }.filter { seen.add(it.id) }
+                    titlesTotal = p.total
+                    titlesHasMore = p.hasMore && p.items.isNotEmpty()
+                }
+            }
+            pageLoading = false
+        }
+    }
+    LaunchedEffect(Unit) { if (popular.isEmpty()) loadPopular() }
     val firstKey = remember { FocusRequester() }
     val resultsFocus = remember { FocusRequester() }
     val chipsFocus = remember { FocusRequester() }
@@ -164,10 +207,13 @@ fun SearchScreen(
         delay(350)
         searching = true
         coroutineScope {
-            val m = async { runCatching { api.invokeCatalogSearch("movies.search", mapOf("q" to q, "limit" to 18)) }.getOrDefault(emptyList()) }
+            val m = async { runCatching { repo.searchPage(q, 0) }.getOrNull() }
             val a = async { runCatching { api.invokeCatalogSearch("anime.search", mapOf("query" to q, "limit" to 18)) }.getOrDefault(emptyList()) }
             val c = async { runCatching { api.invokeTvList(args = TvListArgs(search = q, limit = 24)).items }.getOrDefault(emptyList()) }
-            titles = m.await(); anime = a.await(); channels = c.await()
+            val page = m.await()
+            titles = page?.items?.map { it.toCatalogItem() }.orEmpty(); titlesTotal = page?.total ?: 0
+            titlesHasMore = page?.hasMore == true; titlesFocus = 0
+            anime = a.await(); channels = c.await()
         }
         searching = false
     }
@@ -175,8 +221,9 @@ fun SearchScreen(
     val showTitles = (type_ == SearchType.ALL || type_ == SearchType.TITLES) && titles.isNotEmpty()
     val showAnime = (type_ == SearchType.ALL || type_ == SearchType.ANIME) && anime.isNotEmpty()
     val showChannels = (type_ == SearchType.ALL || type_ == SearchType.CHANNELS) && channels.isNotEmpty()
-    val hasResults = query.trim().length >= 2 && (showTitles || showAnime || showChannels)
-    val firstRow = when { showTitles -> "titles"; showAnime -> "anime"; else -> "channels" }
+    val showPopular = query.trim().length < 2 && popular.isNotEmpty()
+    val hasResults = showPopular || (query.trim().length >= 2 && (showTitles || showAnime || showChannels))
+    val firstRow = when { showPopular -> "popular"; showTitles -> "titles"; showAnime -> "anime"; else -> "channels" }
     // ▲ desde la primera fila de resultados va a los filtros (no al teclado).
     var firstRowFocused by remember { mutableStateOf(false) }
     val resultsList = androidx.compose.foundation.lazy.rememberLazyListState()
@@ -190,7 +237,7 @@ fun SearchScreen(
     }
 
     Column(Modifier.fillMaxSize().padding(start = 32.dp, end = 24.dp, top = 18.dp, bottom = 14.dp)) {
-        TvHeader(title = "Buscar", eyebrow = "PELÍCULAS, SERIES, ANIME Y CANALES")
+        TvHeader(title = "Buscar", eyebrow = "Películas, series, anime y canales")
         Spacer(Modifier.height(12.dp))
         Row(Modifier.weight(1f)) {
             // Teclado
@@ -250,12 +297,29 @@ fun SearchScreen(
                     },
                 ) {
                     when {
-                        query.trim().length < 2 -> SearchHint("Escribe al menos 2 letras con el teclado de la izquierda.")
+                        query.trim().length < 2 && popular.isEmpty() ->
+                            if (pageLoading) NoirSpinner(Modifier.align(Alignment.Center)) else SearchHint("Escribe al menos 2 letras con el teclado de la izquierda.")
+                        query.trim().length < 2 -> LazyColumn(state = resultsList, contentPadding = PaddingValues(top = 4.dp, bottom = 16.dp), modifier = Modifier.fillMaxSize()) {
+                            item(key = "popular") {
+                                CatalogRow(
+                                    modifier = rowMod("popular"),
+                                    title = "Películas populares",
+                                    items = popular,
+                                    onOpen = { onOpenTitle(TitleKind.MOVIE, it.id) },
+                                    firstItemFocus = resultsFocus,
+                                    onNearEnd = { loadPopular() },
+                                    countText = pro.verpelis.tv.ui.library.pageIndicator(popularFocus, popularTotal),
+                                    onFocusIndex = { popularFocus = it },
+                                )
+                            }
+                            item(key = "popular-hint") { MnText("Escribe con el teclado de la izquierda para buscar títulos, anime o canales.", color = Mn.Variant, size = 11.sp, modifier = Modifier.padding(start = 48.dp, top = 6.dp)) }
+                        }
                         searching && !showTitles && !showAnime && !showChannels -> NoirSpinner(Modifier.align(Alignment.Center))
                         !showTitles && !showAnime && !showChannels -> SearchHint("No encontramos resultados para “${query.trim()}”.")
                         else -> LazyColumn(state = resultsList, contentPadding = PaddingValues(top = 4.dp, bottom = 16.dp), modifier = Modifier.fillMaxSize()) {
                             if (showTitles) item(key = "titles") {
-                                CatalogRow(modifier = rowMod("titles"), title = "Películas y series", items = titles, onOpen = { onOpenTitle(if (it.mediaType == "series") TitleKind.SERIES else TitleKind.MOVIE, it.id) }, firstItemFocus = if (firstRow == "titles") resultsFocus else null)
+                                CatalogRow(modifier = rowMod("titles"), title = "Películas y series", items = titles, onOpen = { onOpenTitle(if (it.mediaType == "series") TitleKind.SERIES else TitleKind.MOVIE, it.id) }, firstItemFocus = if (firstRow == "titles") resultsFocus else null,
+                                    onNearEnd = { loadMoreTitles() }, countText = if (titlesTotal > 0) pro.verpelis.tv.ui.library.pageIndicator(titlesFocus, titlesTotal) else null, onFocusIndex = { titlesFocus = it })
                             }
                             if (showAnime) item(key = "anime") {
                                 CatalogRow(modifier = rowMod("anime"), title = "Anime", items = anime, onOpen = { onOpenTitle(TitleKind.ANIME, it.id) }, firstItemFocus = if (firstRow == "anime") resultsFocus else null)
@@ -325,7 +389,7 @@ private fun PhoneKeyboardCard(session: TvKeyboardSession) {
             Spacer(Modifier.width(10.dp))
         }
         Column {
-            MnText("ESCRIBE DESDE TU CELULAR", color = Mn.Gold, size = 7.5.sp, weight = FontWeight.SemiBold, spacing = 1.2.sp, lines = 1)
+            MnText("Escribe desde tu celular", color = Mn.Gold, size = 7.5.sp, weight = FontWeight.SemiBold, spacing = 1.2.sp, lines = 1)
             Spacer(Modifier.height(3.dp))
             MnText("Escanea el código o entra a ${session.url.substringAfter("://").substringBefore("?")}", color = Mn.Variant, size = 8.sp, lines = 2)
             Spacer(Modifier.height(3.dp))

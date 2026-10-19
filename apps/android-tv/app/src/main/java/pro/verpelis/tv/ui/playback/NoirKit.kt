@@ -192,7 +192,7 @@ fun NoirBadge(text: String, gold: Boolean = false, modifier: Modifier = Modifier
             .border(1.dp, if (gold) Mn.Gold.copy(alpha = 0.55f) else Mn.OutlineVar, shape)
             .padding(horizontal = 7.dp, vertical = 3.dp),
     ) {
-        MnText(text.uppercase(), color = if (gold) Mn.Gold else Mn.Variant, size = 7.sp, weight = FontWeight.SemiBold, spacing = 1.2.sp, lines = 1)
+        MnText(text, color = if (gold) Mn.Gold else Mn.Variant, size = 7.sp, weight = FontWeight.SemiBold, spacing = 1.2.sp, lines = 1)
     }
 }
 

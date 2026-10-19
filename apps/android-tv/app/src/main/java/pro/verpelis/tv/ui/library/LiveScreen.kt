@@ -1,5 +1,6 @@
 package pro.verpelis.tv.ui.library
 
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -55,6 +56,7 @@ private object LiveStore {
     var categories by mutableStateOf<List<String>>(emptyList())
     var category by mutableStateOf<String?>(null)
     var total by mutableStateOf(0)
+    var focusedIndex by mutableStateOf(0)
     var hasMore by mutableStateOf(true)
     var loading by mutableStateOf(false)
     var error by mutableStateOf<Throwable?>(null)
@@ -93,7 +95,7 @@ fun LiveScreen(onPlayChannel: (TvChannel) -> Unit) {
     fun select(cat: String?) {
         if (s.category == cat) return
         s.category = cat
-        s.channels.clear()
+        s.channels.clear(); s.focusedIndex = 0
         s.hasMore = true
         scope.launch { gridState.scrollToItem(0); loadMore() }
     }
@@ -131,8 +133,8 @@ fun LiveScreen(onPlayChannel: (TvChannel) -> Unit) {
     }
 
     Column(Modifier.fillMaxSize().padding(start = 32.dp, end = 32.dp, top = 18.dp, bottom = 14.dp)) {
-        TvHeader(title = "TV en vivo", eyebrow = "CANALES", trailing = {
-            if (s.total > 0) TvHeaderChip(if (s.total == 1) "1 canal" else "${s.total} canales")
+        TvHeader(title = "TV en vivo", eyebrow = "Canales", trailing = {
+            if (s.total > 0) TvHeaderChip(pageIndicator(s.focusedIndex, s.total, LIVE_PAGE).replace("títulos", "canales").replace("título", "canal"))
         })
         Spacer(Modifier.height(4.dp))
         Box(Modifier.weight(1f)) {
@@ -158,7 +160,7 @@ fun LiveScreen(onPlayChannel: (TvChannel) -> Unit) {
                         }
                     }
                     itemsIndexed(s.channels, key = { _, c -> c.id }, contentType = { _, _ -> "channel" }) { i, c ->
-                        ChannelCard(channel = c, onClick = { onPlayChannel(c) }, modifier = if (i == 0) Modifier.focusRequester(first) else Modifier)
+                        ChannelCard(channel = c, onClick = { onPlayChannel(c) }, modifier = (if (i == 0) Modifier.focusRequester(first) else Modifier).onFocusChanged { if (it.hasFocus) s.focusedIndex = i })
                     }
                     if (s.loading && s.channels.isNotEmpty()) {
                         item(key = "more", span = { GridItemSpan(maxLineSpan) }) {

@@ -235,18 +235,16 @@ private fun DetailContent(
     Box(Modifier.fillMaxSize()) {
         val lowRam = (context.applicationContext as? pro.verpelis.tv.PelisTvApp)?.lowRam == true
         val backdrop = remember(d.backdrop, lowRam) {
-            val width = if (lowRam) TvImages.BACKDROP_WIDTH_LOW_RAM else TvImages.BACKDROP_WIDTH
-            ImageRequest.Builder(context)
-                .data(TvImages.sized(pro.verpelis.tv.BuildConfig.API_BASE_URL, d.backdrop, width))
-                .size(width, width * 9 / 16)
-                .build()
+            TvImages.backdropRequest(context, pro.verpelis.tv.BuildConfig.API_BASE_URL, d.backdrop, lowRam)
         }
-        AsyncImage(
-            model = backdrop,
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize(),
-        )
+        if (backdrop != null) {
+            AsyncImage(
+                model = backdrop,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
         Box(Modifier.fillMaxSize().background(Brush.horizontalGradient(0f to Mn.Bg, 0.42f to Mn.Bg.copy(alpha = 0.88f), 1f to Mn.Bg.copy(alpha = 0.15f))))
         Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0f to Mn.Bg.copy(alpha = 0.55f), 0.3f to Color.Transparent, 0.62f to Color.Transparent, 1f to Mn.Bg)))
 
@@ -312,7 +310,7 @@ private fun DetailContent(
           }
             if (seasons.size > 1) item(key = "seasons") {
                 Column(Modifier.padding(start = 48.dp, top = 10.dp)) {
-                    MnText("TEMPORADAS", color = Mn.Gold, size = 8.sp, weight = FontWeight.SemiBold, spacing = 1.6.sp)
+                    MnText("Temporadas", color = Mn.Gold, size = 8.sp, weight = FontWeight.SemiBold, spacing = 1.6.sp)
                     Spacer(Modifier.height(8.dp))
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(end = 40.dp, top = 2.dp, bottom = 2.dp)) {
                         items(seasons, key = { it.id }) { s ->

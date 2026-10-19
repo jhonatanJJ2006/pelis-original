@@ -90,6 +90,41 @@ class PelisApi private constructor(context: Context) {
     suspend fun byGenre(genre: String) = call("movies.getByGenre", JSONObject().put("genre", genre).put("limit", 20)).asArray().objects().map { Parse.movie(base, it) }
     suspend fun genres(): List<String> = call("movies.getGenres").asArray().let { a -> (0 until a.length()).map { a.optString(it) } }
     suspend fun search(q: String) = call("movies.search", JSONObject().put("q", q).put("limit", 40)).asArray().objects().map { Parse.movie(base, it) }
+    // ---- Paginación en servidor ----
+    private fun <T> page(raw: Any?, map: (JSONObject) -> T?): Page<T> {
+        val o = raw as? JSONObject ?: return Page(emptyList(), 0, 0, 0, false)
+        val items = o.optJSONArray("items")?.objects()?.mapNotNull(map).orEmpty()
+        return Page(items, o.optInt("total", items.size), o.optInt("offset", 0), o.optInt("limit", items.size), o.optBoolean("hasMore", false))
+    }
+
+    /** Catálogo/búsqueda paginados (movies.page). Sin texto ni filtros + sort=popular = populares. */
+    suspend fun moviesPage(offset: Int, limit: Int = PAGE_SIZE, mediaType: String? = "movie", genre: String? = null, search: String? = null, sort: String? = null): Page<Title> {
+        val args = JSONObject().put("offset", offset).put("limit", limit)
+        mediaType?.let { args.put("mediaType", it) }
+        genre?.let { args.put("genre", it) }
+        search?.takeIf { it.isNotBlank() }?.let { args.put("search", it) }
+        sort?.let { args.put("sort", it) }
+        return page(call("movies.page", args)) { o -> Parse.movie(base, o).let { if (mediaType == "series") it.copy(kind = Kind.SERIES) else it } }
+    }
+    suspend fun animePage(offset: Int, limit: Int = PAGE_SIZE, search: String? = null): Page<Title> {
+        val args = JSONObject().put("offset", offset).put("limit", limit)
+        search?.takeIf { it.isNotBlank() }?.let { args.put("search", it) }
+        return page(call("anime.listSeriesPage", args)) { Parse.anime(base, it) }
+    }
+    suspend fun favoritesPage(offset: Int, limit: Int = PAGE_SIZE): Page<Title> =
+        page(call("favorites.listByUserPage", JSONObject().put("offset", offset).put("limit", limit))) { Parse.movie(base, it) }
+    suspend fun historyPage(offset: Int, limit: Int = PAGE_SIZE): Page<Title> =
+        page(call("history.listByUserPage", JSONObject().put("offset", offset).put("limit", limit))) { h ->
+            val m = h.optJSONObject("movie") ?: return@page null
+            val dur = h.optDouble("duration", 0.0)
+            Parse.movie(base, m).copy(progress = if (dur > 0) (h.optDouble("progress", 0.0) / dur).toFloat().coerceIn(0f, 1f) else 0f)
+        }
+    suspend fun channelsPage(offset: Int, limit: Int = PAGE_SIZE, category: String? = null): Page<Channel> {
+        val args = JSONObject().put("offset", offset).put("limit", limit)
+        category?.let { args.put("category", it) }
+        return page(call("tv.list", args)) { Parse.channel(base, it) }
+    }
+
     suspend fun movie(id: String) = (call("movies.getById", JSONObject().put("id", id)) as? JSONObject)?.let { Parse.movie(base, it) }
     suspend fun animeList(limit: Int = 60) = call("anime.list", JSONObject().put("limit", limit)).asArray().objects().map { Parse.anime(base, it) }
     suspend fun anime(id: String) = (call("anime.getById", JSONObject().put("id", id)) as? JSONObject)?.let { Parse.anime(base, it) }
@@ -203,3 +238,5 @@ class PelisApi private constructor(context: Context) {
         }
     }
 }
+
+const val PAGE_SIZE = 30

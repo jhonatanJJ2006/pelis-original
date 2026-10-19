@@ -597,7 +597,7 @@ private fun ControlsOverlay(
                 NoirKeyHint("OK", "Seleccionar / Pausa")
                 NoirKeyHint("◀ ▶", "Retroceder / Adelantar 10 s")
                 NoirKeyHint("▲ ▼", "Controles")
-                NoirKeyHint("ATRÁS", "Salir")
+                NoirKeyHint("Atrás", "Salir")
             }
         }
     }
@@ -699,7 +699,7 @@ private fun SettingsPanel(
 private fun PanelHeader(title: String, tag: String) {
     Row(Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
         MnText(title, color = Mn.Text, size = 11.sp, weight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
-        MnText(tag.uppercase(), color = Mn.Gold, size = 7.5.sp, weight = FontWeight.Bold, spacing = 1.sp)
+        MnText(tag, color = Mn.Gold, size = 7.5.sp, weight = FontWeight.Bold, spacing = 1.sp)
     }
 }
 
@@ -726,7 +726,7 @@ private fun PanelOption(label: String, detail: String, selected: Boolean, modifi
             MnText(label, color = if (selected) Mn.Text else Mn.Variant, size = 10.sp, weight = if (selected) FontWeight.SemiBold else FontWeight.Normal)
             if (detail.isNotBlank()) MnText(detail, color = if (selected) Mn.Gold else Mn.Outline, size = 8.sp)
         }
-        if (selected) MnText("ACTIVO", color = Mn.Gold, size = 7.sp, weight = FontWeight.Bold, spacing = 1.sp)
+        if (selected) MnText("Activo", color = Mn.Gold, size = 7.sp, weight = FontWeight.Bold, spacing = 1.sp)
         else Box(Modifier.size(12.dp).clip(RoundedCornerShape(6.dp)).border(1.dp, Mn.Outline, RoundedCornerShape(6.dp)))
     }
 }
@@ -746,7 +746,7 @@ private fun ErrorOverlay(
         error.kind == pro.verpelis.tv.data.playback.PlaybackErrorKind.DISK
     pro.verpelis.tv.ui.components.TvLoadError(
         onRetry = onRetry,
-        eyebrow = "NO SE PUEDE REPRODUCIR",
+        eyebrow = "No se puede reproducir",
         title = title.ifBlank { detail?.name ?: "No se puede reproducir" },
         message = error.message,
         showConnectionCheck = network,
