@@ -31,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.text.font.FontWeight
@@ -221,15 +222,14 @@ fun SearchScreen(
             Spacer(Modifier.width(18.dp))
             // Resultados
             Column(Modifier.weight(1f)) {
-                Row(
-                    Modifier.onPreviewKeyEvent { e ->
-                        e.type == KeyEventType.KeyDown && e.key == Key.DirectionDown && hasResults &&
-                            runCatching { resultsFocus.requestFocus() }.isSuccess
-                    },
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     SearchType.entries.forEach { t ->
-                        NoirButton(t.label, { sounds.playClick(); type = t }, selected = type == t, focusRequester = if (type == t) chipsFocus else null)
+                        NoirButton(
+                            t.label, { sounds.playClick(); type = t },
+                            // ▼ desde los filtros va al primer resultado.
+                            modifier = if (hasResults) Modifier.focusProperties { down = resultsFocus } else Modifier,
+                            selected = type == t, focusRequester = if (type == t) chipsFocus else null,
+                        )
                     }
                 }
                 Spacer(Modifier.height(6.dp))
