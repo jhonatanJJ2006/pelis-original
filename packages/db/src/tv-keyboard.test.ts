@@ -59,7 +59,9 @@ describe('createTvKeyboardSession', () => {
 
   it('limita las sesiones por IP', async () => {
     db.rateLimitHit.findMany.mockResolvedValue(
-      Array.from({ length: TV_KEYBOARD_CREATE_PER_HOUR }, () => ({ createdAt: new Date(now.getTime() - 60_000) }))
+      Array.from({ length: TV_KEYBOARD_CREATE_PER_HOUR }, () => ({
+        createdAt: new Date(now.getTime() - 60_000),
+      }))
     );
     const res = await createTvKeyboardSession('1.2.3.4', now);
     expect(res).toEqual({ ok: false, retryAfterSec: 3540 });
@@ -101,19 +103,31 @@ describe('updateTvKeyboardText', () => {
   });
 
   it('rechaza datos no válidos', async () => {
-    expect(await updateTvKeyboardText('ABC234', { x: 1 }, false, now)).toEqual({ ok: false, reason: 'invalid' });
-    expect(await updateTvKeyboardText('A', 'hola', false, now)).toEqual({ ok: false, reason: 'invalid' });
+    expect(await updateTvKeyboardText('ABC234', { x: 1 }, false, now)).toEqual({
+      ok: false,
+      reason: 'invalid',
+    });
+    expect(await updateTvKeyboardText('A', 'hola', false, now)).toEqual({
+      ok: false,
+      reason: 'invalid',
+    });
     expect(db.tvKeyboardSession.updateMany).not.toHaveBeenCalled();
   });
 
   it('distingue código vencido y límite de escrituras', async () => {
     db.tvKeyboardSession.updateMany.mockResolvedValue({ count: 0 });
     db.tvKeyboardSession.findUnique.mockResolvedValueOnce(null);
-    expect(await updateTvKeyboardText('ABC234', 'a', false, now)).toEqual({ ok: false, reason: 'not_found' });
+    expect(await updateTvKeyboardText('ABC234', 'a', false, now)).toEqual({
+      ok: false,
+      reason: 'not_found',
+    });
     db.tvKeyboardSession.findUnique.mockResolvedValueOnce({
       expiresAt: new Date(now.getTime() + 60_000),
       version: TV_KEYBOARD_MAX_UPDATES,
     });
-    expect(await updateTvKeyboardText('ABC234', 'a', false, now)).toEqual({ ok: false, reason: 'limit' });
+    expect(await updateTvKeyboardText('ABC234', 'a', false, now)).toEqual({
+      ok: false,
+      reason: 'limit',
+    });
   });
 });

@@ -19,7 +19,10 @@ export async function POST(req: Request) {
     const res = await createTvKeyboardSession(clientIp(req));
     if (!res.ok) {
       return NextResponse.json(
-        { error: 'Demasiados códigos. Intenta de nuevo más tarde.', retryAfterSec: res.retryAfterSec },
+        {
+          error: 'Demasiados códigos. Intenta de nuevo más tarde.',
+          retryAfterSec: res.retryAfterSec,
+        },
         { status: 429, headers: { ...noStore, 'Retry-After': String(res.retryAfterSec) } }
       );
     }
@@ -33,7 +36,10 @@ export async function POST(req: Request) {
       { headers: noStore }
     );
   } catch {
-    return NextResponse.json({ error: 'No se pudo crear el código' }, { status: 500, headers: noStore });
+    return NextResponse.json(
+      { error: 'No se pudo crear el código' },
+      { status: 500, headers: noStore }
+    );
   }
 }
 
@@ -47,10 +53,16 @@ export async function GET(req: Request) {
   const since = Number(url.searchParams.get('v') ?? '-1');
   const row = await getTvKeyboardSession(code);
   if (!row) {
-    return NextResponse.json({ error: 'Código vencido', expired: true }, { status: 404, headers: noStore });
+    return NextResponse.json(
+      { error: 'Código vencido', expired: true },
+      { status: 404, headers: noStore }
+    );
   }
   if (row.version === since) {
     return NextResponse.json({ v: row.version }, { headers: noStore });
   }
-  return NextResponse.json({ v: row.version, text: row.text, done: row.done }, { headers: noStore });
+  return NextResponse.json(
+    { v: row.version, text: row.text, done: row.done },
+    { headers: noStore }
+  );
 }

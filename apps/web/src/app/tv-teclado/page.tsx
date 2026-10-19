@@ -3,7 +3,11 @@
 import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { TV_KEYBOARD_MAX_TEXT } from '@pelis/db/tv-keyboard-code';
-import { normalizePairingCode, isPairingCodeShape, formatPairingCode } from '@pelis/db/tv-pairing-code';
+import {
+  normalizePairingCode,
+  isPairingCodeShape,
+  formatPairingCode,
+} from '@pelis/db/tv-pairing-code';
 
 type Status = 'idle' | 'sending' | 'sent' | 'done' | 'expired' | 'error';
 
@@ -59,9 +63,12 @@ function Keyboard() {
     [flush]
   );
 
-  useEffect(() => () => {
-    if (timer.current) clearTimeout(timer.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (timer.current) clearTimeout(timer.current);
+    },
+    []
+  );
 
   if (!valid) {
     return (
@@ -85,7 +92,10 @@ function Keyboard() {
           className="rounded-xl border border-[#3A3630] bg-[#141418] px-4 py-4 text-center text-2xl tracking-[0.3em] text-[#F4F1EA] outline-none focus:border-[#C4A35A]"
           placeholder="ABC 123"
         />
-        <button type="submit" className="rounded-xl bg-[#C4A35A] px-4 py-4 text-lg font-semibold text-[#0B0B0D]">
+        <button
+          type="submit"
+          className="rounded-xl bg-[#C4A35A] px-4 py-4 text-lg font-semibold text-[#0B0B0D]"
+        >
           Continuar
         </button>
       </form>
@@ -141,7 +151,14 @@ function Keyboard() {
           Buscar en la TV
         </button>
       </div>
-      <p role="status" className={status === 'expired' || status === 'error' ? 'text-sm text-[#E58A7B]' : 'text-sm text-[#C9C3B6]'}>
+      <p
+        role="status"
+        className={
+          status === 'expired' || status === 'error'
+            ? 'text-sm text-[#E58A7B]'
+            : 'text-sm text-[#C9C3B6]'
+        }
+      >
         {STATUS_TEXT[status]}
       </p>
     </form>

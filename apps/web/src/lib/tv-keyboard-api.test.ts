@@ -80,7 +80,9 @@ describe('POST /api/tv-keyboard/text (celular)', () => {
   });
 
   it('rechaza cuerpos grandes y JSON roto', async () => {
-    expect((await TEXT(textReq({ code: 'ABC234', text: 'x'.repeat(2000) }, '10.0.0.3'))).status).toBe(413);
+    expect(
+      (await TEXT(textReq({ code: 'ABC234', text: 'x'.repeat(2000) }, '10.0.0.3'))).status
+    ).toBe(413);
     expect((await TEXT(textReq('{no', '10.0.0.3'))).status).toBe(400);
     expect(db.updateTvKeyboardText).not.toHaveBeenCalled();
   });
