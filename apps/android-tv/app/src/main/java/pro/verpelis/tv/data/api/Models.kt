@@ -145,3 +145,19 @@ data class OtpResult(
     val error: String? = null,
     val cooldownSeconds: Int? = null,
 )
+
+/** Sesión del teclado del celular (búsqueda de la TV). */
+data class TvKeyboardSession(
+    val code: String = "",
+    val displayCode: String? = null,
+    val url: String = "",
+    val expiresAt: String? = null,
+)
+
+/** Respuesta de la consulta cada segundo. Sin cambios solo trae `v`. */
+data class TvKeyboardPoll(
+    val v: Int = -1,
+    val text: String? = null,
+    val done: Boolean = false,
+    val expired: Boolean = false,
+)

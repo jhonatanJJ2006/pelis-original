@@ -108,11 +108,7 @@ fun CatalogRow(
                     PosterCard(
                         item = item,
                         onClick = { onOpen(item) },
-                        modifier = if (index == 0 && firstItemFocus != null) {
-                            Modifier.focusRequester(firstItemFocus)
-                        } else {
-                            Modifier
-                        },
+                        focusRequester = if (index == 0) firstItemFocus else null,
                     )
                 }
             }

@@ -179,6 +179,42 @@ class PelisApiClient(private val sessionStore: SessionStore) {
         return postJson("api/tv-auth/claim", json, PairingClaimResponse::class.java)
     }
 
+    /** Abre una sesión de teclado del celular. `null` si no se pudo (sin red, límite). */
+    suspend fun createTvKeyboard(): TvKeyboardSession? = withContext(Dispatchers.IO) {
+        val request = Request.Builder().url(baseUrl + "api/tv-keyboard")
+            .post("{}".toRequestBody(JSON)).header("User-Agent", USER_AGENT).build()
+        try {
+            quietHttp.newCall(request).execute().use { r ->
+                if (!r.isSuccessful) return@withContext null
+                moshi.adapter(TvKeyboardSession::class.java).fromJson(r.body?.string().orEmpty())
+                    ?.takeIf { it.code.isNotBlank() && it.url.isNotBlank() }
+            }
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    /**
+     * Texto que llegó del celular. `expired = true` si el código venció (404);
+     * `null` si falló la red. Sin registro en logcat: corre cada segundo.
+     */
+    suspend fun pollTvKeyboard(code: String, version: Int): TvKeyboardPoll? = withContext(Dispatchers.IO) {
+        val url = baseUrl.toHttpUrl().newBuilder().addPathSegments("api/tv-keyboard")
+            .addQueryParameter("code", code).addQueryParameter("v", version.toString()).build()
+        val request = Request.Builder().url(url).get().header("User-Agent", USER_AGENT).build()
+        try {
+            quietHttp.newCall(request).execute().use { r ->
+                when {
+                    r.code == 404 -> TvKeyboardPoll(expired = true)
+                    !r.isSuccessful -> null
+                    else -> moshi.adapter(TvKeyboardPoll::class.java).fromJson(r.body?.string().orEmpty())
+                }
+            }
+        } catch (_: Exception) {
+            null
+        }
+    }
+
     suspend fun apkAvailability(): TvApkAvailability {
         val request = Request.Builder().url("${baseUrl}api/app/availability").get().build()
         return execute(request, TvApkAvailability::class.java)
