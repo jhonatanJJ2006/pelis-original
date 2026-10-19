@@ -221,7 +221,13 @@ fun SearchScreen(
             Spacer(Modifier.width(18.dp))
             // Resultados
             Column(Modifier.weight(1f)) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(
+                    Modifier.onPreviewKeyEvent { e ->
+                        e.type == KeyEventType.KeyDown && e.key == Key.DirectionDown && hasResults &&
+                            runCatching { resultsFocus.requestFocus() }.isSuccess
+                    },
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
                     SearchType.entries.forEach { t ->
                         NoirButton(t.label, { sounds.playClick(); type = t }, selected = type == t, focusRequester = if (type == t) chipsFocus else null)
                     }
