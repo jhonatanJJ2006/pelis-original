@@ -155,7 +155,7 @@ export default function HistoryPage() {
             <section>
               <h2 className="flex items-center gap-3 font-display text-2xl tracking-tight text-cinema-chalk mb-5">
                 <span aria-hidden className="h-6 w-[3px] bg-cinema-accent" />
-                Continuar viendo
+                Seguir viendo
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                 {continueItems.map((item) => (

@@ -35,11 +35,7 @@ export function ContinueWatchingRow({ items, className }: ContinueWatchingRowPro
   if (items.length === 0) {
     return (
       <section className={cn('relative', className)} aria-busy="true">
-        <SectionHeader
-          title="Continuar viendo"
-          subtitle="Retoma donde lo dejaste"
-          href="/history"
-        />
+        <SectionHeader title="Seguir viendo" subtitle="Retoma donde lo dejaste" href="/history" />
         <div className="no-scrollbar flex gap-4 overflow-x-auto px-1 py-1">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="w-[280px] sm:w-[320px] md:w-[360px] shrink-0">
@@ -53,7 +49,7 @@ export function ContinueWatchingRow({ items, className }: ContinueWatchingRowPro
 
   return (
     <section className={cn('relative', className)}>
-      <SectionHeader title="Continuar viendo" subtitle="Retoma donde lo dejaste" href="/history" />
+      <SectionHeader title="Seguir viendo" subtitle="Retoma donde lo dejaste" href="/history" />
       <div className="relative group/row">
         <button
           type="button"

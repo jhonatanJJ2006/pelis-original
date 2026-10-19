@@ -91,6 +91,20 @@ export const clearAll = register({
   },
 });
 
+/**
+ * Fila de historial con la película en forma pública (`_id`, imagen resuelta:
+ * imageId → /uploads, hash → /peliculas/peliculas). Se mantienen `id` y
+ * `mediaType` en mayúsculas para las APK de TV ≤ 2.0.1, que leían la fila cruda.
+ */
+function shapeHistoryMovie<M extends { id: string; mediaType: string }>(movie: M) {
+  return { ...toMovieShape(movie as never), id: movie.id, mediaType: movie.mediaType } as Record<
+    string,
+    unknown
+  >;
+}
+
+const continueWhere = (userId: string) => ({ userId, duration: { gt: 0 }, progress: { gt: 0 } });
+
 export const getContinueWatching = register({
   kind: 'query',
   name: 'history.getContinueWatching',
@@ -99,13 +113,51 @@ export const getContinueWatching = register({
   handler: async (ctx, args) => {
     const userId = requireUser(ctx);
     const all = await prisma.history.findMany({
-      where: { userId },
+      where: continueWhere(userId),
       include: { movie: true },
+      orderBy: { lastWatched: 'desc' },
     });
     const inProgress = all
-      .filter((h) => h.duration > 0 && h.progress > 0 && h.progress < h.duration * 0.95)
-      .sort((a, b) => b.lastWatched.getTime() - a.lastWatched.getTime())
-      .slice(0, args?.limit ?? 10);
-    return inProgress.map((h) => ({ ...h, movie: h.movie }));
+      .filter((h) => h.progress < h.duration * 0.95)
+      .slice(0, Math.min(Math.max(args?.limit ?? 10, 1), 50));
+    // Antes devolvía `movie` crudo de Prisma: sin `_id` (el enlace de la web iba a
+    // /movies/undefined) y con `image` sin resolver (se ignoraba imageId).
+    return inProgress.map((h) => ({ ...h, movie: h.movie ? shapeHistoryMovie(h.movie) : null }));
+  },
+});
+
+/** Historial paginado en servidor: { items, total, offset, limit, hasMore }. */
+export const listByUserPage = register({
+  kind: 'query',
+  name: 'history.listByUserPage',
+  reads: ['history', 'movie'],
+  args: z
+    .object({
+      userId: z.string().optional(),
+      limit: z.number().int().positive().max(100).optional(),
+      offset: z.number().int().min(0).optional(),
+    })
+    .optional(),
+  handler: async (ctx, args) => {
+    const userId = requireUser(ctx);
+    const limit = args?.limit ?? 24;
+    const offset = args?.offset ?? 0;
+    const [total, rows] = await Promise.all([
+      prisma.history.count({ where: { userId } }),
+      prisma.history.findMany({
+        where: { userId },
+        include: { movie: true },
+        orderBy: { lastWatched: 'desc' },
+        take: limit,
+        skip: offset,
+      }),
+    ]);
+    return {
+      items: rows.map((h) => ({ ...h, movie: h.movie ? toMovieShape(h.movie) : null })),
+      total,
+      offset,
+      limit,
+      hasMore: offset + limit < total,
+    };
   },
 });
