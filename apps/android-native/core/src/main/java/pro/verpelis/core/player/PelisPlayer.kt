@@ -226,7 +226,7 @@ fun SettingsPanel(player: ExoPlayer, req: PlaybackRequest, modifier: Modifier = 
         androidx.compose.foundation.lazy.LazyColumn {
             for (type in listOf(C.TRACK_TYPE_TEXT, C.TRACK_TYPE_VIDEO)) {
                 item(key = "h$type") {
-                    Text(if (type == C.TRACK_TYPE_TEXT) "SUBTÍTULOS" else "CALIDAD DE VIDEO", color = Noir.Gold, fontSize = 12.sp,
+                    Text(if (type == C.TRACK_TYPE_TEXT) "Subtítulos" else "Calidad de video", color = Noir.Gold, fontSize = 12.sp,
                         letterSpacing = 1.sp, modifier = Modifier.padding(top = 16.dp, bottom = 8.dp))
                 }
                 val params = player.trackSelectionParameters

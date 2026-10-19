@@ -125,6 +125,12 @@ class PelisApi private constructor(context: Context) {
         return page(call("tv.list", args)) { Parse.channel(base, it) }
     }
 
+    suspend fun channelCategories(): List<String> {
+        val raw = call("tv.getCategories")
+        val array = raw as? JSONArray ?: return emptyList()
+        return (0 until array.length()).map { array.optString(it) }.filter { it.isNotBlank() }
+    }
+
     suspend fun movie(id: String) = (call("movies.getById", JSONObject().put("id", id)) as? JSONObject)?.let { Parse.movie(base, it) }
     suspend fun animeList(limit: Int = 60) = call("anime.list", JSONObject().put("limit", limit)).asArray().objects().map { Parse.anime(base, it) }
     suspend fun anime(id: String) = (call("anime.getById", JSONObject().put("id", id)) as? JSONObject)?.let { Parse.anime(base, it) }

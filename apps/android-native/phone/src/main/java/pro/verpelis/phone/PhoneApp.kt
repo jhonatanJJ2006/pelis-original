@@ -23,8 +23,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.items as gridItems
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -214,18 +215,17 @@ fun LoginScreen(api: PelisApi, onDone: () -> Unit) {
             Box(Modifier.width(80.dp).height(2.dp).background(Brush.horizontalGradient(listOf(Color.Transparent, Noir.Gold, Color.Transparent))))
             Spacer(Modifier.height(16.dp))
             Text("PELIS", fontFamily = Noir.Display, fontWeight = FontWeight.Bold, fontSize = 36.sp, color = Noir.Gold, letterSpacing = 3.sp)
-            Text("MAISON NOIR CINÉMATHÈQUE", style = NoirLabel.copy(color = Noir.Gold.copy(alpha = 0.8f), fontSize = 10.sp))
             Spacer(Modifier.height(12.dp))
             Text("Iniciar sesión", style = NoirSection.copy(fontSize = 22.sp))
             Spacer(Modifier.height(20.dp))
-            Text("CORREO ELECTRÓNICO", style = NoirLabel, modifier = Modifier.fillMaxWidth())
+            Text("Correo electrónico", style = NoirLabel, modifier = Modifier.fillMaxWidth())
             Spacer(Modifier.height(6.dp))
             OutlinedTextField(email, { email = it }, placeholder = { Text("tu@correo.com") }, singleLine = true, colors = noirFieldColors(),
                 leadingIcon = { Icon(Icons.Filled.Email, null, tint = Noir.Muted) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email), modifier = Modifier.fillMaxWidth())
             Spacer(Modifier.height(14.dp))
             Row(Modifier.fillMaxWidth()) {
-                Text("CONTRASEÑA", style = NoirLabel)
+                Text("Contraseña", style = NoirLabel)
                 Spacer(Modifier.weight(1f))
                 Text("¿Olvidaste tu contraseña?", color = Noir.Gold, fontSize = 11.sp, modifier = Modifier.clickable { openCustomTab(ctx, api.base + "/login") })
             }
@@ -235,7 +235,7 @@ fun LoginScreen(api: PelisApi, onDone: () -> Unit) {
                 visualTransformation = PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth())
             error?.let { Text(it, color = Color(0xFFE08A95), fontSize = 13.sp, modifier = Modifier.fillMaxWidth().padding(top = 10.dp)) }
             Spacer(Modifier.height(20.dp))
-            GoldButton(if (busy) "ENTRANDO..." else "INICIAR SESIÓN", enabled = !busy && email.isNotBlank() && pass.isNotBlank(), modifier = Modifier.fillMaxWidth(), onClick = {
+            GoldButton(if (busy) "Entrando…" else "Iniciar sesión", enabled = !busy && email.isNotBlank() && pass.isNotBlank(), modifier = Modifier.fillMaxWidth(), onClick = {
                 busy = true; error = null
                 scope.launch {
                     try { api.signInEmail(email, pass); onDone() } catch (e: Exception) { error = e.message ?: "No se pudo iniciar sesión" }
@@ -253,7 +253,7 @@ fun LoginScreen(api: PelisApi, onDone: () -> Unit) {
                 runCatching { openCustomTab(ctx, api.googleLogin.start()) }
                     .onFailure { waitingGoogle = false; error = "No se pudo abrir el navegador" }
             }
-            GhostButton(if (googleBusy) "CONECTANDO CON GOOGLE..." else "CONTINUAR CON GOOGLE", modifier = Modifier.fillMaxWidth(), onClick = {
+            GhostButton(if (googleBusy) "Conectando con Google…" else "Continuar con Google", modifier = Modifier.fillMaxWidth(), onClick = {
                 if (busy || googleBusy) return@GhostButton
                 error = null; googleNote = null; waitingGoogle = false; googleBusy = true
                 scope.launch {
@@ -305,7 +305,7 @@ fun HomeScreen(api: PelisApi, nav: NavHostController) {
             val cont = bg(emptyList()) { api.history().filter { it.progress in 0.01f..0.97f }.distinctBy { it.id }.take(10) }
             val latest = bg(emptyList()) { api.movies(limit = 20).sortedByDescending { it.year } }
             val anime = bg(emptyList()) { api.animeList().filter { it.poster != null }.take(15) }
-            val channels = bg(emptyList()) { api.channels().filter { it.online }.take(12) }
+            val channels = bg(emptyList()) { api.channelsPage(0, 24).items.filter { it.online }.take(12) }
             val rows = listOf("Acción", "Comedia", "Terror").map { g -> g to bg(emptyList()) { api.byGenre(g) } }
             val plans = bg(emptyList()) { api.plans() }
             val tr = trending.await()
@@ -337,9 +337,8 @@ fun HomeScreen(api: PelisApi, nav: NavHostController) {
             if (d.plans.isNotEmpty()) item { PlansTeaser(d.plans) { nav.navigate("plans") } }
             item {
                 Column(Modifier.fillMaxWidth().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Wordmark(16.sp, subtitle = null)
-                    Text("PELIS MAISON NOIR", style = NoirLabel.copy(color = Noir.Gold))
-                    Text("Catálogo cinematográfico, anime y canales en vivo.", color = Noir.Muted, fontSize = 11.sp, textAlign = TextAlign.Center)
+                    Wordmark(16.sp)
+                    Text("Películas, series, anime y canales en vivo.", color = Noir.Muted, fontSize = 11.sp, textAlign = TextAlign.Center)
                 }
             }
         }
@@ -371,15 +370,15 @@ fun Hero(t: Title, onPlay: () -> Unit, onInfo: () -> Unit) {
 @Composable
 private fun PlansTeaser(plans: List<pro.verpelis.core.data.Plan>, onOpen: () -> Unit) {
     Column(Modifier.padding(16.dp).fillMaxWidth().background(Noir.Surface, RoundedCornerShape(10.dp)).border(1.dp, Noir.Line, RoundedCornerShape(10.dp)).padding(16.dp)) {
-        Text("MEMBRESÍA MAISON NOIR", style = NoirLabel.copy(color = Noir.Gold))
-        Text("Elige tu experiencia cinematográfica", style = NoirSection)
+        Text("Membresía", style = NoirLabel.copy(color = Noir.Gold))
+        Text("Elige tu plan", style = NoirSection)
         Spacer(Modifier.height(12.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             plans.take(3).forEach { p ->
                 Column(Modifier.weight(1f).background(Noir.Raised, RoundedCornerShape(6.dp))
                     .border(1.dp, if (p.recommended) Noir.Gold else Noir.Line, RoundedCornerShape(6.dp)).padding(10.dp),
                     horizontalAlignment = Alignment.CenterHorizontally) {
-                    if (p.recommended) Text("RECOMENDADO", style = NoirLabel.copy(color = Noir.Gold, fontSize = 8.sp))
+                    if (p.recommended) Text("Recomendado", style = NoirLabel.copy(color = Noir.Gold, fontSize = 8.sp))
                     Text(p.name, color = Noir.Text, fontSize = 12.sp)
                     Text("$" + "%.2f".format(p.price), color = Noir.Gold, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
                 }
@@ -451,7 +450,7 @@ fun Grid(list: List<Title>, empty: String = "No hay resultados", onOpen: (Title)
     }
     LazyVerticalGrid(GridCells.Adaptive(108.dp), contentPadding = PaddingValues(16.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        items(list, key = { it.id }) { PosterCard(it, { onOpen(it) }, Modifier) }
+        gridItems(list, key = { it.id }) { PosterCard(it, { onOpen(it) }, Modifier) }
     }
 }
 
@@ -509,7 +508,7 @@ fun DetailScreen(api: PelisApi, nav: NavHostController, kind: String, id: String
                     AsyncImage(t.backdrop, t.name, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
                     Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Noir.Ink.copy(alpha = 0.6f), Color.Transparent, Noir.Ink))))
                     TopBar(nav, back = true)
-                    Box(Modifier.align(Alignment.BottomStart).padding(16.dp)) { Badge("Estreno exclusivo Maison Noir", gold = true) }
+                    Box(Modifier.align(Alignment.BottomStart).padding(16.dp)) { Badge("Estreno", gold = true) }
                 }
             }
             item {
@@ -576,22 +575,46 @@ fun DetailScreen(api: PelisApi, nav: NavHostController, kind: String, id: String
 fun ChannelsScreen(api: PelisApi) {
     val ctx = LocalContext.current
     var cat by remember { mutableStateOf<String?>(null) }
-    val data = rememberLoad(Unit) { api.channels().filter { it.online } }
-    LoadBox(data) { all ->
-        val cats = all.map { it.category }.distinct()
-        val list = all.filter { cat == null || it.category == cat }
-        Column(Modifier.fillMaxSize().statusBarsPadding()) {
-            Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text("TV en vivo", style = NoirTitle); Spacer(Modifier.width(8.dp)); Badge("${all.size} canales", gold = true)
-            }
-            LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                item { Chip("Todos", cat == null) { cat = null } }
-                items(cats) { c -> Chip(c, cat == c) { cat = c } }
-            }
-            LazyVerticalGrid(GridCells.Adaptive(160.dp), contentPadding = PaddingValues(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                items(list, key = { it.id }) { ch ->
-                    ChannelCard(ch, { PlaybackIntent.start(ctx, PlayerActivity::class.java, PlaybackRequest(api.channelStreamUrl(ch.id), ch.name, live = true)) }, Modifier)
+    val cats = rememberLoad(Unit) { api.channelCategories() }
+    val pageState = remember(cat) { mutableIntStateOf(0) }
+    val pageIndex = pageState.intValue
+    val limit = pro.verpelis.core.data.PAGE_SIZE
+    val data = rememberLoad(cat, pageIndex) { api.channelsPage(pageIndex * limit, limit, cat) }
+    val names = (cats as? pro.verpelis.core.ui.Load.Ok)?.value.orEmpty()
+    Column(Modifier.fillMaxSize().statusBarsPadding()) {
+        Text("TV en vivo", style = NoirTitle, modifier = Modifier.padding(16.dp))
+        LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            item { Chip("Todos", cat == null) { cat = null } }
+            items(names) { c -> Chip(c, cat == c) { cat = c } }
+        }
+        Box(Modifier.weight(1f)) {
+            LoadBox(data) { page ->
+                if (page.items.isEmpty()) {
+                    Box(Modifier.fillMaxSize(), Alignment.Center) { Text("No hay canales", style = NoirBody) }
+                    return@LoadBox
+                }
+                LazyVerticalGrid(
+                    GridCells.Adaptive(160.dp),
+                    contentPadding = PaddingValues(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    gridItems(page.items, key = { it.id }) { ch ->
+                        ChannelCard(ch, {
+                            PlaybackIntent.start(ctx, PlayerActivity::class.java, PlaybackRequest(api.channelStreamUrl(ch.id), ch.name, live = true))
+                        }, Modifier)
+                    }
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        PageControls(
+                            page.pageNumber,
+                            page.pageCount,
+                            page.total,
+                            onPrev = { pageState.intValue = pageIndex - 1 },
+                            onNext = { pageState.intValue = pageIndex + 1 },
+                            one = "canal",
+                            many = "canales",
+                        )
+                    }
                 }
             }
         }
@@ -630,7 +653,7 @@ fun ProfileScreen(api: PelisApi, nav: NavHostController, onLogout: () -> Unit) {
                 Row(Modifier.fillMaxWidth().background(Noir.Surface, RoundedCornerShape(8.dp)).border(1.dp, if (m?.planName != null) Noir.Gold else Noir.Line, RoundedCornerShape(8.dp)).padding(14.dp),
                     verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {
-                        Text("MEMBRESÍA", style = NoirLabel)
+                        Text("Membresía", style = NoirLabel)
                         Text(if (m?.planName != null) "Suscripción activa" else "Sin suscripción activa", color = Noir.Gold, fontSize = 15.sp)
                     }
                     Text("Planes  >", color = Noir.Gold, fontSize = 13.sp, modifier = Modifier.clickable { nav.navigate("plans") })
@@ -657,7 +680,7 @@ fun PlansScreen(api: PelisApi) {
     LoadBox(data) { plans ->
         LazyColumn(Modifier.fillMaxSize().statusBarsPadding(), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             item {
-                Text("MEMBRESÍA MAISON NOIR", style = NoirLabel.copy(color = Noir.Gold))
+                Text("Membresía", style = NoirLabel.copy(color = Noir.Gold))
                 Text("Elige tu plan", style = NoirTitle)
                 Text("Cancela cuando quieras. El pago se completa de forma segura en el navegador.", style = NoirBody)
             }

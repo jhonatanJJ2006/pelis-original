@@ -31,24 +31,37 @@ interface HomePageClientProps {
   preloaded: {
     featured: PreloadedQuery<MediaItem[]>;
     trending: PreloadedQuery<MediaItem[]>;
-    movies: PreloadedQuery<MediaItem[]>;
     series: PreloadedQuery<MediaItem[]>;
     genres: PreloadedQuery<string[]>;
   };
 }
 
+/** Fila de un género: pide solo 12 títulos, no el catálogo entero. */
+function HomeGenreRow({ genre }: { genre: string }) {
+  const movies = useQuery<MediaItem[]>(api.movies.getByGenre, { genre, limit: 12 }) as
+    MediaItem[] | undefined;
+  if (movies && movies.length === 0) return null;
+  return (
+    <MovieRow
+      title={genre}
+      movies={movies}
+      isLoading={movies === undefined}
+      href={`/movies?genre=${encodeURIComponent(genre)}`}
+    />
+  );
+}
+
 export function HomePageClient({ preloaded }: HomePageClientProps) {
   const { user, isLoading: authLoading } = useUser();
-  const liveMovies = useQuery<MediaItem[]>(api.movies.list, {}) as MediaItem[] | undefined;
   const liveFeatured = useQuery<MediaItem[]>(api.movies.getFeatured, {}) as MediaItem[] | undefined;
   const liveTrending = useQuery<MediaItem[]>(api.movies.getTrending, {}) as MediaItem[] | undefined;
-  const liveSeries = useQuery<MediaItem[]>(api.movies.listSeries, {}) as MediaItem[] | undefined;
+  const liveSeries = useQuery<MediaItem[]>(api.movies.listSeries, { limit: 18 }) as
+    MediaItem[] | undefined;
   const liveGenres = useQuery<string[]>(api.movies.getGenres, {}) as string[] | undefined;
   const continueWatching = useQuery<
     Array<{ _id: string; progress: number; duration: number; movie: MediaItem }>
   >(api.history.getContinueWatching, user ? { userId: user._id as any, limit: 10 } : 'skip');
 
-  const movies = liveMovies ?? preloaded.movies.data;
   const featuredMovies = liveFeatured ?? preloaded.featured.data;
   const trending = liveTrending ?? preloaded.trending.data;
   const series = liveSeries ?? preloaded.series.data;
@@ -63,7 +76,7 @@ export function HomePageClient({ preloaded }: HomePageClientProps) {
       ? playableFeatured
       : featuredMovies === undefined
         ? undefined
-        : (playableOnly(trending) ?? playableOnly(movies) ?? []).slice(0, 5);
+        : (playableOnly(trending) ?? []).slice(0, 5);
 
   // Visitantes: landing. Con sesión: catálogo de inicio.
   if (authLoading) {
@@ -145,27 +158,9 @@ export function HomePageClient({ preloaded }: HomePageClientProps) {
           linkLabel="Ver series"
         />
 
-        {topGenres.map((genre) => {
-          const genreMovies = (movies ?? [])
-            .filter((m) =>
-              (m.genre ?? '')
-                .split(',')
-                .map((g) => g.trim())
-                .includes(genre)
-            )
-            .slice(0, 12);
-          if (genreMovies.length === 0 && movies !== undefined) return null;
-          return (
-            <div key={genre}>
-              <MovieRow
-                title={genre}
-                movies={genreMovies}
-                isLoading={movies === undefined}
-                href={`/movies?genre=${encodeURIComponent(genre)}`}
-              />
-            </div>
-          );
-        })}
+        {topGenres.map((genre) => (
+          <HomeGenreRow key={genre} genre={genre} />
+        ))}
 
         <section className="space-y-4">
           <SectionHeader

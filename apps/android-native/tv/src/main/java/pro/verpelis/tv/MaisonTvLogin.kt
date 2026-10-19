@@ -255,7 +255,7 @@ private fun MnHeader(host: String) {
         ) {
             Box(Modifier.size(5.dp).clip(CircleShape).background(Mn.Live))
             Spacer(Modifier.width(6.dp))
-            MnText(host.uppercase(), color = Mn.Variant, size = 8.sp, spacing = 1.sp, weight = FontWeight.Medium)
+            MnText(host, color = Mn.Variant, size = 8.sp, spacing = 1.sp, weight = FontWeight.Medium)
             Box(Modifier.padding(horizontal = 10.dp).width(1.dp).height(12.dp).background(Mn.Highest))
             MnGlyph(MnIcon.Clock, color = Mn.Variant, size = 11.dp)
             Spacer(Modifier.width(6.dp))
@@ -267,15 +267,15 @@ private fun MnHeader(host: String) {
 @Composable
 private fun MnHintBar(versionName: String) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(20.dp)) {
-        MnHint("◀ ▶", "CAMBIAR PANEL")
-        MnHint("OK", "SELECCIONAR", gold = true)
-        MnHint("ATRÁS", "SALIR")
+        MnHint("◀ ▶", "Cambiar panel")
+        MnHint("OK", "Seleccionar", gold = true)
+        MnHint("Atrás", "Salir")
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.clip(RoundedCornerShape(2.dp)).background(Mn.High).border(1.dp, Mn.OutlineVar, RoundedCornerShape(2.dp)).padding(horizontal = 5.dp, vertical = 2.dp)) {
                 MnGlyph(MnIcon.Keyboard, color = Mn.Outline, size = 10.dp)
             }
             Spacer(Modifier.width(7.dp))
-            MnText("TECLADO EN PANTALLA", color = Mn.Outline, size = 8.sp, spacing = 1.sp)
+            MnText("Teclado en pantalla", color = Mn.Outline, size = 8.sp, spacing = 1.sp)
         }
         Spacer(Modifier.weight(1f))
         Box(Modifier.size(4.dp).clip(CircleShape).background(Mn.GoldDeep))
@@ -377,7 +377,7 @@ fun MnQrCard(qr: ImageBitmap?, loading: Boolean, modifier: Modifier = Modifier, 
         Row(verticalAlignment = Alignment.CenterVertically) {
             MnGlyph(MnIcon.Scan, color = Mn.Outline, size = 9.dp)
             Spacer(Modifier.width(5.dp))
-            MnText("CÁMARA iOS / ANDROID", color = Mn.Outline, size = 7.sp, spacing = 1.sp)
+            MnText("Cámara iOS / Android", color = Mn.Outline, size = 7.sp, spacing = 1.sp)
         }
     }
 }
@@ -385,7 +385,7 @@ fun MnQrCard(qr: ImageBitmap?, loading: Boolean, modifier: Modifier = Modifier, 
 @Composable
 fun MnCodeCard(code: String?, badge: String, host: String, modifier: Modifier = Modifier) {
     Column(modifier) {
-        MnText("O INGRESA ESTE CÓDIGO EN TU NAVEGADOR:", color = Mn.Variant, size = 7.5.sp, spacing = 1.sp, weight = FontWeight.Medium)
+        MnText("O ingresa este código en tu navegador:", color = Mn.Variant, size = 7.5.sp, spacing = 1.sp, weight = FontWeight.Medium)
         Spacer(Modifier.height(6.dp))
         Column(
             Modifier.fillMaxWidth().clip(RoundedCornerShape(4.dp))
@@ -403,7 +403,7 @@ fun MnCodeCard(code: String?, badge: String, host: String, modifier: Modifier = 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 MnGlyph(MnIcon.Globe, color = Mn.Variant, size = 9.dp)
                 Spacer(Modifier.width(6.dp))
-                MnText("URL DIRECTA: ", color = Mn.Outline, size = 7.5.sp, family = Mn.Mono)
+                MnText("URL directa: ", color = Mn.Outline, size = 7.5.sp, family = Mn.Mono)
                 MnText("$host/link-tv", color = Mn.Text, size = 8.sp, family = Mn.Mono)
             }
         }
@@ -553,7 +553,7 @@ fun MnInputField(
             Spacer(Modifier.weight(1f))
             if (active) {
                 Box(Modifier.clip(RoundedCornerShape(2.dp)).background(Mn.High).border(1.dp, Mn.OutlineVar, RoundedCornerShape(2.dp)).padding(horizontal = 5.dp, vertical = 1.dp)) {
-                    MnText(if (editing) "ESCRIBIENDO" else "EN FOCO", color = Mn.Gold, size = 7.sp, weight = FontWeight.Bold, spacing = 1.sp)
+                    MnText(if (editing) "Escribiendo" else "En foco", color = Mn.Gold, size = 7.sp, weight = FontWeight.Bold, spacing = 1.sp)
                 }
             } else {
                 MnText("Presiona [OK] para escribir", color = Mn.Outline, size = 7.5.sp)

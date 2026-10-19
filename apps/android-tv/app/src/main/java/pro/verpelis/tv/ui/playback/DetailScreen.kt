@@ -300,7 +300,7 @@ private fun DetailContent(
                 if (d.cast.isNotBlank()) {
                     Spacer(Modifier.height(14.dp))
                     Row(verticalAlignment = Alignment.Top) {
-                        MnText("REPARTO\nPRINCIPAL", color = Mn.Outline, size = 6.5.sp, weight = FontWeight.SemiBold, spacing = 1.2.sp)
+                        MnText("Reparto\nprincipal", color = Mn.Outline, size = 6.5.sp, weight = FontWeight.SemiBold, spacing = 1.2.sp)
                         Spacer(Modifier.width(14.dp))
                         MnText(d.cast, color = Mn.Variant, size = 8.5.sp, lines = 2)
                     }

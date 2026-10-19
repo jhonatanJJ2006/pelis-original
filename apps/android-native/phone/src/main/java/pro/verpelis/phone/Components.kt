@@ -202,7 +202,15 @@ fun PagedGrid(
 }
 
 @Composable
-fun PageControls(page: Int, pages: Int, total: Int, onPrev: () -> Unit, onNext: () -> Unit) {
+fun PageControls(
+    page: Int,
+    pages: Int,
+    total: Int,
+    onPrev: () -> Unit,
+    onNext: () -> Unit,
+    one: String = "título",
+    many: String = "títulos",
+) {
     Column(Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         if (pages > 1) Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             GhostButton("‹ Anterior", { if (page > 1) onPrev() }, Modifier.alpha(if (page > 1) 1f else 0.4f))
@@ -210,6 +218,6 @@ fun PageControls(page: Int, pages: Int, total: Int, onPrev: () -> Unit, onNext: 
             GhostButton("Siguiente ›", { if (page < pages) onNext() }, Modifier.alpha(if (page < pages) 1f else 0.4f))
         }
         Spacer(Modifier.height(6.dp))
-        Text(if (total == 1) "1 título" else "$total títulos", color = Noir.Muted, fontSize = 11.sp)
+        Text(if (total == 1) "1 $one" else "$total $many", color = Noir.Muted, fontSize = 11.sp)
     }
 }

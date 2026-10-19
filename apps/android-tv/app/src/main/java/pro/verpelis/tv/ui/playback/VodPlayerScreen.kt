@@ -691,7 +691,7 @@ private fun SettingsPanel(
                 }
             }
         }
-        MnText("ATRÁS cierra el panel", color = Mn.Outline, size = 8.sp)
+        MnText("Atrás cierra el panel", color = Mn.Outline, size = 8.sp)
     }
 }
 

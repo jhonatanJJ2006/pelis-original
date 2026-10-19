@@ -377,7 +377,7 @@ fun MnQrCard(qr: ImageBitmap?, loading: Boolean, modifier: Modifier = Modifier, 
         Row(verticalAlignment = Alignment.CenterVertically) {
             MnGlyph(MnIcon.Scan, color = Mn.Outline, size = 9.dp)
             Spacer(Modifier.width(5.dp))
-            MnText("CÁMARA iOS / ANDROID", color = Mn.Outline, size = 7.sp, spacing = 1.sp)
+            MnText("Cámara iOS / Android", color = Mn.Outline, size = 7.sp, spacing = 1.sp)
         }
     }
 }

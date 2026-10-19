@@ -21,11 +21,12 @@ interface PrismaMovie {
 
 export function toMovieShape<T extends PrismaMovie>(m: T): T {
   const { id, mediaType, episodes, ...rest } = m;
+  const rawName = (rest as { name?: unknown }).name;
   const shaped = {
     ...rest,
-    ...(typeof (rest as { name?: unknown }).name === 'string'
-      ? { name: displayTitle((rest as { name: string }).name) }
-      : {}),
+    // `name` es el título para mostrar. `sourceName` es el guardado: el admin
+    // edita ese, para no reescribir la normalización en la base.
+    ...(typeof rawName === 'string' ? { name: displayTitle(rawName), sourceName: rawName } : {}),
     _id: id,
     mediaType: mediaType === 'SERIES' ? 'series' : 'movie',
     episodes: episodes ?? undefined,
@@ -45,9 +46,12 @@ interface PrismaAnime {
 
 export function toAnimeShape<T extends PrismaAnime>(a: T) {
   const { id, status, ...rest } = a;
+  const rawTitle = rest.title;
   return {
     ...rest,
-    ...(typeof rest.title === 'string' ? { title: displayTitle(rest.title) } : {}),
+    ...(typeof rawTitle === 'string'
+      ? { title: displayTitle(rawTitle), sourceTitle: rawTitle }
+      : {}),
     _id: id,
     status: status === 'ONGOING' ? 'ongoing' : 'completed',
   };

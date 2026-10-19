@@ -57,6 +57,11 @@ interface TvListResult {
   total?: number;
 }
 
+interface CatalogPage {
+  items?: MediaItem[];
+  total?: number;
+}
+
 async function load<T>(name: string, args: unknown, fallback: T): Promise<T> {
   try {
     const req = new Request('http://localhost/inicio', { headers: new Headers() });
@@ -96,11 +101,11 @@ function SectionEyebrow({ children }: { children: React.ReactNode }) {
 }
 
 export default async function InicioPage() {
-  const [featured, trending, movies, series, anime, tv, plans] = await Promise.all([
+  const [featured, trending, moviePage, seriesPage, anime, tv, plans] = await Promise.all([
     load<MediaItem[]>('movies.getFeatured', {}, []),
     load<MediaItem[]>('movies.getTrending', { limit: 18 }, []),
-    load<MediaItem[]>('movies.list', { mediaType: 'movie' }, []),
-    load<MediaItem[]>('movies.listSeries', {}, []),
+    load<CatalogPage>('movies.page', { mediaType: 'movie', limit: 1 }, {}),
+    load<CatalogPage>('movies.page', { mediaType: 'series', limit: 18 }, {}),
     load<AnimeCard[]>('anime.listSeries', {}, []),
     load<TvListResult>('tv.list', {}, {}),
     load<LandingPlan[]>('subscriptions.list', {}, []),
@@ -114,7 +119,7 @@ export default async function InicioPage() {
     [
       ...featured.map((m) => ({ src: m.image, alt: m.name })),
       ...trending.map((m) => ({ src: m.image, alt: m.name })),
-      ...series.map((m) => ({ src: m.image, alt: m.name })),
+      ...(seriesPage.items ?? []).map((m) => ({ src: m.image, alt: m.name })),
       ...topAnime.map((a) => ({ src: a.image ?? '', alt: a.title })),
     ],
     15
@@ -122,6 +127,7 @@ export default async function InicioPage() {
   const columns = [0, 1, 2, 3, 4].map((c) => collage.filter((_, i) => i % 5 === c));
 
   const movieCover = featured[0] ?? trending[0];
+  const series = seriesPage.items ?? [];
   const seriesCover = series.find((s) => s.backdropImage || s.image);
   const animeCover = topAnime[0];
   const liveCover = trending[1] ?? featured[1];
@@ -130,8 +136,8 @@ export default async function InicioPage() {
   const cheapest = landingPlans[0];
 
   const stats = [
-    { value: movies.length, label: 'Películas' },
-    { value: series.length, label: 'Series' },
+    { value: moviePage.total ?? 0, label: 'Películas' },
+    { value: seriesPage.total ?? series.length, label: 'Series' },
     { value: anime.length, label: 'Títulos de anime' },
     { value: channelTotal, label: 'Canales en vivo' },
   ].filter((s) => s.value > 0);

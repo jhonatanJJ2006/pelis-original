@@ -9,13 +9,12 @@ export default async function HomePage() {
   // but `preloadQuery` takes a Request. Build a minimal Request with empty
   // cookies — server components in Next.js 14 do not pass a Request object.
   const fakeReq = new Request('http://localhost/', { headers: new Headers() });
-  const [featured, trending, series, movies, genres] = await Promise.all([
+  const [featured, trending, series, genres] = await Promise.all([
     preloadQuery<MediaItem[]>('movies.getFeatured', {}, fakeReq),
     preloadQuery<MediaItem[]>('movies.getTrending', { limit: 12 }, fakeReq),
-    preloadQuery<MediaItem[]>('movies.listSeries', {}, fakeReq),
-    preloadQuery<MediaItem[]>('movies.list', { mediaType: 'movie' }, fakeReq),
+    preloadQuery<MediaItem[]>('movies.listSeries', { limit: 18 }, fakeReq),
     preloadQuery<string[]>('movies.getGenres', {}, fakeReq),
   ]);
 
-  return <HomePageClient preloaded={{ featured, trending, movies, series, genres }} />;
+  return <HomePageClient preloaded={{ featured, trending, series, genres }} />;
 }

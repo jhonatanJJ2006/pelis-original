@@ -26,9 +26,9 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-/** Wordmark "PELIS | MAISON NOIR" del diseño. */
+/** Wordmark PELIS. Sin subtítulo por defecto: el nombre del estilo no se muestra. */
 @Composable
-fun Wordmark(size: TextUnit = 22.sp, subtitle: String? = "MAISON NOIR", modifier: Modifier = Modifier) {
+fun Wordmark(size: TextUnit = 22.sp, subtitle: String? = null, modifier: Modifier = Modifier) {
     Row(modifier, verticalAlignment = Alignment.CenterVertically) {
         Text("PELIS", fontFamily = Noir.Display, fontWeight = FontWeight.Bold, fontSize = size, color = Noir.Gold, letterSpacing = 1.5.sp)
         if (subtitle != null) {
@@ -38,13 +38,13 @@ fun Wordmark(size: TextUnit = 22.sp, subtitle: String? = "MAISON NOIR", modifier
     }
 }
 
-/** Etiqueta tipo "ESTRENO EXCLUSIVO" / "4K UHD". */
+/** Etiqueta corta. El texto se muestra como llega (tipo oración), sin forzar mayúsculas. */
 @Composable
 fun Badge(text: String, gold: Boolean = false, danger: Boolean = false) {
     val bg = when { danger -> Noir.Burgundy; gold -> Noir.Gold.copy(alpha = 0.16f); else -> Noir.Raised }
     val fg = when { danger -> Noir.Text; gold -> Noir.Gold; else -> Noir.Text }
     Text(
-        text.uppercase(), color = fg, fontSize = 10.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.8.sp,
+        text, color = fg, fontSize = 10.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.4.sp,
         modifier = Modifier.background(bg, RoundedCornerShape(3.dp))
             .then(if (gold) Modifier.border(1.dp, Noir.Gold.copy(alpha = 0.6f), RoundedCornerShape(3.dp)) else Modifier)
             .padding(horizontal = 7.dp, vertical = 3.dp),
@@ -82,7 +82,7 @@ fun EpisodePicker(
     itemModifier: @Composable (Int) -> Modifier = { Modifier },
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text("TEMPORADAS Y EPISODIOS", style = NoirLabel)
+        Text("Temporadas y episodios", style = NoirLabel)
         if (seasons > 1) LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             items((1..seasons).toList()) { s ->
                 Text("Temporada $s", color = if (s == season) Noir.Ink else Noir.Text, fontSize = 13.sp,
