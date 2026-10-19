@@ -61,7 +61,7 @@ fun SettingsScreen(onBack: () -> Unit, onNeedLogin: () -> Unit = {}) {
     val me = MeCache.me
 
     Column(Modifier.fillMaxSize().padding(start = 32.dp, end = 32.dp, top = 18.dp, bottom = 14.dp)) {
-        TvHeader(title = "Ajustes", eyebrow = "ESTE TELEVISOR")
+        TvHeader(title = "Ajustes", eyebrow = "Este televisor")
         Spacer(Modifier.height(14.dp))
         Row(Modifier.weight(1f).padding(start = 6.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {

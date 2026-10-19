@@ -67,7 +67,7 @@ fun UpdateModal(
                 .padding(32.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            Text("ACTUALIZACIÓN", style = MaisonType.Eyebrow)
+            Text("Actualización", style = MaisonType.Eyebrow)
             when (mode) {
                 UpdateMode.Update -> {
                     Text("Nueva versión de Pelis TV$version", style = MaisonType.Title.copy(fontSize = 22.sp, color = MaisonNoir.Chalk))

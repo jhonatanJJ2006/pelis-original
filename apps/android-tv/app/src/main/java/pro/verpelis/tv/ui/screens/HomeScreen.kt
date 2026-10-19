@@ -268,22 +268,19 @@ private fun HomeHero(title: TitleDto, focus: FocusRequester, modifier: Modifier 
     val context = LocalContext.current
     val uiSounds = LocalUiSounds.current
     val lowRam = (context.applicationContext as? pro.verpelis.tv.PelisTvApp)?.lowRam == true
-    val request = remember(title.backdropImage, title.image, lowRam) {
-        val width = if (lowRam) TvImages.BACKDROP_WIDTH_LOW_RAM else TvImages.BACKDROP_WIDTH
-        ImageRequest.Builder(context)
-            .data(TvImages.sized(BuildConfig.API_BASE_URL, title.backdropImage ?: title.image, width))
-            .size(width, width * 9 / 16)
-            .build()
+    // Solo fondos horizontales (nunca el póster estirado), al ancho real de la pantalla.
+    val request = remember(title.backdropImage, lowRam) {
+        TvImages.backdropRequest(context, BuildConfig.API_BASE_URL, title.backdropImage, lowRam)
     }
     Box(modifier.fillMaxWidth().height(318.dp)) {
-        AsyncImage(request, null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+        if (request != null) AsyncImage(request, null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
         Box(Modifier.fillMaxSize().background(Brush.horizontalGradient(0f to Mn.Bg, 0.45f to Mn.Bg.copy(alpha = 0.85f), 1f to Mn.Bg.copy(alpha = 0.1f))))
         Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0f to Mn.Bg.copy(alpha = 0.6f), 0.25f to Color.Transparent, 0.7f to Color.Transparent, 1f to Mn.Bg)))
         Column(Modifier.fillMaxSize().padding(start = 32.dp, end = 40.dp, top = 20.dp)) {
             TvHeader(null)
             Spacer(Modifier.weight(1f))
             Column(Modifier.width(460.dp)) {
-                MnText("DESTACADO", color = Mn.Gold, size = 8.sp, weight = FontWeight.SemiBold, spacing = 2.sp)
+                MnText("Destacado", color = Mn.Gold, size = 8.sp, weight = FontWeight.SemiBold, spacing = 2.sp)
                 Spacer(Modifier.height(6.dp))
                 MnText(title.displayName, color = Mn.Text, size = 30.sp, family = Mn.Serif, lines = 2)
                 Spacer(Modifier.height(6.dp))

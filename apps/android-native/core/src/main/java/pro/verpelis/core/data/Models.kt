@@ -40,7 +40,34 @@ internal fun JSONObject.str(key: String): String? =
 
 internal fun JSONArray.objects(): List<JSONObject> = (0 until length()).mapNotNull { optJSONObject(it) }
 
+/** Página del servidor: { items, total, offset, limit, hasMore }. */
+data class Page<T>(val items: List<T>, val total: Int, val offset: Int, val limit: Int, val hasMore: Boolean) {
+    val pageCount: Int get() = if (limit <= 0) 1 else maxOf(1, (total + limit - 1) / limit)
+    val pageNumber: Int get() = if (limit <= 0) 1 else offset / limit + 1
+}
+
 object Parse {
+    /** Ancho del fondo: 1080 en el celular, 1920 en la TV (lo fija cada app al arrancar). */
+    @Volatile var backdropWidth: Int = 1080
+    private val NEXT_WIDTHS = intArrayOf(64, 96, 128, 256, 384, 640, 750, 828, 1080, 1200, 1920)
+
+    /**
+     * Imágenes propias (/uploads, /peliculas) por el optimizador de Next al ancho pedido:
+     * nada de originales de 2 MB en el celular ni pósters estirados en el hero.
+     */
+    fun sized(base: String, url: String?, width: Int): String? {
+        val u = url?.trim()?.takeIf { it.isNotEmpty() } ?: return null
+        val path = when {
+            u.startsWith(base) -> u.removePrefix(base)
+            u.startsWith("http") -> return u
+            u.startsWith("/") -> u
+            else -> "/$u"
+        }
+        if (!path.startsWith("/uploads/") && !path.startsWith("/peliculas/")) return base + path
+        val w = NEXT_WIDTHS.firstOrNull { it >= width } ?: NEXT_WIDTHS.last()
+        return "$base/_next/image?url=" + java.net.URLEncoder.encode(path, "UTF-8") + "&w=$w&q=75"
+    }
+
     fun absolute(base: String, url: String?): String? = when {
         url.isNullOrBlank() -> null
         url.startsWith("http") -> url
@@ -57,8 +84,9 @@ object Parse {
         return Title(
             id = o.str("_id") ?: o.str("id") ?: "",
             name = o.str("name") ?: o.str("title") ?: "",
-            poster = absolute(base, o.str("image")),
-            backdrop = absolute(base, o.str("backdropImage") ?: o.str("image")),
+            poster = sized(base, o.str("image"), 384),
+            // Fondo horizontal a ancho de pantalla; sin fondo, el póster grande (nunca la miniatura).
+            backdrop = o.str("backdropImage")?.let { sized(base, it, backdropWidth) } ?: sized(base, o.str("image"), 780),
             synopsis = o.str("synopsis") ?: "",
             genre = o.optJSONArray("genre")?.let { a -> (0 until a.length()).joinToString(", ") { a.optString(it) } } ?: o.str("genre") ?: "",
             year = o.str("releaseYear") ?: o.opt("year")?.toString() ?: "",

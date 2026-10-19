@@ -141,8 +141,8 @@ fun PhoneApp(startRoute: String = "home") {
             composable("anime") { AnimeScreen(api, nav) }
             composable("tv") { ChannelsScreen(api) }
             composable("profile") { ProfileScreen(api, nav) { loggedIn = false } }
-            composable("list") { SimpleListScreen("Mi lista", "Aún no guardaste títulos", api, nav) { api.favorites() } }
-            composable("history") { SimpleListScreen("Historial", "Todavía no viste nada", api, nav) { api.history() } }
+            composable("list") { SimpleListScreen("Mi lista", "Aún no guardaste títulos", api, nav) { o, l -> api.favoritesPage(o, l) } }
+            composable("history") { SimpleListScreen("Historial", "Todavía no viste nada", api, nav) { o, l -> api.historyPage(o, l) } }
             composable("plans") { PlansScreen(api) }
             composable("detail/{kind}/{id}") { e ->
                 DetailScreen(api, nav, e.arguments?.getString("kind") ?: "movie", e.arguments?.getString("id") ?: "")
@@ -396,14 +396,9 @@ fun SearchScreen(api: PelisApi, nav: NavHostController) {
     var genre by remember { mutableStateOf<String?>(null) }
     var mode by remember { mutableIntStateOf(0) }
     val genres = rememberLoad(Unit) { api.genres() }
-    val results = rememberLoad(q, genre, mode) {
-        delay(300)
-        when {
-            q.length >= 2 -> api.search(q)
-            mode == 1 -> api.series()
-            else -> api.movies(genre, limit = 60)
-        }
-    }
+    // Búsqueda con espera corta; sin texto se ven las películas populares (paginadas).
+    var debounced by remember { mutableStateOf("") }
+    LaunchedEffect(q) { delay(300); debounced = q.trim() }
     Column(Modifier.fillMaxSize().statusBarsPadding()) {
         Text("Buscar", style = NoirTitle, modifier = Modifier.padding(start = 16.dp, top = 12.dp))
         OutlinedTextField(q, { q = it }, placeholder = { Text("Películas, series, actores") }, singleLine = true, colors = noirFieldColors(),
@@ -418,7 +413,22 @@ fun SearchScreen(api: PelisApi, nav: NavHostController) {
                 items(genres.value) { g -> Chip(g, genre == g) { genre = g } }
             }
         } else Spacer(Modifier.height(12.dp))
-        LoadBox(results) { list -> Grid(list, if (q.length >= 2) "Sin resultados para \"$q\"" else "No hay títulos") { nav.open(it) } }
+        val searching = debounced.length >= 2
+        if (!searching && mode == 0 && genre == null) {
+            Text("Películas populares", style = NoirSection, modifier = Modifier.padding(horizontal = 16.dp))
+        }
+        PagedGrid(
+            key = Triple(debounced.takeIf { searching }, genre, mode),
+            empty = if (searching) "Sin resultados para \"$debounced\"" else "No hay títulos",
+            onOpen = { nav.open(it) },
+        ) { offset, limit ->
+            when {
+                searching -> api.moviesPage(offset, limit, mediaType = null, search = debounced)
+                mode == 1 -> api.moviesPage(offset, limit, mediaType = "series")
+                genre != null -> api.moviesPage(offset, limit, genre = genre)
+                else -> api.moviesPage(offset, limit, sort = "popular")
+            }
+        }
     }
 }
 
@@ -448,14 +458,17 @@ fun Grid(list: List<Title>, empty: String = "No hay resultados", onOpen: (Title)
 @Composable
 fun AnimeScreen(api: PelisApi, nav: NavHostController) {
     var q by remember { mutableStateOf("") }
-    val data = rememberLoad(q) { delay(300); if (q.length >= 2) api.searchAnime(q) else api.animeList() }
+    var debounced by remember { mutableStateOf("") }
+    LaunchedEffect(q) { delay(300); debounced = q.trim() }
     Column(Modifier.fillMaxSize().statusBarsPadding()) {
         Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Text("Anime", style = NoirTitle); Spacer(Modifier.width(8.dp)); Badge("Simulcast", gold = true)
         }
         OutlinedTextField(q, { q = it }, placeholder = { Text("Buscar anime") }, singleLine = true, colors = noirFieldColors(),
             leadingIcon = { Icon(Icons.Filled.Search, null, tint = Noir.Muted) }, modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp))
-        LoadBox(data) { Grid(it) { t -> nav.open(t) } }
+        PagedGrid(debounced, if (debounced.length >= 2) "Sin resultados para \"$debounced\"" else "No hay anime", { t -> nav.open(t) }) { offset, limit ->
+            api.animePage(offset, limit, search = debounced.takeIf { it.length >= 2 })
+        }
     }
 }
 
@@ -586,12 +599,11 @@ fun ChannelsScreen(api: PelisApi) {
 }
 
 @Composable
-fun SimpleListScreen(title: String, empty: String, api: PelisApi, nav: NavHostController, load: suspend () -> List<Title>) {
-    val data = rememberLoad(title) { load() }
+fun SimpleListScreen(title: String, empty: String, api: PelisApi, nav: NavHostController, load: suspend (Int, Int) -> pro.verpelis.core.data.Page<Title>) {
     Column(Modifier.fillMaxSize()) {
         TopBar(nav, back = true)
         Text(title, style = NoirTitle, modifier = Modifier.padding(horizontal = 16.dp))
-        LoadBox(data) { Grid(it.distinctBy { t -> t.id }, empty) { t -> nav.open(t) } }
+        PagedGrid(title, empty, { t -> nav.open(t) }) { o, l -> load(o, l) }
     }
 }
 

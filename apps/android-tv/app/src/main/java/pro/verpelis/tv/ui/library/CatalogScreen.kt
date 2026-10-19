@@ -48,6 +48,9 @@ private class CatalogState {
     var genres by mutableStateOf<List<String>>(emptyList())
     var genre by mutableStateOf<String?>(null)
     var hasMore by mutableStateOf(true)
+    var total by mutableStateOf(-1)
+    /** Índice del póster enfocado: alimenta el indicador «Página x de y». */
+    var focusedIndex by mutableStateOf(0)
     var loading by mutableStateOf(false)
     var error by mutableStateOf<Throwable?>(null)
     var at = System.currentTimeMillis()
@@ -61,8 +64,9 @@ private class CatalogState {
             .onSuccess { page ->
                 if (forGenre == genre) {
                     val seen = items.mapTo(HashSet()) { it.id }
-                    items.addAll(page.map { it.toCatalogItem() }.filter { seen.add(it.id) })
-                    hasMore = page.size >= CATALOG_PAGE
+                    items.addAll(page.items.map { it.toCatalogItem() }.filter { seen.add(it.id) })
+                    total = page.total
+                    hasMore = page.hasMore && page.items.isNotEmpty()
                 }
             }
             .onFailure { error = it }
@@ -73,6 +77,8 @@ private class CatalogState {
         genre = newGenre
         items.clear()
         hasMore = true
+        total = -1
+        focusedIndex = 0
         error = null
     }
 }
@@ -130,10 +136,10 @@ fun CatalogScreen(kind: CatalogKind, onOpenTitle: (TitleKind, String) -> Unit) {
     Column(Modifier.fillMaxSize().padding(start = 32.dp, end = 32.dp, top = 18.dp, bottom = 14.dp)) {
         TvHeader(
             title = kind.title,
-            eyebrow = "CATÁLOGO",
+            eyebrow = "Catálogo",
             trailing = {
-                val n = state.items.size
-                if (n > 0 && !state.hasMore) TvHeaderChip(if (n == 1) "1 título" else "$n títulos")
+                val total = state.total
+                if (total > 0) TvHeaderChip(pageIndicator(state.focusedIndex, total))
             },
         )
         Spacer(Modifier.height(4.dp))
@@ -162,6 +168,7 @@ fun CatalogScreen(kind: CatalogKind, onOpenTitle: (TitleKind, String) -> Unit) {
                 firstFocus = firstPoster,
                 state = gridState,
                 onNearEnd = { scope.launch { state.loadMore(repo, kind) } },
+                onFocusIndex = { state.focusedIndex = it },
                 footer = state.loading && state.items.isNotEmpty(),
                 header = chips,
                 empty = when {
@@ -180,4 +187,12 @@ fun CatalogScreen(kind: CatalogKind, onOpenTitle: (TitleKind, String) -> Unit) {
         Spacer(Modifier.height(8.dp))
         TvHintBar(listOf(TvHints.Select, TvHints.Move, TvHint("◀", "Menú"), TvHints.Back))
     }
+}
+
+/** «Página 2 de 7 · 312 títulos» según el póster enfocado (las páginas se cargan solas al llegar al final). */
+fun pageIndicator(focusedIndex: Int, total: Int, pageSize: Int = CATALOG_PAGE): String {
+    val pages = maxOf(1, (total + pageSize - 1) / pageSize)
+    val page = (focusedIndex / pageSize + 1).coerceIn(1, pages)
+    val n = if (total == 1) "1 título" else "$total títulos"
+    return "Página $page de $pages · $n"
 }

@@ -49,8 +49,8 @@ data class TvHint(val key: String, val label: String, val gold: Boolean = false)
 object TvHints {
     val Select = TvHint("OK", "Seleccionar", gold = true)
     val Move = TvHint("◀ ▶ ▲ ▼", "Moverse")
-    val Back = TvHint("ATRÁS", "Volver")
-    val Exit = TvHint("ATRÁS", "Salir")
+    val Back = TvHint("Atrás", "Volver")
+    val Exit = TvHint("Atrás", "Salir")
 }
 
 /** Barra inferior de ayudas del control remoto, compartida por todas las pantallas. */
@@ -96,7 +96,7 @@ fun TvLoadError(
     title: String = "No pudimos cargar el contenido",
     message: String = "Revisa la conexión a internet de tu TV e inténtalo de nuevo.",
     detail: String? = null,
-    eyebrow: String = "ERROR DE CARGA",
+    eyebrow: String = "Error de carga",
     showConnectionCheck: Boolean = true,
     retryFocus: FocusRequester = remember { FocusRequester() },
     extraActions: @Composable () -> Unit = {},

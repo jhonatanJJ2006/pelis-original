@@ -16,8 +16,28 @@ object TvImages {
     private val NEXT_WIDTHS = intArrayOf(64, 96, 128, 256, 384, 640, 750, 828, 1080, 1200, 1920)
 
     const val POSTER_WIDTH = 256
-    const val BACKDROP_WIDTH = 1080
-    const val BACKDROP_WIDTH_LOW_RAM = 640
+    /** Fondo a pantalla completa: 1920 px (Full HD). Antes 1080/640 y se veía pixelado al estirarlo. */
+    const val BACKDROP_WIDTH = 1920
+    /** TV box con poca RAM: 1200 px + RGB_565 (≈2,8 MB de bitmap), sin cargar nunca el original. */
+    const val BACKDROP_WIDTH_LOW_RAM = 1200
+
+    /** Ancho del fondo para esta pantalla: el ancho real en píxeles, con tope según la RAM. */
+    fun backdropWidth(context: android.content.Context, lowRam: Boolean): Int {
+        val screen = context.resources.displayMetrics.widthPixels.coerceAtLeast(640)
+        return nextWidth(minOf(screen, if (lowRam) BACKDROP_WIDTH_LOW_RAM else BACKDROP_WIDTH))
+    }
+
+    /** Petición de Coil para un fondo horizontal decodificado al tamaño de la pantalla. */
+    fun backdropRequest(context: android.content.Context, base: String, raw: String?, lowRam: Boolean): coil.request.ImageRequest? {
+        val url = sized(base, raw, backdropWidth(context, lowRam)) ?: return null
+        val w = backdropWidth(context, lowRam)
+        return coil.request.ImageRequest.Builder(context)
+            .data(url)
+            .size(w, w * 9 / 16)
+            .precision(coil.size.Precision.INEXACT)
+            .allowRgb565(lowRam)
+            .build()
+    }
     private const val QUALITY = 70
 
     fun nextWidth(px: Int): Int = NEXT_WIDTHS.firstOrNull { it >= px } ?: NEXT_WIDTHS.last()
@@ -37,7 +57,8 @@ object TvImages {
             value.startsWith("http://") || value.startsWith("https://") -> return value
             else -> "/$value"
         }
-        if (!path.startsWith("/uploads/")) return root + path
+        // /uploads y /peliculas pasan por el optimizador: nunca se baja el original a la TV.
+        if (!path.startsWith("/uploads/") && !path.startsWith("/peliculas/")) return root + path
         val encoded = URLEncoder.encode(path, "UTF-8")
         return "$root/_next/image?url=$encoded&w=${nextWidth(widthPx)}&q=$QUALITY"
     }

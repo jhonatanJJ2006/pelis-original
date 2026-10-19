@@ -81,7 +81,7 @@ fun NetflixLoginFrame(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             pro.verpelis.tv.ui.components.PelisLogo(26.sp, 6.sp)
-            MnText("MAISON NOIR · ANDROID TV", color = Mn.Outline, size = 7.5.sp, spacing = 2.sp)
+            MnText("Android TV", color = Mn.Outline, size = 7.5.sp, spacing = 2.sp)
             Spacer(Modifier.weight(0.7f))
             content()
             Spacer(Modifier.weight(1f))
@@ -191,7 +191,7 @@ fun PhoneLoginCard(
         ) {
             Box(Modifier.size(4.dp).clip(CircleShape).background(Mn.OnGold))
             Spacer(Modifier.width(4.dp))
-            MnText("RECOMENDADO", color = Mn.OnGold, size = 7.sp, weight = FontWeight.Bold, spacing = 1.sp)
+            MnText("Recomendado", color = Mn.OnGold, size = 7.sp, weight = FontWeight.Bold, spacing = 1.sp)
         }
     }
 }

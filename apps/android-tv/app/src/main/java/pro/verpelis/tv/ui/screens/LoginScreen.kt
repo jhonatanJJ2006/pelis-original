@@ -389,7 +389,7 @@ fun LoginScreen(
                     }
                 }
                 LoginMode.SignIn -> FormPanel(
-                    eyebrow = "CON TU CUENTA",
+                    eyebrow = "Con tu cuenta",
                     title = "Correo y contraseña",
                     subtitle = "Pulsa OK en un campo para escribir con el teclado de la TV.",
                 ) {
@@ -405,7 +405,7 @@ fun LoginScreen(
                     )
                     FormError(error)
                     Spacer(Modifier.height(14.dp))
-                    MnPrimaryButton(if (busy) "ENTRANDO…" else "INICIAR SESIÓN", onClick = {
+                    MnPrimaryButton(if (busy) "Entrando…" else "Iniciar sesión", onClick = {
                         uiSounds.playClick()
                         submitSignIn()
                     })
@@ -417,7 +417,7 @@ fun LoginScreen(
                     }
                 }
                 LoginMode.SignUp -> FormPanel(
-                    eyebrow = "NUEVA CUENTA",
+                    eyebrow = "Nueva cuenta",
                     title = "Crear cuenta",
                     subtitle = "La contraseña debe tener al menos 8 caracteres.",
                 ) {
@@ -438,7 +438,7 @@ fun LoginScreen(
                     )
                     FormError(error)
                     Spacer(Modifier.height(10.dp))
-                    MnPrimaryButton(if (busy) "CREANDO…" else "CREAR CUENTA", onClick = {
+                    MnPrimaryButton(if (busy) "Creando…" else "Crear cuenta", onClick = {
                         uiSounds.playClick()
                         submitSignUp()
                     })
@@ -450,7 +450,7 @@ fun LoginScreen(
                     }
                 }
                 LoginMode.VerifyOtp -> FormPanel(
-                    eyebrow = "VERIFICACIÓN",
+                    eyebrow = "Verificación",
                     title = "Verifica tu correo",
                     subtitle = "Enviamos un código de 6 dígitos a $email. Al verificar, entras automáticamente.",
                 ) {
@@ -465,13 +465,13 @@ fun LoginScreen(
                         MnStatusLine(otpStatus, isError = false)
                     }
                     Spacer(Modifier.height(14.dp))
-                    MnPrimaryButton(if (busy) "VERIFICANDO…" else "VERIFICAR", onClick = {
+                    MnPrimaryButton(if (busy) "Verificando…" else "Verificar", onClick = {
                         uiSounds.playClick()
                         submitOtp()
                     })
                     Spacer(Modifier.height(10.dp))
                     MnOutlineButton(
-                        label = if (resendCooldown > 0) "REENVIAR (${resendCooldown}s)" else "REENVIAR CÓDIGO",
+                        label = if (resendCooldown > 0) "Reenviar (${resendCooldown}s)" else "Reenviar código",
                         icon = MnIcon.Refresh,
                         onClick = {
                             uiSounds.playClick()
@@ -518,7 +518,7 @@ private fun SignedInPanel(onGoLive: () -> Unit, onSignOut: () -> Unit) {
             .padding(28.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Text("SESIÓN", color = MaisonNoir.Ash, fontSize = 12.sp)
+        Text("Sesión", color = MaisonNoir.Ash, fontSize = 12.sp)
         Text("Activa en este televisor", color = MaisonNoir.Gold, fontSize = 28.sp, fontFamily = FontFamily.Serif)
         Text("Puedes cerrar sesión o volver a los canales en vivo.", color = MaisonNoir.Silver)
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
