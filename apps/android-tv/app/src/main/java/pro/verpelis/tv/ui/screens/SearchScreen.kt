@@ -177,10 +177,8 @@ fun SearchScreen(
     val hasResults = query.trim().length >= 2 && (showTitles || showAnime || showChannels)
     val firstRow = when { showTitles -> "titles"; showAnime -> "anime"; else -> "channels" }
     // ▲ desde la primera fila de resultados va a los filtros (no al teclado).
-    val upToChips = Modifier.onPreviewKeyEvent { e ->
-        e.type == KeyEventType.KeyDown && e.key == Key.DirectionUp && runCatching { chipsFocus.requestFocus() }.isSuccess
-    }
-    fun rowMod(key: String) = if (key == firstRow) upToChips else Modifier
+    var firstRowFocused by remember { mutableStateOf(false) }
+    fun rowMod(key: String) = if (key == firstRow) Modifier.onFocusChanged { firstRowFocused = it.hasFocus } else Modifier
     // ► desde la última tecla de cada fila va a los resultados (los filtros quedan con ▲/▼).
     val toResults: () -> Boolean = { if (hasResults) runCatching { resultsFocus.requestFocus() }; true }
     LaunchedEffect(focusResults, hasResults) {
@@ -233,17 +231,23 @@ fun SearchScreen(
                     }
                 }
                 Spacer(Modifier.height(6.dp))
-                Box(Modifier.weight(1f).fillMaxWidth()) {
+                Box(
+                    Modifier.weight(1f).fillMaxWidth().onPreviewKeyEvent { e ->
+                        // ▲ desde la primera fila de resultados va a los filtros (no al teclado).
+                        firstRowFocused && e.type == KeyEventType.KeyDown && e.key == Key.DirectionUp &&
+                            runCatching { chipsFocus.requestFocus() }.isSuccess
+                    },
+                ) {
                     when {
                         query.trim().length < 2 -> SearchHint("Escribe al menos 2 letras con el teclado de la izquierda.")
                         searching && !showTitles && !showAnime && !showChannels -> NoirSpinner(Modifier.align(Alignment.Center))
                         !showTitles && !showAnime && !showChannels -> SearchHint("No encontramos resultados para “${query.trim()}”.")
                         else -> LazyColumn(contentPadding = PaddingValues(top = 4.dp, bottom = 16.dp), modifier = Modifier.fillMaxSize()) {
                             if (showTitles) item(key = "titles") {
-                                Box(rowMod("titles")) { CatalogRow(title = "Películas y series", items = titles, onOpen = { onOpenTitle(if (it.mediaType == "series") TitleKind.SERIES else TitleKind.MOVIE, it.id) }, firstItemFocus = if (firstRow == "titles") resultsFocus else null) }
+                                CatalogRow(modifier = rowMod("titles"), title = "Películas y series", items = titles, onOpen = { onOpenTitle(if (it.mediaType == "series") TitleKind.SERIES else TitleKind.MOVIE, it.id) }, firstItemFocus = if (firstRow == "titles") resultsFocus else null)
                             }
                             if (showAnime) item(key = "anime") {
-                                Box(rowMod("anime")) { CatalogRow(title = "Anime", items = anime, onOpen = { onOpenTitle(TitleKind.ANIME, it.id) }, firstItemFocus = if (firstRow == "anime") resultsFocus else null) }
+                                CatalogRow(modifier = rowMod("anime"), title = "Anime", items = anime, onOpen = { onOpenTitle(TitleKind.ANIME, it.id) }, firstItemFocus = if (firstRow == "anime") resultsFocus else null)
                             }
                             if (showChannels) item(key = "channels") {
                                 Column(rowMod("channels").padding(vertical = 8.dp)) {
