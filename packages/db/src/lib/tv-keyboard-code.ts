@@ -7,7 +7,7 @@ export const TV_KEYBOARD_MAX_TEXT = 80;
 /** Escrituras máximas por sesión (cada pulsación del celular es una). */
 export const TV_KEYBOARD_MAX_UPDATES = 2000;
 /** Sesiones nuevas por IP y hora. */
-export const TV_KEYBOARD_CREATE_PER_HOUR = 30;
+export const TV_KEYBOARD_CREATE_PER_HOUR = 60;
 
 /**
  * Deja el texto listo para guardar: sin caracteres de control, espacios

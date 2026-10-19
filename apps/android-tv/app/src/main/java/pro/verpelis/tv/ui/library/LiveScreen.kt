@@ -89,6 +89,7 @@ fun LiveScreen(onPlayChannel: (TvChannel) -> Unit) {
             .onFailure { s.error = it }
         s.loading = false
     }
+    val chipFilter = rememberChipFocusFilter()
     fun select(cat: String?) {
         if (s.category == cat) return
         s.category = cat
@@ -146,8 +147,8 @@ fun LiveScreen(onPlayChannel: (TvChannel) -> Unit) {
                 ) {
                     item(key = "cats", span = { GridItemSpan(maxLineSpan) }, contentType = "header") {
                         LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(horizontal = 2.dp, vertical = 4.dp)) {
-                            item(key = "all") { NoirButton("Todos", { sounds.playClick(); select(null) }, selected = s.category == null) }
-                            items(s.categories, key = { it }) { c -> NoirButton(c, { sounds.playClick(); select(c) }, selected = s.category == c) }
+                            item(key = "all") { NoirButton("Todos", { chipFilter.cancel(); sounds.playClick(); select(null) }, selected = s.category == null, onFocus = { chipFilter.onFocus(it) { select(null) } }) }
+                            items(s.categories, key = { it }) { c -> NoirButton(c, { chipFilter.cancel(); sounds.playClick(); select(c) }, selected = s.category == c, onFocus = { chipFilter.onFocus(it) { select(c) } }) }
                         }
                     }
                     if (s.channels.isEmpty()) {
