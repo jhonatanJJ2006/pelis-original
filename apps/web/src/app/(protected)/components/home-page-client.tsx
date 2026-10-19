@@ -65,7 +65,7 @@ export function HomePageClient({ preloaded }: HomePageClientProps) {
         ? undefined
         : (playableOnly(trending) ?? playableOnly(movies) ?? []).slice(0, 5);
 
-  // Visitantes: landing Maison Noir. Con sesión: catálogo de inicio.
+  // Visitantes: landing. Con sesión: catálogo de inicio.
   if (authLoading) {
     return (
       <div className="page-shell py-24 flex justify-center" role="status" aria-label="Cargando">
@@ -104,7 +104,7 @@ export function HomePageClient({ preloaded }: HomePageClientProps) {
 
         {trending && trending.length >= 3 && (
           <section aria-labelledby="top-pelis">
-            <SectionHeader title="Tendencias en PELIS Maison Noir" subtitle="Top 5 de la semana" />
+            <SectionHeader title="Tendencias en Pelis" subtitle="Top 5 de la semana" />
             <h2 id="top-pelis" className="sr-only">
               Tendencias
             </h2>

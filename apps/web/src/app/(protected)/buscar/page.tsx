@@ -84,7 +84,7 @@ export default function BuscarPage() {
           <Link
             key={s.href}
             href={s.href}
-            className="inline-flex h-9 items-center rounded-[2px] border border-cinema-border bg-cinema-surface px-4 text-xs font-semibold uppercase tracking-[0.12em] text-cinema-muted hover:border-cinema-accent hover:text-cinema-accent transition-colors"
+            className="inline-flex h-9 items-center rounded-[2px] border border-cinema-border bg-cinema-surface px-4 text-xs font-semibold tracking-[0.12em] text-cinema-muted hover:border-cinema-accent hover:text-cinema-accent transition-colors"
           >
             {s.label}
           </Link>

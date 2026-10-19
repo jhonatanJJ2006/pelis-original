@@ -91,9 +91,6 @@ export default function PlaygroundPage() {
   return (
     <div className="page-shell py-10 space-y-10">
       <div>
-        <p className="text-cinema-accent text-sm font-medium uppercase tracking-widest mb-2">
-          Maison Noir
-        </p>
         <h1 className="font-display text-4xl md:text-5xl tracking-tight text-cinema-chalk mb-2">
           Playground de componentes
         </h1>

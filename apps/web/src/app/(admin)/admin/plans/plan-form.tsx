@@ -292,7 +292,7 @@ function CheckboxGroup({
 }) {
   return (
     <fieldset>
-      <legend className="mb-2 text-xs font-medium uppercase tracking-widest text-cinema-muted">
+      <legend className="mb-2 text-xs font-medium tracking-widest text-cinema-muted">
         {legend}
       </legend>
       <div className="flex flex-wrap gap-2">

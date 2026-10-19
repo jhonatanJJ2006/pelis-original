@@ -18,9 +18,6 @@ export function PublicSiteFooter() {
           <p className="font-display text-2xl font-semibold tracking-[0.16em] text-cinema-accent">
             PELIS
           </p>
-          <p className="mt-1 text-[10px] uppercase tracking-[0.28em] text-cinema-silver">
-            Maison Noir
-          </p>
           <p className="mt-4 text-sm leading-relaxed text-cinema-silver">
             Películas, series, anime y canales en vivo en un solo lugar.
           </p>

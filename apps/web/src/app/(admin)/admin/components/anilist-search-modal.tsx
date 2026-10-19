@@ -61,7 +61,7 @@ export function AnilistSearchModal({ onClose, onImported }: AnilistSearchModalPr
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
       <div className="w-full max-w-lg rounded-[2px] border border-cinema-border bg-cinema-elevated p-5">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-display text-lg text-cinema-chalk uppercase tracking-wide">
+          <h2 className="font-display text-lg text-cinema-chalk tracking-wide">
             Buscar en AniList
           </h2>
           <button type="button" onClick={onClose} aria-label="Cerrar">

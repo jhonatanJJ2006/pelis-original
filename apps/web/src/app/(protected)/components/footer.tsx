@@ -36,7 +36,7 @@ export function Footer({ className }: { className?: string }) {
           </div>
 
           <div>
-            <h3 className="font-display text-sm tracking-widest text-cinema-muted uppercase mb-4">
+            <h3 className="font-display text-sm tracking-widest text-cinema-muted mb-4">
               Explorar
             </h3>
             <ul className="space-y-2.5">
@@ -54,9 +54,7 @@ export function Footer({ className }: { className?: string }) {
           </div>
 
           <div>
-            <h3 className="font-display text-sm tracking-widest text-cinema-muted uppercase mb-4">
-              Cuenta
-            </h3>
+            <h3 className="font-display text-sm tracking-widest text-cinema-muted mb-4">Cuenta</h3>
             <ul className="space-y-2.5">
               <li>
                 <Link

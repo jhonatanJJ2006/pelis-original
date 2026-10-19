@@ -27,9 +27,6 @@ export function PublicSiteHeader({ active }: { active?: 'inicio' | 'descargas' }
           <span className="font-display text-2xl font-semibold tracking-[0.16em] text-cinema-accent">
             PELIS
           </span>
-          <span className="hidden border-l border-cinema-border pl-3 text-[10px] uppercase tracking-[0.28em] text-cinema-silver sm:inline">
-            Maison Noir
-          </span>
         </Link>
         <nav aria-label="Principal" className="hidden items-center gap-8 text-sm md:flex">
           {NAV.map((item) => (
@@ -51,13 +48,13 @@ export function PublicSiteHeader({ active }: { active?: 'inicio' | 'descargas' }
         <div className="flex items-center gap-3">
           <Link
             href="/login"
-            className="rounded-[2px] border border-cinema-accent/70 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-cinema-accent transition-colors hover:bg-cinema-accent/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cinema-accent/60"
+            className="rounded-[2px] border border-cinema-accent/70 px-4 py-2 text-[11px] font-semibold tracking-[0.16em] text-cinema-accent transition-colors hover:bg-cinema-accent/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cinema-accent/60"
           >
             Iniciar sesión
           </Link>
           <Link
             href="/register"
-            className="hidden rounded-[2px] bg-cinema-accent px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#3f2e00] transition-colors hover:bg-cinema-accent-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cinema-accent/60 lg:inline-flex"
+            className="hidden rounded-[2px] bg-cinema-accent px-4 py-2 text-[11px] font-semibold tracking-[0.16em] text-[#3f2e00] transition-colors hover:bg-cinema-accent-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cinema-accent/60 lg:inline-flex"
           >
             Empieza ahora
           </Link>

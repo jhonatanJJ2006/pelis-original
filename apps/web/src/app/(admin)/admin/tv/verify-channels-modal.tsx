@@ -131,7 +131,7 @@ export function VerifyChannelsModal({
             <Activity className="w-5 h-5 text-cinema-accent-light" />
             <h2
               id="verify-channels-title"
-              className="font-display text-lg uppercase tracking-wide text-cinema-chalk"
+              className="font-display text-lg tracking-wide text-cinema-chalk"
             >
               Verificar canales
             </h2>

@@ -137,9 +137,7 @@ export default function AnimeDetailPage() {
       <div className="page-shell min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
           <AlertCircle className="w-12 h-12 text-cinema-muted mx-auto mb-4" />
-          <h1 className="font-display text-3xl text-cinema-chalk uppercase mb-2">
-            Anime no encontrado
-          </h1>
+          <h1 className="font-display text-3xl text-cinema-chalk mb-2">Anime no encontrado</h1>
           <p className="text-cinema-muted mb-6">El anime que buscas no está disponible.</p>
           <Link
             href="/anime"
@@ -237,7 +235,7 @@ export default function AnimeDetailPage() {
               {firstEpisodeHref && (
                 <Link
                   href={firstEpisodeHref}
-                  className="btn-base h-11 px-7 bg-cinema-accent hover:bg-cinema-accent-light text-cinema-bg text-xs uppercase tracking-[0.08em] inline-flex items-center justify-center gap-2"
+                  className="btn-base h-11 px-7 bg-cinema-accent hover:bg-cinema-accent-light text-cinema-bg text-xs tracking-[0.08em] inline-flex items-center justify-center gap-2"
                 >
                   <Play className="w-5 h-5" fill="currentColor" aria-hidden />
                   Ver episodio 1
