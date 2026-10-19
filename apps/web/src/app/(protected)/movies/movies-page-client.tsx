@@ -14,7 +14,7 @@ import { Paginator, type PageResult } from '@pelis/ui/features/paginator';
 import { api } from '@pelis/db/api';
 import type { MediaItem } from '@pelis/ui/types';
 
-export const MOVIES_PAGE_SIZE = 30;
+import { MOVIES_PAGE_SIZE } from './page-size';
 
 interface MoviesPageClientProps {
   preloaded: {
