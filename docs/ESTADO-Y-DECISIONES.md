@@ -123,6 +123,19 @@ producción dice 2.0.0 (11). Pendiente decidir si se commitea o se saca de git.
   código de un solo uso con PKCE (`/app-auth/google` → `/api/app-auth/exchange`, #118).
 - La TV no usa Google: QR o correo/contraseña.
 
+### Recuperar contraseña (web)
+
+- `/login` → «¿Olvidaste tu contraseña?» → `/recuperar` (correo) → correo con enlace
+  `${SITE_URL}/restablecer?token=…` → `/restablecer` (nueva contraseña + confirmación).
+- Better Auth nativo (`emailAndPassword.sendResetPassword`): el token vence en 1 h, solo sirve una vez,
+  al cambiar la contraseña se cierran las demás sesiones. Respuesta genérica (no revela si el correo existe).
+  Límite: 3 solicitudes/min y 5 intentos de cambio/min por IP (rateLimit de Better Auth, en producción).
+- Envío: `packages/db/src/lib/mailer.ts` (API de Resend). Variables: `RESEND_API_KEY` (obligatoria en
+  producción), `EMAIL_FROM` (opcional, por defecto `Pelis <no-reply@verpelis.pro>`), `SITE_URL` para el
+  enlace. Sin clave fuera de producción, el enlace se escribe en la consola del servidor.
+- La TV (web `tv-login-screen`) muestra «Para recuperar tu contraseña entra a verpelis.pro/recuperar».
+  La app nativa de TV aún no lo muestra.
+
 ## 7. Formato de vídeo (OBLIGATORIO)
 
 Toda película se sirve como **HLS multicalidad**:
