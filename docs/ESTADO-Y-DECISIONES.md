@@ -33,6 +33,15 @@ Nunca escribas aquí valores de secretos: solo dónde viven.
   una variable de entorno y **rotarla**; la rotación es acción del dueño (pendiente).
 - **Stripe sigue en sandbox/TEST** hasta que el dueño decida otra cosa.
 - **Las APK se prueban en los emuladores de Movies** antes de publicarlas (ver §10).
+- **Emuladores: solo con `scripts/emu-run.sh`** (RAM 2048 MB, scope systemd propio con `MemoryMax=4G`,
+  se apaga solo a los 45 min) y **siempre `scripts/emu-stop.sh` al terminar**. Nunca lances
+  `emulator` a mano. El 18-oct un emulador olvidado (~14 GB) provocó un OOM que mató el deploy y la
+  cola ffmpeg. Vigilante: timer `pelis-emu-watchdog.timer` (systemd --user, cada 5 min,
+  `ops/systemd-user/`) mata emuladores con más de 60 min o si MemAvailable < 4 GB; log en
+  `~/Desktop/PELIS/logs/emu-watchdog.log`. Nunca toca pelis-web, postgres, cloudflared ni ffmpeg.
+- **La cola ffmpeg y los deploys corren en su propio scope/unidad** (`pelis-abr-queue`,
+  `deploy-prod.sh` se re-ejecuta con `systemd-run --user --scope`), para que un OOM ajeno no los mate.
+- **El reloj de Movies está en UTC** (no UTC-5): logs y `date` en Movies van 5 h por delante de Ecuador.
 - Nunca imprimas ni commitees secretos (`.env`, contraseñas del keystore, API keys).
 
 ## 2. Reglas de producto
@@ -106,8 +115,10 @@ Nunca escribas aquí valores de secretos: solo dónde viven.
 5. `/api/app/availability` lee los archivos del disco y expone tamaño y SHA-256
    (`tvApkSizeBytes`, `tvApkSha256`, `apkSizeBytes`); `/descargas` usa la misma fuente.
 
-**Conocido:** el `tv-app-version.json` commiteado en el repo está viejo (dice 1.2.0 (3)); el de
-producción dice 2.0.0 (11). Pendiente decidir si se commitea o se saca de git.
+**Publicado (2026-10-19):** TV 2.0.1 (12), 11 224 099 bytes, SHA-256
+`e53836e5a0610f4c89ee49f62c362a9024cf5ee3e87646c40fe2c9606539a1cf`. Respaldo de 2.0.0 (11) en
+`previous-published/before-2.0.1/`. **Conocido:** el `tv-app-version.json` commiteado en el repo está
+viejo (dice 1.2.0 (3)); el de producción dice 2.0.1 (12). Pendiente decidir si se commitea o se saca de git.
 
 ## 6. Login con Google
 
@@ -281,6 +292,17 @@ error compartida (`TvLoadError`) y barra de ayudas (`TvHintBar`).
   (emulator-5562, 1920×1080) para TV. También existen `pelis_phone` (5558) y `pelis_tv` (5556).
 - Cuenta QA: `pelis.qa@verpelis.pro` (rol ADMIN). La clave está en
   `/home/det/Desktop/PELIS/aside-2026-10-03/qa-login.txt` (no la copies a ningún lado).
+- Cuenta QA de TV: `pelis.qa.tv@verpelis.pro` (suscripción ACTIVE hasta 2027-10-19). Clave solo en
+  `~/.pelis-secrets/qa-tv-pass` (600). No cambies la clave de `pelis.qa@verpelis.pro`.
+- Arrancar: `EMU_MAX_MIN=30 scripts/emu-run.sh pelis_tv`; parar: `scripts/emu-stop.sh`.
+- `adb exec-out screencap` en el emulador sin ventana a veces devuelve el fotograma anterior:
+  captura dos veces y quédate con la segunda.
+
+### Deploy (desde 2026-10-19)
+
+`scripts/deploy-prod.sh` falla con exit 1 si el build queda sin `.next/BUILD_ID`, si `sudo -n systemctl
+restart pelis-web` falla, si localhost no da 200 o si algún CSS enlazado no da 200. Corre en su propio
+scope systemd. `det` tiene sudo sin contraseña.
 
 ## 13. Problemas conocidos y pendientes
 

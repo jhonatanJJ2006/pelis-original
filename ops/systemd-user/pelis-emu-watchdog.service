@@ -1,0 +1,5 @@
+[Unit]
+Description=Pelis: mata emuladores viejos o con memoria baja
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/pelis-emu-watchdog.sh
