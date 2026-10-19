@@ -7,6 +7,13 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+
+# Correr en su propio scope de systemd: si otro proceso agota la memoria, el OOM no se lleva
+# el deploy junto con él (el 18-oct un emulador de ~14 GB tumbó el build a medias).
+if [[ -z "${PELIS_DEPLOY_SCOPED:-}" ]] && command -v systemd-run >/dev/null 2>&1 && systemctl --user is-system-running >/dev/null 2>&1; then
+  export PELIS_DEPLOY_SCOPED=1
+  exec systemd-run --user --scope --quiet --unit="pelis-deploy-$(date +%s)" -E PELIS_DEPLOY_SCOPED=1 "$0" "$@"
+fi
 MODE="${1:---all}"
 
 usage() {
