@@ -104,7 +104,7 @@ fun TvShell(
 
     CompositionLocalProvider(LocalMnFocusSound provides { sounds.playFocus() }) {
         Box(Modifier.fillMaxSize().background(Mn.Bg)) {
-            Box(Modifier.fillMaxSize().padding(start = RailWidth).focusRestorer()) { content() }
+            Box(Modifier.fillMaxSize().padding(start = RailWidth)) { content() }
             TvNavRail(section, sections, me, requesters, { railFocused = it }, onNavigate)
         }
     }
