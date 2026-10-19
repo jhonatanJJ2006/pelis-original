@@ -52,7 +52,7 @@ packages/db/src/lib/resolveMovieImage.ts:
 ## Anime
 
 Catalogo: tabla anime + AniList. Episodios: ani.zip (anizip-client). Play: anime-providers.ts (embed iframe o hls Consumet).
-Consumet: docker-compose.yml redis + consumet :3001 (CONSUMET_API_URL). Campo providers JSON es informativo, no controla play.
+Consumet: docker-compose.yml redis + consumet 127.0.0.1:3001 (CONSUMET_API_URL). Apagado en prod desde 2026-10-18 (ver docs/ANIME-PROVIDERS.md). Campo providers JSON es informativo, no controla play.
 Detalle: docs/ANIME-PROVIDERS.md.
 
 ## TV IPTV
@@ -62,7 +62,7 @@ Admin: probe, cleanupNonWorking, seedPopular, playlists.
 
 ## PWA
 
-Serwist: apps/web/sw.ts -> public/sw.js. Desactivado en development. exclude /uploads/, version.json y assetlinks.json. Manifest `display: standalone`. Sin CTAs de instalar (se silencia `beforeinstallprompt`). Sin `AppDownloadButtons` en perfil/footer. Runtime = Movies (`pelis-web.service` + tunnel), no Vercel. Nueva versión (`/api/app/availability` lee `public/version.json` del disco, o SW en waiting) → modal Aceptar / Más tarde. `version.json` y `sw.js` van con Cache-Control no-store. TWA Bubblewrap: `apps/android` package `pro.verpelis.twa`, host `verpelis.pro`, `fallbackType: customtabs`. DAL: `public/.well-known/assetlinks.json` (package + SHA256). Si Chrome abre el sitio en pestaña/Custom Tabs, la barra de URL no se puede ocultar. Parcial.
+Serwist: apps/web/sw.ts -> public/sw.js. Desactivado en development. exclude /uploads/, version.json y assetlinks.json. Manifest `display: standalone`. Sin CTAs de instalar (se silencia `beforeinstallprompt`). Sin `AppDownloadButtons` en perfil/footer. Runtime = Movies (`pelis-web.service` + tunnel), no Vercel. Nueva versión (`/api/app/availability` lee `public/version.json` del disco, o SW en waiting) → el aviso de nueva versión solo se muestra dentro de las apps Android (en la web `PwaUpdateModal` no pinta nada). APK solo en la página web `/descargas`. `version.json` y `sw.js` van con Cache-Control no-store. TWA Bubblewrap: `apps/android` package `pro.verpelis.twa`, host `verpelis.pro`, `fallbackType: customtabs`. DAL: `public/.well-known/assetlinks.json` (package + SHA256). Si Chrome abre el sitio en pestaña/Custom Tabs, la barra de URL no se puede ocultar. Parcial.
 
 ## Trampas
 

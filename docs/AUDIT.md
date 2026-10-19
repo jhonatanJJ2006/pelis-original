@@ -7,21 +7,21 @@ Documento vivo con el inventario de gaps, bugs e incompletitudes.
 
 ## Resumen ejecutivo
 
-| Área               | Estado        | Notas                                                                                                                  |
-| ------------------ | ------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| Catálogo películas | OK            | Filtros, búsqueda, detalle                                                                                             |
-| Catálogo series    | Crítico       | Admin `Series` ≠ público `Movie.mediaType`                                                                             |
-| Anime catálogo     | OK            | CRUD admin, listado                                                                                                    |
-| Anime streaming    | En reparación | IDs incorrectos + API Consumet inestable                                                                               |
-| TV en vivo         | OK            | IPTV, probe admin                                                                                                      |
-| Auth               | OK            | Better Auth + Google                                                                                                   |
-| Suscripción        | OK código     | Checkout → sync/webhook → ACTIVE. Ops en Movies (túnel + .env + Postgres local), no Vercel                             |
-| PWA                | Parcial       | Update modal + sin install/descarga in-app; SW precache de uploads sigue siendo ruido                                  |
-| Android TV         | OK v3         | APK `pelis-tv.apk` code 3 / 1.2.0 en `/downloads` + availability. Fuentes Compose en git. Sideload debug.              |
-| TWA móvil          | OK v3         | Keystore nuevo SHA `B2:9F…`; `pnpm android:publish`. Usuarios con APK v2 deben reinstalar.                             |
-| Imágenes           | Alto          | Pósters hash faltantes en clone limpio                                                                                 |
-| CI / calidad       | Parcial       | format+test+build+deploy en GitHub Actions; `deploy` genera Prisma y pasa `DATABASE_URL` a turbo. Build ignora TS/lint |
-| Docs agentes       | OK            | AGENTS.md + docs/APP, ARCHITECTURE, DATA-MODEL, TESTING                                                                |
+| Área               | Estado       | Notas                                                                                                                  |
+| ------------------ | ------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| Catálogo películas | OK           | Filtros, búsqueda, detalle                                                                                             |
+| Catálogo series    | Crítico      | Admin `Series` ≠ público `Movie.mediaType`                                                                             |
+| Anime catálogo     | OK           | CRUD admin, listado                                                                                                    |
+| Anime streaming    | OK (iframes) | 2026-10-18: VidNest/iframes; Consumet apagado (ningún proveedor sirve). Ver docs/ANIME-PROVIDERS.md                    |
+| TV en vivo         | OK           | IPTV, probe admin                                                                                                      |
+| Auth               | OK           | Better Auth + Google                                                                                                   |
+| Suscripción        | OK código    | Checkout → sync/webhook → ACTIVE. Ops en Movies (túnel + .env + Postgres local), no Vercel                             |
+| PWA                | Parcial      | Update modal + sin install/descarga in-app; SW precache de uploads sigue siendo ruido                                  |
+| Android TV         | OK 2.0.0     | 2026-10-18: `pelis-tv.apk` 2.0.0 (11), firma de release, en `/descargas`. Ver docs/ESTADO-Y-DECISIONES.md              |
+| TWA móvil          | OK v5        | 2026-10-18: `pelis.apk` v5; mismo keystore de release que todas las APK (SHA-256 `B2:9F…`, SHA-1 `9E:35…`)             |
+| Imágenes           | Alto         | Pósters hash faltantes en clone limpio                                                                                 |
+| CI / calidad       | Parcial      | format+test+build+deploy en GitHub Actions; `deploy` genera Prisma y pasa `DATABASE_URL` a turbo. Build ignora TS/lint |
+| Docs agentes       | OK           | AGENTS.md + docs/APP, ARCHITECTURE, DATA-MODEL, TESTING                                                                |
 
 ---
 
