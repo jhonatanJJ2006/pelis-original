@@ -356,6 +356,9 @@ export function TvLoginScreen() {
                     Volver al código QR
                   </button>
                 </div>
+                <p className="text-sm text-cinema-muted">
+                  Para recuperar tu contraseña entra a verpelis.pro/recuperar
+                </p>
               </form>
             )}
           </div>
