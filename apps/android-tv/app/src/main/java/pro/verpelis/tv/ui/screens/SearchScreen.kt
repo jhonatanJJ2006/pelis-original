@@ -53,6 +53,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import pro.verpelis.tv.LocalApiClient
 import pro.verpelis.tv.LocalUiSounds
 import pro.verpelis.tv.data.api.CatalogItem
@@ -178,6 +179,9 @@ fun SearchScreen(
     val firstRow = when { showTitles -> "titles"; showAnime -> "anime"; else -> "channels" }
     // ▲ desde la primera fila de resultados va a los filtros (no al teclado).
     var firstRowFocused by remember { mutableStateOf(false) }
+    val resultsList = androidx.compose.foundation.lazy.rememberLazyListState()
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    var resultsHadFocus by remember { mutableStateOf(false) }
     fun rowMod(key: String) = if (key == firstRow) Modifier.onFocusChanged { firstRowFocused = it.hasFocus } else Modifier
     // ► desde la última tecla de cada fila va a los resultados (los filtros quedan con ▲/▼).
     val toResults: () -> Boolean = { if (hasResults) runCatching { resultsFocus.requestFocus() }; true }
@@ -232,7 +236,14 @@ fun SearchScreen(
                 }
                 Spacer(Modifier.height(6.dp))
                 Box(
-                    Modifier.weight(1f).fillMaxWidth().onPreviewKeyEvent { e ->
+                    Modifier.weight(1f).fillMaxWidth()
+                        .onFocusChanged {
+                            // Al entrar desde el teclado o los filtros, la lista se vuelve a colocar arriba;
+                            // si no, la primera fila a veces no dibuja el foco hasta desplazarse.
+                            if (it.hasFocus && !resultsHadFocus) scope.launch { delay(16); resultsList.scrollToItem(0) }
+                            resultsHadFocus = it.hasFocus
+                        }
+                        .onPreviewKeyEvent { e ->
                         // ▲ desde la primera fila de resultados va a los filtros (no al teclado).
                         firstRowFocused && e.type == KeyEventType.KeyDown && e.key == Key.DirectionUp &&
                             runCatching { chipsFocus.requestFocus() }.isSuccess
@@ -242,7 +253,7 @@ fun SearchScreen(
                         query.trim().length < 2 -> SearchHint("Escribe al menos 2 letras con el teclado de la izquierda.")
                         searching && !showTitles && !showAnime && !showChannels -> NoirSpinner(Modifier.align(Alignment.Center))
                         !showTitles && !showAnime && !showChannels -> SearchHint("No encontramos resultados para “${query.trim()}”.")
-                        else -> LazyColumn(contentPadding = PaddingValues(top = 4.dp, bottom = 16.dp), modifier = Modifier.fillMaxSize()) {
+                        else -> LazyColumn(state = resultsList, contentPadding = PaddingValues(top = 4.dp, bottom = 16.dp), modifier = Modifier.fillMaxSize()) {
                             if (showTitles) item(key = "titles") {
                                 CatalogRow(modifier = rowMod("titles"), title = "Películas y series", items = titles, onOpen = { onOpenTitle(if (it.mediaType == "series") TitleKind.SERIES else TitleKind.MOVIE, it.id) }, firstItemFocus = if (firstRow == "titles") resultsFocus else null)
                             }
