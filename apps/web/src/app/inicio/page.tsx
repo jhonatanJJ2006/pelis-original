@@ -280,13 +280,13 @@ export default async function InicioPage() {
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link
                   href="/register"
-                  className="inline-flex items-center justify-center gap-2 rounded-[2px] bg-cinema-accent px-7 py-4 text-sm font-semibold uppercase tracking-[0.14em] text-[#3f2e00] transition-colors hover:bg-cinema-accent-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cinema-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0e0e10]"
+                  className="inline-flex items-center justify-center gap-2 rounded-[2px] bg-cinema-accent px-7 py-4 text-sm font-semibold tracking-[0.14em] text-[#3f2e00] transition-colors hover:bg-cinema-accent-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cinema-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0e0e10]"
                 >
                   Empieza ahora <ArrowRight className="h-4 w-4" aria-hidden />
                 </Link>
                 <Link
                   href="/login"
-                  className="inline-flex items-center justify-center rounded-[2px] border border-cinema-chalk/40 bg-[#0e0e10]/50 px-7 py-4 text-sm font-semibold uppercase tracking-[0.14em] text-cinema-chalk transition-colors hover:border-cinema-accent hover:text-cinema-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cinema-accent/60"
+                  className="inline-flex items-center justify-center rounded-[2px] border border-cinema-chalk/40 bg-[#0e0e10]/50 px-7 py-4 text-sm font-semibold tracking-[0.14em] text-cinema-chalk transition-colors hover:border-cinema-accent hover:text-cinema-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cinema-accent/60"
                 >
                   Iniciar sesión
                 </Link>
@@ -440,7 +440,7 @@ export default async function InicioPage() {
               </div>
               <Link
                 href="/descargas"
-                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-[2px] border border-cinema-accent px-5 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-cinema-accent transition-colors hover:bg-cinema-accent hover:text-[#3f2e00]"
+                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-[2px] border border-cinema-accent px-5 py-3 text-xs font-semibold tracking-[0.14em] text-cinema-accent transition-colors hover:bg-cinema-accent hover:text-[#3f2e00]"
               >
                 Ver descargas <ArrowRight className="h-4 w-4" aria-hidden />
               </Link>
@@ -505,7 +505,7 @@ export default async function InicioPage() {
                   <Link
                     href="/subscribe"
                     className={cn(
-                      'mt-8 inline-flex items-center justify-center rounded-[2px] px-5 py-3 text-xs font-semibold uppercase tracking-[0.14em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cinema-accent/60',
+                      'mt-8 inline-flex items-center justify-center rounded-[2px] px-5 py-3 text-xs font-semibold tracking-[0.14em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cinema-accent/60',
                       plan.recommended
                         ? 'bg-cinema-accent text-[#3f2e00] hover:bg-cinema-accent-light'
                         : 'border border-cinema-border text-cinema-chalk hover:border-cinema-accent hover:text-cinema-accent'
@@ -561,13 +561,13 @@ export default async function InicioPage() {
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
               <Link
                 href="/register"
-                className="inline-flex items-center justify-center gap-2 rounded-[2px] bg-cinema-accent px-7 py-4 text-sm font-semibold uppercase tracking-[0.14em] text-[#3f2e00] transition-colors hover:bg-cinema-accent-light"
+                className="inline-flex items-center justify-center gap-2 rounded-[2px] bg-cinema-accent px-7 py-4 text-sm font-semibold tracking-[0.14em] text-[#3f2e00] transition-colors hover:bg-cinema-accent-light"
               >
                 Empieza ahora <ArrowRight className="h-4 w-4" aria-hidden />
               </Link>
               <Link
                 href="/login"
-                className="inline-flex items-center justify-center rounded-[2px] border border-cinema-chalk/40 px-7 py-4 text-sm font-semibold uppercase tracking-[0.14em] text-cinema-chalk transition-colors hover:border-cinema-accent hover:text-cinema-accent"
+                className="inline-flex items-center justify-center rounded-[2px] border border-cinema-chalk/40 px-7 py-4 text-sm font-semibold tracking-[0.14em] text-cinema-chalk transition-colors hover:border-cinema-accent hover:text-cinema-accent"
               >
                 Iniciar sesión
               </Link>

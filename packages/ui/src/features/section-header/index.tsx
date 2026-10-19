@@ -31,7 +31,7 @@ export function SectionHeader({
       {href && (
         <Link
           href={href}
-          className="flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.16em] text-cinema-accent hover:text-cinema-accent-light transition-all duration-200 shrink-0 group-hover:gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cinema-accent/50 rounded px-1"
+          className="flex items-center gap-1 text-xs font-semibold tracking-[0.16em] text-cinema-accent hover:text-cinema-accent-light transition-all duration-200 shrink-0 group-hover:gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cinema-accent/50 rounded px-1"
         >
           {linkLabel}
           <ChevronRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" />

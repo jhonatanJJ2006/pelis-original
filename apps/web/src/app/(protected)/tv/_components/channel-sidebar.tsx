@@ -152,7 +152,7 @@ export function ChannelSidebar({
         ) : (
           grouped.map(([category, items]) => (
             <section key={category} className="py-1">
-              <h3 className="sticky top-0 z-10 px-3 py-1.5 bg-cinema-bg/95 text-[10px] uppercase tracking-widest text-cinema-ash font-semibold">
+              <h3 className="sticky top-0 z-10 px-3 py-1.5 bg-cinema-bg/95 text-[10px] tracking-widest text-cinema-ash font-semibold">
                 {category}
                 <span className="ml-1.5 text-cinema-accent/80">{items.length}</span>
               </h3>

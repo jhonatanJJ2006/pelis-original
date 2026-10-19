@@ -101,10 +101,7 @@ export default function HistoryPage() {
     <div className="page-shell">
       <ScrollReveal className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 mb-8 border-b border-cinema-border/60">
         <div className="max-w-2xl">
-          <nav
-            aria-label="Ruta"
-            className="text-[11px] uppercase tracking-[0.16em] text-cinema-silver mb-3"
-          >
+          <nav aria-label="Ruta" className="text-[11px] tracking-[0.16em] text-cinema-silver mb-3">
             <Link href="/profile" className="hover:text-cinema-chalk">
               Mi cuenta
             </Link>{' '}

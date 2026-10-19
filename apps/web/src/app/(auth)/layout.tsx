@@ -22,9 +22,6 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             <span className="font-display text-2xl font-semibold tracking-[0.12em] text-cinema-accent">
               PELIS
             </span>
-            <span className="mt-1 text-[10px] font-medium uppercase tracking-[0.28em] text-cinema-silver">
-              Maison Noir
-            </span>
           </Link>
         </div>
       </header>

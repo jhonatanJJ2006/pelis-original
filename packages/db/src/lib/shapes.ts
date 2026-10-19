@@ -1,3 +1,4 @@
+import { displayTitle } from './displayTitle';
 // Map Prisma rows to the "Convex-style" shapes the UI expects:
 // - `_id` (not `id`)
 // - lowercase enums (`mediaType: 'movie'`, `status: 'completed'`)
@@ -22,6 +23,9 @@ export function toMovieShape<T extends PrismaMovie>(m: T): T {
   const { id, mediaType, episodes, ...rest } = m;
   const shaped = {
     ...rest,
+    ...(typeof (rest as { name?: unknown }).name === 'string'
+      ? { name: displayTitle((rest as { name: string }).name) }
+      : {}),
     _id: id,
     mediaType: mediaType === 'SERIES' ? 'series' : 'movie',
     episodes: episodes ?? undefined,
@@ -43,6 +47,7 @@ export function toAnimeShape<T extends PrismaAnime>(a: T) {
   const { id, status, ...rest } = a;
   return {
     ...rest,
+    ...(typeof rest.title === 'string' ? { title: displayTitle(rest.title) } : {}),
     _id: id,
     status: status === 'ONGOING' ? 'ongoing' : 'completed',
   };

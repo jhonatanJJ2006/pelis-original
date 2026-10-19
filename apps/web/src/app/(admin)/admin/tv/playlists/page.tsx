@@ -283,7 +283,7 @@ export default function AdminTVPlaylistsPage() {
                       <ListVideo className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="font-display text-lg uppercase tracking-wide text-cinema-chalk">
+                      <h3 className="font-display text-lg tracking-wide text-cinema-chalk">
                         {pl.name}
                       </h3>
                       <p className="text-xs text-cinema-muted mt-0.5">

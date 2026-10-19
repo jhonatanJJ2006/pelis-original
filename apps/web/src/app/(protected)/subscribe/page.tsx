@@ -144,7 +144,7 @@ export default function SubscribePage() {
       <ScrollReveal className="mb-14 max-w-3xl">
         <p className="text-label uppercase text-cinema-accent mb-3 inline-flex items-center gap-3">
           <span className="h-px w-8 bg-cinema-accent" aria-hidden />
-          Suscripción Maison Noir
+          Suscripción
         </p>
         <h1 className="font-display text-4xl md:text-5xl tracking-tight text-cinema-chalk mb-4">
           Elige tu plan cinematográfico
@@ -220,7 +220,7 @@ export default function SubscribePage() {
                     </span>
                   ) : plan.recommended ? (
                     <span className="absolute top-0 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap px-3 py-1 border border-cinema-accent bg-cinema-bg text-cinema-accent text-label font-semibold rounded-[2px] uppercase">
-                      Recomendado Maison Noir
+                      Recomendado
                     </span>
                   ) : null}
 
@@ -291,7 +291,7 @@ export default function SubscribePage() {
                       onClick={() => handleSubscribe(plan, action)}
                       disabled={!canSelect || isPlanLoading}
                       className={cn(
-                        'w-full h-11 rounded-[2px] text-xs font-semibold uppercase tracking-[0.08em] transition-colors disabled:opacity-50 disabled:cursor-not-allowed',
+                        'w-full h-11 rounded-[2px] text-xs font-semibold tracking-[0.08em] transition-colors disabled:opacity-50 disabled:cursor-not-allowed',
                         action === 'upgrade'
                           ? 'bg-cinema-accent text-cinema-bg hover:bg-cinema-accent-light'
                           : action === 'current'

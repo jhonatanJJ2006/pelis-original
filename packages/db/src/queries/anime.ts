@@ -3,6 +3,7 @@ import type { Anime } from '@prisma/client';
 import { prisma } from '../client';
 import { register } from '../registry';
 import { toAnimeShape } from '../lib/shapes';
+import { displayTitle } from '../lib/displayTitle';
 import { getProvidersSortedByPriority, toProviderListItem } from '../lib/anime-providers';
 import { fallbackSeriesKey, isSeasonalFormat, sortSeasons } from '../lib/anime-series';
 
@@ -39,7 +40,7 @@ function toSeriesCard(key: string, members: Anime[]) {
   return {
     _id: main.id,
     seriesKey: key,
-    title: main.seriesTitle ?? main.title,
+    title: displayTitle(main.seriesTitle ?? main.title),
     alternativeTitle: main.alternativeTitle ?? undefined,
     image: main.image,
     backdropImage: main.backdropImage ?? undefined,

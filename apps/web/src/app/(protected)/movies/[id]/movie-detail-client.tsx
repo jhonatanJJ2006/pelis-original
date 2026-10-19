@@ -124,6 +124,7 @@ export default function MovieDetailPageClient({ preloaded }: MovieDetailPageClie
           <MoviePoster
             src={heroImage}
             alt=""
+            hero
             className="w-full h-full object-cover"
             loading="eager"
             fetchPriority="high"

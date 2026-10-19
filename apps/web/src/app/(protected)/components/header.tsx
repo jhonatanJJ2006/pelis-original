@@ -81,9 +81,6 @@ export function Header({ sticky = true, minimalNav = false, tvMode = false }: He
             <span className="font-display text-2xl font-semibold tracking-[0.12em] text-cinema-accent group-hover:text-cinema-accent-light transition-colors">
               PELIS
             </span>
-            <span className="hidden sm:inline text-[10px] font-medium uppercase tracking-[0.28em] text-cinema-silver">
-              Maison Noir
-            </span>
           </Link>
 
           <div
