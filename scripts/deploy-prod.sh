@@ -45,12 +45,23 @@ if [[ "$MODE" == "--web" || "$MODE" == "--all" ]]; then
   echo "→ Build Next.js (apps/web)..."
   cd "$ROOT/apps/web"
   pnpm build
+  # Un build cortado (OOM, Ctrl+C) deja .next sin BUILD_ID: no reiniciar sobre eso.
+  if [[ ! -s .next/BUILD_ID ]]; then
+    echo "✗ Build incompleto (.next/BUILD_ID no existe). pelis-web NO se reinició." >&2
+    exit 1
+  fi
+  NEW_BUILD_ID="$(cat .next/BUILD_ID)"
+  echo "✓ Build $NEW_BUILD_ID"
 
   echo "→ Liberando puerto 3000 (dev server u otro proceso)..."
   free_port_3000
 
   echo "→ Reiniciando pelis-web..."
-  sudo systemctl restart pelis-web
+  # -n: si sudo pidiera contraseña, fallar en vez de quedarse colgado.
+  if ! sudo -n systemctl restart pelis-web; then
+    echo "✗ No se pudo reiniciar pelis-web (sudo/systemctl). El servidor sigue con el build viejo." >&2
+    exit 1
+  fi
 
   sleep 3
   if systemctl is-active --quiet pelis-web; then
@@ -60,8 +71,32 @@ if [[ "$MODE" == "--web" || "$MODE" == "--all" ]]; then
     exit 1
   fi
 
-  HTTP_CODE="$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/ || true)"
-  echo "✓ localhost:3000 → HTTP $HTTP_CODE"
+  HTTP_CODE=000
+  for _ in $(seq 1 30); do
+    HTTP_CODE="$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/ || true)"
+    [[ "$HTTP_CODE" == "200" ]] && break
+    sleep 2
+  done
+  if [[ "$HTTP_CODE" != "200" ]]; then
+    echo "✗ localhost:3000 → HTTP $HTTP_CODE" >&2
+    exit 1
+  fi
+  echo "✓ localhost:3000 → HTTP 200"
+
+  # El HTML servido debe enlazar CSS del build nuevo y cada CSS debe responder 200.
+  CSS_LIST="$(curl -s http://localhost:3000/ | grep -o '/_next/static/css/[A-Za-z0-9_-]*\.css' | sort -u || true)"
+  if [[ -z "$CSS_LIST" ]]; then
+    echo "✗ La página no enlaza ningún CSS" >&2
+    exit 1
+  fi
+  for css in $CSS_LIST; do
+    CODE="$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:3000$css" || true)"
+    if [[ "$CODE" != "200" ]]; then
+      echo "✗ $css → HTTP $CODE (el servidor no sirve el build nuevo)" >&2
+      exit 1
+    fi
+  done
+  echo "✓ CSS enlazado responde 200 ($(echo "$CSS_LIST" | wc -l) archivos)"
 fi
 
 echo ""
