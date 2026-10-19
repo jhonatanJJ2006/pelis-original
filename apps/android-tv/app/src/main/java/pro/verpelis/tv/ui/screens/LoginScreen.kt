@@ -327,6 +327,7 @@ fun LoginScreen(
                 onSignOut = {
                     uiSounds.playClick()
                     session.clear()
+                    pro.verpelis.tv.data.tv.MeCache.clear()
                     signedIn = false
                     mode = LoginMode.Choose
                     requestPairing()

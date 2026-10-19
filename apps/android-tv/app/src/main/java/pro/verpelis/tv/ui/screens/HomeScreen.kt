@@ -1,6 +1,29 @@
 package pro.verpelis.tv.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import pro.verpelis.tv.BuildConfig
+import pro.verpelis.tv.LocalSessionStore
+import pro.verpelis.tv.data.TvImages
+import pro.verpelis.tv.data.tv.ContinueItem
+import pro.verpelis.tv.data.tv.LocalTvRepository
+import pro.verpelis.tv.data.tv.TitleDto
+import pro.verpelis.tv.ui.components.PosterCard
+import pro.verpelis.tv.ui.components.TvHint
+import pro.verpelis.tv.ui.login.Mn
+import pro.verpelis.tv.ui.login.MnText
+import pro.verpelis.tv.ui.shell.TvHeader
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.size
@@ -8,6 +31,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import kotlinx.coroutines.launch
 import pro.verpelis.tv.ui.components.TvPivotScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -42,7 +67,6 @@ import pro.verpelis.tv.data.api.TvChannel
 import pro.verpelis.tv.data.api.TvListArgs
 import pro.verpelis.tv.ui.components.CatalogRow
 import pro.verpelis.tv.ui.components.CategoryRow
-import pro.verpelis.tv.ui.components.TvFocusButton
 import pro.verpelis.tv.ui.components.TvHintBar
 import pro.verpelis.tv.ui.components.TvHints
 import pro.verpelis.tv.ui.components.TvLoadError
@@ -62,23 +86,28 @@ private data class HomeCatalog(
 
 @Composable
 fun HomeScreen(
-    onOpenSearch: () -> Unit,
     onOpenSettings: () -> Unit,
-    onOpenLogin: () -> Unit,
     onPlayChannel: (String, String) -> Unit,
     onOpenTitle: (TitleKind, String) -> Unit,
 ) {
     val apiClient = LocalApiClient.current
+    val repo = LocalTvRepository.current
+    val session = LocalSessionStore.current
     val uiSounds = LocalUiSounds.current
 
     // Se conserva al volver de una ficha: la portada no se recarga (caduca a los 15 min).
     remember { HomeCache.expireIfStale() }
     var rows by rememberSaveableRows()
     var catalog by remember { mutableStateOf(HomeCache.catalog) }
+    var featured by remember { mutableStateOf(HomeCache.featured) }
+    var continueItems by remember { mutableStateOf(HomeCache.continueItems) }
     var catalogLoading by remember { mutableStateOf(HomeCache.catalog == null) }
     var rowsLoading by remember { mutableStateOf(HomeCache.rows == null) }
     var error by remember { mutableStateOf<String?>(null) }
     var attempt by remember { mutableStateOf(0) }
+    val heroFocus = remember { FocusRequester() }
+    val listState = androidx.compose.foundation.lazy.rememberLazyListState()
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
     val firstPoster = remember { FocusRequester() }
     var focusedOnce by remember { mutableStateOf(false) }
 
@@ -86,6 +115,13 @@ fun HomeScreen(
     // filas de canales (hasta ~13 llamadas) se cargan después sin bloquear la portada.
     LaunchedEffect(attempt) {
         error = null
+        if (featured == null) {
+            runCatching { repo.featured() }.getOrNull()?.let { list ->
+                val pick = list.firstOrNull { !it.backdropImage.isNullOrBlank() } ?: list.firstOrNull()
+                HomeCache.featured = pick
+                featured = pick
+            }
+        }
         if (catalog == null) {
             catalogLoading = true
             val loaded = runCatching { loadCatalogRows(apiClient.api) }.getOrNull()
@@ -108,10 +144,23 @@ fun HomeScreen(
             }
         }
     }
-    LaunchedEffect(catalog) {
-        if (catalog != null && !focusedOnce) {
+    // "Continuar viendo" se relee cada vez que se vuelve a la portada (p. ej. tras ver algo).
+    LaunchedEffect(Unit) {
+        if (!session.hasSession()) {
+            HomeCache.continueItems = emptyList()
+            continueItems = emptyList()
+            return@LaunchedEffect
+        }
+        runCatching { repo.continueWatching() }.getOrNull()?.let {
+            HomeCache.continueItems = it
+            continueItems = it
+        }
+    }
+    LaunchedEffect(catalog, featured) {
+        if ((catalog != null || featured != null) && !focusedOnce) {
             withFrameNanos { }
-            if (runCatching { firstPoster.requestFocus() }.isSuccess) focusedOnce = true
+            val target = if (featured != null) heroFocus else firstPoster
+            if (runCatching { target.requestFocus() }.isSuccess) focusedOnce = true
         }
     }
 
@@ -120,35 +169,52 @@ fun HomeScreen(
     val openAnime = remember(onOpenTitle) { { item: CatalogItem -> onOpenTitle(TitleKind.ANIME, item.id) } }
 
     Box(Modifier.fillMaxSize().background(MaisonNoir.Background)) {
+        val c = catalog
+        val r = rows
+        val f = featured
+        if (c == null && f == null && r.isNullOrEmpty() && error != null) {
+            // Error de carga compartido: Reintentar + estado de conexión real.
+            TvLoadError(
+                onRetry = { attempt++ },
+                detail = error,
+                extraActions = {
+                    pro.verpelis.tv.ui.playback.NoirButton("Ajustes", { uiSounds.playClick(); onOpenSettings() })
+                },
+                hints = listOf(TvHints.Select, TvHints.Move, TvHints.Exit),
+            )
+            return@Box
+        }
         Column(Modifier.fillMaxSize()) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 48.dp, end = 48.dp, top = 22.dp, bottom = 6.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Column {
-                    Text("PELIS", style = MaisonType.Title.copy(color = MaisonNoir.Gold))
-                    Text("MAISON NOIR · EN VIVO Y CATÁLOGO", style = MaisonType.Eyebrow)
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    TvFocusButton("Buscar", { uiSounds.playClick(); onOpenSearch() })
-                    TvFocusButton("Ajustes", { uiSounds.playClick(); onOpenSettings() })
-                    TvFocusButton("Cuenta", { uiSounds.playClick(); onOpenLogin() })
-                }
-            }
-
-            val c = catalog
-            val r = rows
             when {
-                c == null && catalogLoading -> HomeSkeleton()
-                c == null && r.isNullOrEmpty() && error != null -> Unit
+                c == null && f == null && catalogLoading -> {
+                    TvHeader(null, Modifier.padding(start = 32.dp, end = 40.dp, top = 20.dp, bottom = 8.dp))
+                    HomeSkeleton()
+                }
                 else -> TvPivotScroll(0.18f) {
                     LazyColumn(
                         Modifier.fillMaxWidth().weight(1f),
-                        contentPadding = PaddingValues(top = 4.dp, bottom = 48.dp),
+                        state = listState,
+                        contentPadding = PaddingValues(bottom = 40.dp),
                     ) {
+                        item(key = "hero", contentType = "hero") {
+                            if (f != null) {
+                                HomeHero(
+                                    f,
+                                    heroFocus,
+                                    // El destacado se ve entero: con el foco en "Ver ahora" la lista vuelve arriba.
+                                    Modifier.onFocusChanged { st ->
+                                        if (st.hasFocus) scope.launch { kotlinx.coroutines.delay(16); listState.scrollToItem(0) }
+                                    },
+                                ) { onOpenTitle(f.kind, f.id) }
+                            } else {
+                                TvHeader(null, Modifier.padding(start = 32.dp, end = 40.dp, top = 20.dp, bottom = 8.dp))
+                            }
+                        }
+                        if (continueItems.isNotEmpty()) {
+                            item(key = "continue", contentType = "catalog") {
+                                ContinueRow(continueItems) { onOpenTitle(it.kind, it.id) }
+                            }
+                        }
                         if (c != null && c.movies.isNotEmpty()) {
                             item(key = "catalog-movies", contentType = "catalog") {
                                 CatalogRow("Películas", c.movies, openMovie, firstItemFocus = firstPoster)
@@ -188,23 +254,83 @@ fun HomeScreen(
                     }
                 }
             }
-            if (catalog != null || !rows.isNullOrEmpty()) {
-                TvHintBar(
-                    listOf(TvHints.Select, TvHints.Move, TvHints.Exit),
-                    Modifier.padding(start = 48.dp, end = 48.dp, top = 6.dp, bottom = 14.dp),
+            TvHintBar(
+                listOf(TvHints.Select, TvHints.Move, TvHint("◀", "Menú"), TvHints.Exit),
+                Modifier.padding(start = 32.dp, end = 40.dp, top = 6.dp, bottom = 12.dp),
+            )
+        }
+    }
+}
+
+/** Destacado real (movies.getFeatured): fondo a la medida de la pantalla, sin animación. */
+@Composable
+private fun HomeHero(title: TitleDto, focus: FocusRequester, modifier: Modifier = Modifier, onOpen: () -> Unit) {
+    val context = LocalContext.current
+    val uiSounds = LocalUiSounds.current
+    val lowRam = (context.applicationContext as? pro.verpelis.tv.PelisTvApp)?.lowRam == true
+    val request = remember(title.backdropImage, title.image, lowRam) {
+        val width = if (lowRam) TvImages.BACKDROP_WIDTH_LOW_RAM else TvImages.BACKDROP_WIDTH
+        ImageRequest.Builder(context)
+            .data(TvImages.sized(BuildConfig.API_BASE_URL, title.backdropImage ?: title.image, width))
+            .size(width, width * 9 / 16)
+            .build()
+    }
+    Box(modifier.fillMaxWidth().height(318.dp)) {
+        AsyncImage(request, null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+        Box(Modifier.fillMaxSize().background(Brush.horizontalGradient(0f to Mn.Bg, 0.45f to Mn.Bg.copy(alpha = 0.85f), 1f to Mn.Bg.copy(alpha = 0.1f))))
+        Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0f to Mn.Bg.copy(alpha = 0.6f), 0.25f to Color.Transparent, 0.7f to Color.Transparent, 1f to Mn.Bg)))
+        Column(Modifier.fillMaxSize().padding(start = 32.dp, end = 40.dp, top = 20.dp)) {
+            TvHeader(null)
+            Spacer(Modifier.weight(1f))
+            Column(Modifier.width(460.dp)) {
+                MnText("DESTACADO", color = Mn.Gold, size = 8.sp, weight = FontWeight.SemiBold, spacing = 2.sp)
+                Spacer(Modifier.height(6.dp))
+                MnText(title.displayName, color = Mn.Text, size = 30.sp, family = Mn.Serif, lines = 2)
+                Spacer(Modifier.height(6.dp))
+                val meta = listOfNotNull(
+                    title.yearText.takeIf { it.isNotBlank() },
+                    title.classification?.takeIf { it.isNotBlank() },
+                    title.genreText.takeIf { it.isNotBlank() }?.replace(",", " •"),
+                    if (title.kind == TitleKind.SERIES) "Serie" else "Película",
+                )
+                MnText(meta.joinToString("  ·  "), color = Mn.Variant, size = 9.sp, lines = 1)
+                Spacer(Modifier.height(8.dp))
+                MnText(title.synopsis.orEmpty(), color = Mn.Text.copy(alpha = 0.86f), size = 10.sp, lines = 3)
+                Spacer(Modifier.height(14.dp))
+                pro.verpelis.tv.ui.playback.NoirButton(
+                    "Ver ahora",
+                    { uiSounds.playClick(); onOpen() },
+                    icon = pro.verpelis.tv.ui.playback.NoirIcon.Play,
+                    primary = true,
+                    focusRequester = focus,
                 )
             }
+            Spacer(Modifier.height(18.dp))
         }
-        if (catalog == null && rows.isNullOrEmpty() && error != null) {
-            // Error de carga compartido: Reintentar + estado de conexión real.
-            TvLoadError(
-                onRetry = { attempt++ },
-                detail = error,
-                extraActions = {
-                    pro.verpelis.tv.ui.playback.NoirButton("Ajustes", { uiSounds.playClick(); onOpenSettings() })
-                },
-                hints = listOf(TvHints.Select, TvHints.Move, TvHints.Exit),
-            )
+    }
+}
+
+@Composable
+private fun ContinueRow(items: List<ContinueItem>, onOpen: (ContinueItem) -> Unit) {
+    Column(Modifier.fillMaxWidth().padding(vertical = 10.dp)) {
+        Text(
+            "Continuar viendo",
+            style = MaisonType.Title,
+            modifier = Modifier.padding(start = 48.dp, bottom = 10.dp),
+        )
+        TvPivotScroll(0.06f) {
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 48.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                items(items, key = { "c-" + it.id }, contentType = { "poster" }) { it ->
+                    PosterCard(
+                        item = CatalogItem(id = it.id, name = it.name, image = it.image),
+                        onClick = { onOpen(it) },
+                        progress = it.fraction,
+                    )
+                }
+            }
         }
     }
 }
@@ -216,11 +342,14 @@ private object HomeCache {
     var catalog: HomeCatalog? = null
         set(value) { field = value; at = System.currentTimeMillis() }
     var rows: List<Pair<String, List<TvChannel>>>? = null
+    var featured: TitleDto? = null
+    var continueItems: List<ContinueItem> = emptyList()
 
     fun expireIfStale() {
         if (catalog != null && System.currentTimeMillis() - at > TTL_MS) {
             catalog = null
             rows = null
+            featured = null
         }
     }
 }

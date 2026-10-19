@@ -244,7 +244,7 @@ private fun MnHeader(host: String) {
         Spacer(Modifier.width(12.dp))
         Column {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                MnText("PELIS", color = Mn.Gold, size = 22.sp, family = Mn.Serif, spacing = 2.sp)
+                pro.verpelis.tv.ui.components.PelisLogo(22.sp, 2.sp)
                 Spacer(Modifier.width(8.dp))
                 Box(Modifier.clip(RoundedCornerShape(2.dp)).background(Mn.GoldDeep.copy(alpha = 0.22f)).border(1.dp, Mn.GoldDeep.copy(alpha = 0.45f), RoundedCornerShape(2.dp)).padding(horizontal = 5.dp, vertical = 1.dp)) {
                     MnText("MAISON NOIR", color = Mn.Gold, size = 7.sp, weight = FontWeight.SemiBold, spacing = 1.sp)
