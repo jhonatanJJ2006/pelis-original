@@ -4,6 +4,7 @@ import { emailOTP } from 'better-auth/plugins';
 import type { BetterAuthOptions } from 'better-auth';
 import { prisma } from './client';
 import { LOGIN_CODE_EXPIRES_MIN, sendLoginCodeEmail } from './lib/loginCodeEmail';
+import { PASSWORD_RESET_EXPIRES_MIN, sendPasswordResetEmail } from './lib/passwordResetEmail';
 
 const siteUrl =
   process.env.SITE_URL?.trim() ||
@@ -53,6 +54,22 @@ export function createAuth() {
       enabled: true,
       autoSignIn: true,
       requireEmailVerification: true,
+      // Recuperar contraseña: enlace a /restablecer?token=… que vence en 1 h.
+      // Better Auth responde igual exista o no el correo.
+      resetPasswordTokenExpiresIn: PASSWORD_RESET_EXPIRES_MIN * 60,
+      revokeSessionsOnPasswordReset: true,
+      sendResetPassword: async ({ user, token }) => {
+        await sendPasswordResetEmail(user.email, siteUrl, token).catch((err) =>
+          console.error('[auth] sendResetPassword failed', err)
+        );
+      },
+    },
+    rateLimit: {
+      customRules: {
+        '/request-password-reset': { window: 60, max: 3 },
+        '/forget-password': { window: 60, max: 3 },
+        '/reset-password': { window: 60, max: 5 },
+      },
     },
     socialProviders: (() => {
       const clientId =

@@ -232,6 +232,14 @@ function LoginForm() {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
+          <div className="-mt-1 text-right">
+            <Link
+              href="/recuperar"
+              className="text-sm text-cinema-accent hover:text-cinema-accent-light"
+            >
+              ¿Olvidaste tu contraseña?
+            </Link>
+          </div>
           <Button type="submit" className="w-full" size="lg" disabled={loading}>
             {loading ? 'Iniciando sesión…' : 'Iniciar sesión'}
           </Button>
