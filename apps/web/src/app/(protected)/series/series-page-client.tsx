@@ -12,7 +12,7 @@ import { useQueryResult } from '@pelis/db/client';
 import { api } from '@pelis/db/api';
 import type { MediaItem } from '@pelis/ui/types';
 
-export const SERIES_PAGE_SIZE = 30;
+import { SERIES_PAGE_SIZE } from './page-size';
 
 interface SeriesPageClientProps {
   preloaded: { series: PreloadedQuery<PageResult<MediaItem>> };

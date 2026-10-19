@@ -2,7 +2,8 @@ import { Suspense } from 'react';
 import { preloadQuery } from '@pelis/db/server';
 import { CatalogPageSkeleton } from '@pelis/ui/features/catalog-page-skeleton';
 import type { PageResult } from '@pelis/ui/features/paginator';
-import MoviesPageClient, { MOVIES_PAGE_SIZE } from './movies-page-client';
+import MoviesPageClient from './movies-page-client';
+import { MOVIES_PAGE_SIZE } from './page-size';
 import type { MediaItem } from '@pelis/ui/types';
 
 export const revalidate = 3600;
