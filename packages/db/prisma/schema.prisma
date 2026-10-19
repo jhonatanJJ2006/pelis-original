@@ -360,6 +360,19 @@ enum TvPairingStatus {
 }
 /// Eventos de límite de envíos (código de acceso por correo). Compartido entre
 /// todos los procesos de Next, a diferencia del límite en memoria.
+/// Teclado del celular para la búsqueda de la TV (sesiones de 10 min).
+model TvKeyboardSession {
+  code      String   @id
+  text      String   @default("")
+  done      Boolean  @default(false)
+  version   Int      @default(0)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([expiresAt])
+}
+
 model RateLimitHit {
   id        String   @id @default(cuid())
   bucket    String

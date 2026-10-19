@@ -19,6 +19,16 @@ export {
   formatPairingCode,
   getTvPairingForDevice,
 } from './lib/tv-pairing';
+export {
+  TV_KEYBOARD_MAX_TEXT,
+  TV_KEYBOARD_TTL_MS,
+  buildTvKeyboardUrl,
+  createTvKeyboardSession,
+  getTvKeyboardSession,
+  sanitizeKeyboardText,
+  updateTvKeyboardText,
+} from './lib/tv-keyboard';
+export type { TvKeyboardState } from './lib/tv-keyboard';
 export { issueTvSession, betterAuthSessionCookieName } from './lib/tv-session';
 export {
   APP_AUTH_CODE_TTL_MS,
