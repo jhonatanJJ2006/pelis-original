@@ -2,6 +2,21 @@
 
 Eres un modelo que acaba de aterrizar. No improvises. Este archivo manda. Si CONVEX.md o DEPLOY.md dicen otra cosa, gana este archivo.
 
+## Leer primero
+
+**Lee `docs/ESTADO-Y-DECISIONES.md` antes de tocar nada.** Es el handoff canónico: reglas, decisiones,
+formatos, estilo, estado y pendientes. Registro del último día de trabajo: `docs/HANDOFF-2026-10-18.md`.
+
+Reglas no negociables (detalle en ese documento):
+
+- Solo git y gh locales en la máquina Movies, como `jhonatanJJ2006`. Sin agentes en la nube de Cursor, sin force-push, sin tocar otros repos. No edites el checkout de producción: usa un worktree desde `origin/staging`.
+- Ramas `feat/`, `fix/` o `chore/` (un prefijo `docs/` falla el Soft branch gate). PR a `staging`, squash-merge solo con format, test, build y Soft branch gate en verde (Vercel se ignora). Promoción `staging → main` con merge commit y luego `./scripts/deploy-prod.sh` en Movies si hay cambios de la web.
+- Nunca imprimas ni commitees secretos; en la doc solo se dice dónde viven.
+- Las APK solo se descargan desde la web `/descargas`; nunca dentro de las apps. El aviso de nueva versión solo existe dentro de las apps. Los pagos son solo web. Stripe sigue en TEST.
+- La app de TV `apps/android-tv` (`pro.verpelis.tv`) es la principal; nada la reemplaza.
+- Todo vídeo es HLS multicalidad H.264 (1080/720/480/360 + `master.m3u8`), sin borrar lo existente. Reproductores sin precarga extra.
+- Copy en español llano; nunca el copy inventado de Stitch.
+
 ## 0. Primeros 2 minutos
 
 1. Lee este archivo entero.
@@ -43,7 +58,7 @@ Opcional anime:
 
 pnpm --filter @pelis/db import:anilist -- --limit 200
 pnpm --filter @pelis/db group:anime
-docker compose up -d redis consumet
+docker compose -p pelis-original -f docker-compose.yml up -d redis consumet # hoy APAGADO: ver docs/ANIME-PROVIDERS.md
 
 Variables: solo .env (gitignored). Nombres en .env.example. No commitear secretos. No leer .env.
 
@@ -77,12 +92,12 @@ Archivo: apps/web/src/app/playground/page.tsx. Detalle: docs/TESTING.md.
 3. ignoreBuildErrors: apps/web/next.config.mjs ignora TS y ESLint en build. Build verde no implica tipos correctos.
 4. Streaming y auth: /api/stream, /api/tv/stream, /api/anime/stream pasan por denyUnlessStreamAccess (sesión + plan activo o ADMIN). No quitar esa puerta. Históricamente sin auth.
    4b. Plan entitlements — sesiones concurrentes (MVP): `Plan.maxDevices` (default 1). En Better Auth `databaseHooks.session.create` se recortan sesiones no-expiradas más viejas si el usuario supera el límite. ADMIN = ilimitado; sin plan activo = 1. Claim de pairing TV crea otra Session y cuenta como dispositivo. Seed: Mensual/Básico=1, Trimestral/Estándar=2, Anual/Premium=4.
-   4d. Android TV nativo: fuentes en `apps/android-tv/app/src/` (package `pro.verpelis.tv`). **No** gitignorar `app/` como en el TWA (`apps/android/app/`). Build: `apps/android-tv/README.md`. Cold start sin sesión → login split + QR (`/api/tv-auth/*`); con sesión → home de canales. El navegador de tele sigue siendo la web: middleware `/` → `/tv` si UA tele o `?device=tv`. Móvil aprueba en `/link-tv`. APK: `public/downloads/pelis-tv.apk` + `tv-app-version.json`.
+   4d. Android TV nativo: fuentes en `apps/android-tv/app/src/` (package `pro.verpelis.tv`). **No** gitignorar `app/` como en el TWA (`apps/android/app/`). Build: `apps/android-tv/README.md`. Cold start sin sesión → login estilo Netflix con QR a `/link-tv?code=` (`/api/tv-auth/*`) o correo/contraseña; con sesión → Inicio de TV 2.0 (menú lateral, catálogos, reproducción nativa Media3). Versión publicada 2.0.0 (11). El navegador de tele sigue siendo la web: middleware `/` → `/tv` si UA tele o `?device=tv`. Móvil aprueba en `/link-tv`. APK: `public/downloads/pelis-tv.apk` + `tv-app-version.json`.
    4c. Stripe: el plan se activa por webhook **y** por `POST /api/stripe/fulfill` en `/subscribe/success` (no exige cookie: `session_id` + metadata). No mapear `incomplete` a EXPIRED. Lógica: packages/db/src/lib/stripe-subscription.ts.
    Runtime **Movies local** (pelis-web + Postgres + cloudflared → verpelis.pro). No Vercel. Webhook → `https://verpelis.pro/api/stripe/webhook`. Si `SITE_URL` es localhost, los redirects usan `BETTER_AUTH_URL` público. Diagnóstico: docs/AUDIT.md §5b.
 5. Posters gitignored: apps/web/public/peliculas/ y apps/web/public/uploads/. Hash MD5 32 hex -> /peliculas/peliculas/{hash}.webp. imageId -> /uploads/{id}.webp. Clone limpio = imágenes rotas.
    Ver packages/db/src/lib/resolveMovieImage.ts y scripts/audit-images.mjs.
-6. PWA: no hay prompts ni barras de «instalar app» (`beforeinstallprompt` se silencia). Nueva versión = modal Aceptar / Más tarde, sin reload forzado. La versión se lee del deploy local Movies (`/api/app/availability` → `public/version.json` escrito en prebuild, o SW waiting). No asumir Vercel. No montar `AppDownloadButtons` en `/profile` ni en el footer: los APK quedan en `/downloads/*.apk` (superficie pública, no in-app). Package TWA = `pro.verpelis.twa` (no el id legado `com.pelis.app`); Digital Asset Links en `public/.well-known/assetlinks.json`. La barra gris con URL + compartir es chrome de Chrome / Custom Tabs: no se puede ocultar con CSS. TWA/PWA standalone solo si el usuario abre el APK TWA verificado (package + SHA256) o «Añadir a pantalla de inicio». Si abre una pestaña de Chrome, la barra sigue.
+6. PWA: no hay prompts ni barras de «instalar app» (`beforeinstallprompt` se silencia). El aviso de nueva versión **solo existe dentro de las apps** (TV, nativa, TWA); en la web `PwaUpdateModal` mantiene el SW pero no pinta el diálogo. La versión se lee del deploy local Movies (`/api/app/availability` → `public/version.json` escrito en prebuild, o SW waiting). No asumir Vercel. No montar `AppDownloadButtons` en `/profile` ni en el footer: los APK solo se ofrecen en la página web `/descargas` (archivos en `/downloads/*.apk`; `/descargar` → 308); con UA `PelisTV`/`PelisAndroid` la página dice «Ya tienes Pelis». Package TWA = `pro.verpelis.twa` (no el id legado `com.pelis.app`); Digital Asset Links en `public/.well-known/assetlinks.json`. La barra gris con URL + compartir es chrome de Chrome / Custom Tabs: no se puede ocultar con CSS. TWA/PWA standalone solo si el usuario abre el APK TWA verificado (package + SHA256) o «Añadir a pantalla de inicio». Si abre una pestaña de Chrome, la barra sigue.
 7. CI `deploy` / `pnpm build:vercel`: `prisma migrate deploy` no emite el cliente. Hay que correr `prisma generate` vía `@pelis/db` (cwd `packages/db`) **antes** de `next build`. Turbo `build:vercel` depende de `^build`. No uses `pnpm -w --filter @pelis/db exec prisma generate` desde `apps/web`: el cwd no ve el schema. `DATABASE_URL` debe estar en `turbo.json` `globalEnv` o turbo strict la recorta y el prerender de `/` y `/series` falla. El job `build` (gate de promote) ya genera con `turbo run build --filter=@pelis/web...` y carga `.env` vía `with-env`. No saltar el job `deploy`.
 
 ## Deploy / entornos (Glob es dueño)
@@ -125,12 +140,16 @@ Rutas completas: docs/APP.md.
 
 ## Documentación
 
+- docs/ESTADO-Y-DECISIONES.md — handoff canónico (leer primero)
+- docs/HANDOFF-2026-10-18.md — registro del 2026-10-17/18
 - DESIGN.md — UI Maison Noir (tokens cinema-*)
 - docs/APP.md — rutas, auth, fuentes de datos
 - docs/ARCHITECTURE.md — paquetes, flujo, trampas
 - docs/DATA-MODEL.md — Prisma
 - docs/TESTING.md — Vitest + Playwright
-- docs/ANIME-PROVIDERS.md — Consumet / embeds / AniList
+- docs/ANIME-PROVIDERS.md — embeds / AniList / Consumet (apagado)
+- docs/TRANSCODE-ABR.md, docs/TRANSCODE-ABR-PILOT-2026-10-18.md — formato HLS multicalidad obligatorio
+- docs/HLS-NGINX-PLAN.md — nginx secure_link (decidido: no por ahora)
 - docs/AUDIT.md — gaps vivos
 - TODO.md — backlog
 - CONVEX.md — legado, no usar

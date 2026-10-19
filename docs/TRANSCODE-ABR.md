@@ -27,9 +27,8 @@ escalera ABR H.264 dentro de la **misma** carpeta-token, sin tocar lo que ya exi
 
 El resolver devuelve `/api/stream/<token>/<token>/master.m3u8`; `rewriteM3u8Manifest` ya reescribe
 las rutas relativas `v720/index.m3u8` y sus segmentos a `/api/stream/…`. **No hace falta cambiar la
-DB**: la web y la TV llaman primero a `/api/stream/resolve`. (La app nativa de móvil,
-`apps/android-native`, usa `movie.videoUrl` si existe, que apunta a `playlist.m3u8`: seguirá con la
-rendición original hasta que cambie ese orden o se actualice `videoUrl`.)
+DB**: la web y la TV llaman primero a `/api/stream/resolve`. Desde 1.2.1 (4), #140, la app nativa
+`apps/android-native` también llama primero al resolver y usa `movie.videoUrl` solo como respaldo.
 
 ## Uso
 
@@ -101,3 +100,11 @@ el encoder H.264 de Haswell da peor calidad por bit que x264 veryfast, que es lo
 ## Piloto 2026-10-18
 
 Resultados en `docs/TRANSCODE-ABR-PILOT-2026-10-18.md`.
+
+## Biblioteca completa (en curso)
+
+Desde 2026-10-18 corre en Movies `/home/det/Desktop/PELIS/abr-pilot-2026-10-18/queue.sh`: 144
+películas, una a la vez, con los valores por defecto de este script (CRF 21). Se para sola si un
+disco baja de 30 GB libres. Progreso en `abr-pilot-2026-10-18/queue-status.txt`. Antes se movieron
+29 carpetas-token de Pelis-A a Pelis-B. **No la toques** desde otra tarea. Formato obligatorio y
+decisiones: `docs/ESTADO-Y-DECISIONES.md` §7.

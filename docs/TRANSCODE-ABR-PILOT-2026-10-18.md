@@ -75,6 +75,9 @@ Con ~0,85 Mbps de subida (medido hoy por el túnel: 150–220 KB/s en descargas 
 
 ## Estimación biblioteca completa (155 películas restantes, 280,7 h)
 
+> Actualización: se eligió la opción (c), mover 29 carpetas a Pelis-B, y se mantuvieron CRF 21 y
+> 360p a 0,7M. La cola de 144 películas corre desde 2026-10-18 (ver `docs/TRANSCODE-ABR.md`).
+
 - Tiempo: **~128 h de codificación (~5,3 días)** a la velocidad medida con la máquina cargada
   (escala por píxeles de salida; las fuentes de 720p y menores van más rápido). Sin los emuladores,
   probablemente ~25–30 % menos.
