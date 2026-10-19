@@ -120,7 +120,7 @@ export default function EditAnimePage() {
 
       <AnimeForm
         initialValues={{
-          title: anime.title,
+          title: anime.sourceTitle ?? anime.title,
           alternativeTitle: anime.alternativeTitle ?? '',
           image: anime.image,
           synopsis: anime.synopsis,
@@ -141,7 +141,7 @@ export default function EditAnimePage() {
         <EnrichAnimeModal
           anime={{
             _id: anime._id,
-            title: anime.title,
+            title: anime.sourceTitle ?? anime.title,
             image: anime.image,
             backdropImage: anime.backdropImage,
           }}

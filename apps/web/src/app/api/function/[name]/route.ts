@@ -13,11 +13,13 @@ import { TtlCache } from '@/lib/ttl-cache';
 
 /**
  * Consultas públicas del catálogo que no dependen del usuario. Con muchos
- * visitantes a la vez se piden igual en cada carga (movies.list pesa ~160 KB),
+ * visitantes a la vez se piden igual en cada carga,
  * así que se guardan 60 s por proceso.
  */
 const PUBLIC_CACHED_QUERIES = new Set([
   'movies.list',
+  'movies.page',
+  'movies.getByGenre',
   'movies.getFeatured',
   'movies.getTrending',
   'movies.listSeries',

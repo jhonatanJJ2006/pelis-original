@@ -1,6 +1,8 @@
 export interface MediaItem {
   _id: string;
   name: string;
+  /** Título tal como está guardado. El admin lo edita; `name` es el de pantalla. */
+  sourceName?: string;
   image: string;
   backdropImage?: string;
   synopsis: string;

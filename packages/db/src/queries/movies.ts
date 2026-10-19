@@ -217,17 +217,25 @@ export const listSeries = register({
   kind: 'query',
   name: 'movies.listSeries',
   reads: ['movie', 'series'],
-  handler: async () => {
-    const series = await prisma.movie.findMany({
+  // limit opcional: el inicio (web y TV) pide un puñado. Sin limit sigue
+  // devolviendo el catálogo entero para las APK que ya lo llaman así.
+  args: z
+    .object({
+      limit: z.number().int().positive().max(100).optional(),
+    })
+    .optional(),
+  handler: async (_ctx, args) => {
+    const series = await findPlayableMovies({
       where: { mediaType: 'SERIES' },
       orderBy: { name: 'asc' },
+      limit: args?.limit,
     });
     // Public catalog uses Movie.mediaType = SERIES (favorites/history/detail too).
     // Do NOT invent fake series from random movies when the table is empty —
     // that polluted /series and the home "Series" row with mislabeled films.
     // Admin `series` rows are a separate table. adminSeries.create mirrors a new
     // token into this Movie row; import:tmdb-series does the same additively.
-    return (await filterPlayableCatalog(series)).map(toMovieShape);
+    return series.map(toMovieShape);
   },
 });
 

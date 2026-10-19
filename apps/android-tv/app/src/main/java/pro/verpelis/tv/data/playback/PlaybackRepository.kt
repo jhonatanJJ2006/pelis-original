@@ -128,7 +128,8 @@ class PlaybackRepository(baseUrl: String, apiHttp: OkHttpClient) : PlaybackBacke
             genre = genre,
             classification = dto.classification.orEmpty(),
             poster = PlaybackUrls.absolute(base, dto.image),
-            backdrop = PlaybackUrls.absolute(base, dto.backdropImage ?: dto.image),
+            // Solo fondo horizontal: el póster estirado a 1920 px se veía pixelado.
+            backdrop = PlaybackUrls.absolute(base, dto.backdropImage),
             videoUrl = if (kind == TitleKind.ANIME) null else dto.videoUrl,
             token = dto.token,
             episodes = intOf(dto.episodes).takeIf { it > 0 } ?: intOf(dto.totalEpisodes),

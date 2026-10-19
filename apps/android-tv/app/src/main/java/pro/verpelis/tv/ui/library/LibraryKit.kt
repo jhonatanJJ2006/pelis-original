@@ -21,6 +21,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -49,6 +50,8 @@ fun TitleGrid(
     header: (@Composable () -> Unit)? = null,
     /** Contenido de ancho completo cuando no hay pósters (cargando, vacío). */
     empty: (@Composable () -> Unit)? = null,
+    /** Avisa qué póster tiene el foco (indicador de página). */
+    onFocusIndex: ((Int) -> Unit)? = null,
 ) {
     if (onNearEnd != null) {
         LaunchedEffect(state, items.size) {
@@ -79,6 +82,7 @@ fun TitleGrid(
                     progress = progress(item),
                     modifier = Modifier
                         .let { if (i == 0 && firstFocus != null) it.focusRequester(firstFocus) else it }
+                        .let { m -> if (onFocusIndex != null) m.onFocusChanged { if (it.hasFocus) onFocusIndex(i) } else m }
 
                 )
             }
@@ -122,6 +126,6 @@ fun LibraryLoading(modifier: Modifier = Modifier) {
 
 @Composable
 fun SectionLabel(text: String, modifier: Modifier = Modifier) {
-    MnText(text.uppercase(), color = Mn.Gold, size = 8.sp, weight = FontWeight.SemiBold, spacing = 1.6.sp, modifier = modifier)
+    MnText(text, color = Mn.Gold, size = 8.sp, weight = FontWeight.SemiBold, spacing = 1.6.sp, modifier = modifier)
 }
 

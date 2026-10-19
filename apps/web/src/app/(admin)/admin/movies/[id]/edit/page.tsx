@@ -133,7 +133,7 @@ export default function EditMoviePage() {
 
       <MovieForm
         initialValues={{
-          name: movie.name,
+          name: movie.sourceName ?? movie.name,
           image: movie.image,
           synopsis: movie.synopsis,
           genre: movie.genre,
@@ -165,7 +165,7 @@ export default function EditMoviePage() {
         <EnrichMovieModal
           movie={{
             _id: movie._id,
-            name: movie.name,
+            name: movie.sourceName ?? movie.name,
             token: movie.token,
             image: movie.image,
             backdropImage: movie.backdropImage,

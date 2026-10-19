@@ -3,7 +3,6 @@ from PIL import Image, ImageDraw, ImageFont
 import os
 INK = (11, 11, 13); GOLD = (196, 163, 90); MUTED = (156, 151, 140)
 FONT = 'core/src/main/res/font/fraunces_bold.ttf'
-UI = 'core/src/main/res/font/inter_medium.ttf'
 DENS = {'mdpi': 48, 'hdpi': 72, 'xhdpi': 96, 'xxhdpi': 144, 'xxxhdpi': 192}
 
 def fit(draw, text, path, max_w):
@@ -36,8 +35,7 @@ w, h = 640, 360
 b = Image.new('RGB', (w, h), INK)
 d = ImageDraw.Draw(b)
 f = fit(d, 'PELIS', FONT, w * 0.55)
-d.text((w / 2, h / 2 - 20), 'PELIS', font=f, fill=GOLD, anchor='mm')
-d.text((w / 2, h / 2 + 70), 'MAISON NOIR', font=ImageFont.truetype(UI, 26), fill=MUTED, anchor='mm')
+d.text((w / 2, h / 2), 'PELIS', font=f, fill=GOLD, anchor='mm')
 os.makedirs('tv/src/main/res/drawable-xhdpi', exist_ok=True)
 b.resize((320, 180), Image.LANCZOS).save('tv/src/main/res/drawable-xhdpi/banner.png')
 b.save('/tmp/pelis-banner-preview.png'); icon(192).save('/tmp/pelis-icon-preview.png')

@@ -1,5 +1,8 @@
 package pro.verpelis.tv.ui.library
 
+import pro.verpelis.tv.data.tv.historyPage
+import pro.verpelis.tv.data.tv.favoritesPage
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -111,18 +114,40 @@ private fun TitleDto.titleKind(): TitleKind = kind
 fun MyListScreen(onOpenTitle: (TitleKind, String) -> Unit, onOpenHistory: () -> Unit, onNeedLogin: () -> Unit) {
     val session = LocalSessionStore.current
     if (!session.hasSession()) {
-        NeedSession("Mi lista", "TU CUENTA", "Guarda películas y series en Mi lista desde su ficha y encuéntralas aquí.", onNeedLogin)
+        NeedSession("Mi lista", "Tu cuenta", "Guarda películas y series en Mi lista desde su ficha y encuéntralas aquí.", onNeedLogin)
         return
     }
     val repo = LocalTvRepository.current
     var items by remember { mutableStateOf<List<TitleDto>?>(null) }
+    var total by remember { mutableStateOf(0) }
+    var hasMore by remember { mutableStateOf(false) }
+    var loadingMore by remember { mutableStateOf(false) }
+    var focusedIndex by remember { mutableStateOf(0) }
     var error by remember { mutableStateOf<Throwable?>(null) }
     var attempt by remember { mutableStateOf(0) }
     val first = remember { FocusRequester() }
     val historyFocus = remember { FocusRequester() }
+    val scope = rememberCoroutineScope()
     LaunchedEffect(attempt) {
         error = null
-        runCatching { repo.favorites() }.onSuccess { items = it }.onFailure { error = it }
+        runCatching { repo.favoritesPage(0) }
+            .onSuccess { items = it.items; total = it.total; hasMore = it.hasMore }
+            .onFailure { error = it }
+    }
+    val loadMore: () -> Unit = {
+        val current = items
+        if (current != null && hasMore && !loadingMore) {
+            loadingMore = true
+            scope.launch {
+                runCatching { repo.favoritesPage(current.size) }.onSuccess { p ->
+                    val seen = current.mapTo(HashSet()) { it.id }
+                    items = current + p.items.filter { seen.add(it.id) }
+                    total = p.total
+                    hasMore = p.hasMore && p.items.isNotEmpty()
+                }
+                loadingMore = false
+            }
+        }
     }
     if (items == null && error != null) {
         TvLoadError(onRetry = { attempt++ }, title = "No pudimos cargar Mi lista", detail = PelisApiClient.friendlyNetworkError(error!!), hints = MenuHints)
@@ -132,7 +157,7 @@ fun MyListScreen(onOpenTitle: (TitleKind, String) -> Unit, onOpenHistory: () -> 
     LaunchedEffect(list) {
         if (list != null) runCatching { if (list.isEmpty()) historyFocus.requestFocus() else first.requestFocus() }
     }
-    ScreenFrame("Mi lista", "TU CUENTA", chip = list?.let { if (it.size == 1) "1 guardado" else "${it.size} guardados" }) {
+    ScreenFrame("Mi lista", "Tu cuenta", chip = list?.let { if (total > 0) pageIndicator(focusedIndex, total).replace("títulos", "guardados").replace("título", "guardado") else "0 guardados" }) {
         val historyButton: @Composable () -> Unit = {
             Row(Modifier.padding(vertical = 4.dp)) { NoirButton("Historial", onOpenHistory, focusRequester = historyFocus) }
         }
@@ -146,6 +171,9 @@ fun MyListScreen(onOpenTitle: (TitleKind, String) -> Unit, onOpenHistory: () -> 
                 },
                 firstFocus = first,
                 header = historyButton,
+                onNearEnd = loadMore,
+                footer = loadingMore,
+                onFocusIndex = { focusedIndex = it },
                 empty = {
                     LibraryMessage(
                         "Tu lista está vacía",
@@ -163,7 +191,7 @@ fun MyListScreen(onOpenTitle: (TitleKind, String) -> Unit, onOpenHistory: () -> 
 fun HistoryScreen(onOpenTitle: (TitleKind, String) -> Unit, onNeedLogin: () -> Unit) {
     val session = LocalSessionStore.current
     if (!session.hasSession()) {
-        NeedSession("Historial", "TU CUENTA", "Inicia sesión para ver lo que viste en todos tus dispositivos.", onNeedLogin)
+        NeedSession("Historial", "Tu cuenta", "Inicia sesión para ver lo que viste en todos tus dispositivos.", onNeedLogin)
         return
     }
     val repo = LocalTvRepository.current
@@ -176,9 +204,29 @@ fun HistoryScreen(onOpenTitle: (TitleKind, String) -> Unit, onNeedLogin: () -> U
     var confirmClear by remember { mutableStateOf(false) }
     val first = remember { FocusRequester() }
     val clearFocus = remember { FocusRequester() }
+    var total by remember { mutableStateOf(0) }
+    var hasMore by remember { mutableStateOf(false) }
+    var loadingMore by remember { mutableStateOf(false) }
+    var focusedIndex by remember { mutableStateOf(0) }
     LaunchedEffect(attempt) {
         error = null
-        runCatching { repo.history() }.onSuccess { rows = it }.onFailure { error = it }
+        runCatching { repo.historyPage(0) }
+            .onSuccess { rows = it.items; total = it.total; hasMore = it.hasMore }
+            .onFailure { error = it }
+    }
+    fun loadMore() {
+        val current = rows ?: return
+        if (!hasMore || loadingMore) return
+        loadingMore = true
+        scope.launch {
+            runCatching { repo.historyPage(current.size) }.onSuccess { p ->
+                val seen = current.mapTo(HashSet()) { it.movieId }
+                rows = current + p.items.filter { seen.add(it.movieId) }
+                total = p.total
+                hasMore = p.hasMore && p.items.isNotEmpty()
+            }
+            loadingMore = false
+        }
     }
     if (rows == null && error != null) {
         TvLoadError(onRetry = { attempt++ }, title = "No pudimos cargar tu historial", detail = PelisApiClient.friendlyNetworkError(error!!), hints = MenuHints)
@@ -192,14 +240,14 @@ fun HistoryScreen(onOpenTitle: (TitleKind, String) -> Unit, onNeedLogin: () -> U
             runCatching { if (list.isEmpty()) Unit else first.requestFocus() }
         }
     }
-    ScreenFrame("Historial", "TU CUENTA", chip = list?.let { "${it.size} títulos" }, actions = if (list.isNullOrEmpty()) null else ({
+    ScreenFrame("Historial", "Tu cuenta", chip = list?.let { if (total > 0) pageIndicator(focusedIndex, total) else "0 títulos" }, actions = if (list.isNullOrEmpty()) null else ({
         NoirButton(if (confirmClear) "Pulsa otra vez para borrar todo" else "Borrar historial", {
             sounds.playClick()
             if (!confirmClear) { confirmClear = true; return@NoirButton }
             confirmClear = false
             scope.launch {
                 runCatching { repo.clearHistory() }
-                    .onSuccess { rows = emptyList(); actionError = null }
+                    .onSuccess { rows = emptyList(); total = 0; hasMore = false; actionError = null }
                     .onFailure { actionError = "No se pudo borrar: " + PelisApiClient.friendlyNetworkError(it) }
             }
         }, Modifier.focusProperties { down = first }, selected = confirmClear, focusRequester = clearFocus, onFocus = { if (!it) confirmClear = false })
@@ -210,17 +258,19 @@ fun HistoryScreen(onOpenTitle: (TitleKind, String) -> Unit, onNeedLogin: () -> U
             list.isEmpty() -> LibraryMessage("Sin historial", "Lo que empieces a ver aparecerá aquí.")
             else -> TvPivotScroll(0.3f) {
                 LazyColumn(state = rememberLazyListState(), verticalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(6.dp)) {
-                    items(list, key = { it.movieId }) { row ->
+                    itemsIndexed(list, key = { _, it -> it.movieId }) { index, row ->
                         val movie = row.movie!!
+                        if (index >= list.size - 6) LaunchedEffect(list.size) { loadMore() }
                         HistoryRow(
                             row = row,
-                            modifier = if (row === list.first()) Modifier.focusRequester(first).focusProperties { up = clearFocus } else Modifier,
+                            modifier = (if (index == 0) Modifier.focusRequester(first).focusProperties { up = clearFocus } else Modifier)
+                                .onFocusChanged { if (it.hasFocus) focusedIndex = index },
                             onOpen = { sounds.playClick(); onOpenTitle(movie.kind, movie.id) },
                             onRemove = {
                                 sounds.playClick()
                                 scope.launch {
                                     runCatching { repo.removeHistory(row.movieId) }
-                                        .onSuccess { rows = rows?.filterNot { it.movieId == row.movieId }; actionError = null }
+                                        .onSuccess { rows = rows?.filterNot { it.movieId == row.movieId }; total = (total - 1).coerceAtLeast(0); actionError = null }
                                         .onFailure { actionError = "No se pudo quitar: " + PelisApiClient.friendlyNetworkError(it) }
                                 }
                             },
@@ -303,7 +353,7 @@ private fun HistoryRow(row: HistoryRowDto, modifier: Modifier, onOpen: () -> Uni
 fun ProfileScreen(onOpenMyList: () -> Unit, onOpenHistory: () -> Unit, onNeedLogin: () -> Unit, onSignedOut: () -> Unit) {
     val session = LocalSessionStore.current
     if (!session.hasSession()) {
-        NeedSession("Perfil", "TU CUENTA", "Inicia sesión para ver tu cuenta y tu plan en este televisor.", onNeedLogin)
+        NeedSession("Perfil", "Tu cuenta", "Inicia sesión para ver tu cuenta y tu plan en este televisor.", onNeedLogin)
         return
     }
     val repo = LocalTvRepository.current
@@ -322,7 +372,7 @@ fun ProfileScreen(onOpenMyList: () -> Unit, onOpenHistory: () -> Unit, onNeedLog
     val manageUrl = BuildConfig.API_BASE_URL.trimEnd('/') + "/subscribe"
     val qr = remember(manageUrl) { QrBitmap.encode(manageUrl, 360)?.asImageBitmap() }
 
-    ScreenFrame("Perfil", "TU CUENTA") {
+    ScreenFrame("Perfil", "Tu cuenta") {
         val user = me
         if (user == null && loading) { LibraryLoading(); return@ScreenFrame }
         if (user == null) {

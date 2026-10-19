@@ -21,11 +21,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items as gridItems
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -57,6 +62,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -95,6 +101,7 @@ val GoldFocusBorder = Border(BorderStroke(3.dp, Noir.Gold), shape = RoundedCorne
 
 private sealed interface TvRoute {
     data object Home : TvRoute
+    data object Search : TvRoute
     data object Channels : TvRoute
     data object Anime : TvRoute
     data object MyList : TvRoute
@@ -119,8 +126,13 @@ fun TvApp(openId: String? = null) {
                 Text("P", fontFamily = Noir.Display, color = Noir.Gold, fontSize = 20.sp)
             }
             Spacer(Modifier.weight(1f))
-            listOf(Triple("Inicio", Icons.Filled.Home, TvRoute.Home), Triple("TV en vivo", Icons.Filled.Tv, TvRoute.Channels),
-                Triple("Anime", Icons.Filled.AutoAwesome, TvRoute.Anime), Triple("Mi lista", Icons.Filled.Bookmark, TvRoute.MyList)).forEach { (l, icon, r) ->
+            listOf(
+                Triple("Buscar", Icons.Filled.Search, TvRoute.Search),
+                Triple("Inicio", Icons.Filled.Home, TvRoute.Home),
+                Triple("TV en vivo", Icons.Filled.Tv, TvRoute.Channels),
+                Triple("Anime", Icons.Filled.AutoAwesome, TvRoute.Anime),
+                Triple("Mi lista", Icons.Filled.Bookmark, TvRoute.MyList),
+            ).forEach { (l, icon, r) ->
                 RailItem(l, icon, route == r) { stack = emptyList(); route = r }
             }
             Spacer(Modifier.weight(1f))
@@ -129,9 +141,10 @@ fun TvApp(openId: String? = null) {
         Box(Modifier.fillMaxSize()) {
             when (val r = route) {
                 TvRoute.Home -> TvHome(api) { go(TvRoute.Detail(it)) }
+                TvRoute.Search -> TvSearch(api) { go(TvRoute.Detail(it)) }
                 TvRoute.Channels -> TvChannels(api)
-                TvRoute.Anime -> TvRowsScreen(api, { listOf("Anime" to api.animeList()) }) { go(TvRoute.Detail(it)) }
-                TvRoute.MyList -> TvRowsScreen(api, { listOf("Mi lista" to api.favorites(), "Seguir viendo" to api.history()) }) { go(TvRoute.Detail(it)) }
+                TvRoute.Anime -> TvCatalog("Anime", "No hay anime", { go(TvRoute.Detail(it)) }) { o, l -> api.animePage(o, l) }
+                TvRoute.MyList -> TvLibrary(api) { go(TvRoute.Detail(it)) }
                 is TvRoute.Detail -> TvDetail(api, r.t)
             }
         }
@@ -220,7 +233,7 @@ fun TvHome(api: PelisApi, onOpen: (Title) -> Unit) {
             val featured = bg(emptyList()) { api.featured() }
             val cont = bg(emptyList()) { api.history().filter { it.progress in 0.01f..0.97f }.distinctBy { it.id } }
             val anime = bg(emptyList()) { api.animeList().filter { it.poster != null }.take(15) }
-            val channels = bg(emptyList()) { api.channels().filter { it.online }.take(12) }
+            val channels = bg(emptyList()) { api.channelsPage(0, 24).items.filter { it.online }.take(12) }
             val rows = listOf("Acción", "Comedia", "Drama", "Terror").map { g -> g to bg(emptyList()) { api.byGenre(g) } }
             val tr = trending.await()
             TvHomeData(
@@ -254,7 +267,7 @@ fun TvHome(api: PelisApi, onOpen: (Title) -> Unit) {
             }
             if (d.anime.isNotEmpty()) item { TvSection("Anime destacado", null, "Ediciones en simulcast"); PosterRow(d.anime, onOpen) }
             if (d.trending.isNotEmpty()) item {
-                TvSection("Tendencias en PELIS", null, "Las obras más vistas")
+                TvSection("Tendencias en Pelis", null, "Las obras más vistas")
                 LazyRow(contentPadding = PaddingValues(horizontal = 48.dp, vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     items(d.trending.size) { i ->
                         val t = d.trending[i]
@@ -274,8 +287,9 @@ fun TvHome(api: PelisApi, onOpen: (Title) -> Unit) {
             items(d.rows.filter { it.second.isNotEmpty() }) { (g, list) -> TvSection(g); PosterRow(list, onOpen) }
             item {
                 Row(Modifier.padding(horizontal = 48.dp, vertical = 24.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Wordmark(14.sp, subtitle = null); Spacer(Modifier.width(12.dp))
-                    Text("Maison Noir Cinémathèque", style = NoirBody)
+                    Wordmark(14.sp)
+                    Spacer(Modifier.width(12.dp))
+                    Text("Películas, series, anime y canales en vivo.", style = NoirBody)
                 }
             }
         }
@@ -307,7 +321,7 @@ fun TvHero(t: Title, onPlay: () -> Unit, onInfo: () -> Unit) {
         Box(Modifier.fillMaxSize().background(Brush.horizontalGradient(listOf(Noir.Ink, Noir.Ink.copy(alpha = 0.6f), Color.Transparent))))
         Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent, Noir.Ink))))
         Column(Modifier.align(Alignment.CenterStart).padding(start = 48.dp).width(560.dp)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { Badge("Estreno exclusivo Maison Noir", gold = true); Badge("HD") }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { Badge("Destacado", gold = true); Badge("HD") }
             Spacer(Modifier.height(10.dp))
             Text(listOf(t.genre.split(",").firstOrNull().orEmpty(), t.classification, t.year).filter { it.isNotBlank() }.joinToString("  ·  "), style = NoirBody)
             Text(t.name, style = NoirTitle.copy(fontSize = 44.sp, lineHeight = 48.sp))
@@ -334,7 +348,7 @@ fun TvChannelCard(ch: Channel, onClick: () -> Unit) {
             Box(Modifier.padding(8.dp)) { Badge("En vivo", danger = true) }
             Column(Modifier.align(Alignment.BottomStart).padding(10.dp)) {
                 Text(ch.name, color = Noir.Text, fontSize = 13.sp, maxLines = 1)
-                Text(ch.category.uppercase(), style = NoirLabel.copy(fontSize = 9.sp))
+                Text(ch.category, style = NoirLabel.copy(fontSize = 9.sp))
             }
         }
     }
@@ -372,7 +386,7 @@ fun TvDetail(api: PelisApi, t: Title) {
             item {
                 Column(Modifier.width(600.dp)) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Badge("Estreno exclusivo Maison Noir", gold = true); Badge("HD")
+                        Badge("Destacado", gold = true); Badge("HD")
                         if (m.classification.isNotBlank()) Badge(m.classification, danger = true)
                     }
                     Spacer(Modifier.height(12.dp))
@@ -394,7 +408,7 @@ fun TvDetail(api: PelisApi, t: Title) {
             }
             if (isSeries) item {
                 Column(Modifier.padding(top = 28.dp)) {
-                    Text("TEMPORADA 1  ·  EPISODIOS", style = NoirLabel)
+                    Text("Temporada 1 · Episodios", style = NoirLabel)
                     LazyRow(contentPadding = PaddingValues(vertical = 14.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                         items((1..episodes).toList()) { e ->
                             val ok = m.kind == Kind.ANIME || (e == 1 && !m.comingSoon)
@@ -442,19 +456,152 @@ fun TvButton(label: String, primary: Boolean = false, modifier: Modifier = Modif
 @Composable
 fun TvChannels(api: PelisApi) {
     val ctx = LocalContext.current
-    val data = rememberLoad(Unit) { api.channels().filter { it.online }.groupBy { it.category } }
-    TvLoad(data) { groups ->
-        LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(vertical = 24.dp)) {
-            item { Text("TV en vivo", style = NoirTitle, modifier = Modifier.padding(start = 48.dp)) }
-            items(groups.entries.toList()) { (cat, list) ->
-                Text(cat, style = NoirSection, modifier = Modifier.padding(start = 48.dp, top = 16.dp, bottom = 8.dp))
-                LazyRow(contentPadding = PaddingValues(horizontal = 48.dp, vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(20.dp)) {
-                    items(list, key = { it.id }) { ch ->
-                        TvChannelCard(ch) { PlaybackIntent.start(ctx, TvPlayerActivity::class.java, PlaybackRequest(api.channelStreamUrl(ch.id), ch.name, live = true)) }
-                    }
+    var cat by remember { mutableStateOf<String?>(null) }
+    val cats = rememberLoad(Unit) { api.channelCategories() }
+    val names = (cats as? Load.Ok)?.value.orEmpty()
+    Column(Modifier.fillMaxSize()) {
+        Text("TV en vivo", style = NoirTitle, modifier = Modifier.padding(start = 48.dp, top = 24.dp, bottom = 8.dp))
+        LazyRow(contentPadding = PaddingValues(horizontal = 48.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            item { TvButton("Todos") { cat = null } }
+            items(names) { c -> TvButton(c) { cat = c } }
+        }
+        Box(Modifier.weight(1f).fillMaxWidth()) {
+            TvChannelPage(api, cat) { ch ->
+                PlaybackIntent.start(ctx, TvPlayerActivity::class.java, PlaybackRequest(api.channelStreamUrl(ch.id), ch.name, live = true))
+            }
+        }
+    }
+}
+
+/** Catálogo paginado. Sin texto se muestran las películas populares. */
+@Composable
+fun TvSearch(api: PelisApi, onOpen: (Title) -> Unit) {
+    var q by remember { mutableStateOf("") }
+    var debounced by remember { mutableStateOf("") }
+    LaunchedEffect(q) { delay(300); debounced = q.trim() }
+    val searching = debounced.length >= 2
+    Column(Modifier.fillMaxSize()) {
+        Text("Buscar", style = NoirTitle, modifier = Modifier.padding(start = 48.dp, top = 24.dp))
+        androidx.compose.material3.OutlinedTextField(
+            value = q,
+            onValueChange = { q = it },
+            singleLine = true,
+            placeholder = { androidx.compose.material3.Text("Películas, series, actores") },
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 48.dp, vertical = 12.dp),
+        )
+        if (!searching) {
+            Text("Películas populares", style = NoirSection, modifier = Modifier.padding(start = 48.dp, bottom = 8.dp))
+        }
+        Box(Modifier.weight(1f).fillMaxWidth()) {
+            TvTitlePage(if (searching) debounced else "popular", if (searching) "Sin resultados para \"$debounced\"" else "No hay títulos", onOpen) { offset, limit ->
+                if (searching) api.moviesPage(offset, limit, mediaType = null, search = debounced)
+                else api.moviesPage(offset, limit, sort = "popular")
+            }
+        }
+    }
+}
+
+@Composable
+fun TvCatalog(title: String, empty: String, onOpen: (Title) -> Unit, load: suspend (Int, Int) -> pro.verpelis.core.data.Page<Title>) {
+    Column(Modifier.fillMaxSize()) {
+        Text(title, style = NoirTitle, modifier = Modifier.padding(start = 48.dp, top = 24.dp, bottom = 8.dp))
+        Box(Modifier.weight(1f).fillMaxWidth()) { TvTitlePage(title, empty, onOpen, load) }
+    }
+}
+
+@Composable
+fun TvLibrary(api: PelisApi, onOpen: (Title) -> Unit) {
+    var tab by remember { mutableIntStateOf(0) }
+    Column(Modifier.fillMaxSize()) {
+        Text(if (tab == 0) "Mi lista" else "Seguir viendo", style = NoirTitle, modifier = Modifier.padding(start = 48.dp, top = 24.dp))
+        Row(Modifier.padding(horizontal = 48.dp, vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            TvButton("Mi lista", primary = tab == 0) { tab = 0 }
+            TvButton("Seguir viendo", primary = tab == 1) { tab = 1 }
+        }
+        Box(Modifier.weight(1f).fillMaxWidth()) {
+            TvTitlePage(tab, if (tab == 0) "Tu lista está vacía" else "Todavía no hay nada en seguir viendo", onOpen) { offset, limit ->
+                if (tab == 0) api.favoritesPage(offset, limit) else api.historyPage(offset, limit)
+            }
+        }
+    }
+}
+
+@Composable
+fun TvTitlePage(
+    key: Any?,
+    empty: String,
+    onOpen: (Title) -> Unit,
+    load: suspend (offset: Int, limit: Int) -> pro.verpelis.core.data.Page<Title>,
+) {
+    val pageState = remember(key) { mutableIntStateOf(0) }
+    val pageIndex = pageState.intValue
+    val limit = pro.verpelis.core.data.PAGE_SIZE
+    val state = rememberLoad(key, pageIndex) { load(pageIndex * limit, limit) }
+    Box(Modifier.fillMaxSize()) {
+        TvLoad(state) { page ->
+            if (page.items.isEmpty()) {
+                Box(Modifier.fillMaxSize(), Alignment.Center) { Text(empty, style = NoirBody) }
+                return@TvLoad
+            }
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(150.dp),
+                contentPadding = PaddingValues(horizontal = 48.dp, vertical = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                gridItems(page.items, key = { it.id }) { t ->
+                    TvPoster(t) { onOpen(t) }
+                }
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    TvPageBar(page.pageNumber, page.pageCount, page.total, "título", "títulos",
+                        onPrev = { pageState.intValue = pageIndex - 1 }, onNext = { pageState.intValue = pageIndex + 1 })
                 }
             }
         }
+    }
+}
+
+@Composable
+fun TvChannelPage(api: PelisApi, category: String?, onOpen: (Channel) -> Unit) {
+    val pageState = remember(category) { mutableIntStateOf(0) }
+    val pageIndex = pageState.intValue
+    val limit = pro.verpelis.core.data.PAGE_SIZE
+    val state = rememberLoad(category, pageIndex) { api.channelsPage(pageIndex * limit, limit, category) }
+    Box(Modifier.fillMaxSize()) {
+        TvLoad(state) { page ->
+            if (page.items.isEmpty()) {
+                Box(Modifier.fillMaxSize(), Alignment.Center) { Text("No hay canales", style = NoirBody) }
+                return@TvLoad
+            }
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(220.dp),
+                contentPadding = PaddingValues(horizontal = 48.dp, vertical = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                gridItems(page.items, key = { it.id }) { ch ->
+                    TvChannelCard(ch) { onOpen(ch) }
+                }
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    TvPageBar(page.pageNumber, page.pageCount, page.total, "canal", "canales",
+                        onPrev = { pageState.intValue = pageIndex - 1 }, onNext = { pageState.intValue = pageIndex + 1 })
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun TvPageBar(page: Int, pages: Int, total: Int, one: String, many: String, onPrev: () -> Unit, onNext: () -> Unit) {
+    Column(Modifier.fillMaxWidth().padding(vertical = 12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        if (pages > 1) {
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                TvButton("Anterior") { if (page > 1) onPrev() }
+                Text("Página $page de $pages", style = NoirBody)
+                TvButton("Siguiente") { if (page < pages) onNext() }
+            }
+        }
+        Text(if (total == 1) "1 $one" else "$total $many", style = NoirBody, modifier = Modifier.padding(top = 8.dp))
     }
 }
 
@@ -509,7 +656,7 @@ fun PairingScreen(api: PelisApi, onDone: () -> Unit) {
 
     MnTvLoginFrame(versionName = versionName, host = host) {
         MnPanel(0.59f, right = firstField) {
-            MnEyebrow(MnIcon.Phone, "VINCULAR CON TU TELÉFONO")
+            MnEyebrow(MnIcon.Phone, "Vincular con tu teléfono")
             MnTitle("Escanea para entrar", "Accede al instante sin escribir credenciales en pantalla usando la cámara de tu smartphone o tableta.")
             Spacer(Modifier.height(14.dp))
             Row(Modifier.fillMaxWidth().weight(1f), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -520,7 +667,7 @@ fun PairingScreen(api: PelisApi, onDone: () -> Unit) {
                     image = pairing?.let { p -> { AsyncImage(api.qrUrl(p.verifyUrl), "Código QR para vincular la TV", modifier = Modifier.fillMaxSize().padding(8.dp)) } },
                 )
                 Column(Modifier.weight(1f)) {
-                    MnCodeCard(pairing?.displayCode?.ifBlank { null } ?: pairing?.code, if (pairing != null) "ACTIVO" else "GENERANDO", host)
+                    MnCodeCard(pairing?.displayCode?.ifBlank { null } ?: pairing?.code, if (pairing != null) "Activo" else "Generando", host)
                     Spacer(Modifier.height(10.dp))
                     MnSteps(host)
                     Spacer(Modifier.height(10.dp))
@@ -530,11 +677,11 @@ fun PairingScreen(api: PelisApi, onDone: () -> Unit) {
             MnPanelFooter {
                 MnExpiry(parseIsoMillis(pairing?.expiresAt))
                 Spacer(Modifier.weight(1f))
-                MnOutlineButton("GENERAR NUEVO CÓDIGO", onClick = { pairing = null; attempt++ }, icon = MnIcon.Refresh, focusRequester = regenButton)
+                MnOutlineButton("Generar nuevo código", onClick = { pairing = null; attempt++ }, icon = MnIcon.Refresh, focusRequester = regenButton)
             }
         }
         MnPanel(0.41f, left = regenButton) {
-            MnEyebrow(MnIcon.Remote, "CON TU CUENTA")
+            MnEyebrow(MnIcon.Remote, "Con tu cuenta")
             MnTitle("Correo y contraseña", "Usa el control remoto para escribir tus credenciales")
             Spacer(Modifier.height(16.dp))
             MnInputField(
@@ -549,7 +696,7 @@ fun PairingScreen(api: PelisApi, onDone: () -> Unit) {
             )
             error?.let { Spacer(Modifier.height(8.dp)); MnStatusLine(it, isError = true) }
             Spacer(Modifier.height(14.dp))
-            MnPrimaryButton(if (busy) "ENTRANDO…" else "INICIAR SESIÓN", onClick = { login() })
+            MnPrimaryButton(if (busy) "Entrando…" else "Iniciar sesión", onClick = { login() })
             Spacer(Modifier.weight(1f))
             MnPanelFooter {
                 MnText("¿No tienes cuenta?", color = Mn.Variant, size = 9.sp)
