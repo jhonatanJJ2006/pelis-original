@@ -136,7 +136,7 @@ export default function ProfilePage() {
             <div className="flex flex-wrap gap-3">
               <Link
                 href="/link-tv"
-                className="inline-flex items-center gap-2 bg-cinema-accent px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-cinema-bg hover:bg-cinema-accent-light transition-colors rounded-[2px]"
+                className="inline-flex items-center gap-2 bg-cinema-accent px-4 py-2.5 text-xs font-semibold tracking-[0.12em] text-cinema-bg hover:bg-cinema-accent-light transition-colors rounded-[2px]"
               >
                 <Tv className="w-4 h-4" aria-hidden />
                 Vincular TV
@@ -243,7 +243,7 @@ export default function ProfilePage() {
 
       {user.role === 'admin' && (
         <ScrollReveal>
-          <h2 className="font-display text-sm tracking-widest text-cinema-muted uppercase mb-3 px-1">
+          <h2 className="font-display text-sm tracking-widest text-cinema-muted mb-3 px-1">
             Administración
           </h2>
           <Link
@@ -282,7 +282,7 @@ export default function ProfilePage() {
           <button
             type="button"
             onClick={handleLogout}
-            className="inline-flex items-center justify-center gap-2 bg-cinema-danger px-5 py-3 text-sm font-semibold uppercase tracking-[0.12em] text-cinema-chalk hover:bg-cinema-danger-light transition-colors rounded-[2px]"
+            className="inline-flex items-center justify-center gap-2 bg-cinema-danger px-5 py-3 text-sm font-semibold tracking-[0.12em] text-cinema-chalk hover:bg-cinema-danger-light transition-colors rounded-[2px]"
           >
             <LogOut className="w-4 h-4" aria-hidden />
             Cerrar sesión

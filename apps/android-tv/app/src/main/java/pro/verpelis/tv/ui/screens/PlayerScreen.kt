@@ -141,14 +141,14 @@ fun PlayerScreen(
                     NoirBadge("En vivo", gold = true)
                 }
                 Spacer(Modifier.weight(1f))
-                if (category.isNotBlank()) MnText(category.uppercase(), color = Mn.Gold, size = 8.sp, spacing = 1.6.sp)
+                if (category.isNotBlank()) MnText(category, color = Mn.Gold, size = 8.sp, spacing = 1.6.sp)
                 MnText(channelName.ifBlank { "Canal en vivo" }, color = Mn.Text, size = 28.sp, family = Mn.Serif, lines = 1)
                 if (failed) {
                     Spacer(Modifier.height(6.dp))
                     MnText("No pudimos reproducir este canal ahora mismo. Prueba otro canal o vuelve más tarde.", color = Mn.Error, size = 10.sp, lines = 2)
                 }
                 Spacer(Modifier.height(14.dp))
-                TvHintBar(listOf(TvHint("OK", "Información", gold = true), TvHint("ATRÁS", "Salir del canal")), Modifier.fillMaxWidth())
+                TvHintBar(listOf(TvHint("OK", "Información", gold = true), TvHint("Atrás", "Salir del canal")), Modifier.fillMaxWidth())
             }
         }
     }

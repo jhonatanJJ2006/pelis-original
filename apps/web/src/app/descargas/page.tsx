@@ -91,7 +91,7 @@ function DownloadCard(props: DownloadCardProps) {
         <a
           href={props.href}
           download={props.fileName}
-          className="mt-6 inline-flex w-full items-center justify-center gap-3 rounded-[2px] bg-cinema-accent px-6 py-4 text-sm font-semibold uppercase tracking-[0.12em] text-[#3f2e00] transition-colors hover:bg-cinema-accent-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cinema-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-cinema-bg"
+          className="mt-6 inline-flex w-full items-center justify-center gap-3 rounded-[2px] bg-cinema-accent px-6 py-4 text-sm font-semibold tracking-[0.12em] text-[#3f2e00] transition-colors hover:bg-cinema-accent-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cinema-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-cinema-bg"
         >
           <Download className="h-5 w-5" aria-hidden />
           {props.label}
@@ -120,7 +120,7 @@ function DownloadCard(props: DownloadCardProps) {
       ) : null}
 
       <div className="mt-8 border-t border-cinema-border/70 pt-6">
-        <h3 className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cinema-silver">
+        <h3 className="text-[11px] font-semibold tracking-[0.2em] text-cinema-silver">
           Pasos de instalación
         </h3>
         <ol className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -166,7 +166,7 @@ function InAppNotice() {
       </p>
       <Link
         href="/"
-        className="mt-6 inline-flex rounded-[2px] bg-cinema-accent px-6 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-[#3f2e00]"
+        className="mt-6 inline-flex rounded-[2px] bg-cinema-accent px-6 py-3 text-xs font-semibold tracking-[0.14em] text-[#3f2e00]"
       >
         Ir al catálogo
       </Link>

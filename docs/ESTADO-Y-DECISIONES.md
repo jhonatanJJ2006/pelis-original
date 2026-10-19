@@ -1,6 +1,6 @@
 # Estado y decisiones de Pelis (handoff canónico)
 
-Última actualización: 2026-10-18 (hora de Guayaquil, UTC-5). Dueño: Jhonatan Jara.
+Última actualización: 2026-10-19 (hora de Guayaquil, UTC-5). Dueño: Jhonatan Jara.
 
 Este documento es la fuente de verdad para cualquier agente que continúe el trabajo. Reúne las
 reglas, las decisiones ya tomadas, los formatos obligatorios, el estilo y el estado. **No cambies
@@ -61,22 +61,33 @@ Nunca escribas aquí valores de secretos: solo dónde viven.
   («Madrid / Paris Edge 01»), protocolos («DCI-P3 Seguro»), «señal fiduciaria», «sala maestra de
   transmisión», una caché offline que no existe («Explorar acervo en caché», «Obras maestras en
   almacenamiento local»), ni promesas de Dolby Atmos / 4K UHD.
+- **No mostrar el texto «Maison Noir» al usuario.** El estilo visual se queda (tokens `cinema-*`,
+  colores, tipografía, anillo de foco). El nombre del estilo vive solo en documentación interna y
+  en comentarios de código, nunca en pantallas, banners, metadatos ni correos.
+- **Títulos en tipo oración.** Encabezados, botones y etiquetas en español con mayúscula solo al
+  inicio (y en nombres propios). No mezclar TODO EN MAYÚSCULAS con minúsculas. El título de una
+  película se muestra con `displayTitle` (`packages/db/src/lib/displayTitle.ts`): normaliza lo que
+  está todo en mayúsculas o todo en minúsculas y deja igual el resto. En el admin se edita el
+  título guardado (`sourceName` / `sourceTitle`), no el ya normalizado, para no reescribir la base.
+- **Imágenes de TMDB solo vía la API**, con la clave en una variable de entorno (nunca en el repo).
+  No correr `scripts/tmdb-hq-images.py` desde un agente ni contra la base de producción: eso lo
+  aplica el dueño en Movies.
 
 ## 3. Apps y paquetes
 
-| App                      | Carpeta                     | Package                   | APK publicada         | Versión en repo                                         |
-| ------------------------ | --------------------------- | ------------------------- | --------------------- | ------------------------------------------------------- |
-| **Pelis TV (principal)** | `apps/android-tv`           | `pro.verpelis.tv`         | `pelis-tv.apk`        | **2.0.0 (11)** publicada; 2.0.1 (12) en curso (PR #156) |
-| Nativa celular           | `apps/android-native/phone` | `pro.verpelis.app.native` | `pelis-nativo.apk`    | 1.2.1 (4)                                               |
-| Nativa TV                | `apps/android-native/tv`    | `pro.verpelis.tv.native`  | `pelis-tv-nativo.apk` | 1.2.1 (4)                                               |
-| TWA                      | `apps/android`              | `pro.verpelis.twa`        | `pelis.apk`           | 5                                                       |
+| App                      | Carpeta                     | Package                   | APK publicada         | Versión en repo                                        |
+| ------------------------ | --------------------------- | ------------------------- | --------------------- | ------------------------------------------------------ |
+| **Pelis TV (principal)** | `apps/android-tv`           | `pro.verpelis.tv`         | `pelis-tv.apk`        | **2.0.1 (12)** publicada; **2.0.2 (13)** en el repo    |
+| Nativa celular           | `apps/android-native/phone` | `pro.verpelis.app.native` | `pelis-nativo.apk`    | **1.2.2 (5)** en el repo; publicada sigue en 1.2.1 (4) |
+| Nativa TV                | `apps/android-native/tv`    | `pro.verpelis.tv.native`  | `pelis-tv-nativo.apk` | **1.2.2 (5)** en el repo; publicada sigue en 1.2.1 (4) |
+| TWA                      | `apps/android`              | `pro.verpelis.twa`        | `pelis.apk`           | 5                                                      |
 
 - **Pelis TV (`apps/android-tv`) es la app principal y la que más usa Jhonatan.** Compose for TV +
   Media3/ExoPlayer: películas, series, anime y canales se reproducen de forma nativa (desde 1.7.0,
   #133).
-  - 2.0.1 (12), en curso en `worktrees/tv2` (rama `feat/tv-2.0.1`, PR #156): los chips filtran al
-    enfocarlos, la tecla DERECHA en búsqueda va a los resultados y se puede escribir la búsqueda
-    desde el celular con un QR. No toques ese worktree desde otra tarea.
+  - 2.0.1 (12) está publicada (PR #156): los chips filtran al enfocarlos, la tecla DERECHA en
+    búsqueda va a los resultados y se puede escribir la búsqueda desde el celular con un QR.
+    2.0.2 (13) en el repo: paginación en servidor, búsqueda vacía con populares y fondos a 1920.
   - **El esqueleto `app.pelis.tv` de la rama vieja `feat/native-player-tv` nunca debe reemplazar a
     `apps/android-tv`** (se dejó fuera a propósito en #116).
 - `apps/android-native` (phone + tv): llaman primero al resolver `/api/stream/resolve?token=…` y
@@ -318,7 +329,7 @@ scope systemd. `det` tiene sudo sin contraseña.
   `pelis-tv.apk`.
 - Canales XTOTV y FunBox son MPEG-TS: marcados como no soportados (#128).
 - `api.ani.zip` a veces falla el DNS en Movies (router 192.168.0.1 con DNSSEC).
-- TV 2.0.1 (12) en curso: PR #156.
+- TV 2.0.2 (13) y nativas 1.2.2 (5) están en el repo; la publicación de APK es en Movies, no desde un agente.
 
 ## 14. Discrepancias encontradas al verificar (2026-10-18)
 

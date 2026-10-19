@@ -61,9 +61,6 @@ export function AdminSidebar({ mobileOpen = false, onMobileClose }: AdminSidebar
             <span className="font-display text-2xl font-semibold tracking-[0.12em] text-cinema-accent">
               PELIS
             </span>
-            <span className="border border-cinema-accent/50 px-1.5 py-0.5 text-[9px] uppercase tracking-[0.2em] text-cinema-accent">
-              Maison Noir
-            </span>
           </p>
           <p className="text-label uppercase text-cinema-ash mt-2 flex items-center gap-1.5">
             <span className="h-1 w-1 rounded-full bg-cinema-accent" aria-hidden />

@@ -1,8 +1,10 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, Star, Tv } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Search, Star, Tv } from 'lucide-react';
+import { useQueryResult } from '@pelis/db/client';
+import { api } from '@pelis/db/api';
 import { cn } from '@pelis/ui/utils';
 import { ChannelRow } from './channel-row';
 
@@ -28,6 +30,13 @@ const CHIPS = [
   { id: 'Lucha libre', label: 'Lucha' },
 ] as const;
 
+const CHANNEL_PAGE_SIZE = 40;
+
+interface ChannelPage {
+  items: SidebarChannel[];
+  total: number;
+}
+
 interface ChannelSidebarProps {
   channels: SidebarChannel[];
   currentId?: string;
@@ -48,19 +57,26 @@ export function ChannelSidebar({
   const [chip, setChip] = useState<string>('');
   const router = useRouter();
 
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return channels.filter((c) => {
-      if (chip === '__popular' && !c.isPopular) return false;
-      if (chip && chip !== '__popular' && c.category !== chip) return false;
-      if (!q) return true;
-      return (
-        c.name.toLowerCase().includes(q) ||
-        c.category.toLowerCase().includes(q) ||
-        (c.country || '').toLowerCase().includes(q)
-      );
-    });
-  }, [channels, search, chip]);
+  const [page, setPage] = useState(1);
+  const [debounced, setDebounced] = useState('');
+  useEffect(() => {
+    const t = setTimeout(() => setDebounced(search.trim()), 250);
+    return () => clearTimeout(t);
+  }, [search]);
+  useEffect(() => setPage(1), [debounced, chip]);
+
+  // Paginación en servidor (antes: 200 canales de golpe y el resto no aparecía).
+  const { data: remote, isLoading: pageLoading } = useQueryResult<ChannelPage>(api.tv.list, {
+    search: debounced || undefined,
+    category: chip && chip !== '__popular' ? chip : undefined,
+    popularOnly: chip === '__popular' ? true : undefined,
+    limit: CHANNEL_PAGE_SIZE,
+    offset: (page - 1) * CHANNEL_PAGE_SIZE,
+  });
+  const filtered = remote?.items ?? (page === 1 && !debounced && !chip ? channels : []);
+  const total = remote?.total ?? filtered.length;
+  const pageCount = Math.max(1, Math.ceil(total / CHANNEL_PAGE_SIZE));
+  const loading = isLoading || pageLoading;
 
   const grouped = useMemo(() => {
     const groups: Record<string, SidebarChannel[]> = {};
@@ -91,9 +107,6 @@ export function ChannelSidebar({
       aria-label="Lista de canales"
     >
       <div className="px-3 pt-3 pb-2 border-b border-cinema-border">
-        <p className="text-[10px] uppercase tracking-widest text-cinema-accent font-medium">
-          Maison Noir broadcast
-        </p>
         <p className="font-display text-2xl text-cinema-chalk mb-2">TV en vivo</p>
         <div className="relative">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-cinema-ash pointer-events-none" />
@@ -124,7 +137,7 @@ export function ChannelSidebar({
           ))}
         </div>
         <p className="text-[10px] text-cinema-ash mt-2 uppercase tracking-wider">
-          {filtered.length} {filtered.length === 1 ? 'canal' : 'canales'}
+          {total} {total === 1 ? 'canal' : 'canales'}
         </p>
       </div>
 
@@ -133,13 +146,13 @@ export function ChannelSidebar({
           <div className="flex flex-col items-center justify-center text-center px-4 py-12">
             <Tv className="w-8 h-8 text-cinema-muted/30 mb-2" />
             <p className="text-xs text-cinema-muted">
-              {isLoading ? 'Cargando canales…' : 'Sin resultados.'}
+              {loading ? 'Cargando canales…' : 'Sin resultados.'}
             </p>
           </div>
         ) : (
           grouped.map(([category, items]) => (
             <section key={category} className="py-1">
-              <h3 className="sticky top-0 z-10 px-3 py-1.5 bg-cinema-bg/95 text-[10px] uppercase tracking-widest text-cinema-ash font-semibold">
+              <h3 className="sticky top-0 z-10 px-3 py-1.5 bg-cinema-bg/95 text-[10px] tracking-widest text-cinema-ash font-semibold">
                 {category}
                 <span className="ml-1.5 text-cinema-accent/80">{items.length}</span>
               </h3>
@@ -157,6 +170,34 @@ export function ChannelSidebar({
           ))
         )}
       </nav>
+      {pageCount > 1 && (
+        <nav
+          aria-label="Páginas de canales"
+          className="flex items-center justify-between gap-2 border-t border-cinema-border px-3 py-2 text-xs text-cinema-muted"
+        >
+          <button
+            type="button"
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page <= 1}
+            aria-label="Página anterior"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-[6px] border border-cinema-border disabled:opacity-40 tv-focus"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <span>
+            Página {page} de {pageCount}
+          </span>
+          <button
+            type="button"
+            onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
+            disabled={page >= pageCount}
+            aria-label="Página siguiente"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-[6px] border border-cinema-border disabled:opacity-40 tv-focus"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </nav>
+      )}
     </aside>
   );
 }

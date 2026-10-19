@@ -11,9 +11,11 @@ interface MoviePosterProps {
   fetchPriority?: 'high' | 'low' | 'auto';
   style?: CSSProperties;
   responsive?: boolean;
+  /** Imagen a todo el ancho (hero/ficha): pide 1280/1920 px, nunca la variante de 400 px. */
+  hero?: boolean;
 }
 
-function buildSrcSet(src: string): string | undefined {
+function buildSrcSet(src: string, hero = false): string | undefined {
   if (!src.startsWith('/peliculas/') && !src.startsWith('/uploads/')) return undefined;
   if (
     !src.endsWith('.webp') &&
@@ -24,6 +26,7 @@ function buildSrcSet(src: string): string | undefined {
     return undefined;
   }
   const base = src.replace(/\.(webp|jpg|jpeg|png)$/i, '');
+  if (hero) return `${base}-1280.webp 1280w, ${src} 1920w`;
   return `${base}-200.webp 200w, ${base}-400.webp 400w`;
 }
 
@@ -35,11 +38,21 @@ function MoviePosterBase({
   fetchPriority,
   style,
   responsive = true,
+  hero = false,
 }: MoviePosterProps) {
-  const [failed, setFailed] = useState(false);
-  const srcSet = responsive ? buildSrcSet(src) : undefined;
+  // 0 = con srcSet, 1 = sin srcSet (las variantes -200/-400 no existen para la
+  // mayoría de /uploads y daban 404 → la tarjeta quedaba sin imagen), 2 = respaldo.
+  const [stage, setStage] = useState(0);
+  const [lastSrc, setLastSrc] = useState(src);
+  if (lastSrc !== src) {
+    setLastSrc(src);
+    setStage(0);
+  }
+  const candidateSrcSet = responsive ? buildSrcSet(src, hero) : undefined;
+  const srcSet = stage === 0 ? candidateSrcSet : undefined;
+  const isPlaceholder = !src || src.endsWith('/placeholder.webp');
 
-  if (!src || failed) {
+  if (isPlaceholder || stage >= 2) {
     return (
       <div
         className={cn('relative overflow-hidden bg-cinema-bg', className)}
@@ -47,11 +60,13 @@ function MoviePosterBase({
         role="img"
         aria-label={alt}
       >
-        <div className="absolute inset-x-0 top-0 h-[11%] bg-cinema-bg border-b border-cinema-border/50" />
-        <div className="absolute inset-x-0 bottom-0 h-[11%] bg-cinema-bg border-t border-cinema-border/50" />
-        <div className="absolute inset-x-[8%] inset-y-[11%] border border-cinema-accent/20 bg-cinema-elevated/70 flex items-center justify-center">
-          <span className="font-display text-[10px] tracking-[0.28em] text-cinema-muted/45 uppercase">
-            Maison Noir
+        <div className="absolute inset-0 bg-gradient-to-br from-cinema-elevated via-cinema-surface to-cinema-bg" />
+        <div className="absolute inset-[6%] border border-cinema-accent/25 flex flex-col items-center justify-center gap-2 p-3 text-center">
+          <span className="font-display text-2xl text-cinema-accent/70" aria-hidden>
+            P
+          </span>
+          <span className="font-display text-sm leading-snug text-cinema-chalk/85 line-clamp-4 break-words">
+            {alt}
           </span>
         </div>
       </div>
@@ -62,7 +77,7 @@ function MoviePosterBase({
     <img
       src={src}
       srcSet={srcSet}
-      sizes={srcSet ? '(max-width: 640px) 200px, 400px' : undefined}
+      sizes={srcSet ? (hero ? '100vw' : '(max-width: 640px) 200px, 400px') : undefined}
       alt={alt}
       className={cn(className)}
       loading={loading}
@@ -70,7 +85,7 @@ function MoviePosterBase({
       decoding="async"
       draggable={false}
       style={style}
-      onError={() => setFailed(true)}
+      onError={() => setStage((n) => (n === 0 && candidateSrcSet ? 1 : 2))}
     />
   );
 }

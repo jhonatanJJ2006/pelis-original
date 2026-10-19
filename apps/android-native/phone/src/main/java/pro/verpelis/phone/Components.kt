@@ -1,5 +1,6 @@
 package pro.verpelis.phone
 
+import androidx.compose.ui.draw.alpha
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -85,12 +86,12 @@ fun TitleRow(label: String, items: List<Title>, action: String? = null, badge: S
 fun ContinueRow(items: List<Title>, onAll: () -> Unit, onOpen: (Title) -> Unit) {
     if (items.isEmpty()) return
     Column(Modifier.padding(vertical = 12.dp)) {
-        SectionHeader("Continuar viendo", "Historial", onAction = onAll, modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp))
+        SectionHeader("Seguir viendo", "Historial", onAction = onAll, modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp))
         LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             items(items, key = { it.id }) { t ->
                 Column(Modifier.width(220.dp).clickable { onOpen(t) }) {
                     Box(Modifier.fillMaxWidth().aspectRatio(16f / 9f).clip(RoundedCornerShape(6.dp)).background(Noir.Raised)) {
-                        AsyncImage(t.backdrop, t.name, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+                        AsyncImage(t.backdrop ?: t.poster, t.name, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
                         Box(Modifier.align(Alignment.Center).size(36.dp).background(Noir.Gold.copy(alpha = 0.9f), RoundedCornerShape(18.dp)), Alignment.Center) {
                             Icon(Icons.Filled.PlayArrow, null, tint = Noir.Ink)
                         }
@@ -105,12 +106,12 @@ fun ContinueRow(items: List<Title>, onAll: () -> Unit, onOpen: (Title) -> Unit) 
     }
 }
 
-/** "Tendencias en PELIS": números grandes estilo Top 10. */
+/** "Tendencias en Pelis": números grandes estilo Top 10. */
 @Composable
 fun RankedRow(items: List<Title>, onOpen: (Title) -> Unit) {
     if (items.isEmpty()) return
     Column(Modifier.padding(vertical = 12.dp)) {
-        SectionHeader("Tendencias en PELIS", badge = "Top 10", modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp))
+        SectionHeader("Tendencias en Pelis", badge = "Top 10", modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp))
         LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             itemsIndexed(items.take(10), key = { _, t -> t.id }) { i, t ->
                 Row(Modifier.clickable { onOpen(t) }, verticalAlignment = Alignment.Bottom) {
@@ -163,5 +164,60 @@ fun <T> LoadBox(state: Load<T>, content: @Composable (T) -> Unit) {
         is Load.Loading -> Box(Modifier.fillMaxSize(), Alignment.Center) { CircularProgressIndicator(color = Noir.Gold) }
         is Load.Err -> Box(Modifier.fillMaxSize().padding(24.dp), Alignment.Center) { Text(state.message, color = Noir.Muted) }
         is Load.Ok -> content(state.value)
+    }
+}
+
+/**
+ * Cuadrícula paginada en el servidor con controles «‹ Página x de y ›» al final.
+ * Cambiar [key] (búsqueda, filtro) vuelve a la página 1.
+ */
+@Composable
+fun PagedGrid(
+    key: Any?,
+    empty: String,
+    onOpen: (Title) -> Unit,
+    load: suspend (offset: Int, limit: Int) -> pro.verpelis.core.data.Page<Title>,
+) {
+    val pageState = androidx.compose.runtime.remember(key) { androidx.compose.runtime.mutableIntStateOf(0) }
+    val pageIndex = pageState.intValue
+    val limit = pro.verpelis.core.data.PAGE_SIZE
+    val state = pro.verpelis.core.ui.rememberLoad(key, pageIndex) { load(pageIndex * limit, limit) }
+    val grid = androidx.compose.foundation.lazy.grid.rememberLazyGridState()
+    androidx.compose.runtime.LaunchedEffect(pageIndex) { grid.scrollToItem(0) }
+    LoadBox(state) { page ->
+        if (page.items.isEmpty()) {
+            Grid(emptyList(), empty, onOpen)
+            return@LoadBox
+        }
+        androidx.compose.foundation.lazy.grid.LazyVerticalGrid(
+            androidx.compose.foundation.lazy.grid.GridCells.Adaptive(108.dp), state = grid, contentPadding = PaddingValues(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            items(page.items.size, key = { page.items[it].id }) { i -> PosterCard(page.items[i], { onOpen(page.items[i]) }, Modifier) }
+            item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) {
+                PageControls(page.pageNumber, page.pageCount, page.total, onPrev = { pageState.intValue = pageIndex - 1 }, onNext = { pageState.intValue = pageIndex + 1 })
+            }
+        }
+    }
+}
+
+@Composable
+fun PageControls(
+    page: Int,
+    pages: Int,
+    total: Int,
+    onPrev: () -> Unit,
+    onNext: () -> Unit,
+    one: String = "título",
+    many: String = "títulos",
+) {
+    Column(Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        if (pages > 1) Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            GhostButton("‹ Anterior", { if (page > 1) onPrev() }, Modifier.alpha(if (page > 1) 1f else 0.4f))
+            Text("Página $page de $pages", color = Noir.Text, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+            GhostButton("Siguiente ›", { if (page < pages) onNext() }, Modifier.alpha(if (page < pages) 1f else 0.4f))
+        }
+        Spacer(Modifier.height(6.dp))
+        Text(if (total == 1) "1 $one" else "$total $many", color = Noir.Muted, fontSize = 11.sp)
     }
 }

@@ -32,17 +32,35 @@ fun TitleDto.toCatalogItem(): CatalogItem =
 
 const val CATALOG_PAGE = 48
 
-/** Una página del catálogo. Series: el API las da todas (≈40), se filtran y cortan aquí. */
-suspend fun TvRepository.catalogPage(kind: CatalogKind, genre: String?, offset: Int, limit: Int = CATALOG_PAGE): List<TitleDto> {
+/** Respuesta paginada del servidor ({ items, total, offset, limit, hasMore }). */
+data class PageDto<T>(val items: List<T> = emptyList(), val total: Int = 0, val hasMore: Boolean = false)
+
+internal suspend inline fun <reified T> TvRepository.fetchPage(name: String, body: String): PageDto<T> {
+    val text = call(name, body)
+    return kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+        if (text.isBlank() || text == "null") return@withContext PageDto<T>()
+        val type = com.squareup.moshi.Types.newParameterizedType(PageDto::class.java, T::class.java)
+        moshi.adapter<PageDto<T>>(type).fromJson(text) ?: PageDto()
+    }
+}
+
+/** Una página del catálogo, paginada en el servidor (movies.page / anime.listSeriesPage). */
+suspend fun TvRepository.catalogPage(kind: CatalogKind, genre: String?, offset: Int, limit: Int = CATALOG_PAGE): PageDto<TitleDto> {
     val g = genre?.let { ""","genre":${quote(it)}""" }.orEmpty()
     return when (kind) {
-        CatalogKind.MOVIES -> fetchList("movies.list", """{"mediaType":"movie","limit":$limit,"offset":$offset$g}""")
-        CatalogKind.ANIME -> fetchList("anime.listSeries", """{"limit":$limit,"offset":$offset$g}""")
-        CatalogKind.SERIES -> {
-            val all = SeriesCache.get(this)
-            val filtered = if (genre == null) all else all.filter { s -> s.genreList.any { it.equals(genre, ignoreCase = true) } }
-            filtered.drop(offset).take(limit)
-        }
+        CatalogKind.MOVIES -> fetchPage("movies.page", """{"mediaType":"movie","limit":$limit,"offset":$offset$g}""")
+        CatalogKind.SERIES -> fetchPage("movies.page", """{"mediaType":"series","limit":$limit,"offset":$offset$g}""")
+        CatalogKind.ANIME -> fetchPage("anime.listSeriesPage", """{"limit":$limit,"offset":$offset$g}""")
+    }
+}
+
+/** Búsqueda paginada; sin texto devuelve las películas populares. */
+suspend fun TvRepository.searchPage(query: String, offset: Int, limit: Int = CATALOG_PAGE): PageDto<TitleDto> {
+    val q = query.trim()
+    return if (q.isEmpty()) {
+        fetchPage("movies.page", """{"mediaType":"movie","sort":"popular","limit":$limit,"offset":$offset}""")
+    } else {
+        fetchPage("movies.page", """{"search":${quote(q)},"limit":$limit,"offset":$offset}""")
     }
 }
 
@@ -70,11 +88,15 @@ private object SeriesCache {
 
 // ---- Mi lista / Historial / Perfil ----
 suspend fun TvRepository.favorites(): List<TitleDto> = fetchList("favorites.listByUser")
+suspend fun TvRepository.favoritesPage(offset: Int, limit: Int = CATALOG_PAGE): PageDto<TitleDto> =
+    fetchPage("favorites.listByUserPage", """{"limit":$limit,"offset":$offset}""")
 suspend fun TvRepository.isFavorite(movieId: String): Boolean = call("favorites.check", """{"movieId":${quote(movieId)}}""").trim() == "true"
 suspend fun TvRepository.addFavorite(movieId: String) { call("favorites.add", """{"movieId":${quote(movieId)}}""") }
 suspend fun TvRepository.removeFavorite(movieId: String) { call("favorites.remove", """{"movieId":${quote(movieId)}}""") }
 
 suspend fun TvRepository.history(): List<HistoryRowDto> = fetchList<HistoryRowDto>("history.listByUser").filter { it.movie != null }
+suspend fun TvRepository.historyPage(offset: Int, limit: Int = CATALOG_PAGE): PageDto<HistoryRowDto> =
+    fetchPage<HistoryRowDto>("history.listByUserPage", """{"limit":$limit,"offset":$offset}""").let { p -> p.copy(items = p.items.filter { it.movie != null }) }
 suspend fun TvRepository.removeHistory(movieId: String) { call("history.remove", """{"movieId":${quote(movieId)}}""") }
 suspend fun TvRepository.clearHistory() { call("history.clearAll") }
 

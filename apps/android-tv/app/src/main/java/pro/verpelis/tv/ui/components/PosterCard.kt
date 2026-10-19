@@ -1,5 +1,7 @@
 package pro.verpelis.tv.ui.components
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.border
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -93,11 +95,24 @@ fun PosterCard(
             ),
         ) {
             Box(Modifier.fillMaxSize().background(MaisonNoir.Surface), contentAlignment = Alignment.Center) {
-                Text(
-                    item.displayName.take(1).uppercase(),
-                    color = MaisonNoir.Ash,
-                    fontSize = 28.sp,
-                )
+                // Respaldo sin imagen (o mientras carga): póster con el título, no una tarjeta vacía.
+                Column(
+                    Modifier.fillMaxSize().border(1.dp, MaisonNoir.Gold.copy(alpha = 0.25f), PosterShape).padding(10.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Text("P", color = MaisonNoir.Gold.copy(alpha = 0.7f), fontSize = 22.sp, fontFamily = androidx.compose.ui.text.font.FontFamily.Serif)
+                    Text(
+                        item.displayName,
+                        color = MaisonNoir.Chalk.copy(alpha = 0.85f),
+                        fontSize = 12.sp,
+                        lineHeight = 15.sp,
+                        maxLines = 4,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                        fontFamily = androidx.compose.ui.text.font.FontFamily.Serif,
+                    )
+                }
                 AsyncImage(
                     model = request,
                     contentDescription = item.displayName,

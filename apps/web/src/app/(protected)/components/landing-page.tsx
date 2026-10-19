@@ -44,7 +44,7 @@ const pillars = [
 const perks = [
   {
     icon: Sparkles,
-    title: 'Maison Noir',
+    title: 'Diseño cuidado',
     body: 'Diseño premium: tinta cálida, champagne gold y tipografía editorial. Nada de plantilla Netflix.',
   },
   {
@@ -92,7 +92,7 @@ export function LandingPage() {
       <section className="page-shell pt-10 pb-16 md:pt-20 md:pb-24">
         <ScrollReveal className="max-w-3xl">
           <p className="text-cinema-accent text-xs md:text-sm font-medium uppercase tracking-[0.2em] mb-4">
-            Streaming · Maison Noir
+            Streaming en español
           </p>
           <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-cinema-chalk leading-[1.05] mb-6">
             Cine, series, anime y TV en vivo.

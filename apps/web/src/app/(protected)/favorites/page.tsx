@@ -1,7 +1,10 @@
 'use client';
 
 import { useQueryResult, useMutation } from '@pelis/db/client';
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { Paginator } from '@pelis/ui/features/paginator';
+
+const FAV_PAGE_SIZE = 30;
 import { Heart, Film, Tv } from 'lucide-react';
 import { api } from '@pelis/db/api';
 import { useUser } from '@pelis/auth/hooks';
@@ -18,27 +21,36 @@ type Tab = 'all' | 'movies' | 'series';
 export default function FavoritesPage() {
   const { user } = useUser();
   const [tab, setTab] = useState<Tab>('all');
+  const [page, setPage] = useState(1);
+  useEffect(() => setPage(1), [tab]);
   const removeFavorite = useMutation(api.favorites.remove);
 
   const {
-    data: movies,
+    data: favPage,
     error: moviesError,
     isLoading: moviesLoading,
     refetch,
-  } = useQueryResult<MediaItem[]>(
-    api.favorites.listByUser,
-    user ? { userId: user._id as any } : 'skip'
+  } = useQueryResult<{
+    items: MediaItem[];
+    total: number;
+    counts: { all: number; movies: number; series: number };
+  }>(
+    api.favorites.listByUserPage,
+    user
+      ? {
+          userId: user._id as any,
+          mediaType: tab === 'all' ? undefined : tab === 'series' ? 'series' : 'movie',
+          limit: FAV_PAGE_SIZE,
+          offset: (page - 1) * FAV_PAGE_SIZE,
+        }
+      : 'skip'
   );
+  const movies = favPage?.items;
 
-  const filtered = useMemo(() => {
-    const list = movies ?? [];
-    if (tab === 'movies') return list.filter((m) => (m.mediaType ?? 'movie') !== 'series');
-    if (tab === 'series') return list.filter((m) => m.mediaType === 'series');
-    return list;
-  }, [movies, tab]);
-
-  const seriesCount = (movies ?? []).filter((m) => m.mediaType === 'series').length;
-  const moviesCount = (movies ?? []).filter((m) => (m.mediaType ?? 'movie') !== 'series').length;
+  const filtered = movies ?? [];
+  const seriesCount = favPage?.counts.series ?? 0;
+  const moviesCount = favPage?.counts.movies ?? 0;
+  const allCount = favPage?.counts.all ?? 0;
 
   const handleRemove = async (movieId: string) => {
     if (!user) return;
@@ -71,19 +83,16 @@ export default function FavoritesPage() {
           Curaduría personal
         </span>
         <h1 className="font-display text-4xl md:text-5xl tracking-tight text-cinema-chalk">
-          Mi lista{' '}
-          <span className="italic text-cinema-accent text-2xl md:text-3xl">Maison Noir</span>
+          Mi lista
         </h1>
-        <p className="text-cinema-muted mt-2">
-          Colección personal: {(movies ?? []).length} títulos guardados.
-        </p>
+        <p className="text-cinema-muted mt-2">Colección personal: {allCount} títulos guardados.</p>
       </ScrollReveal>
 
       <ScrollReveal className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div className="flex gap-2 overflow-x-auto" role="tablist" aria-label="Filtrar favoritos">
           {(
             [
-              { id: 'all' as Tab, label: 'Todo', count: movies?.length ?? 0 },
+              { id: 'all' as Tab, label: 'Todo', count: allCount },
               { id: 'movies' as Tab, label: 'Películas', count: moviesCount },
               { id: 'series' as Tab, label: 'Series', count: seriesCount },
             ] as const
@@ -107,7 +116,7 @@ export default function FavoritesPage() {
         </div>
       </ScrollReveal>
 
-      {isLoading ? (
+      {isLoading && !favPage ? (
         <MovieGridSkeleton />
       ) : moviesError && !movies ? (
         <ErrorState
@@ -146,6 +155,12 @@ export default function FavoritesPage() {
               </div>
             ))}
           </div>
+          <Paginator
+            page={page}
+            total={favPage?.total ?? 0}
+            pageSize={FAV_PAGE_SIZE}
+            onPageChange={setPage}
+          />
         </ScrollReveal>
       )}
     </div>

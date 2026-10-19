@@ -17,7 +17,7 @@ export default function TVPage() {
     error,
     isLoading,
     refetch,
-  } = useQueryResult<{ items: TVChannelItem[] }>(api.tv.list, { limit: 200, offset: 0 });
+  } = useQueryResult<{ items: TVChannelItem[] }>(api.tv.list, { limit: 40, offset: 0 });
   const channels = (list?.items ?? []) as SidebarChannel[];
 
   const first = useMemo(() => {

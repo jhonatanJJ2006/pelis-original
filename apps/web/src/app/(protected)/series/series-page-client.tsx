@@ -1,61 +1,45 @@
 'use client';
 
 import type { PreloadedQuery } from '@pelis/db/server';
-import { useMemo } from 'react';
+import { useEffect, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import { Tv } from 'lucide-react';
-import { MovieRow } from '@pelis/ui/features/movie-row';
+import { MovieCard } from '@pelis/ui/features/movie-card';
 import { EmptyState, ErrorState } from '@pelis/ui/features/empty-state';
 import { CatalogPageSkeleton } from '@pelis/ui/features/catalog-page-skeleton';
+import { Paginator, type PageResult } from '@pelis/ui/features/paginator';
 import { useQueryResult } from '@pelis/db/client';
 import { api } from '@pelis/db/api';
 import type { MediaItem } from '@pelis/ui/types';
 
-const classificationOrder = ['G', 'PG', 'PG-13', 'R', 'NC-17'];
-
-const classificationLabels: Record<string, string> = {
-  G: 'Para toda la familia',
-  PG: 'Guía paternal sugerida',
-  'PG-13': 'Mayores de 13 años',
-  R: 'Mayores de 17 años',
-  'NC-17': 'Solo adultos',
-};
+export const SERIES_PAGE_SIZE = 30;
 
 interface SeriesPageClientProps {
-  preloaded: {
-    series: PreloadedQuery<MediaItem[]>;
-  };
+  preloaded: { series: PreloadedQuery<PageResult<MediaItem>> };
+  initialPage: number;
 }
 
-export default function SeriesPageClient({ preloaded }: SeriesPageClientProps) {
+export default function SeriesPageClient({ preloaded, initialPage }: SeriesPageClientProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const [page, setPage] = useState(initialPage);
+  useEffect(() => {
+    router.replace(page > 1 ? `${pathname}?page=${page}` : pathname, { scroll: false });
+  }, [page, pathname, router]);
+
   const {
-    data: liveSeries,
-    error: seriesError,
-    isLoading: seriesLoading,
+    data: live,
+    error,
+    isLoading,
     refetch,
-  } = useQueryResult<MediaItem[]>(api.movies.listSeries, {});
-  const series = liveSeries ?? preloaded.series.data;
-  const isLoading = series === undefined && seriesLoading;
+  } = useQueryResult<PageResult<MediaItem>>(api.movies.page, {
+    mediaType: 'series' as const,
+    limit: SERIES_PAGE_SIZE,
+    offset: (page - 1) * SERIES_PAGE_SIZE,
+  });
+  const result = live ?? (page === initialPage ? preloaded.series.data : undefined);
 
-  const grouped = useMemo(() => {
-    if (!series) return [];
-    const groups: Record<string, MediaItem[]> = {};
-    for (const s of series) {
-      const key = s.classification || 'Otros';
-      if (!groups[key]) groups[key] = [];
-      groups[key].push(s);
-    }
-    return Object.entries(groups).sort(([a], [b]) => {
-      const ia = classificationOrder.indexOf(a);
-      const ib = classificationOrder.indexOf(b);
-      return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
-    });
-  }, [series]);
-
-  if (isLoading) {
-    return <CatalogPageSkeleton showFilters={false} />;
-  }
-
-  if (!series && seriesError) {
+  if (!result && error) {
     return (
       <div className="page-shell">
         <ErrorState
@@ -66,29 +50,37 @@ export default function SeriesPageClient({ preloaded }: SeriesPageClientProps) {
       </div>
     );
   }
-
-  if (!series) {
+  if (!result && isLoading && page === initialPage) {
     return <CatalogPageSkeleton showFilters={false} />;
   }
+
+  const items = result?.items ?? [];
+  const total = result?.total ?? 0;
 
   return (
     <div className="page-shell">
       <div className="mb-10">
-        <p className="text-label uppercase text-cinema-accent mb-2">Catálogo Maison Noir</p>
+        <p className="text-label uppercase text-cinema-accent mb-2">Catálogo</p>
         <div className="flex items-end justify-between gap-4">
           <h1 className="font-display text-4xl md:text-5xl tracking-tight text-cinema-chalk">
             Series
           </h1>
-          <span className="shrink-0 border border-cinema-accent/40 bg-cinema-accent/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-cinema-accent">
-            {series.length} series
-          </span>
+          {result && (
+            <span className="shrink-0 border border-cinema-accent/40 bg-cinema-accent/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-cinema-accent">
+              {total} series
+            </span>
+          )}
         </div>
         <p className="text-cinema-muted mt-3 max-w-2xl">
           Series para maratonear, con temporadas completas.
         </p>
       </div>
 
-      {series.length === 0 ? (
+      {!result ? (
+        <div className="py-16 text-center text-cinema-muted" role="status">
+          Cargando…
+        </div>
+      ) : items.length === 0 ? (
         <EmptyState
           icon={Tv}
           title="La sala de series se está preparando"
@@ -97,16 +89,20 @@ export default function SeriesPageClient({ preloaded }: SeriesPageClientProps) {
           actionHref="/movies"
         />
       ) : (
-        <div className="space-y-10">
-          {grouped.map(([classification, items]) => (
-            <MovieRow
-              key={classification}
-              title={classification}
-              subtitle={`${classificationLabels[classification] ?? ''} · ${items.length} ${items.length === 1 ? 'título' : 'títulos'}`.trim()}
-              movies={items}
-            />
-          ))}
-        </div>
+        <section aria-busy={isLoading}>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-6">
+            {items.map((s) => (
+              <MovieCard key={s._id} movie={s} />
+            ))}
+          </div>
+          <Paginator
+            page={page}
+            total={total}
+            pageSize={SERIES_PAGE_SIZE}
+            onPageChange={setPage}
+            noun="series"
+          />
+        </section>
       )}
     </div>
   );

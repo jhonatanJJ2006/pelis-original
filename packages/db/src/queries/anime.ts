@@ -3,6 +3,7 @@ import type { Anime } from '@prisma/client';
 import { prisma } from '../client';
 import { register } from '../registry';
 import { toAnimeShape } from '../lib/shapes';
+import { displayTitle } from '../lib/displayTitle';
 import { getProvidersSortedByPriority, toProviderListItem } from '../lib/anime-providers';
 import { fallbackSeriesKey, isSeasonalFormat, sortSeasons } from '../lib/anime-series';
 
@@ -39,7 +40,7 @@ function toSeriesCard(key: string, members: Anime[]) {
   return {
     _id: main.id,
     seriesKey: key,
-    title: main.seriesTitle ?? main.title,
+    title: displayTitle(main.seriesTitle ?? main.title),
     alternativeTitle: main.alternativeTitle ?? undefined,
     image: main.image,
     backdropImage: main.backdropImage ?? undefined,
@@ -253,4 +254,40 @@ export const getProviders = register({
   name: 'anime.getProviders',
   reads: [],
   handler: async () => PROVIDERS.map(toProviderListItem),
+});
+
+/** Catálogo de anime (una tarjeta por franquicia) paginado en servidor con total. */
+export const listSeriesPage = register({
+  kind: 'query',
+  name: 'anime.listSeriesPage',
+  reads: ['anime'],
+  args: z
+    .object({
+      genre: z.string().optional(),
+      status: StatusEnum.optional(),
+      search: z.string().optional(),
+      limit: z.number().int().positive().max(100).optional(),
+      offset: z.number().int().min(0).optional(),
+    })
+    .optional(),
+  handler: async (ctx, args) => {
+    const a = args ?? {};
+    const limit = a.limit ?? 24;
+    const offset = a.offset ?? 0;
+    const all = (await listSeries.handler(
+      ctx as never,
+      {
+        genre: a.genre,
+        status: a.status,
+        search: a.search,
+      } as never
+    )) as unknown[];
+    return {
+      items: all.slice(offset, offset + limit),
+      total: all.length,
+      offset,
+      limit,
+      hasMore: offset + limit < all.length,
+    };
+  },
 });
