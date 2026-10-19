@@ -1,7 +1,8 @@
 # Plan: servir segmentos HLS con nginx (no aplicado)
 
-Estado: **propuesta**. No se ha instalado ni cambiado ningún servicio. Medido el 2026-10-18 en la
-máquina Movies.
+Estado: **propuesta, decidido no aplicarla por ahora** (2026-10-18). No se ha instalado ni cambiado
+ningún servicio. Medido el 2026-10-18 en la máquina Movies. Revisar si la subida crece mucho o hay
+muchos espectadores a la vez; el despliegue iría detrás de `HLS_SIGNED_SEGMENTS`.
 
 ## Cómo se sirve hoy
 

@@ -72,23 +72,33 @@ así que no hay fork oficial que actualizar.
 
 ---
 
+**Decisión 2026-10-18: Consumet APAGADO en producción.** Se levantaron `consumet` y `redis` con
+docker compose, ningún proveedor sirvió y se apagaron. `CONSUMET_API_URL` está comentada en el
+`.env` de producción, así que los `hls` se omiten y `ANIME_CONSUMET_HLS` no hace nada. Las
+definiciones de `docker-compose.yml` se conservan. El circuit breaker por proveedor (#146) sigue en
+el código por si se reactiva. Reactivar solo si el dueño lo pide (comando más abajo).
+
+---
+
 ## Variables de entorno
 
 ```env
 # Consumet self-hosted. Sin esta variable los `hls` se omiten sin gastar tiempo.
-CONSUMET_API_URL=http://127.0.0.1:3001
+# Hoy comentada en producción (Consumet apagado).
+# CONSUMET_API_URL=http://127.0.0.1:3001
 
 # Opcional: probar Consumet HLS ANTES que VidNest y los iframes (reproductor nativo en la
 # TV). Sin CONSUMET_API_URL no hace nada. Dejar apagado mientras los scrapers estén caídos:
 # solo añade latencia.
-ANIME_CONSUMET_HLS=1
+# ANIME_CONSUMET_HLS=1   (apagado)
 ```
 
-Levantar Consumet en Movies (solo escucha en `127.0.0.1`, `restart: unless-stopped`, Consumet
+Reactivar Consumet en Movies (hoy apagado; solo con OK del dueño) (solo escucha en `127.0.0.1`, `restart: unless-stopped`, Consumet
 limitado a 512 MB y 1 CPU, Redis a 96 MB sin persistencia):
 
 ```bash
-docker compose -p pelis-original up -d redis consumet
+docker compose -p pelis-original -f docker-compose.yml up -d redis consumet
+# descomentar CONSUMET_API_URL en .env y reiniciar pelis-web
 curl "http://127.0.0.1:3001/meta/anilist/info/21?provider=hianime"
 ```
 
@@ -181,7 +191,7 @@ Desde admin: botón "Importar catálogo AniList".
 | Animes repetidos en el catálogo    | `pnpm --filter @pelis/db group:anime`                                                     |
 | Temporadas como animes separados   | Igual que arriba; el script las une por relaciones de AniList                             |
 | Sin episodios en una temporada     | Falta `anilistId`; `getSeasonEpisodes` lo resuelve solo, o usar `anime.resolveAnilistId`  |
-| Todos los proveedores `hls` fallan | Normal si Consumet está roto; se usa `embed` automáticamente                              |
+| Todos los proveedores `hls` fallan | Normal: Consumet está apagado; se usa `embed` automáticamente                             |
 | Ningún proveedor reproduce         | Comprobar que el DNS del servidor/cliente resuelve los dominios; algunos ISP los bloquean |
 | Redis connection refused           | `docker compose up -d redis` antes de consumet                                            |
 | Rate limit AniList (429)           | `anilistQuery` reintenta respetando `Retry-After`                                         |

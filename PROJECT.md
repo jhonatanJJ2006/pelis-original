@@ -74,7 +74,7 @@
 | Datos/secretos | Postgres y `.env` locales en Movies (gitignored)                                                        | `AGENTS.md`                        | 2026-10-17 |
 | Vercel         | **No** es producción. `vercel.json` + `scripts/vercel-ignore.mjs` son legado                            | `AGENTS.md`                        | 2026-10-17 |
 | Ramas          | `feat/*`/`fix/*`/`chore/*` → PR a `staging`; `staging` → `main` (promote) lo hace Glob                  | `AGENTS.md`                        | 2026-10-17 |
-| APKs           | `/downloads/pelis.apk` (TWA) y `/downloads/pelis-tv.apk` (TV)                                           | `apps/web/src/lib/app-download.ts` | 2026-10-17 |
+| APKs           | Página `/descargas`: `/downloads/pelis.apk` (TWA) y `/downloads/pelis-tv.apk` (TV)                      | `apps/web/src/lib/app-download.ts` | 2026-10-18 |
 
 ## Prioridades abiertas (snapshot)
 
