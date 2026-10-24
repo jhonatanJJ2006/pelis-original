@@ -18,9 +18,16 @@ interface ContinueWatchingItem {
 interface ContinueWatchingRowProps {
   items: ContinueWatchingItem[];
   className?: string;
+  onPreview?: (movie: MediaItem, duration: number) => void;
+  activeId?: string;
 }
 
-export function ContinueWatchingRow({ items, className }: ContinueWatchingRowProps) {
+export function ContinueWatchingRow({
+  items,
+  className,
+  onPreview,
+  activeId,
+}: ContinueWatchingRowProps) {
   const { setRef, getEl } = useDragScroll();
 
   const scrollBy = useCallback(
@@ -78,6 +85,8 @@ export function ContinueWatchingRow({ items, className }: ContinueWatchingRowPro
                 movie={item.movie}
                 progress={item.progress}
                 duration={item.duration}
+                onPreview={onPreview ? () => onPreview(item.movie, item.duration) : undefined}
+                active={activeId === item.movie._id}
               />
             </div>
           ))}

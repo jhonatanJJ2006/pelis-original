@@ -17,7 +17,8 @@
     "./lib/vidnest-client": "./src/lib/vidnest-client.ts",
     "./tv-pairing-code": "./src/lib/tv-pairing-code.ts",
     "./tv-keyboard-code": "./src/lib/tv-keyboard-code.ts",
-    "./tv-stream-kind": "./src/lib/tv-stream-kind.ts"
+    "./tv-stream-kind": "./src/lib/tv-stream-kind.ts",
+    "./displayTitle": "./src/lib/displayTitle.ts"
   },
   "scripts": {
     "dev": "prisma generate && echo 'db: ready'",

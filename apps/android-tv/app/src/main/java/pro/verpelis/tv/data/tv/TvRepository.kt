@@ -67,6 +67,10 @@ data class RawMovieDto(
     val name: String? = null,
     val image: String? = null,
     val backdropImage: String? = null,
+    val synopsis: String? = null,
+    val genre: String? = null,
+    val releaseYear: String? = null,
+    val classification: String? = null,
     val mediaType: String? = null,
 )
 
@@ -77,7 +81,25 @@ data class ContinueDto(
 )
 
 /** Algo que se sigue viendo: id, tipo, nombre, poster y fracción vista. */
-data class ContinueItem(val id: String, val kind: TitleKind, val name: String, val image: String?, val fraction: Float, val progressSec: Long)
+data class ContinueItem(
+    val id: String,
+    val kind: TitleKind,
+    val name: String,
+    val image: String?,
+    val fraction: Float,
+    val progressSec: Long,
+    val backdropImage: String? = null,
+    val synopsis: String? = null,
+    val year: String? = null,
+    val classification: String? = null,
+    val genres: String? = null,
+    val durationSec: Long = 0,
+)
+
+data class HeroExtrasDto(
+    val runtimeMinutes: Double? = null,
+    val youtubeKey: String? = null,
+)
 
 /**
  * Datos de las pantallas 2.0.0 contra las funciones existentes del API web
@@ -124,6 +146,13 @@ class TvRepository(baseUrl: String, private val http: OkHttpClient) {
     // ---- Inicio ----
     suspend fun featured(): List<TitleDto> = fetchList("movies.getFeatured")
 
+    /** Duración y tráiler. En la TV solo se usa la duración: el vídeo no se reproduce. */
+    suspend fun heroExtras(id: String): HeroExtrasDto? {
+        val text = call("movies.heroExtras", """{"id":${quote(id)}}""")
+        if (text.isBlank() || text == "null") return null
+        return moshi.adapter(HeroExtrasDto::class.java).fromJson(text)
+    }
+
     suspend fun continueWatching(limit: Int = 12): List<ContinueItem> =
         fetchList<ContinueDto>("history.getContinueWatching", """{"limit":$limit}""").mapNotNull { row ->
             val m = row.movie ?: return@mapNotNull null
@@ -135,6 +164,12 @@ class TvRepository(baseUrl: String, private val http: OkHttpClient) {
                 image = m.image,
                 fraction = (row.progress / row.duration).toFloat().coerceIn(0f, 1f),
                 progressSec = row.progress.toLong(),
+                backdropImage = m.backdropImage,
+                synopsis = m.synopsis,
+                year = m.releaseYear,
+                classification = m.classification,
+                genres = m.genre,
+                durationSec = row.duration.toLong(),
             )
         }
 }

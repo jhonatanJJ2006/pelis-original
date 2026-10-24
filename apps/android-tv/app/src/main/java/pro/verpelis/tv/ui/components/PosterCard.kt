@@ -58,6 +58,8 @@ fun PosterCard(
     progress: Float? = null,
     /** Va en la superficie enfocable (no en la columna): así el foco se dibuja al volver con requestFocus. */
     focusRequester: FocusRequester? = null,
+    /** Pastilla OK del mando, como en el inicio. */
+    markFocused: Boolean = false,
 ) {
     val uiSounds = LocalUiSounds.current
     var focused by remember { mutableStateOf(false) }
@@ -86,7 +88,7 @@ fun PosterCard(
             scale = ClickableSurfaceDefaults.scale(focusedScale = 1.08f),
             border = ClickableSurfaceDefaults.border(
                 border = Border(BorderStroke(1.dp, MaisonNoir.Border.copy(alpha = 0.6f)), shape = PosterShape),
-                focusedBorder = Border(BorderStroke(2.dp, MaisonNoir.Gold), shape = PosterShape),
+                focusedBorder = Border(BorderStroke(3.dp, MaisonNoir.Gold), shape = PosterShape),
             ),
             glow = ClickableSurfaceDefaults.glow(),
             colors = ClickableSurfaceDefaults.colors(
@@ -119,6 +121,19 @@ fun PosterCard(
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize(),
                 )
+                if (focused && markFocused) {
+                    Text(
+                        "OK",
+                        color = MaisonNoir.Background,
+                        fontSize = 9.sp,
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(6.dp)
+                            .background(MaisonNoir.Gold, RoundedCornerShape(3.dp))
+                            .padding(horizontal = 5.dp, vertical = 2.dp),
+                    )
+                }
                 if (progress != null) {
                     Box(
                         Modifier.align(Alignment.BottomStart).fillMaxWidth().height(4.dp)

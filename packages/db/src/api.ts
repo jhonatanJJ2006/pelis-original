@@ -44,6 +44,7 @@ export const api = {
     'movies.getById',
     'movies.getClassifications',
     'movies.getFeatured',
+    'movies.heroExtras',
     'movies.getGenres',
     'movies.getTrending',
     'movies.getYears',

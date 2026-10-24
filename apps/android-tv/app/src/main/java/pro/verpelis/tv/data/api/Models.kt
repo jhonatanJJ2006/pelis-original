@@ -55,8 +55,10 @@ data class CatalogItem(
     val name: String? = null,
     val title: String? = null,
     val image: String? = null,
+    val backdropImage: String? = null,
     val synopsis: String? = null,
     val genre: Any? = null,
+    val classification: String? = null,
     val mediaType: String? = null,
     val releaseYear: String? = null,
 ) {
