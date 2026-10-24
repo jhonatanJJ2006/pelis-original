@@ -1,28 +1,23 @@
 package pro.verpelis.tv.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
-import pro.verpelis.tv.BuildConfig
 import pro.verpelis.tv.LocalSessionStore
-import pro.verpelis.tv.data.TvImages
+import pro.verpelis.tv.data.HERO_EXTRA_DEBOUNCE_MS
+import pro.verpelis.tv.data.HeroFocus
+import pro.verpelis.tv.data.formatHeroDuration
+import pro.verpelis.tv.data.formatHeroMinutes
+import pro.verpelis.tv.data.heroFocus
+import pro.verpelis.tv.data.heroMetaLine
 import pro.verpelis.tv.data.tv.ContinueItem
 import pro.verpelis.tv.data.tv.LocalTvRepository
 import pro.verpelis.tv.data.tv.TitleDto
-import pro.verpelis.tv.ui.components.PosterCard
+import pro.verpelis.tv.data.tv.addFavorite
+import pro.verpelis.tv.data.tv.isFavorite
+import pro.verpelis.tv.data.tv.removeFavorite
+import pro.verpelis.tv.ui.components.ContinueCard
 import pro.verpelis.tv.ui.components.TvHint
-import pro.verpelis.tv.ui.login.Mn
-import pro.verpelis.tv.ui.login.MnText
 import pro.verpelis.tv.ui.shell.TvHeader
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -31,7 +26,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.onFocusChanged
 import kotlinx.coroutines.launch
 import pro.verpelis.tv.ui.components.TvPivotScroll
 import androidx.compose.foundation.layout.Box
@@ -48,7 +42,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Text
@@ -80,8 +73,10 @@ private data class HomeCatalog(
     val movies: List<CatalogItem> = emptyList(),
     val series: List<CatalogItem> = emptyList(),
     val anime: List<CatalogItem> = emptyList(),
+    val popular: List<CatalogItem> = emptyList(),
 ) {
-    val isEmpty: Boolean get() = movies.isEmpty() && series.isEmpty() && anime.isEmpty()
+    val isEmpty: Boolean
+        get() = popular.isEmpty() && movies.isEmpty() && series.isEmpty() && anime.isEmpty()
 }
 
 @Composable
@@ -101,6 +96,12 @@ fun HomeScreen(
     var catalog by remember { mutableStateOf(HomeCache.catalog) }
     var featured by remember { mutableStateOf(HomeCache.featured) }
     var continueItems by remember { mutableStateOf(HomeCache.continueItems) }
+    var preview by remember { mutableStateOf<HeroFocus?>(null) }
+    var extraMinutes by remember { mutableStateOf<Int?>(null) }
+    var extraFor by remember { mutableStateOf<String?>(null) }
+    var favorite by remember { mutableStateOf<Boolean?>(null) }
+    var favoriteFor by remember { mutableStateOf<String?>(null) }
+    var trailerNote by remember { mutableStateOf(false) }
     var catalogLoading by remember { mutableStateOf(HomeCache.catalog == null) }
     var rowsLoading by remember { mutableStateOf(HomeCache.rows == null) }
     var error by remember { mutableStateOf<String?>(null) }
@@ -156,12 +157,35 @@ fun HomeScreen(
             continueItems = it
         }
     }
-    LaunchedEffect(catalog, featured) {
-        if ((catalog != null || featured != null) && !focusedOnce) {
-            withFrameNanos { }
-            val target = if (featured != null) heroFocus else firstPoster
-            if (runCatching { target.requestFocus() }.isSuccess) focusedOnce = true
-        }
+    val hero = preview
+        ?: featured?.heroFocus()
+        ?: catalog?.popular?.firstOrNull()?.heroFocus(TitleKind.MOVIE)
+        ?: catalog?.movies?.firstOrNull()?.heroFocus(TitleKind.MOVIE)
+    LaunchedEffect(hero?.id, catalog) {
+        if (hero == null && catalog == null) return@LaunchedEffect
+        if (focusedOnce) return@LaunchedEffect
+        withFrameNanos { }
+        val target = if (hero != null) heroFocus else firstPoster
+        if (runCatching { target.requestFocus() }.isSuccess) focusedOnce = true
+    }
+    val heroId = hero?.id
+    val knownDuration = hero?.durationSeconds
+    LaunchedEffect(heroId, knownDuration) {
+        trailerNote = false
+        if (heroId == null || knownDuration != null) return@LaunchedEffect
+        extraMinutes = null
+        kotlinx.coroutines.delay(HERO_EXTRA_DEBOUNCE_MS)
+        val extras = runCatching { repo.heroExtras(heroId) }.getOrNull()
+        extraFor = heroId
+        extraMinutes = extras?.runtimeMinutes?.toInt()?.takeIf { it > 0 }
+    }
+    LaunchedEffect(heroId) {
+        favorite = null
+        val id = heroId ?: return@LaunchedEffect
+        if (hero?.kind == TitleKind.ANIME) return@LaunchedEffect
+        kotlinx.coroutines.delay(HERO_EXTRA_DEBOUNCE_MS)
+        favoriteFor = id
+        favorite = runCatching { repo.isFavorite(id) }.getOrNull()
     }
 
     val openMovie = remember(onOpenTitle) { { item: CatalogItem -> onOpenTitle(TitleKind.MOVIE, item.id) } }
@@ -184,40 +208,82 @@ fun HomeScreen(
             )
             return@Box
         }
+        val shownHero = hero
+        val firstRowIsContinue = continueItems.isNotEmpty()
+        val firstRowIsPopular = !firstRowIsContinue && c != null && c.popular.isNotEmpty()
         Column(Modifier.fillMaxSize()) {
             when {
-                c == null && f == null && catalogLoading -> {
+                c == null && f == null && shownHero == null && catalogLoading -> {
                     TvHeader(null, Modifier.padding(start = 32.dp, end = 40.dp, top = 20.dp, bottom = 8.dp))
                     HomeSkeleton()
                 }
-                else -> TvPivotScroll(0.18f) {
+                else -> {
+                    if (shownHero != null) {
+                        val duration = shownHero.durationSeconds?.let { formatHeroDuration(it) }
+                            ?: extraMinutes.takeIf { extraFor == shownHero.id }?.let { formatHeroMinutes(it) }
+                        HomeHero(
+                            hero = shownHero,
+                            meta = heroMetaLine(shownHero.year, duration, shownHero.classification, shownHero.genres),
+                            favorite = favorite.takeIf { favoriteFor == shownHero.id },
+                            trailerNote = trailerNote,
+                            focus = heroFocus,
+                            onPlay = { onOpenTitle(shownHero.kind, shownHero.id) },
+                            onTrailer = { trailerNote = true },
+                            onToggleList = {
+                                scope.launch {
+                                    val next = favorite != true
+                                    val ok = runCatching {
+                                        if (next) repo.addFavorite(shownHero.id) else repo.removeFavorite(shownHero.id)
+                                    }.isSuccess
+                                    if (ok) {
+                                        favoriteFor = shownHero.id
+                                        favorite = next
+                                    }
+                                }
+                            },
+                        )
+                    } else {
+                        TvHeader(null, Modifier.padding(start = 32.dp, end = 40.dp, top = 20.dp, bottom = 8.dp))
+                    }
+                    TvPivotScroll(0.18f) {
                     LazyColumn(
                         Modifier.fillMaxWidth().weight(1f),
                         state = listState,
                         contentPadding = PaddingValues(bottom = 40.dp),
                     ) {
-                        item(key = "hero", contentType = "hero") {
-                            if (f != null) {
-                                HomeHero(
-                                    f,
-                                    heroFocus,
-                                    // El destacado se ve entero: con el foco en "Ver ahora" la lista vuelve arriba.
-                                    Modifier.onFocusChanged { st ->
-                                        if (st.hasFocus) scope.launch { kotlinx.coroutines.delay(16); listState.scrollToItem(0) }
-                                    },
-                                ) { onOpenTitle(f.kind, f.id) }
-                            } else {
-                                TvHeader(null, Modifier.padding(start = 32.dp, end = 40.dp, top = 20.dp, bottom = 8.dp))
-                            }
-                        }
                         if (continueItems.isNotEmpty()) {
                             item(key = "continue", contentType = "catalog") {
-                                ContinueRow(continueItems) { onOpenTitle(it.kind, it.id) }
+                                ContinueRow(
+                                    continueItems,
+                                    onOpen = { onOpenTitle(it.kind, it.id) },
+                                    onFocused = { preview = it.heroFocus() },
+                                    firstItemFocus = firstPoster,
+                                )
+                            }
+                        }
+                        if (c != null && c.popular.isNotEmpty()) {
+                            item(key = "catalog-popular", contentType = "catalog") {
+                                CatalogRow(
+                                    "Populares",
+                                    c.popular,
+                                    { item -> onOpenTitle(kindOf(item), item.id) },
+                                    subtitle = "Tendencias del cine",
+                                    markFocused = true,
+                                    firstItemFocus = if (firstRowIsPopular) firstPoster else null,
+                                    onFocusIndex = { index -> preview = c.popular[index].heroFocus(kindOf(c.popular[index])) },
+                                )
                             }
                         }
                         if (c != null && c.movies.isNotEmpty()) {
                             item(key = "catalog-movies", contentType = "catalog") {
-                                CatalogRow("Películas", c.movies, openMovie, firstItemFocus = firstPoster)
+                                CatalogRow(
+                                    "Películas",
+                                    c.movies,
+                                    openMovie,
+                                    markFocused = true,
+                                    firstItemFocus = if (!firstRowIsContinue && !firstRowIsPopular) firstPoster else null,
+                                    onFocusIndex = { index -> preview = c.movies[index].heroFocus(TitleKind.MOVIE) },
+                                )
                             }
                         }
                         if (c != null && c.series.isNotEmpty()) {
@@ -226,13 +292,20 @@ fun HomeScreen(
                                     "Series",
                                     c.series,
                                     openSeries,
-                                    firstItemFocus = if (c.movies.isEmpty()) firstPoster else null,
+                                    markFocused = true,
+                                    onFocusIndex = { index -> preview = c.series[index].heroFocus(TitleKind.SERIES) },
                                 )
                             }
                         }
                         if (c != null && c.anime.isNotEmpty()) {
                             item(key = "catalog-anime", contentType = "catalog") {
-                                CatalogRow("Anime", c.anime, openAnime)
+                                CatalogRow(
+                                    "Anime",
+                                    c.anime,
+                                    openAnime,
+                                    markFocused = true,
+                                    onFocusIndex = { index -> preview = c.anime[index].heroFocus(TitleKind.ANIME) },
+                                )
                             }
                         }
                         items(r.orEmpty(), key = { it.first }, contentType = { "channels" }) { (title, channels) ->
@@ -252,6 +325,7 @@ fun HomeScreen(
                             }
                         }
                     }
+                    }
                 }
             }
             TvHintBar(
@@ -262,57 +336,17 @@ fun HomeScreen(
     }
 }
 
-/** Destacado real (movies.getFeatured): fondo a la medida de la pantalla, sin animación. */
 @Composable
-private fun HomeHero(title: TitleDto, focus: FocusRequester, modifier: Modifier = Modifier, onOpen: () -> Unit) {
-    val context = LocalContext.current
-    val uiSounds = LocalUiSounds.current
-    val lowRam = (context.applicationContext as? pro.verpelis.tv.PelisTvApp)?.lowRam == true
-    // Solo fondos horizontales (nunca el póster estirado), al ancho real de la pantalla.
-    val request = remember(title.backdropImage, lowRam) {
-        TvImages.backdropRequest(context, BuildConfig.API_BASE_URL, title.backdropImage, lowRam)
-    }
-    Box(modifier.fillMaxWidth().height(318.dp)) {
-        if (request != null) AsyncImage(request, null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
-        Box(Modifier.fillMaxSize().background(Brush.horizontalGradient(0f to Mn.Bg, 0.45f to Mn.Bg.copy(alpha = 0.85f), 1f to Mn.Bg.copy(alpha = 0.1f))))
-        Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0f to Mn.Bg.copy(alpha = 0.6f), 0.25f to Color.Transparent, 0.7f to Color.Transparent, 1f to Mn.Bg)))
-        Column(Modifier.fillMaxSize().padding(start = 32.dp, end = 40.dp, top = 20.dp)) {
-            TvHeader(null)
-            Spacer(Modifier.weight(1f))
-            Column(Modifier.width(460.dp)) {
-                MnText("Destacado", color = Mn.Gold, size = 8.sp, weight = FontWeight.SemiBold, spacing = 2.sp)
-                Spacer(Modifier.height(6.dp))
-                MnText(title.displayName, color = Mn.Text, size = 30.sp, family = Mn.Serif, lines = 2)
-                Spacer(Modifier.height(6.dp))
-                val meta = listOfNotNull(
-                    title.yearText.takeIf { it.isNotBlank() },
-                    title.classification?.takeIf { it.isNotBlank() },
-                    title.genreText.takeIf { it.isNotBlank() }?.replace(",", " •"),
-                    if (title.kind == TitleKind.SERIES) "Serie" else "Película",
-                )
-                MnText(meta.joinToString("  ·  "), color = Mn.Variant, size = 9.sp, lines = 1)
-                Spacer(Modifier.height(8.dp))
-                MnText(title.synopsis.orEmpty(), color = Mn.Text.copy(alpha = 0.86f), size = 10.sp, lines = 3)
-                Spacer(Modifier.height(14.dp))
-                pro.verpelis.tv.ui.playback.NoirButton(
-                    "Ver ahora",
-                    { uiSounds.playClick(); onOpen() },
-                    icon = pro.verpelis.tv.ui.playback.NoirIcon.Play,
-                    primary = true,
-                    focusRequester = focus,
-                )
-            }
-            Spacer(Modifier.height(18.dp))
-        }
-    }
-}
-
-@Composable
-private fun ContinueRow(items: List<ContinueItem>, onOpen: (ContinueItem) -> Unit) {
+private fun ContinueRow(
+    items: List<ContinueItem>,
+    onOpen: (ContinueItem) -> Unit,
+    onFocused: (ContinueItem) -> Unit,
+    firstItemFocus: FocusRequester?,
+) {
     Column(Modifier.fillMaxWidth().padding(vertical = 10.dp)) {
         Text(
-            "Continuar viendo",
-            style = MaisonType.Title,
+            "Seguir viendo",
+            style = MaisonType.Title.copy(fontSize = 18.sp),
             modifier = Modifier.padding(start = 48.dp, bottom = 10.dp),
         )
         TvPivotScroll(0.06f) {
@@ -321,10 +355,11 @@ private fun ContinueRow(items: List<ContinueItem>, onOpen: (ContinueItem) -> Uni
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 items(items, key = { "c-" + it.id }, contentType = { "poster" }) { it ->
-                    PosterCard(
-                        item = CatalogItem(id = it.id, name = it.name, image = it.image),
+                    ContinueCard(
+                        item = it,
                         onClick = { onOpen(it) },
-                        progress = it.fraction,
+                        onFocused = { onFocused(it) },
+                        focusRequester = if (it.id == items.first().id) firstItemFocus else null,
                     )
                 }
             }
@@ -386,6 +421,10 @@ private data class HomeLoadLimits(
 )
 
 private suspend fun loadCatalogRows(api: PelisApi): HomeCatalog = coroutineScope {
+    val popular = async {
+        runCatching { api.invokeCatalog("movies.getTrending", CatalogListArgs(limit = 18)) }
+            .getOrDefault(emptyList())
+    }
     val movies = async {
         runCatching { api.invokeCatalog("movies.list", CatalogListArgs(mediaType = "movie", limit = 18)) }
             .getOrDefault(emptyList())
@@ -398,7 +437,12 @@ private suspend fun loadCatalogRows(api: PelisApi): HomeCatalog = coroutineScope
         runCatching { api.invokeCatalog("anime.list", CatalogListArgs(limit = 18)) }
             .getOrDefault(emptyList())
     }
-    HomeCatalog(movies.await(), series.await(), anime.await())
+    HomeCatalog(
+        movies = movies.await(),
+        series = series.await(),
+        anime = anime.await(),
+        popular = popular.await(),
+    )
 }
 
 private suspend fun loadHomeRows(api: PelisApi): List<Pair<String, List<TvChannel>>> = coroutineScope {
@@ -410,7 +454,7 @@ private suspend fun loadHomeRows(api: PelisApi): List<Pair<String, List<TvChanne
     val items = popular.await()
     val cats = categories.await()
     val result = mutableListOf<Pair<String, List<TvChannel>>>()
-    if (items.isNotEmpty()) result += "Populares" to items
+    if (items.isNotEmpty()) result += "Canales populares" to items
 
     val used = linkedSetOf<String>()
     val preferred = listOf(
@@ -454,6 +498,9 @@ private suspend fun loadHomeRows(api: PelisApi): List<Pair<String, List<TvChanne
 
     result
 }
+
+private fun kindOf(item: CatalogItem): TitleKind =
+    if (item.mediaType.equals("series", ignoreCase = true)) TitleKind.SERIES else TitleKind.MOVIE
 
 private fun foldAscii(value: String): String =
     java.text.Normalizer.normalize(value, java.text.Normalizer.Form.NFD)

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useSyncExternalStore } from 'react';
 import { useQuery, usePreloadedQuery } from '@pelis/db/client';
 import type { PreloadedQuery } from '@pelis/db/server';
 import { useUser } from '@pelis/auth/hooks';
@@ -14,6 +15,22 @@ import { api } from '@pelis/db/api';
 import type { MediaItem } from '@pelis/ui/types';
 import { MoviePoster } from '@pelis/ui/features/movie-poster';
 import { LandingPage } from './landing-page';
+import { DesktopHome } from './desktop-home';
+
+function subscribeDesktop(onChange: () => void) {
+  const mq = window.matchMedia('(min-width: 768px)');
+  mq.addEventListener('change', onChange);
+  return () => mq.removeEventListener('change', onChange);
+}
+
+/** Escritorio: hero dinámico. El móvil conserva el carrusel. */
+function useDesktopCatalog() {
+  return useSyncExternalStore(
+    subscribeDesktop,
+    () => window.matchMedia('(min-width: 768px)').matches,
+    () => false
+  );
+}
 
 const genreColors: Record<string, string> = {
   Acción: 'from-red-500/30 to-cinema-accent/15',
@@ -53,6 +70,7 @@ function HomeGenreRow({ genre }: { genre: string }) {
 
 export function HomePageClient({ preloaded }: HomePageClientProps) {
   const { user, isLoading: authLoading } = useUser();
+  const desktop = useDesktopCatalog();
   const liveFeatured = useQuery<MediaItem[]>(api.movies.getFeatured, {}) as MediaItem[] | undefined;
   const liveTrending = useQuery<MediaItem[]>(api.movies.getTrending, {}) as MediaItem[] | undefined;
   const liveSeries = useQuery<MediaItem[]>(api.movies.listSeries, { limit: 18 }) as
@@ -99,6 +117,18 @@ export function HomePageClient({ preloaded }: HomePageClientProps) {
         duration: item.duration,
         movie: item.movie as MediaItem,
       })) ?? [];
+
+  if (desktop) {
+    return (
+      <DesktopHome
+        userId={String(user._id)}
+        heroMovies={heroMovies}
+        continueItems={continueItems}
+        trending={trending}
+        series={series}
+      />
+    );
+  }
 
   return (
     <div className="pb-12">

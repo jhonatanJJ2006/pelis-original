@@ -28,7 +28,18 @@ data class PlanDto(
 )
 
 fun TitleDto.toCatalogItem(): CatalogItem =
-    CatalogItem(id = id, name = name, title = title, image = image, synopsis = synopsis, mediaType = mediaType, releaseYear = yearText)
+    CatalogItem(
+        id = id,
+        name = name,
+        title = title,
+        image = image,
+        backdropImage = backdropImage,
+        synopsis = synopsis,
+        genre = genre,
+        classification = classification,
+        mediaType = mediaType,
+        releaseYear = yearText.ifBlank { releaseYear },
+    )
 
 const val CATALOG_PAGE = 48
 

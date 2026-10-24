@@ -3,16 +3,24 @@
 import Link from 'next/link';
 import { Play, Clock } from 'lucide-react';
 import { MoviePoster } from '../movie-poster';
-import { formatDuration, getProgressPercentage } from '../../shared/utils';
+import { cn, formatDuration, getProgressPercentage } from '../../shared/utils';
 import type { MediaItem } from '../../shared/types';
 
 interface ContinueWatchingCardProps {
   movie: MediaItem;
   progress: number;
   duration: number;
+  onPreview?: () => void;
+  active?: boolean;
 }
 
-export function ContinueWatchingCard({ movie, progress, duration }: ContinueWatchingCardProps) {
+export function ContinueWatchingCard({
+  movie,
+  progress,
+  duration,
+  onPreview,
+  active = false,
+}: ContinueWatchingCardProps) {
   const pct = getProgressPercentage(progress, duration);
   const remaining = Math.max(0, duration - progress);
 
@@ -20,9 +28,17 @@ export function ContinueWatchingCard({ movie, progress, duration }: ContinueWatc
     <Link
       href={`/movies/${movie._id}?play=true`}
       prefetch={false}
-      className="card-container group relative block shrink-0 w-[260px] sm:w-[300px] md:w-[340px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cinema-accent/60 rounded-lg active:scale-[0.97] motion-safe:transition-transform motion-safe:duration-fast motion-safe:ease-out-expo"
+      onMouseEnter={onPreview}
+      onFocus={onPreview}
+      className="card-container group relative block shrink-0 w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cinema-accent rounded-lg active:scale-[0.97] motion-safe:transition-transform motion-safe:duration-fast motion-safe:ease-out-expo"
     >
-      <div className="relative aspect-video rounded-lg overflow-hidden border border-cinema-border bg-cinema-surface motion-safe:transition-[border-color,box-shadow] motion-safe:duration-normal [@media(hover:hover)_and_(pointer:fine)]:group-hover:border-cinema-accent/50 [@media(hover:hover)_and_(pointer:fine)]:group-hover:ring-2 [@media(hover:hover)_and_(pointer:fine)]:group-hover:ring-cinema-accent">
+      <div
+        className={cn(
+          'relative aspect-video rounded-lg overflow-hidden border border-cinema-border bg-cinema-surface motion-safe:transition-[border-color,box-shadow] motion-safe:duration-normal',
+          '[@media(hover:hover)_and_(pointer:fine)]:group-hover:border-cinema-accent [@media(hover:hover)_and_(pointer:fine)]:group-hover:ring-2 [@media(hover:hover)_and_(pointer:fine)]:group-hover:ring-cinema-accent',
+          active && 'ring-2 ring-cinema-accent border-cinema-accent'
+        )}
+      >
         <MoviePoster
           src={movie.backdropImage ?? movie.image}
           alt={movie.name}

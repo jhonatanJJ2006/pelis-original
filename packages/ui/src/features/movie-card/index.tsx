@@ -18,6 +18,10 @@ interface MovieCardProps {
   variant?: 'poster' | 'compact';
   posterLoading?: 'lazy' | 'eager';
   posterFetchPriority?: 'high' | 'low' | 'auto';
+  /** Avisa al hero de inicio cuando el ratón o el teclado se posan en la tarjeta. */
+  onPreview?: () => void;
+  /** Anillo dorado de la tarjeta que ahora manda el hero. */
+  active?: boolean;
 }
 
 function MovieCardBase({
@@ -26,6 +30,8 @@ function MovieCardBase({
   variant = 'poster',
   posterLoading = 'lazy',
   posterFetchPriority,
+  onPreview,
+  active = false,
 }: MovieCardProps) {
   const { user } = useUser();
   const addFavorite = useMutation(api.favorites.add);
@@ -62,7 +68,9 @@ function MovieCardBase({
       href={`/movies/${movie._id}`}
       prefetch={false}
       draggable={false}
-      className="card-container block group active:scale-[0.97] motion-safe:transition-transform motion-safe:duration-fast motion-safe:ease-out-expo"
+      onMouseEnter={onPreview}
+      onFocus={onPreview}
+      className="card-container block group active:scale-[0.97] motion-safe:transition-transform motion-safe:duration-fast motion-safe:ease-out-expo rounded-[2px] focus-visible:outline-none"
     >
       <div
         className={cn(
@@ -70,9 +78,10 @@ function MovieCardBase({
           'bg-cinema-surface border border-cinema-border',
           'motion-safe:transition-[transform,border-color,box-shadow] relative z-0 hover:z-10 motion-safe:duration-normal motion-safe:ease-out-expo',
           '[@media(hover:hover)_and_(pointer:fine)]:group-hover:border-cinema-accent',
-          '[@media(hover:hover)_and_(pointer:fine)]:group-hover:ring-1 [@media(hover:hover)_and_(pointer:fine)]:group-hover:ring-cinema-accent/60',
+          '[@media(hover:hover)_and_(pointer:fine)]:group-hover:ring-2 [@media(hover:hover)_and_(pointer:fine)]:group-hover:ring-cinema-accent',
           '[@media(hover:hover)_and_(pointer:fine)]:group-hover:scale-[1.03]',
-          'group-focus-visible:ring-2 group-focus-visible:ring-cinema-accent'
+          'group-focus-visible:ring-2 group-focus-visible:ring-cinema-accent',
+          active && 'ring-2 ring-cinema-accent border-cinema-accent'
         )}
       >
         <div

@@ -51,15 +51,22 @@ fun TvPivotScroll(fraction: Float, content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun RowHeader(title: String, count: Int, countText: String? = null) {
+private fun RowHeader(title: String, count: Int, countText: String? = null, subtitle: String? = null) {
     Row(
         modifier = Modifier.padding(start = 48.dp, end = 48.dp, bottom = 10.dp),
         verticalAlignment = Alignment.Bottom,
     ) {
         Text(title, style = MaisonType.Title.copy(fontSize = 18.sp, color = MaisonNoir.Chalk))
+        if (!subtitle.isNullOrBlank()) {
+            Text(
+                "  $subtitle",
+                style = MaisonType.Meta.copy(color = MaisonNoir.Silver),
+                modifier = Modifier.padding(bottom = 2.dp),
+            )
+        }
         Text(
             "  ·  ${countText ?: count}",
-            style = MaisonType.Eyebrow.copy(color = MaisonNoir.Silver),
+            style = MaisonType.Eyebrow.copy(color = MaisonNoir.Silver, letterSpacing = 0.sp),
             modifier = Modifier.padding(bottom = 2.dp),
         )
     }
@@ -99,11 +106,14 @@ fun CatalogRow(
     onNearEnd: (() -> Unit)? = null,
     /** Texto del contador (p. ej. «Página 1 de 5 · 230 títulos»); por defecto, cuántos hay. */
     countText: String? = null,
+    subtitle: String? = null,
+    /** Anillo dorado con la pastilla OK (inicio). */
+    markFocused: Boolean = false,
     onFocusIndex: ((Int) -> Unit)? = null,
 ) {
     if (items.isEmpty()) return
     Column(modifier.fillMaxWidth().padding(vertical = 10.dp)) {
-        RowHeader(title, items.size, countText)
+        RowHeader(title, items.size, countText, subtitle)
         TvPivotScroll(0.06f) {
             LazyRow(
                 contentPadding = PaddingValues(horizontal = 48.dp, vertical = 8.dp),
@@ -118,6 +128,7 @@ fun CatalogRow(
                         item = item,
                         onClick = { onOpen(item) },
                         focusRequester = if (index == 0) firstItemFocus else null,
+                        markFocused = markFocused,
                         modifier = if (onFocusIndex != null) Modifier.onFocusChanged { if (it.hasFocus) onFocusIndex(index) } else Modifier,
                     )
                 }

@@ -1,7 +1,8 @@
 import { z } from 'zod';
 import { prisma } from '../client';
 import { register } from '../registry';
-import { AuthError } from '../lib/requireAdmin';
+import { createTmdbFetcher, EMPTY_HERO_EXTRAS, lookupHeroExtras } from '../lib/hero-extras';
+import { AuthError, requireUser } from '../lib/requireAdmin';
 import { toMovieShape } from '../lib/shapes';
 import { isMissingVideo } from '../lib/movieQuality';
 import { hasManifestForToken } from '../lib/hasManifestForToken';
@@ -378,5 +379,47 @@ export const page = register({
       list = [...list.filter((m) => !m.comingSoon), ...list.filter((m) => m.comingSoon)];
     const result = pageOf(list, offset, limit);
     return { ...result, items: result.items.map(toMovieShape) };
+  },
+});
+
+const heroExtrasCache = new Map<string, { expires: number; value: typeof EMPTY_HERO_EXTRAS }>();
+
+/** Duración y tráiler (YouTube) para el hero. No escribe la base ni registra la clave de TMDB. */
+export const heroExtras = register({
+  kind: 'query',
+  name: 'movies.heroExtras',
+  reads: ['movie'],
+  args: z.object({ id: z.string().min(1).max(128) }),
+  handler: async (ctx, { id }) => {
+    requireUser(ctx);
+    const now = Date.now();
+    const hit = heroExtrasCache.get(id);
+    if (hit && hit.expires > now) return hit.value;
+    const apiKey = process.env.TMDB_API_KEY;
+    if (!apiKey) return EMPTY_HERO_EXTRAS;
+    try {
+      const movie = await prisma.movie.findUnique({
+        where: { id },
+        select: { name: true, releaseYear: true, mediaType: true },
+      });
+      if (!movie) return EMPTY_HERO_EXTRAS;
+      const value = await lookupHeroExtras(
+        {
+          name: movie.name,
+          year: movie.releaseYear,
+          mediaType: movie.mediaType === 'SERIES' ? 'series' : 'movie',
+        },
+        createTmdbFetcher(apiKey)
+      );
+      const ttl = value.youtubeKey || value.runtimeMinutes ? 12 * 60 * 60 * 1000 : 30 * 60 * 1000;
+      heroExtrasCache.set(id, { expires: now + ttl, value });
+      if (heroExtrasCache.size > 400) {
+        const oldest = heroExtrasCache.keys().next().value;
+        if (oldest) heroExtrasCache.delete(oldest);
+      }
+      return value;
+    } catch {
+      return EMPTY_HERO_EXTRAS;
+    }
   },
 });
