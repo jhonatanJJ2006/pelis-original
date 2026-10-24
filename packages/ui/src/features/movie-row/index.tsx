@@ -17,6 +17,8 @@ interface MovieRowProps {
   linkLabel?: string;
   className?: string;
   isLoading?: boolean;
+  onPreview?: (movie: MediaItem) => void;
+  activeId?: string;
 }
 
 export function MovieRow({
@@ -27,6 +29,8 @@ export function MovieRow({
   linkLabel,
   className,
   isLoading = false,
+  onPreview,
+  activeId,
 }: MovieRowProps) {
   const { setRef, getEl } = useDragScroll();
 
@@ -82,6 +86,8 @@ export function MovieRow({
                 showFavorite={false}
                 posterLoading={index === 0 ? 'eager' : 'lazy'}
                 posterFetchPriority={index === 0 ? 'high' : 'auto'}
+                onPreview={onPreview ? () => onPreview(movie) : undefined}
+                active={activeId === movie._id}
               />
             </div>
           ))}

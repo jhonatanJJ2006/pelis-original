@@ -38,7 +38,7 @@ APK de release (firmar aparte; no commitear keystores):
 ./gradlew :app:assembleRelease
 ```
 
-Package: `pro.verpelis.tv`. `versionCode` 4 / `1.3.0`.
+Package: `pro.verpelis.tv`. `versionCode` 14 / `2.0.3`.
 
 ## Auth nativa (v3)
 
