@@ -5,7 +5,7 @@ Eres un modelo que acaba de aterrizar. No improvises. Este archivo manda. Si CON
 ## Leer primero
 
 **Lee `docs/ESTADO-Y-DECISIONES.md` antes de tocar nada.** Es el handoff canónico: reglas, decisiones,
-formatos, estilo, estado y pendientes. Registro del último día de trabajo: `docs/HANDOFF-2026-10-19.md`.
+formatos, estilo, estado y pendientes. Registro del último día de trabajo: `docs/HANDOFF-2026-10-24.md`.
 
 Reglas no negociables (detalle en ese documento):
 
@@ -144,6 +144,8 @@ Rutas completas: docs/APP.md.
 
 - docs/ESTADO-Y-DECISIONES.md — handoff canónico (leer primero)
 - docs/HANDOFF-2026-10-18.md — registro del 2026-10-17/18
+- docs/HANDOFF-2026-10-19.md — registro del 2026-10-19
+- docs/HANDOFF-2026-10-24.md — registro del 2026-10-24 (hero dinámico, TV 2.0.3)
 - DESIGN.md — UI Maison Noir (tokens cinema-*)
 - docs/APP.md — rutas, auth, fuentes de datos
 - docs/ARCHITECTURE.md — paquetes, flujo, trampas
