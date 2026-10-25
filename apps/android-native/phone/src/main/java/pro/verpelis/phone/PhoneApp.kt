@@ -12,6 +12,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import android.content.res.Configuration
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -73,6 +76,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -117,10 +121,29 @@ fun PhoneApp(startRoute: String = "home") {
     val nav = rememberNavController()
     val current = nav.currentBackStackEntryAsState().value?.destination?.route
     LaunchedEffect(startRoute) { if (startRoute.startsWith("detail/") || startRoute in listOf("list", "history", "plans")) nav.navigate(startRoute) }
+    val landscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
+    val showTabs = tabs.any { it.route == current }
+    Row(Modifier.fillMaxSize().background(Noir.Ink)) {
+    // En horizontal la barra de pestañas va a la izquierda (riel) para no quitar alto al contenido.
+    if (landscape && showTabs) androidx.compose.material3.NavigationRail(containerColor = Noir.Surface, modifier = Modifier.statusBarsPadding()) {
+        tabs.forEach { t ->
+            androidx.compose.material3.NavigationRailItem(
+                selected = current == t.route,
+                onClick = { nav.navigate(t.route) { popUpTo("home"); launchSingleTop = true } },
+                icon = { Icon(t.icon, t.label) },
+                label = { Text(t.label.uppercase(), fontSize = 9.sp, letterSpacing = 0.6.sp) },
+                colors = androidx.compose.material3.NavigationRailItemDefaults.colors(
+                    selectedIconColor = Noir.Gold, selectedTextColor = Noir.Gold,
+                    unselectedIconColor = Noir.Muted, unselectedTextColor = Noir.Muted, indicatorColor = Noir.Surface,
+                ),
+            )
+        }
+    }
     Scaffold(
+        modifier = Modifier.weight(1f),
         containerColor = Noir.Ink,
         bottomBar = {
-            if (tabs.any { it.route == current }) NavigationBar(containerColor = Noir.Surface, tonalElevation = 0.dp) {
+            if (!landscape && showTabs) NavigationBar(containerColor = Noir.Surface, tonalElevation = 0.dp) {
                 tabs.forEach { t ->
                     NavigationBarItem(
                         selected = current == t.route,
@@ -149,6 +172,7 @@ fun PhoneApp(startRoute: String = "home") {
                 DetailScreen(api, nav, e.arguments?.getString("kind") ?: "movie", e.arguments?.getString("id") ?: "")
             }
         }
+    }
     }
 }
 
@@ -309,6 +333,8 @@ fun HomeScreen(api: PelisApi, nav: NavHostController) {
             val rows = listOf("Acción", "Comedia", "Terror").map { g -> g to bg(emptyList()) { api.byGenre(g) } }
             val plans = bg(emptyList()) { api.plans() }
             val tr = trending.await()
+            // Sin nada de lo esencial (p. ej. sin conexión): error con «Reintentar» en vez de pantalla vacía.
+            if (tr.isEmpty() && featured.await().isEmpty() && latest.await().isEmpty()) error("No se pudo cargar el inicio")
             HomeData(
                 hero = featured.await().firstOrNull { !it.comingSoon } ?: tr.firstOrNull { it.backdrop != null && !it.comingSoon },
                 continueWatching = cont.await(), trending = tr, latest = latest.await(), anime = anime.await(),
@@ -316,8 +342,9 @@ fun HomeScreen(api: PelisApi, nav: NavHostController) {
             )
         }
     }
+    val listState = androidx.compose.foundation.lazy.rememberLazyListState()
     LoadBox(data) { d ->
-        LazyColumn(Modifier.fillMaxSize().background(Noir.Ink)) {
+        LazyColumn(Modifier.fillMaxSize().background(Noir.Ink), state = listState) {
             item { Box { d.hero?.let { Hero(it, onPlay = { nav.open(it) }, onInfo = { nav.open(it) }) }; TopBar(nav) } }
             item { ContinueRow(d.continueWatching, onAll = { nav.navigate("history") }) { nav.open(it) } }
             item { TitleRow("Estrenos", d.latest, action = "Ver catálogo", onAction = { nav.navigate("search") }) { nav.open(it) } }
@@ -352,12 +379,12 @@ fun Hero(t: Title, onPlay: () -> Unit, onInfo: () -> Unit) {
         Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Noir.Ink.copy(alpha = 0.7f), Color.Transparent, Noir.Ink.copy(alpha = 0.7f), Noir.Ink))))
         Column(Modifier.align(Alignment.BottomStart).padding(16.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
-                Badge("Estreno exclusivo", gold = true)
+                if (t.isRecent()) Badge("Estreno exclusivo", gold = true)
                 Text(t.meta(), color = Noir.Text, fontSize = 11.sp)
             }
             Spacer(Modifier.height(8.dp))
             Text(t.name, style = NoirTitle.copy(fontSize = 34.sp, lineHeight = 38.sp))
-            Text(t.synopsis, color = Noir.Text.copy(alpha = 0.8f), fontSize = 13.sp, maxLines = 2)
+            Text(pro.verpelis.core.data.SynopsisText.clean(t.synopsis, 120), color = Noir.Text.copy(alpha = 0.8f), fontSize = 13.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
             Spacer(Modifier.height(14.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 GoldButton("Reproducir", onPlay, Modifier.weight(1f), icon = Icons.Filled.PlayArrow)
@@ -391,15 +418,17 @@ private fun PlansTeaser(plans: List<pro.verpelis.core.data.Plan>, onOpen: () -> 
 
 @Composable
 fun SearchScreen(api: PelisApi, nav: NavHostController) {
-    var q by remember { mutableStateOf("") }
-    var genre by remember { mutableStateOf<String?>(null) }
-    var mode by remember { mutableIntStateOf(0) }
+    var q by rememberSaveable { mutableStateOf("") }
+    var genre by rememberSaveable { mutableStateOf<String?>(null) }
+    var mode by rememberSaveable { mutableIntStateOf(0) }
+    val landscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
     val genres = rememberLoad(Unit) { api.genres() }
     // Búsqueda con espera corta; sin texto se ven las películas populares (paginadas).
-    var debounced by remember { mutableStateOf("") }
+    var debounced by rememberSaveable { mutableStateOf(q.trim()) }
     LaunchedEffect(q) { delay(300); debounced = q.trim() }
     Column(Modifier.fillMaxSize().statusBarsPadding()) {
-        Text("Buscar", style = NoirTitle, modifier = Modifier.padding(start = 16.dp, top = 12.dp))
+        // En horizontal se omiten título y encabezado para dejar sitio a la cuadrícula.
+        if (!landscape) Text("Buscar", style = NoirTitle, modifier = Modifier.padding(start = 16.dp, top = 12.dp))
         OutlinedTextField(q, { q = it }, placeholder = { Text("Películas, series, actores") }, singleLine = true, colors = noirFieldColors(),
             leadingIcon = { Icon(Icons.Filled.Search, null, tint = Noir.Muted) }, modifier = Modifier.fillMaxWidth().padding(16.dp))
         Row(Modifier.padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -413,7 +442,7 @@ fun SearchScreen(api: PelisApi, nav: NavHostController) {
             }
         } else Spacer(Modifier.height(12.dp))
         val searching = debounced.length >= 2
-        if (!searching && mode == 0 && genre == null) {
+        if (!landscape && !searching && mode == 0 && genre == null) {
             Text("Películas populares", style = NoirSection, modifier = Modifier.padding(horizontal = 16.dp))
         }
         PagedGrid(
@@ -456,8 +485,8 @@ fun Grid(list: List<Title>, empty: String = "No hay resultados", onOpen: (Title)
 
 @Composable
 fun AnimeScreen(api: PelisApi, nav: NavHostController) {
-    var q by remember { mutableStateOf("") }
-    var debounced by remember { mutableStateOf("") }
+    var q by rememberSaveable { mutableStateOf("") }
+    var debounced by rememberSaveable { mutableStateOf("") }
     LaunchedEffect(q) { delay(300); debounced = q.trim() }
     Column(Modifier.fillMaxSize().statusBarsPadding()) {
         Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -508,7 +537,7 @@ fun DetailScreen(api: PelisApi, nav: NavHostController, kind: String, id: String
                     AsyncImage(t.backdrop, t.name, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
                     Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Noir.Ink.copy(alpha = 0.6f), Color.Transparent, Noir.Ink))))
                     TopBar(nav, back = true)
-                    Box(Modifier.align(Alignment.BottomStart).padding(16.dp)) { Badge("Estreno", gold = true) }
+                    if (t.isRecent()) Box(Modifier.align(Alignment.BottomStart).padding(16.dp)) { Badge("Estreno", gold = true) }
                 }
             }
             item {
@@ -542,7 +571,7 @@ fun DetailScreen(api: PelisApi, nav: NavHostController, kind: String, id: String
                     Column(Modifier.fillMaxWidth().background(Noir.Surface, RoundedCornerShape(8.dp)).border(1.dp, Noir.Line, RoundedCornerShape(8.dp)).padding(16.dp)) {
                         Text("Sinopsis oficial", style = NoirSection.copy(color = Noir.Gold, fontSize = 17.sp))
                         Spacer(Modifier.height(8.dp))
-                        Text(t.synopsis.ifBlank { "Sin sinopsis por ahora." }, color = Noir.Text, fontSize = 14.sp, lineHeight = 21.sp)
+                        Text(pro.verpelis.core.data.SynopsisText.clean(t.synopsis).ifBlank { "Sin sinopsis por ahora." }, color = Noir.Text, fontSize = 14.sp, lineHeight = 21.sp)
                     }
                     if (t.actors.isNotBlank()) {
                         Spacer(Modifier.height(18.dp))
