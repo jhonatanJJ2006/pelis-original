@@ -110,8 +110,10 @@ fun HeroBackdrop(raw: String?, poster: String? = null, modifier: Modifier = Modi
     }
 
     val shown = frame
-    val posterUrl = if (usePoster) TvImages.sized(BuildConfig.API_BASE_URL, poster, HERO_POSTER_WIDTH) else null
-    if (shown != null && !shown.isRecycled) {
+    val hasFrame = shown != null && !shown.isRecycled
+    // También mientras llega el primer fondo: nunca un hero negro.
+    val posterUrl = if (usePoster || !hasFrame) TvImages.sized(BuildConfig.API_BASE_URL, poster, HERO_POSTER_WIDTH) else null
+    if (hasFrame && shown != null) {
         Image(
             bitmap = shown.asImageBitmap(),
             contentDescription = null,
