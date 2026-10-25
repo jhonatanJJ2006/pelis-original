@@ -24,6 +24,9 @@ class PelisTvApp : Application(), ImageLoaderFactory {
     lateinit var updateStore: UpdateStore
         private set
 
+    /** La intro ya se mostró en este proceso. */
+    var splashShown = false
+
     /** Fire TV Stick / TV box de 1–1,5 GB: menos caché, RGB_565 y sin crossfade. */
     val lowRam: Boolean by lazy {
         val am = getSystemService(ACTIVITY_SERVICE) as ActivityManager
