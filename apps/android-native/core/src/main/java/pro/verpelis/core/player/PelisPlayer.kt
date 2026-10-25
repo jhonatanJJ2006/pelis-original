@@ -8,6 +8,7 @@ import android.net.Uri
 import androidx.annotation.OptIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -58,6 +59,7 @@ import kotlinx.coroutines.launch
 import pro.verpelis.core.data.PelisApi
 import pro.verpelis.core.data.Subtitle
 import pro.verpelis.core.ui.Noir
+import pro.verpelis.core.ui.rememberOnline
 
 data class PlaybackRequest(val url: String, val title: String, val movieId: String? = null, val subtitles: List<Subtitle> = emptyList(), val live: Boolean = false)
 
@@ -70,7 +72,12 @@ fun Context.findActivity(): Activity? {
 @OptIn(UnstableApi::class)
 fun buildPlayer(context: Context, api: PelisApi, req: PlaybackRequest): ExoPlayer {
     val factory = OkHttpDataSource.Factory(api.http)
-    val player = ExoPlayer.Builder(context).setMediaSourceFactory(DefaultMediaSourceFactory(factory)).build()
+    val player = ExoPlayer.Builder(context).setMediaSourceFactory(DefaultMediaSourceFactory(factory))
+        // Foco de audio: pausa si entra una llamada u otra app; pausa al desconectar audífonos.
+        .setAudioAttributes(androidx.media3.common.AudioAttributes.Builder().setUsage(C.USAGE_MEDIA)
+            .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE).build(), true)
+        .setHandleAudioBecomingNoisy(true)
+        .build()
     val subs = req.subtitles.map {
         MediaItem.SubtitleConfiguration.Builder(Uri.parse(it.url))
             .setMimeType(if (it.url.contains(".srt")) MimeTypes.APPLICATION_SUBRIP else MimeTypes.TEXT_VTT)
@@ -80,7 +87,8 @@ fun buildPlayer(context: Context, api: PelisApi, req: PlaybackRequest): ExoPlaye
         .apply { if (req.url.contains(".m3u8") || req.url.contains("/stream")) setMimeType(MimeTypes.APPLICATION_M3U8) }
         .setSubtitleConfigurations(subs).build()
     player.trackSelectionParameters = player.trackSelectionParameters.buildUpon().setPreferredTextLanguage("es").setPreferredAudioLanguage("es").build()
-    player.setMediaItem(item)
+    val resume = if (req.live) 0L else ResumeStore.get(context, req)
+    if (resume > 0) player.setMediaItem(item, resume) else player.setMediaItem(item)
     player.prepare()
     player.playWhenReady = true
     return player
@@ -99,6 +107,12 @@ fun PelisPlayer(req: PlaybackRequest, api: PelisApi, fullscreen: Boolean, tv: Bo
     val player = remember(req.url) { buildPlayer(context, api, req) }
     var buffering by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
+    val online by rememberOnline()
+    var playerView by remember { mutableStateOf<PlayerView?>(null) }
+    var controlsVisible by remember { mutableStateOf(false) }
+    val retry = { error = null; player.prepare(); player.playWhenReady = true }
+    // Al volver la red tras un error, reintenta solo y sigue desde donde iba.
+    LaunchedEffect(online) { if (online && error != null) { delay(800); retry() } }
     var hud by remember { mutableStateOf<GestureMath.Zone?>(null) }
     var hudLevel by remember { mutableFloatStateOf(0f) }
     var hudTick by remember { mutableStateOf(0) }
@@ -111,12 +125,16 @@ fun PelisPlayer(req: PlaybackRequest, api: PelisApi, fullscreen: Boolean, tv: Bo
     DisposableEffect(player) {
         val l = object : Player.Listener {
             override fun onPlaybackStateChanged(state: Int) { buffering = state == Player.STATE_BUFFERING || state == Player.STATE_IDLE }
-            override fun onPlayerError(e: androidx.media3.common.PlaybackException) { error = "No se pudo reproducir. Intenta de nuevo." }
+            override fun onPlayerError(e: androidx.media3.common.PlaybackException) {
+                error = if (!pro.verpelis.core.ui.isOnline(context) || e.errorCode in 2000..2999) "Sin conexión. Se reanudará al volver la red."
+                else "No se pudo reproducir. Intenta de nuevo."
+            }
         }
         player.addListener(l)
         onDispose {
             req.movieId?.let { id ->
                 val pos = player.currentPosition / 1000; val dur = player.duration.coerceAtLeast(0) / 1000
+                if (!req.live) ResumeStore.put(context, req, player.currentPosition, player.duration)
                 if (pos > 5) kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch { api.saveProgress(id, pos, dur) }
             }
             player.removeListener(l); player.release()
@@ -132,6 +150,7 @@ fun PelisPlayer(req: PlaybackRequest, api: PelisApi, fullscreen: Boolean, tv: Bo
                     wasPlaying = player.playWhenReady; player.pause()
                     req.movieId?.let { id ->
                         val pos = player.currentPosition / 1000; val dur = player.duration.coerceAtLeast(0) / 1000
+                if (!req.live) ResumeStore.put(context, req, player.currentPosition, player.duration)
                         if (pos > 5) kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch { runCatching { api.saveProgress(id, pos, dur) } }
                     }
                 }
@@ -167,10 +186,14 @@ fun PelisPlayer(req: PlaybackRequest, api: PelisApi, fullscreen: Boolean, tv: Bo
             },
         )
     } else Modifier
+    // Con los controles ocultos, un toque en el centro los muestra (la capa de gestos tapaba el PlayerView).
+    val tapMod = if (!tv) Modifier.pointerInput(Unit) {
+        detectTapGestures(onTap = { playerView?.showController() })
+    } else Modifier
 
     Box(modifier.fillMaxSize().background(Brush.radialGradient(listOf(Noir.Raised, Noir.Surface, Noir.Ink)))) {
         AndroidView(
-            factory = { ctx -> PlayerView(ctx).apply {
+            factory = { ctx -> (android.view.LayoutInflater.from(ctx).inflate(pro.verpelis.core.R.layout.pelis_player_view, null) as PlayerView).apply {
                 this.player = player
                 setShowSubtitleButton(true)
                 setShowBuffering(PlayerView.SHOW_BUFFERING_NEVER)
@@ -179,12 +202,15 @@ fun PelisPlayer(req: PlaybackRequest, api: PelisApi, fullscreen: Boolean, tv: Bo
                 setShutterBackgroundColor(android.graphics.Color.TRANSPARENT)
                 setBackgroundColor(android.graphics.Color.TRANSPARENT)
                 if (tv) { requestFocus() }
+                playerView = this
+                setControllerVisibilityListener(PlayerView.ControllerVisibilityListener { v -> controlsVisible = v == android.view.View.VISIBLE })
                 onReady(player, this)
             } },
             modifier = Modifier.fillMaxSize(),
         )
         // Capa de gestos solo sobre la mitad central vertical para no tapar la barra de controles
-        Box(Modifier.fillMaxSize().padding(top = 56.dp, bottom = 96.dp).then(gestureMod))
+        // Con los controles visibles la capa se quita para que pausa, saltos y barra reciban el toque.
+        if (!controlsVisible) Box(Modifier.fillMaxSize().padding(top = 56.dp, bottom = 96.dp).then(tapMod).then(gestureMod))
 
         if (buffering && error == null) {
             Column(Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -194,7 +220,10 @@ fun PelisPlayer(req: PlaybackRequest, api: PelisApi, fullscreen: Boolean, tv: Bo
             }
         }
         error?.let {
-            Text(it, color = Noir.Text, modifier = Modifier.align(Alignment.Center).background(Noir.Burgundy, RoundedCornerShape(8.dp)).padding(16.dp))
+            Column(Modifier.align(Alignment.Center).background(Noir.Burgundy, RoundedCornerShape(8.dp)).padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(it, color = Noir.Text)
+                TextButton(onClick = { retry() }) { Text("Reintentar", color = Noir.Gold) }
+            }
         }
         hud?.let { zone -> Hud(zone, hudLevel, Modifier.align(Alignment.TopCenter).padding(top = 64.dp)) }
         var settings by remember { mutableStateOf(false) }
@@ -340,3 +369,16 @@ internal fun trackOptions(player: ExoPlayer, type: Int): List<TrackOption> {
 /** "Automática (720p)": muestra el nivel que eligió el ABR de HLS. */
 internal fun autoLabel(player: ExoPlayer): String =
     player.videoFormat?.let { QualityLabel.of(it.width, it.height) }?.let { "Automática ($it)" } ?: "Automática"
+
+/** Posición local por título para reanudar al reabrir (se borra cerca del final). */
+internal object ResumeStore {
+    private fun key(req: PlaybackRequest) = "pos:" + (req.movieId?.let { it + "|" + req.title } ?: req.url)
+    private fun prefs(c: Context) = c.applicationContext.getSharedPreferences("pelis_resume", Context.MODE_PRIVATE)
+    fun get(c: Context, req: PlaybackRequest): Long = prefs(c).getLong(key(req), 0L)
+    fun put(c: Context, req: PlaybackRequest, posMs: Long, durMs: Long) {
+        val e = prefs(c).edit()
+        if (shouldKeep(posMs, durMs)) e.putLong(key(req), posMs) else e.remove(key(req))
+        e.apply()
+    }
+    fun shouldKeep(posMs: Long, durMs: Long): Boolean = posMs > 5_000 && (durMs <= 0 || posMs < durMs - 30_000)
+}
