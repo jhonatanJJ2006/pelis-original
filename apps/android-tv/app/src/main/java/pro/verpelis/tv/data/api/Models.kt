@@ -61,6 +61,7 @@ data class CatalogItem(
     val classification: String? = null,
     val mediaType: String? = null,
     val releaseYear: String? = null,
+    val featured: Boolean? = null,
 ) {
     val displayName: String get() = name?.takeIf { it.isNotBlank() } ?: title.orEmpty()
 }

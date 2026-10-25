@@ -77,7 +77,10 @@ function runtimeOf(payload: unknown, kind: 'movie' | 'tv'): number | null {
   }
   const list = root.episode_run_time;
   const first = Array.isArray(list) ? list.find((n) => typeof n === 'number' && n > 0) : null;
-  return typeof first === 'number' ? Math.round(first) : null;
+  if (typeof first === 'number') return Math.round(first);
+  // TMDB ya casi no llena `episode_run_time`: se usa el último episodio emitido.
+  const last = asRecord(root.last_episode_to_air)?.runtime;
+  return typeof last === 'number' && last > 0 ? Math.round(last) : null;
 }
 
 export type HeroFetch = (path: string) => Promise<unknown | null>;
@@ -126,4 +129,53 @@ export function createTmdbFetcher(apiKey: string, fetchImpl: typeof fetch = fetc
     if (!response.ok) return null;
     return response.json() as Promise<unknown>;
   };
+}
+
+/**
+ * Solo la duración (minutos): búsqueda + ficha, sin vídeos. Para pedir muchas a la vez
+ * desde `movies.heroRuntimes`.
+ */
+export async function lookupHeroRuntime(
+  input: { name: string; year?: string | null; mediaType: 'movie' | 'series' },
+  fetchJson: HeroFetch
+): Promise<number | null> {
+  const name = input.name.trim();
+  if (!name) return null;
+  try {
+    const kind = input.mediaType === 'series' ? 'tv' : 'movie';
+    const params = new URLSearchParams({ query: name, include_adult: 'false', language: 'es-ES' });
+    const year = input.year?.trim();
+    if (year) params.set(kind === 'movie' ? 'year' : 'first_air_date_year', year);
+    let id = firstId(await fetchJson(`search/${kind}?${params.toString()}`));
+    if (!id && year) {
+      params.delete(kind === 'movie' ? 'year' : 'first_air_date_year');
+      id = firstId(await fetchJson(`search/${kind}?${params.toString()}`));
+    }
+    if (!id) return null;
+    return runtimeOf(await fetchJson(`${kind}/${id}?language=es-ES`), kind);
+  } catch {
+    return null;
+  }
+}
+
+/** Minutos a partir de la duración real del archivo (historial), en segundos. */
+export function minutesFromSeconds(seconds: number | null | undefined): number | null {
+  if (seconds == null || !Number.isFinite(seconds) || seconds < 60) return null;
+  return Math.round(seconds / 60);
+}
+
+/** Corre `tasks` con como mucho `limit` a la vez. */
+export async function runLimited<T>(
+  items: readonly T[],
+  limit: number,
+  task: (item: T) => Promise<void>
+): Promise<void> {
+  let next = 0;
+  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (next < items.length) {
+      const item = items[next++]!;
+      await task(item);
+    }
+  });
+  await Promise.all(workers);
 }

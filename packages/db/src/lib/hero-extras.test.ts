@@ -2,6 +2,9 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   createTmdbFetcher,
   lookupHeroExtras,
+  lookupHeroRuntime,
+  minutesFromSeconds,
+  runLimited,
   pickYoutubeKey,
   sanitizeYoutubeKey,
 } from './hero-extras';
@@ -104,5 +107,65 @@ describe('createTmdbFetcher', () => {
     );
     expect(url).toContain('api_key=test-key-no-es-real');
     expect(url).toContain('/movie/1?language=es-ES');
+  });
+});
+
+describe('lookupHeroRuntime', () => {
+  it('busca sin año si con año no hay resultados y no pide vídeos', async () => {
+    const calls: string[] = [];
+    const fetchJson = vi.fn(async (path: string) => {
+      calls.push(path);
+      if (path.startsWith('search/movie') && path.includes('year=')) return { results: [] };
+      if (path.startsWith('search/movie')) return { results: [{ id: 7 }] };
+      if (path.startsWith('movie/7')) return { runtime: 104 };
+      return null;
+    });
+    await expect(
+      lookupHeroRuntime({ name: 'Algo', year: '2024', mediaType: 'movie' }, fetchJson)
+    ).resolves.toBe(104);
+    expect(calls.some((c) => c.includes('videos'))).toBe(false);
+  });
+
+  it('series: usa el último episodio si no hay duración media', async () => {
+    const fetchJson = async (path: string) =>
+      path.startsWith('search/tv')
+        ? { results: [{ id: 3 }] }
+        : { episode_run_time: [], last_episode_to_air: { runtime: 47 } };
+    await expect(lookupHeroRuntime({ name: 'Serie', mediaType: 'series' }, fetchJson)).resolves.toBe(47);
+  });
+
+  it('null si falla o no hay nombre', async () => {
+    await expect(lookupHeroRuntime({ name: ' ', mediaType: 'movie' }, async () => null)).resolves.toBeNull();
+    await expect(
+      lookupHeroRuntime({ name: 'X', mediaType: 'movie' }, async () => {
+        throw new Error('red');
+      })
+    ).resolves.toBeNull();
+  });
+});
+
+describe('minutesFromSeconds', () => {
+  it('redondea y descarta duraciones no válidas', () => {
+    expect(minutesFromSeconds(6290)).toBe(105);
+    expect(minutesFromSeconds(30)).toBeNull();
+    expect(minutesFromSeconds(null)).toBeNull();
+    expect(minutesFromSeconds(Number.NaN)).toBeNull();
+  });
+});
+
+describe('runLimited', () => {
+  it('no pasa del límite de concurrencia', async () => {
+    let active = 0;
+    let peak = 0;
+    const done: number[] = [];
+    await runLimited([1, 2, 3, 4, 5, 6, 7], 3, async (n) => {
+      active++;
+      peak = Math.max(peak, active);
+      await new Promise((r) => setTimeout(r, 2));
+      done.push(n);
+      active--;
+    });
+    expect(peak).toBeLessThanOrEqual(3);
+    expect(done.sort()).toEqual([1, 2, 3, 4, 5, 6, 7]);
   });
 });

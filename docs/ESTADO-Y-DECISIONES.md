@@ -77,7 +77,7 @@ Nunca escribas aquí valores de secretos: solo dónde viven.
 
 | App                      | Carpeta                     | Package                   | APK publicada         | Versión en repo                                        |
 | ------------------------ | --------------------------- | ------------------------- | --------------------- | ------------------------------------------------------ |
-| **Pelis TV (principal)** | `apps/android-tv`           | `pro.verpelis.tv`         | `pelis-tv.apk`        | **2.0.2 (13)** publicada; **2.0.3 (14)** en el repo    |
+| **Pelis TV (principal)** | `apps/android-tv`           | `pro.verpelis.tv`         | `pelis-tv.apk`        | **2.0.3 (14)** publicada; **2.0.4 (15)** en el repo    |
 | Nativa celular           | `apps/android-native/phone` | `pro.verpelis.app.native` | `pelis-nativo.apk`    | **1.2.2 (5)** en el repo; publicada sigue en 1.2.1 (4) |
 | Nativa TV                | `apps/android-native/tv`    | `pro.verpelis.tv.native`  | `pelis-tv-nativo.apk` | **1.2.2 (5)** en el repo; publicada sigue en 1.2.1 (4) |
 | TWA                      | `apps/android`              | `pro.verpelis.twa`        | `pelis.apk`           | 5                                                      |
@@ -87,7 +87,7 @@ Nunca escribas aquí valores de secretos: solo dónde viven.
   #133).
   - 2.0.1 (12) está publicada (PR #156): los chips filtran al enfocarlos, la tecla DERECHA en
     búsqueda va a los resultados y se puede escribir la búsqueda desde el celular con un QR.
-    2.0.2 (13) está publicada. 2.0.3 (14) en el repo: hero del inicio que sigue al título enfocado (fondo a 1920, sin tráiler en el televisor).
+    2.0.3 (14) está publicada: hero del inicio que sigue al título enfocado (fondo a 1920, sin tráiler en el televisor). 2.0.4 (15) en el repo: duración en las filas (`movies.heroRuntimes`, en lotes de 40 con caché en el servidor), sinopsis corta sin reparto, póster de respaldo si no hay fondo o es casi negro, y «Estreno destacado» solo en el título destacado.
   - **El esqueleto `app.pelis.tv` de la rama vieja `feat/native-player-tv` nunca debe reemplazar a
     `apps/android-tv`** (se dejó fuera a propósito en #116).
 - `apps/android-native` (phone + tv): llaman primero al resolver `/api/stream/resolve?token=…` y
@@ -329,7 +329,7 @@ scope systemd. `det` tiene sudo sin contraseña.
   `pelis-tv.apk`.
 - Canales XTOTV y FunBox son MPEG-TS: marcados como no soportados (#128).
 - `api.ani.zip` a veces falla el DNS en Movies (router 192.168.0.1 con DNSSEC).
-- TV 2.0.3 (14) y nativas 1.2.2 (5) están en el repo; la publicación de APK es en Movies, no desde un agente. 2.0.2 (13) sigue siendo la TV publicada hasta que se firme 2.0.3.
+- TV 2.0.4 (15) y nativas 1.2.2 (5) están en el repo; la publicación de APK es en Movies, no desde un agente. 2.0.3 (14) sigue siendo la TV publicada hasta que se firme 2.0.4.
 
 ## 14. Discrepancias encontradas al verificar (2026-10-18)
 
