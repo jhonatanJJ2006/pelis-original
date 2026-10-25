@@ -325,7 +325,7 @@ export function DynamicHero({
           alt=""
           aria-hidden
           data-testid="hero-poster-fallback"
-          className="absolute right-[8%] top-1/2 hidden h-[78%] -translate-y-1/2 rounded-md object-cover shadow-2xl ring-1 ring-white/10 lg:block"
+          className="absolute right-[8%] top-1/2 z-10 hidden h-[78%] -translate-y-1/2 rounded-md object-cover shadow-2xl ring-1 ring-white/10 lg:block"
         />
       ) : null}
       {playing && youtubeKey ? (
