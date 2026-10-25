@@ -1,36 +1,21 @@
 package pro.verpelis.phone
 
+import android.app.Activity
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import kotlinx.coroutines.flow.MutableStateFlow
-import pro.verpelis.core.ui.NoirTheme
 
-/** Deep link pro.verpelis.app://auth/callback recibido del navegador (login con Google). */
-object AuthCallback {
-    val uri = MutableStateFlow<Uri?>(null)
-}
-
-class MainActivity : ComponentActivity() {
+/**
+ * Entrada del ícono (sin UI). La app real es [HomeActivity] (singleTask, por el login con Google).
+ * Si el ícono abriera directamente una actividad singleTask, Android cerraría todo lo que hay
+ * encima (p. ej. el reproductor) al volver desde Inicio. Con esta entrada estándar, volver desde el
+ * ícono solo trae la tarea al frente y el reproductor sigue donde estaba.
+ */
+class MainActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (savedInstanceState == null) handleAuthIntent(intent)
-        setContent { NoirTheme { PhoneApp(intent.getStringExtra("start") ?: "home") } }
-    }
-
-    override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-        handleAuthIntent(intent)
-    }
-
-    private fun handleAuthIntent(intent: Intent?) {
-        val data = intent?.data ?: return
-        if (intent.action == Intent.ACTION_VIEW && data.scheme == "pro.verpelis.app") {
-            AuthCallback.uri.value = data
-            // No dejar el código en el intent (recreaciones / recientes).
-            intent.data = null
+        if (isTaskRoot) {
+            startActivity(Intent(this, HomeActivity::class.java).apply { intent.extras?.let { putExtras(it) } })
         }
+        finish()
     }
 }

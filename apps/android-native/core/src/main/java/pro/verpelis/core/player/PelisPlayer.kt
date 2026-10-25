@@ -122,6 +122,26 @@ fun PelisPlayer(req: PlaybackRequest, api: PelisApi, fullscreen: Boolean, tv: Bo
             player.removeListener(l); player.release()
         }
     }
+    // Al salir a Inicio se pausa (y se guarda el avance); al volver sigue donde iba.
+    DisposableEffect(player, activity) {
+        val owner = activity as? androidx.lifecycle.LifecycleOwner
+        var wasPlaying = false
+        val obs = androidx.lifecycle.LifecycleEventObserver { _, ev ->
+            when (ev) {
+                androidx.lifecycle.Lifecycle.Event.ON_STOP -> {
+                    wasPlaying = player.playWhenReady; player.pause()
+                    req.movieId?.let { id ->
+                        val pos = player.currentPosition / 1000; val dur = player.duration.coerceAtLeast(0) / 1000
+                        if (pos > 5) kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch { runCatching { api.saveProgress(id, pos, dur) } }
+                    }
+                }
+                androidx.lifecycle.Lifecycle.Event.ON_START -> if (wasPlaying) player.play()
+                else -> Unit
+            }
+        }
+        owner?.lifecycle?.addObserver(obs)
+        onDispose { owner?.lifecycle?.removeObserver(obs) }
+    }
     LaunchedEffect(hudTick) { if (hud != null) { delay(1200); hud = null } }
 
     val gestureMod = if (!tv && GestureMath.gesturesEnabled(fullscreen)) Modifier.pointerInput(fullscreen) {
