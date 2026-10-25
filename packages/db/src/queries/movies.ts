@@ -1,7 +1,14 @@
 import { z } from 'zod';
 import { prisma } from '../client';
 import { register } from '../registry';
-import { createTmdbFetcher, EMPTY_HERO_EXTRAS, lookupHeroExtras } from '../lib/hero-extras';
+import {
+  createTmdbFetcher,
+  EMPTY_HERO_EXTRAS,
+  lookupHeroExtras,
+  lookupHeroRuntime,
+  minutesFromSeconds,
+  runLimited,
+} from '../lib/hero-extras';
 import { AuthError, requireUser } from '../lib/requireAdmin';
 import { toMovieShape } from '../lib/shapes';
 import { isMissingVideo } from '../lib/movieQuality';
@@ -413,6 +420,7 @@ export const heroExtras = register({
       );
       const ttl = value.youtubeKey || value.runtimeMinutes ? 12 * 60 * 60 * 1000 : 30 * 60 * 1000;
       heroExtrasCache.set(id, { expires: now + ttl, value });
+      if (value.runtimeMinutes) rememberRuntime(id, value.runtimeMinutes, now);
       if (heroExtrasCache.size > 400) {
         const oldest = heroExtrasCache.keys().next().value;
         if (oldest) heroExtrasCache.delete(oldest);
@@ -421,5 +429,111 @@ export const heroExtras = register({
     } catch {
       return EMPTY_HERO_EXTRAS;
     }
+  },
+});
+
+const RUNTIME_HIT_TTL = 24 * 60 * 60 * 1000;
+const RUNTIME_MISS_TTL = 60 * 60 * 1000;
+const RUNTIME_CACHE_MAX = 2000;
+const runtimeCache = new Map<string, { expires: number; minutes: number | null }>();
+/** Búsquedas a TMDB en curso, para no repetirlas si llegan dos peticiones a la vez. */
+const runtimeInflight = new Map<string, Promise<number | null>>();
+
+function rememberRuntime(id: string, minutes: number | null, now = Date.now()) {
+  runtimeCache.delete(id);
+  runtimeCache.set(id, { expires: now + (minutes ? RUNTIME_HIT_TTL : RUNTIME_MISS_TTL), minutes });
+  while (runtimeCache.size > RUNTIME_CACHE_MAX) {
+    const oldest = runtimeCache.keys().next().value;
+    if (!oldest) break;
+    runtimeCache.delete(oldest);
+  }
+}
+
+/** Tiempo máximo que espera la respuesta; lo que falte sigue en segundo plano y queda en caché. */
+const RUNTIME_BUDGET_MS = 3500;
+
+/**
+ * Duración (minutos) de varios títulos a la vez para el hero de inicio (web y TV).
+ * Primero la duración real del archivo que guarda el historial; si no hay, TMDB
+ * (solo en el servidor y solo con `TMDB_API_KEY`). Caché en memoria. No escribe la base.
+ */
+export const heroRuntimes = register({
+  kind: 'query',
+  name: 'movies.heroRuntimes',
+  reads: ['movie', 'history'],
+  args: z.object({ ids: z.array(z.string().min(1).max(128)).max(40) }),
+  handler: async (ctx, { ids }) => {
+    requireUser(ctx);
+    const now = Date.now();
+    const unique = [...new Set(ids)];
+    const out: Record<string, number | null> = {};
+    const pending: string[] = [];
+    for (const id of unique) {
+      const hit = runtimeCache.get(id);
+      if (hit && hit.expires > now) out[id] = hit.minutes;
+      else pending.push(id);
+    }
+    if (pending.length === 0) return out;
+    try {
+      const played = await prisma.history.groupBy({
+        by: ['movieId'],
+        where: { movieId: { in: pending } },
+        _max: { duration: true },
+      });
+      for (const row of played) {
+        const minutes = minutesFromSeconds(row._max.duration);
+        if (minutes) {
+          out[row.movieId] = minutes;
+          rememberRuntime(row.movieId, minutes, now);
+        }
+      }
+    } catch {
+      // Sin historial: se sigue con TMDB.
+    }
+    const missing = pending.filter((id) => out[id] === undefined);
+    const apiKey = process.env.TMDB_API_KEY;
+    if (missing.length === 0 || !apiKey) {
+      for (const id of missing) out[id] = null;
+      return out;
+    }
+    let movies: Array<{ id: string; name: string; releaseYear: string; mediaType: string }> = [];
+    try {
+      movies = await prisma.movie.findMany({
+        where: { id: { in: missing } },
+        select: { id: true, name: true, releaseYear: true, mediaType: true },
+      });
+    } catch {
+      movies = [];
+    }
+    const fetcher = createTmdbFetcher(apiKey);
+    const work = runLimited(movies, 6, async (movie) => {
+      let job = runtimeInflight.get(movie.id);
+      if (!job) {
+        job = lookupHeroRuntime(
+          {
+            name: movie.name,
+            year: movie.releaseYear,
+            mediaType: movie.mediaType === 'SERIES' ? 'series' : 'movie',
+          },
+          fetcher
+        )
+          .catch(() => null)
+          .then((minutes) => {
+            rememberRuntime(movie.id, minutes);
+            return minutes;
+          })
+          .finally(() => runtimeInflight.delete(movie.id));
+        runtimeInflight.set(movie.id, job);
+      }
+      out[movie.id] = await job;
+    });
+    await Promise.race([
+      work,
+      new Promise<void>((resolve) => setTimeout(resolve, RUNTIME_BUDGET_MS)),
+    ]);
+    // Lo que no llegó a tiempo va como `null`; la próxima petición lo encuentra en caché.
+    const result: Record<string, number | null> = {};
+    for (const id of unique) result[id] = out[id] ?? null;
+    return result;
   },
 });

@@ -49,6 +49,7 @@ data class TitleDto(
     val seriesKey: String? = null,
     val seasonCount: Any? = null,
     val totalEpisodes: Any? = null,
+    val featured: Boolean? = null,
 ) {
     val displayName: String get() = name?.takeIf { it.isNotBlank() } ?: title.orEmpty()
     val kind: TitleKind get() = if (mediaType == "series") TitleKind.SERIES else TitleKind.MOVIE
@@ -72,6 +73,7 @@ data class RawMovieDto(
     val releaseYear: String? = null,
     val classification: String? = null,
     val mediaType: String? = null,
+    val featured: Boolean? = null,
 )
 
 data class ContinueDto(
@@ -94,6 +96,7 @@ data class ContinueItem(
     val classification: String? = null,
     val genres: String? = null,
     val durationSec: Long = 0,
+    val featured: Boolean = false,
 )
 
 data class HeroExtrasDto(
@@ -153,6 +156,20 @@ class TvRepository(baseUrl: String, private val http: OkHttpClient) {
         return moshi.adapter(HeroExtrasDto::class.java).fromJson(text)
     }
 
+    /**
+     * Duración en minutos de muchos títulos a la vez (máx. 40 por llamada; el servidor
+     * guarda en caché). Null = sin dato: el hero no muestra hueco.
+     */
+    suspend fun heroRuntimes(ids: List<String>): Map<String, Int?> {
+        if (ids.isEmpty()) return emptyMap()
+        val body = ids.take(HERO_RUNTIME_BATCH).joinToString(",", prefix = "{\"ids\":[", postfix = "]}") { quote(it) }
+        val text = call("movies.heroRuntimes", body)
+        if (text.isBlank() || text == "null") return emptyMap()
+        @Suppress("UNCHECKED_CAST")
+        val raw = moshi.adapter(Map::class.java).fromJson(text) as? Map<String, Any?> ?: return emptyMap()
+        return raw.mapValues { (_, v) -> (v as? Number)?.toInt()?.takeIf { it > 0 } }
+    }
+
     suspend fun continueWatching(limit: Int = 12): List<ContinueItem> =
         fetchList<ContinueDto>("history.getContinueWatching", """{"limit":$limit}""").mapNotNull { row ->
             val m = row.movie ?: return@mapNotNull null
@@ -170,9 +187,13 @@ class TvRepository(baseUrl: String, private val http: OkHttpClient) {
                 classification = m.classification,
                 genres = m.genre,
                 durationSec = row.duration.toLong(),
+                featured = m.featured == true,
             )
         }
 }
+
+/** Tope de ids por llamada a `movies.heroRuntimes`. */
+const val HERO_RUNTIME_BATCH = 40
 
 val LocalTvRepository = staticCompositionLocalOf<TvRepository> { error("TvRepository not provided") }
 
