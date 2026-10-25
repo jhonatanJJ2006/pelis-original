@@ -21,8 +21,8 @@ android {
         applicationId = "pro.verpelis.tv"
         minSdk = 21
         targetSdk = 35
-        versionCode = 15
-        versionName = "2.0.4"
+        versionCode = 16
+        versionName = "2.0.5"
         buildConfigField("String", "API_BASE_URL", "\"$apiBase\"")
     }
 

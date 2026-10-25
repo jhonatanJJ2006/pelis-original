@@ -1,6 +1,7 @@
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 import os
 F="/usr/share/fonts/truetype/sand-box/google/Playfair Display SC/PlayfairDisplaySC-Regular.ttf"
+FB="/usr/share/fonts/truetype/sand-box/google/Playfair Display SC/PlayfairDisplaySC-Bold.ttf"
 BG=(11,11,13); PANEL=(20,20,24); GOLD=(196,163,90); IVORY=(229,225,228)
 def gold_fill(w,h):
     g=Image.new("RGB",(w,h)); px=g.load()
@@ -35,25 +36,33 @@ def tile(size, full=True):
     draw_P(im,size/2,size*0.475,size*0.36)
     return im
 def adaptive_fg(px):
-    # 108dp lienzo; zona segura 66dp: la marca (sin losa) ocupa ~72dp centrada
+    # 108dp lienzo; zona segura 66dp: la marca (sin losa) ocupa ~92dp para que se vea grande en la tele
     im=Image.new("RGBA",(px,px),(0,0,0,0))
-    inner=tile(int(px*80/108),full=False)
+    inner=tile(int(px*92/108),full=False)
     im.alpha_composite(inner,((px-inner.width)//2,(px-inner.height)//2))
     return im
-def banner(w=320,h=180):
-    S=3; im=Image.new("RGBA",(w*S,h*S),BG+(255,)); d=ImageDraw.Draw(im)
-    d.rectangle([0,0,w*S,h*S],fill=BG)
-    im=im.resize((w,h),Image.LANCZOS)
-    t=tile(112); im.alpha_composite(t,(22,(h-112)//2))
-    # wordmark
+def wordmark(w,h,x0,y0,size,gap,img):
+    """Escribe PELIS en dorado sobre img (supermuestreo x3)."""
+    S=3
     big=Image.new("L",(w*S,h*S),0); dd=ImageDraw.Draw(big)
-    font=ImageFont.truetype(F,46*S); x=148*S; y=50*S
+    font=ImageFont.truetype(FB,int(size*S)); x=x0*S
     for ch in "PELIS":
-        dd.text((x,y),ch,font=font,fill=255); x+=dd.textlength(ch,font=font)+6*S
-    big=big.resize((w,h),Image.LANCZOS); im.paste(gold_fill(w,h),(0,0),big)
-    d=ImageDraw.Draw(im); small=ImageFont.truetype(F,15)
-    d.line([(150,112),(298,112)],fill=GOLD,width=1)
-    d.text((150,120),"TELEVISIÓN",font=small,fill=IVORY)
+        dd.text((x,y0*S),ch,font=font,fill=255); x+=dd.textlength(ch,font=font)+gap*S
+    big=big.resize((w,h),Image.LANCZOS); img.paste(gold_fill(w,h),(0,0),big)
+    return x/S
+def banner(w=320,h=180):
+    """Banner horizontal de Android TV: marca grande + PELIS ocupando todo el ancho."""
+    k=w/320
+    im=Image.new("RGBA",(w,h),BG+(255,))
+    ts=int(124*k); t=tile(ts); im.alpha_composite(t,(int(12*k),(h-ts)//2))
+    wordmark(w,h,int(144*k),int(52*k),50*k,int(2*k),im)
+    return im
+def splash_logo(h=200):
+    """Logo horizontal para la animación de entrada (fondo transparente)."""
+    w=int(h*3.05)
+    im=Image.new("RGBA",(w,h),(0,0,0,0))
+    t=tile(h); im.alpha_composite(t,(0,0))
+    wordmark(w,h,int(h*1.12),int(h*0.13),h*0.56,int(h*0.04),im)
     return im
 out="res"; dens={"mdpi":1,"hdpi":1.5,"xhdpi":2,"xxhdpi":3,"xxxhdpi":4}
 for k,f in dens.items():
@@ -61,6 +70,8 @@ for k,f in dens.items():
     tile(int(48*f)).save(f"{out}/mipmap-{k}/ic_launcher.png")
     tile(int(48*f)).save(f"{out}/mipmap-{k}/ic_launcher_round.png")
     adaptive_fg(int(108*f)).save(f"{out}/mipmap-{k}/ic_launcher_foreground.png")
-os.makedirs(f"{out}/drawable-xhdpi",exist_ok=True); banner().save(f"{out}/drawable-xhdpi/tv_banner.png")
+for d,(bw,bh) in {"xhdpi":(320,180),"xxhdpi":(480,270),"xxxhdpi":(640,360)}.items():
+    os.makedirs(f"{out}/drawable-{d}",exist_ok=True); banner(bw,bh).save(f"{out}/drawable-{d}/tv_banner.png")
 os.makedirs(f"{out}/drawable-nodpi",exist_ok=True); tile(192).save(f"{out}/drawable-nodpi/pelis_mark.png")
-tile(512).save("preview-icon.png"); banner().resize((960,540),Image.LANCZOS).save("preview-banner.png")
+splash_logo(200).save(f"{out}/drawable-nodpi/pelis_splash_logo.png")
+tile(512).save("preview-icon.png"); banner(640,360).save("preview-banner.png")
