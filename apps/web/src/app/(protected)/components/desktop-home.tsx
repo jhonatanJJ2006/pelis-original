@@ -8,6 +8,7 @@ import { MovieRow } from '@pelis/ui/features/movie-row';
 import { ContinueWatchingRow } from '@pelis/ui/features/continue-watching-row';
 import { HeroSkeleton } from '@pelis/ui/features/hero-skeleton';
 import type { MediaItem } from '@pelis/ui/types';
+import { heroRuntimeIds } from '@/lib/hero-home';
 import { DynamicHero } from './dynamic-hero';
 
 interface ContinueItem {
@@ -65,6 +66,48 @@ function useHeroExtras(id: string | undefined) {
   return state?.id === id ? state.value : undefined;
 }
 
+type RuntimeMap = Record<string, number | null>;
+
+/**
+ * Duración de todos los títulos de las filas en una sola petición (caché en el servidor).
+ * Si algo no llegó a tiempo, se reintenta una vez: el servidor ya lo tendrá en caché.
+ */
+function useHeroRuntimes(ids: string[]) {
+  const [map, setMap] = useState<RuntimeMap>({});
+  const key = ids.join(',');
+  useEffect(() => {
+    if (!key) return;
+    const all = key.split(',');
+    const ac = new AbortController();
+    const retries: number[] = [];
+    // El API acepta hasta 40 ids por petición.
+    const load = (list: string[], attempt: number): Promise<void> =>
+      fetch('/api/function/movies.heroRuntimes', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: list }),
+        signal: ac.signal,
+      })
+        .then((res) => (res.ok ? (res.json() as Promise<RuntimeMap>) : null))
+        .then((value) => {
+          if (!value || ac.signal.aborted) return;
+          setMap((prev) => ({ ...prev, ...value }));
+          const missing = list.some((id) => value[id] == null);
+          if (missing && attempt === 0) {
+            retries.push(window.setTimeout(() => void load(list, 1), 6000));
+          }
+        })
+        .catch(() => undefined);
+    for (let i = 0; i < all.length; i += 40) void load(all.slice(i, i + 40), 0);
+    return () => {
+      ac.abort();
+      retries.forEach((t) => window.clearTimeout(t));
+    };
+  }, [key]);
+  return map;
+}
+
 /**
  * Inicio de escritorio: el hero sigue al título enfocado (ratón o teclado).
  * En el móvil se queda el carrusel de siempre.
@@ -85,6 +128,13 @@ export function DesktopHome({
   const movieId = movie?._id;
 
   const extrasForThis = useHeroExtras(movieId);
+  const runtimeIds = heroRuntimeIds(
+    [continueItems?.map((c) => c.movie), heroMovies?.slice(0, 1), trending, movies, series],
+    120
+  );
+  const runtimes = useHeroRuntimes(runtimeIds);
+  const runtimeMinutes =
+    (movieId ? runtimes[movieId] : null) ?? extrasForThis?.runtimeMinutes ?? null;
 
   const [listed, setListed] = useState<{ id: string; on: boolean } | null>(null);
   useEffect(() => {
@@ -144,7 +194,7 @@ export function DesktopHome({
         <DynamicHero
           movie={movie}
           playbackSeconds={pick?.playbackSeconds}
-          runtimeMinutes={extrasForThis?.runtimeMinutes}
+          runtimeMinutes={runtimeMinutes}
           youtubeKey={extrasForThis?.youtubeKey}
           extrasReady={extrasForThis !== undefined}
           inList={inList}

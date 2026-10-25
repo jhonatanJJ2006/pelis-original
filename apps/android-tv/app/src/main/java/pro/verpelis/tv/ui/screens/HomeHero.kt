@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Brush
@@ -21,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import pro.verpelis.tv.LocalUiSounds
 import pro.verpelis.tv.data.HeroFocus
+import pro.verpelis.tv.data.heroSynopsis
 import pro.verpelis.tv.data.playback.TitleKind
 import pro.verpelis.tv.ui.components.HeroBackdrop
 import pro.verpelis.tv.ui.login.Mn
@@ -48,7 +50,7 @@ fun HomeHero(
 ) {
     val uiSounds = LocalUiSounds.current
     Box(modifier.fillMaxWidth().height(300.dp)) {
-        HeroBackdrop(hero.backdropImage, Modifier.fillMaxSize())
+        HeroBackdrop(hero.backdropImage, hero.poster, Modifier.fillMaxSize())
         Box(
             Modifier.fillMaxSize().background(
                 Brush.horizontalGradient(
@@ -72,23 +74,25 @@ fun HomeHero(
             TvHeader(null)
             Spacer(Modifier.weight(1f))
             Column(Modifier.fillMaxWidth(0.62f)) {
-                Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-                    Box(
-                        Modifier
-                            .padding(end = 6.dp)
-                            .width(6.dp)
-                            .height(6.dp)
-                            .background(Mn.Gold, androidx.compose.foundation.shape.CircleShape),
-                    )
-                    MnText("Estreno destacado", color = Mn.Gold, size = 11.sp, weight = FontWeight.SemiBold)
+                if (hero.featured) {
+                    Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                        Box(
+                            Modifier
+                                .padding(end = 6.dp)
+                                .width(6.dp)
+                                .height(6.dp)
+                                .background(Mn.Gold, androidx.compose.foundation.shape.CircleShape),
+                        )
+                        MnText("Estreno destacado", color = Mn.Gold, size = 11.sp, weight = FontWeight.SemiBold)
+                    }
+                    Spacer(Modifier.height(6.dp))
                 }
-                Spacer(Modifier.height(6.dp))
                 MnText(hero.name, color = Mn.Text, size = 28.sp, family = Mn.Serif, weight = FontWeight.SemiBold, lines = 2)
                 if (meta.isNotBlank()) {
                     Spacer(Modifier.height(4.dp))
                     MnText(meta, color = Mn.Variant, size = 11.sp, lines = 1)
                 }
-                val synopsis = hero.synopsis?.trim().orEmpty()
+                val synopsis = remember(hero.synopsis) { heroSynopsis(hero.synopsis) }
                 if (synopsis.isNotEmpty()) {
                     Spacer(Modifier.height(6.dp))
                     MnText(synopsis, color = Mn.Text.copy(alpha = 0.86f), size = 12.sp, lines = 2)

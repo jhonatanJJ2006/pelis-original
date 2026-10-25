@@ -5,7 +5,11 @@ import {
   heroDurationLabel,
   heroMetaLine,
   heroRequestWidth,
+  heroRuntimeIds,
+  heroSynopsis,
   heroTitle,
+  isFeaturedTitle,
+  isTooDark,
   shouldPlayTrailer,
 } from './hero-home';
 
@@ -69,5 +73,66 @@ describe('shouldPlayTrailer', () => {
     expect(
       shouldPlayTrailer({ rested: true, forced: true, youtubeKey: null, reducedMotion: false })
     ).toBe(false);
+  });
+});
+
+describe('heroSynopsis', () => {
+  it('quita el reparto en negrita y lo que sigue', () => {
+    const raw =
+      'Un joven descubre un secreto familiar.\n\n**REPARTO**: Fulano, Mengano\n**Dirigida por** Zutano 🇺🇸';
+    expect(heroSynopsis(raw)).toBe('Un joven descubre un secreto familiar.');
+  });
+
+  it('quita líneas de reparto y frases que solo enumeran el elenco', () => {
+    expect(
+      heroSynopsis(
+        'Tarzán vuelve a la selva. Margot Robbie y Samuel L. Jackson completan el talentoso elenco.'
+      )
+    ).toBe('Tarzán vuelve a la selva.');
+    expect(heroSynopsis('Una historia de amor.\nReparto: Ana, Luis')).toBe('Una historia de amor.');
+  });
+
+  it('pasa a tipo oración el texto en mayúsculas y capitaliza la primera letra', () => {
+    expect(heroSynopsis('UNA FAMILIA SE MUDA A UNA CASA. NADA ES LO QUE PARECE.')).toBe(
+      'Una familia se muda a una casa. Nada es lo que parece.'
+    );
+    expect(heroSynopsis('una noche cambia todo.')).toBe('Una noche cambia todo.');
+  });
+
+  it('corta por palabra con «…» y nunca supera el máximo', () => {
+    const raw = 'palabra '.repeat(60);
+    const out = heroSynopsis(raw, 100);
+    expect(out.length).toBeLessThanOrEqual(100);
+    expect(out.endsWith('palabra…')).toBe(true);
+  });
+
+  it('prefiere cortar al final de una frase si queda larga', () => {
+    const raw = `${'a'.repeat(70)}. ${'b '.repeat(60)}`;
+    expect(heroSynopsis(raw, 100)).toBe(`A${'a'.repeat(69)}.`);
+  });
+
+  it('vacía si no queda texto', () => {
+    expect(heroSynopsis(null)).toBe('');
+    expect(heroSynopsis('**REPARTO**: Ana')).toBe('');
+  });
+});
+
+describe('isTooDark / isFeaturedTitle / heroRuntimeIds', () => {
+  it('fondo casi negro → póster', () => {
+    expect(isTooDark(5)).toBe(true);
+    expect(isTooDark(43)).toBe(false);
+    expect(isTooDark(null)).toBe(false);
+  });
+
+  it('solo destacado si featured es true', () => {
+    expect(isFeaturedTitle({ featured: true })).toBe(true);
+    expect(isFeaturedTitle({ featured: false })).toBe(false);
+    expect(isFeaturedTitle({})).toBe(false);
+  });
+
+  it('ids únicos en orden y con tope', () => {
+    expect(
+      heroRuntimeIds([[{ _id: 'a' }, { _id: 'b' }], null, [{ _id: 'a' }, { _id: 'c' }]], 2)
+    ).toEqual(['a', 'b']);
   });
 });

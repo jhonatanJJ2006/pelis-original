@@ -10,6 +10,8 @@ import pro.verpelis.tv.data.formatHeroDuration
 import pro.verpelis.tv.data.formatHeroMinutes
 import pro.verpelis.tv.data.heroFocus
 import pro.verpelis.tv.data.heroMetaLine
+import pro.verpelis.tv.data.heroRuntimeIds
+import pro.verpelis.tv.data.tv.HERO_RUNTIME_BATCH
 import pro.verpelis.tv.data.tv.ContinueItem
 import pro.verpelis.tv.data.tv.LocalTvRepository
 import pro.verpelis.tv.data.tv.TitleDto
@@ -98,6 +100,8 @@ fun HomeScreen(
     var continueItems by remember { mutableStateOf(HomeCache.continueItems) }
     var preview by remember { mutableStateOf<HeroFocus?>(null) }
     var extraMinutes by remember { mutableStateOf<Int?>(null) }
+    // Duraciones de todas las filas, pedidas en lotes de 40 una vez cargado el catálogo.
+    var runtimes by remember { mutableStateOf(HomeCache.runtimes) }
     var extraFor by remember { mutableStateOf<String?>(null) }
     var favorite by remember { mutableStateOf<Boolean?>(null) }
     var favoriteFor by remember { mutableStateOf<String?>(null) }
@@ -157,6 +161,29 @@ fun HomeScreen(
             continueItems = it
         }
     }
+    val runtimeIds = remember(catalog, featured, continueItems) {
+        heroRuntimeIds(
+            continueItems.map { it.id },
+            listOfNotNull(featured?.id),
+            catalog?.popular?.map { it.id },
+            catalog?.movies?.map { it.id },
+            catalog?.series?.map { it.id },
+        )
+    }
+    LaunchedEffect(runtimeIds) {
+        val missing = runtimeIds.filter { it !in runtimes }
+        if (missing.isEmpty()) return@LaunchedEffect
+        for (attemptNo in 0..1) {
+            val ask = if (attemptNo == 0) missing else missing.filter { runtimes[it] == null }
+            if (ask.isEmpty()) break
+            if (attemptNo == 1) kotlinx.coroutines.delay(6_000)
+            for (batch in ask.chunked(HERO_RUNTIME_BATCH)) {
+                val got = runCatching { repo.heroRuntimes(batch) }.getOrNull() ?: continue
+                runtimes = runtimes + batch.associateWith { got[it] }
+                HomeCache.runtimes = runtimes
+            }
+        }
+    }
     val hero = preview
         ?: featured?.heroFocus()
         ?: catalog?.popular?.firstOrNull()?.heroFocus(TitleKind.MOVIE)
@@ -174,6 +201,8 @@ fun HomeScreen(
         trailerNote = false
         if (heroId == null || knownDuration != null) return@LaunchedEffect
         extraMinutes = null
+        // Ya lo resolvió el lote (con o sin dato): no se pide otra vez.
+        if (heroId in runtimes) return@LaunchedEffect
         kotlinx.coroutines.delay(HERO_EXTRA_DEBOUNCE_MS)
         val extras = runCatching { repo.heroExtras(heroId) }.getOrNull()
         extraFor = heroId
@@ -220,6 +249,7 @@ fun HomeScreen(
                 else -> {
                     if (shownHero != null) {
                         val duration = shownHero.durationSeconds?.let { formatHeroDuration(it) }
+                            ?: runtimes[shownHero.id]?.let { formatHeroMinutes(it) }
                             ?: extraMinutes.takeIf { extraFor == shownHero.id }?.let { formatHeroMinutes(it) }
                         HomeHero(
                             hero = shownHero,
@@ -376,6 +406,8 @@ private object HomeCache {
     var rows: List<Pair<String, List<TvChannel>>>? = null
     var featured: TitleDto? = null
     var continueItems: List<ContinueItem> = emptyList()
+    /** id → minutos (null = sin dato). Pequeño: ~100 entradas. */
+    var runtimes: Map<String, Int?> = emptyMap()
 
     fun expireIfStale() {
         if (catalog != null && System.currentTimeMillis() - at > TTL_MS) {

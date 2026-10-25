@@ -13,7 +13,11 @@ import {
   heroDurationLabel,
   heroMetaLine,
   heroRequestWidth,
+  heroSynopsis,
   heroTitle,
+  isFeaturedTitle,
+  isTooDark,
+  nextImageWidth,
   shouldPlayTrailer,
 } from '@/lib/hero-home';
 
@@ -65,14 +69,47 @@ function useReducedMotion() {
   return reduced;
 }
 
-/** Carga el fondo al tamaño de la pantalla y cancela la petición si el foco se va. */
+/** Luminancia media (0–255) de una imagen, muestreada a 32×18. Null si el navegador no puede. */
+async function meanLuma(blob: Blob): Promise<number | null> {
+  try {
+    if (typeof createImageBitmap !== 'function') return null;
+    const bitmap = await createImageBitmap(blob, { resizeWidth: 32, resizeHeight: 18 });
+    const canvas = document.createElement('canvas');
+    canvas.width = 32;
+    canvas.height = 18;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    if (!ctx) return null;
+    ctx.drawImage(bitmap, 0, 0, 32, 18);
+    bitmap.close?.();
+    const data = ctx.getImageData(0, 0, 32, 18).data;
+    let sum = 0;
+    for (let i = 0; i < data.length; i += 4) {
+      sum += 0.299 * data[i]! + 0.587 * data[i + 1]! + 0.114 * data[i + 2]!;
+    }
+    return sum / (data.length / 4);
+  } catch {
+    return null;
+  }
+}
+
+type StillState = { key: string; src: string | null; usable: boolean };
+
+/**
+ * Carga el fondo al tamaño de la pantalla y cancela la petición si el foco se va.
+ * `usable` es falso si no hay fondo, si falla o si es casi negro: entonces el hero
+ * se pinta con el póster.
+ */
 function useHeroStill(raw: string | null | undefined) {
-  const [src, setSrc] = useState<string | null>(null);
+  const [state, setState] = useState<StillState | null>(null);
   const hasShown = useRef(false);
+  const key = raw?.trim() ?? '';
   useEffect(() => {
     const width = heroRequestWidth(window.innerWidth, window.devicePixelRatio || 1);
     const next = heroBackdropSrc(raw, width);
-    if (!next) return;
+    if (!next) {
+      setState({ key, src: null, usable: false });
+      return;
+    }
     const ac = new AbortController();
     const delay = hasShown.current ? HERO_IMAGE_DEBOUNCE_MS : 0;
     const timer = window.setTimeout(() => {
@@ -81,16 +118,20 @@ function useHeroStill(raw: string | null | undefined) {
           if (!res.ok) throw new Error('hero');
           return res.blob();
         })
-        .then((blob) => {
+        .then(async (blob) => {
+          const luma = await meanLuma(blob);
           if (ac.signal.aborted) return;
-          const url = URL.createObjectURL(blob);
           hasShown.current = true;
-          setSrc(url);
+          if (isTooDark(luma)) {
+            setState({ key, src: null, usable: false });
+            return;
+          }
+          setState({ key, src: URL.createObjectURL(blob), usable: true });
         })
         .catch(() => {
           if (!ac.signal.aborted) {
             hasShown.current = true;
-            setSrc(next);
+            setState({ key, src: null, usable: false });
           }
         });
     }, delay);
@@ -98,14 +139,17 @@ function useHeroStill(raw: string | null | undefined) {
       window.clearTimeout(timer);
       ac.abort();
     };
-  }, [raw]);
+  }, [raw, key]);
+  const src = state?.src;
   useEffect(
     () => () => {
       if (src?.startsWith('blob:')) URL.revokeObjectURL(src);
     },
     [src]
   );
-  return src;
+  if (!state) return { src: null, settled: false, usable: false };
+  // Mientras llega el fondo nuevo se deja el anterior (sin parpadeo a negro).
+  return { src: state.src, settled: state.key === key, usable: state.usable };
 }
 
 function loadYoutubeApi(): Promise<void> {
@@ -198,6 +242,10 @@ export function DynamicHero({
 }: DynamicHeroProps) {
   const reduced = useReducedMotion();
   const still = useHeroStill(movie.backdropImage);
+  const poster = heroBackdropSrc(movie.image, nextImageWidth(384));
+  const posterHero = still.settled && !still.usable;
+  const synopsis = heroSynopsis(movie.synopsis);
+  const featured = isFeaturedTitle(movie);
   const [rested, setRested] = useState(false);
   const [forced, setForced] = useState(false);
   const [armed, setArmed] = useState(false);
@@ -255,11 +303,29 @@ export function DynamicHero({
       aria-label="Destacado"
     >
       <h1 className="sr-only">Inicio</h1>
-      {still ? (
+      {poster ? (
+        // Base siempre presente: el póster difuminado. Así el hero nunca queda negro.
         <img
-          src={still}
+          src={poster}
+          alt=""
+          aria-hidden
+          className="absolute inset-0 h-full w-full scale-110 object-cover object-center opacity-60 blur-2xl"
+        />
+      ) : null}
+      {still.src && !posterHero ? (
+        <img
+          src={still.src}
           alt=""
           className="absolute inset-0 h-full w-full object-cover object-center"
+        />
+      ) : null}
+      {posterHero && poster ? (
+        <img
+          src={poster}
+          alt=""
+          aria-hidden
+          data-testid="hero-poster-fallback"
+          className="absolute right-[8%] top-1/2 z-10 hidden h-[78%] -translate-y-1/2 rounded-md object-cover shadow-2xl ring-1 ring-white/10 lg:block"
         />
       ) : null}
       {playing && youtubeKey ? (
@@ -291,17 +357,19 @@ export function DynamicHero({
       <div className="absolute inset-0 flex items-end pb-8 md:pb-12">
         <div className="container mx-auto px-4">
           <div className="max-w-2xl">
-            <p className="mb-3 flex items-center gap-2 text-xs font-semibold text-cinema-accent">
-              <span className="h-1.5 w-1.5 rounded-full bg-cinema-accent" aria-hidden />
-              Estreno destacado
-            </p>
+            {featured ? (
+              <p className="mb-3 flex items-center gap-2 text-xs font-semibold text-cinema-accent">
+                <span className="h-1.5 w-1.5 rounded-full bg-cinema-accent" aria-hidden />
+                Estreno destacado
+              </p>
+            ) : null}
             <h2 className="font-display text-4xl font-semibold tracking-tight text-cinema-chalk md:text-5xl lg:text-6xl leading-[1.05]">
               {title}
             </h2>
             {meta ? <p className="mt-3 text-sm text-cinema-chalk/80">{meta}</p> : null}
-            {!playing && movie.synopsis ? (
+            {!playing && synopsis ? (
               <p className="mt-3 line-clamp-3 max-w-xl text-sm leading-relaxed text-cinema-muted md:text-base">
-                {movie.synopsis}
+                {synopsis}
               </p>
             ) : null}
             {miss ? (
