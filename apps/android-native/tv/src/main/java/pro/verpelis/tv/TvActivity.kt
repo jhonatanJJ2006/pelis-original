@@ -607,7 +607,7 @@ fun TvPageBar(page: Int, pages: Int, total: Int, one: String, many: String, onPr
 
 /**
  * Inicio de sesión en TV — diseño Google Stitch "PELIS - Iniciar sesión (Android TV 10-Foot) |
- * Maison Noir" (fe4203145f55480985b6537208384423). QR/código de vinculación (flujo link-tv) y
+ * PELIS" (fe4203145f55480985b6537208384423). QR/código de vinculación (flujo link-tv) y
  * correo/contraseña visibles a la vez; el campo de correo recibe el foco al abrir, así el
  * control remoto siempre tiene dónde estar (antes la pantalla de correo abría sin foco).
  */

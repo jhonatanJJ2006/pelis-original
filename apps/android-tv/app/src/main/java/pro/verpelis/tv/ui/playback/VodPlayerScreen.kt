@@ -198,7 +198,7 @@ private fun textOptions(tracks: Tracks): List<TextOption> {
 
 /**
  * Reproductor nativo de películas, series y anime (Media3 ExoPlayer + HLS) con el
- * diseño Stitch "Reproductor Android TV": controles Maison Noir, calidad, subtítulos,
+ * diseño Stitch "Reproductor Android TV": controles PELIS, calidad, subtítulos,
  * errores con su causa real y guardado de progreso (history.upsert).
  */
 @OptIn(UnstableApi::class)

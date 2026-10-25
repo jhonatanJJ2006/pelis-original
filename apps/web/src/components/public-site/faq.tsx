@@ -7,7 +7,7 @@ export interface FaqItem {
   webOnly?: boolean;
 }
 
-/** Acordeón sin JS (<details>), líneas finas Maison Noir. */
+/** Acordeón sin JS (<details>), líneas finas PELIS. */
 export function Faq({ items, className }: { items: FaqItem[]; className?: string }) {
   return (
     <div

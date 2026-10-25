@@ -7,7 +7,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
 /**
- * Tipografía Maison Noir para TV: titulares serif (equivalente a Bodoni Moda sin
+ * Tipografía PELIS para TV: titulares serif (equivalente a Bodoni Moda sin
  * empaquetar fuentes) y cuerpo sans-serif. Tamaños pensados para 10-foot UI.
  */
 object MaisonType {

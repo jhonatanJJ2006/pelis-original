@@ -44,7 +44,8 @@ export default function BuscarPage() {
   });
 
   useEffect(() => {
-    inputRef.current?.focus();
+    // Solo con puntero fino (escritorio): en móvil el foco abriría el teclado y taparía los resultados.
+    if (window.matchMedia('(pointer: fine)').matches) inputRef.current?.focus();
   }, []);
 
   const onSubmit = (e: React.FormEvent) => {

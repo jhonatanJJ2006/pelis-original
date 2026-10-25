@@ -14,7 +14,7 @@ const NAV: NavItem[] = [
   { href: '/inicio#preguntas', label: 'Preguntas' },
 ];
 
-/** Cabecera pública Maison Noir de /inicio y /descargas (sin chrome del catálogo). */
+/** Cabecera pública PELIS de /inicio y /descargas (sin chrome del catálogo). */
 export function PublicSiteHeader({ active }: { active?: 'inicio' | 'descargas' }) {
   return (
     <header className="sticky top-0 z-40 border-b border-cinema-border/60 bg-[#0e0e10]/85 backdrop-blur-md">

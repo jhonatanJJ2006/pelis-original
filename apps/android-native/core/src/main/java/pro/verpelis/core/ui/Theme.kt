@@ -12,7 +12,7 @@ import pro.verpelis.core.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-/** Maison Noir tokens (ver DESIGN.md del rediseño). */
+/** PELIS tokens (ver DESIGN.md del rediseño). */
 object Noir {
     val Ink = Color(0xFF0B0B0D)
     val Surface = Color(0xFF141417)

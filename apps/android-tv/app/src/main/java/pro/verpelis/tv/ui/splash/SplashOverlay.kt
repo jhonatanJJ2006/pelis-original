@@ -83,15 +83,15 @@ fun SplashOverlay(playSound: Boolean, onFinished: () -> Unit) {
             .background(Color(0xFF07070A)),
         contentAlignment = Alignment.Center,
     ) {
-        // halo cálido detrás del logo
+        // halo cálido detrás del logo, amplio y suave (sin borde marcado)
         Box(
             Modifier
                 .fillMaxSize()
-                .graphicsLayer { this.alpha = glow.value * 0.55f }
+                .graphicsLayer { this.alpha = glow.value * 0.32f }
                 .background(
                     Brush.radialGradient(
-                        listOf(Color(0x55C4A35A), Color(0x00000000)),
-                        radius = 900f,
+                        listOf(Color(0x33C4A35A), Color(0x14C4A35A), Color(0x00000000)),
+                        radius = 1500f,
                     ),
                 ),
         )
@@ -99,7 +99,7 @@ fun SplashOverlay(playSound: Boolean, onFinished: () -> Unit) {
             painter = painterResource(R.drawable.pelis_splash_logo),
             contentDescription = "Pelis",
             modifier = Modifier
-                .fillMaxWidth(0.42f)
+                .fillMaxWidth(0.58f)
                 .graphicsLayer {
                     this.alpha = alpha.value
                     scaleX = scale.value
