@@ -116,7 +116,9 @@ fun PhoneApp(startRoute: String = "home") {
     val ctx = LocalContext.current
     val api = remember { PelisApi.get(ctx) }
     var loggedIn by remember { mutableStateOf(api.session.hasSession) }
-    if (!loggedIn) { LoginScreen(api) { loggedIn = true }; return }
+    // Invitado: puede explorar el catálogo; reproducir sigue pidiendo sesión y plan (muro en el servidor).
+    var guest by remember { mutableStateOf(false) }
+    if (!loggedIn && !guest) { LoginScreen(api, onGuest = { guest = true }) { loggedIn = true }; return }
 
     val nav = rememberNavController()
     val current = nav.currentBackStackEntryAsState().value?.destination?.route
@@ -164,7 +166,10 @@ fun PhoneApp(startRoute: String = "home") {
             composable("search") { SearchScreen(api, nav) }
             composable("anime") { AnimeScreen(api, nav) }
             composable("tv") { ChannelsScreen(api) }
-            composable("profile") { ProfileScreen(api, nav) { loggedIn = false } }
+            composable("profile") {
+                if (loggedIn) ProfileScreen(api, nav) { loggedIn = false; guest = false }
+                else LoginScreen(api) { loggedIn = true; guest = false }
+            }
             composable("list") { SimpleListScreen("Mi lista", "Aún no guardaste títulos", api, nav) { o, l -> api.favoritesPage(o, l) } }
             composable("history") { SimpleListScreen("Historial", "Todavía no viste nada", api, nav) { o, l -> api.historyPage(o, l) } }
             composable("plans") { PlansScreen(api) }
@@ -203,7 +208,7 @@ private fun noirFieldColors() = OutlinedTextFieldDefaults.colors(
 )
 
 @Composable
-fun LoginScreen(api: PelisApi, onDone: () -> Unit) {
+fun LoginScreen(api: PelisApi, onGuest: (() -> Unit)? = null, onDone: () -> Unit) {
     val ctx = LocalContext.current
     val scope = rememberCoroutineScope()
     var email by remember { mutableStateOf("") }
@@ -308,6 +313,8 @@ fun LoginScreen(api: PelisApi, onDone: () -> Unit) {
                 Text("¿No tienes cuenta? ", color = Noir.Muted, fontSize = 13.sp)
                 Text("Regístrate", color = Noir.Gold, fontSize = 13.sp, modifier = Modifier.clickable { openCustomTab(ctx, api.base + "/register") })
             }
+            if (onGuest != null) Text("Explorar el catálogo sin iniciar sesión", color = Noir.Gold, fontSize = 13.sp,
+                modifier = Modifier.padding(top = 14.dp).clickable { onGuest() })
             Spacer(Modifier.height(16.dp))
             Box(Modifier.fillMaxWidth().height(1.dp).background(Noir.Line))
             Text("Conexión protegida con cifrado de grado cinematográfico", color = Noir.Muted, fontSize = 10.sp, modifier = Modifier.padding(top = 12.dp))
@@ -527,7 +534,20 @@ fun DetailScreen(api: PelisApi, nav: NavHostController, kind: String, id: String
             val req = if (kind == "anime") {
                 api.animeEpisode(t.id, episode)?.let { (u, s) -> PlaybackRequest(u, "${t.name} - Ep. $episode", null, s) }
             } else if (t.kind == Kind.SERIES && episode > 1) null
-            else api.playableUrl(t)?.let { PlaybackRequest(it, if (t.kind == Kind.SERIES) "${t.name} - Ep. $episode" else t.name, t.id, t.subtitles) }
+            else {
+                val d = api.playback(t)
+                // Sin plan (o sin sesión): muro de suscripción en lugar de "sin video".
+                if (d.block != null) {
+                    msg = if (d.block == pro.verpelis.core.data.StreamResolution.Block.PLAN) "Necesitas una suscripción activa para ver este título" else "Inicia sesión para continuar"
+                    nav.navigate(if (d.block == pro.verpelis.core.data.StreamResolution.Block.PLAN) "plans" else "profile"); return@launch
+                }
+                d.url?.let { PlaybackRequest(it, if (t.kind == Kind.SERIES) "${t.name} - Ep. $episode" else t.name, t.id, t.subtitles) }
+            }
+            if (req == null && kind == "anime") {
+                // Episodios que solo existen como reproductor embebido: por ahora solo se ven en la web.
+                val embed = runCatching { api.animeEmbedUrl(t.id, episode) }.getOrNull()
+                if (embed != null) { msg = "Por ahora, el episodio $episode solo se puede ver en verpelis.pro"; return@launch }
+            }
             if (req == null) msg = if (isSeries) "El episodio $episode aún no está disponible" else "Este título no tiene video disponible todavía"
             else PlaybackIntent.start(ctx, PlayerActivity::class.java, req)
         }
@@ -706,6 +726,9 @@ fun PlansScreen(api: PelisApi) {
     val ctx = LocalContext.current
     val scope = rememberCoroutineScope()
     val data = rememberLoad(Unit) { api.plans() }
+    // Plan activo del usuario (users.me devuelve planId); sin sesión queda null.
+    var current by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(Unit) { current = runCatching { api.me()?.planName }.getOrNull() }
     LoadBox(data) { plans ->
         LazyColumn(Modifier.fillMaxSize().statusBarsPadding(), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             item {
@@ -715,8 +738,9 @@ fun PlansScreen(api: PelisApi) {
             }
             items(plans, key = { it.id }) { p ->
                 Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(Noir.Surface)
-                    .border(if (p.recommended) 2.dp else 1.dp, if (p.recommended) Noir.Gold else Noir.Line, RoundedCornerShape(10.dp)).padding(18.dp)) {
-                    if (p.recommended) { Badge("Recomendado", gold = true); Spacer(Modifier.height(8.dp)) }
+                    .border(if (p.recommended || p.id == current) 2.dp else 1.dp, if (p.recommended || p.id == current) Noir.Gold else Noir.Line, RoundedCornerShape(10.dp)).padding(18.dp)) {
+                    if (p.id == current) { Badge("Tu plan actual", gold = true); Spacer(Modifier.height(8.dp)) }
+                    else if (p.recommended) { Badge("Recomendado", gold = true); Spacer(Modifier.height(8.dp)) }
                     Text(p.name, style = NoirSection.copy(fontSize = 22.sp))
                     Row(verticalAlignment = Alignment.Bottom) {
                         Text("$" + "%.2f".format(p.price), color = Noir.Gold, fontSize = 30.sp, fontFamily = Noir.Display, fontWeight = FontWeight.SemiBold)
@@ -737,7 +761,8 @@ fun PlansScreen(api: PelisApi) {
                             openCustomTab(ctx, url ?: (api.base + "/subscribe"))
                         }
                     }
-                    if (p.recommended) GoldButton("Elegir ${p.name}", action, Modifier.fillMaxWidth()) else GhostButton("Elegir ${p.name}", action, Modifier.fillMaxWidth())
+                    if (p.id == current) GhostButton("Plan actual", {}, Modifier.fillMaxWidth())
+                    else if (p.recommended) GoldButton("Elegir ${p.name}", action, Modifier.fillMaxWidth()) else GhostButton("Elegir ${p.name}", action, Modifier.fillMaxWidth())
                 }
             }
         }

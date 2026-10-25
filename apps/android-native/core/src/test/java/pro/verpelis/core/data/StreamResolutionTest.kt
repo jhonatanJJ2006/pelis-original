@@ -37,6 +37,15 @@ class StreamResolutionTest {
         assertNull(pick(old, "goat-2026", ResolveReply(403)).first)
     }
 
+    @Test fun decideReportsWhyPlaybackIsBlocked() {
+        val plan = runBlocking { StreamResolution.decide(base, old, "goat-2026") { ResolveReply(403) } }
+        assertEquals(StreamResolution.Block.PLAN, plan.block)
+        val login = runBlocking { StreamResolution.decide(base, old, "goat-2026") { ResolveReply(401) } }
+        assertEquals(StreamResolution.Block.LOGIN, login.block)
+        val ok = runBlocking { StreamResolution.decide(base, old, "goat-2026") { ResolveReply(200, master) } }
+        assertNull(ok.block)
+    }
+
     @Test fun externalUrlSkipsResolver() {
         val (url, calls) = pick("https://cdn.example.com/a.mp4", "t", ResolveReply(200, master))
         assertEquals("https://cdn.example.com/a.mp4", url)

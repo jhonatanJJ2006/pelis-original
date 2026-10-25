@@ -88,7 +88,7 @@ class PelisApi private constructor(context: Context) {
             .asArray().objects().map { Parse.movie(base, it) }
     suspend fun series() = call("movies.listSeries").asArray().objects().map { Parse.movie(base, it).copy(kind = Kind.SERIES) }
     suspend fun byGenre(genre: String) = call("movies.getByGenre", JSONObject().put("genre", genre).put("limit", 20)).asArray().objects().map { Parse.movie(base, it) }
-    suspend fun genres(): List<String> = call("movies.getGenres").asArray().let { a -> (0 until a.length()).map { a.optString(it) } }
+    suspend fun genres(): List<String> = call("movies.getGenres").asArray().let { a -> (0 until a.length()).map { a.optString(it) } }.let { Parse.realGenres(it) }
     suspend fun search(q: String) = call("movies.search", JSONObject().put("q", q).put("limit", 40)).asArray().objects().map { Parse.movie(base, it) }
     // ---- Paginación en servidor ----
     private fun <T> page(raw: Any?, map: (JSONObject) -> T?): Page<T> {
@@ -148,6 +148,13 @@ class PelisApi private constructor(context: Context) {
         return url to subs
     }
 
+    /** Si el episodio solo existe como reproductor embebido (kind=embed), devuelve su URL https. */
+    suspend fun animeEmbedUrl(animeId: String, episode: Int, dub: Boolean = false): String? {
+        val o = call("anime.getEpisodeStream", JSONObject().put("animeId", animeId).put("episodeNumber", episode).put("dub", dub)) as? JSONObject ?: return null
+        if (o.optString("kind") != "embed") return null
+        return o.str("url")?.takeIf { it.startsWith("https://") }
+    }
+
     // TV en vivo
     suspend fun channels() = call("tv.list", JSONObject().put("limit", 500)).asArray().objects().map { Parse.channel(base, it) }
     fun channelStreamUrl(id: String) = "$base/api/tv/stream/$id"
@@ -172,6 +179,9 @@ class PelisApi private constructor(context: Context) {
      */
     suspend fun playableUrl(t: Title): String? =
         StreamResolution.pick(base, t.videoUrl, t.token) { token -> resolveStream(token) }
+
+    suspend fun playback(t: Title): StreamResolution.Decision =
+        StreamResolution.decide(base, t.videoUrl, t.token) { token -> resolveStream(token) }
 
     private suspend fun resolveStream(token: String): ResolveReply = withContext(Dispatchers.IO) {
         val req = Request.Builder().url(base + "/api/stream/resolve?token=" + java.net.URLEncoder.encode(token, "UTF-8")).build()

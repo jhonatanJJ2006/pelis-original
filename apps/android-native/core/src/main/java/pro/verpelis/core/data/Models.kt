@@ -47,6 +47,11 @@ data class Page<T>(val items: List<T>, val total: Int, val offset: Int, val limi
 }
 
 object Parse {
+    /** "Película", "Serie" y "TV" son tipos de título que el catálogo guarda como género: no se muestran. */
+    private val notGenres = setOf("película", "pelicula", "serie", "series", "tv")
+    fun realGenres(raw: List<String>): List<String> =
+        raw.map { it.trim() }.filter { it.isNotEmpty() && it.lowercase() !in notGenres }
+
     /** Ancho del fondo: 1080 en el celular, 1920 en la TV (lo fija cada app al arrancar). */
     @Volatile var backdropWidth: Int = 1080
     private val NEXT_WIDTHS = intArrayOf(64, 96, 128, 256, 384, 640, 750, 828, 1080, 1200, 1920)
@@ -88,7 +93,8 @@ object Parse {
             // Fondo horizontal a ancho de pantalla; sin fondo, el póster grande (nunca la miniatura).
             backdrop = o.str("backdropImage")?.let { sized(base, it, backdropWidth) } ?: sized(base, o.str("image"), 780),
             synopsis = o.str("synopsis") ?: "",
-            genre = o.optJSONArray("genre")?.let { a -> (0 until a.length()).joinToString(", ") { a.optString(it) } } ?: o.str("genre") ?: "",
+            genre = realGenres(o.optJSONArray("genre")?.let { a -> (0 until a.length()).map { a.optString(it) } }
+                ?: o.str("genre")?.split(",") ?: emptyList()).joinToString(", "),
             year = o.str("releaseYear") ?: o.opt("year")?.toString() ?: "",
             classification = o.str("classification") ?: "",
             videoUrl = absolute(base, o.str("videoUrl")),
