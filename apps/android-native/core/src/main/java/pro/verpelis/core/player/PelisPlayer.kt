@@ -113,6 +113,13 @@ fun PelisPlayer(req: PlaybackRequest, api: PelisApi, fullscreen: Boolean, tv: Bo
     val retry = { error = null; player.prepare(); player.playWhenReady = true }
     // Al volver la red tras un error, reintenta solo y sigue desde donde iba.
     LaunchedEffect(online) { if (online && error != null) { delay(800); retry() } }
+    // Guarda la posición cada 15 s: si el sistema mata la app no se pierde el progreso.
+    LaunchedEffect(req) {
+        if (!req.live) while (true) {
+            delay(15_000)
+            if (player.isPlaying) ResumeStore.put(context, req, player.currentPosition, player.duration)
+        }
+    }
     var hud by remember { mutableStateOf<GestureMath.Zone?>(null) }
     var hudLevel by remember { mutableFloatStateOf(0f) }
     var hudTick by remember { mutableStateOf(0) }

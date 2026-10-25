@@ -528,6 +528,11 @@ fun DetailScreen(api: PelisApi, nav: NavHostController, kind: String, id: String
                 api.animeEpisode(t.id, episode)?.let { (u, s) -> PlaybackRequest(u, "${t.name} - Ep. $episode", null, s) }
             } else if (t.kind == Kind.SERIES && episode > 1) null
             else api.playableUrl(t)?.let { PlaybackRequest(it, if (t.kind == Kind.SERIES) "${t.name} - Ep. $episode" else t.name, t.id, t.subtitles) }
+            if (req == null && kind == "anime") {
+                // Episodios que solo existen como reproductor embebido: por ahora solo se ven en la web.
+                val embed = runCatching { api.animeEmbedUrl(t.id, episode) }.getOrNull()
+                if (embed != null) { msg = "Por ahora, el episodio $episode solo se puede ver en verpelis.pro"; return@launch }
+            }
             if (req == null) msg = if (isSeries) "El episodio $episode aún no está disponible" else "Este título no tiene video disponible todavía"
             else PlaybackIntent.start(ctx, PlayerActivity::class.java, req)
         }

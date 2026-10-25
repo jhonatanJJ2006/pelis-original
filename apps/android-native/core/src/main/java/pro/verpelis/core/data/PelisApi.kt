@@ -148,6 +148,13 @@ class PelisApi private constructor(context: Context) {
         return url to subs
     }
 
+    /** Si el episodio solo existe como reproductor embebido (kind=embed), devuelve su URL https. */
+    suspend fun animeEmbedUrl(animeId: String, episode: Int, dub: Boolean = false): String? {
+        val o = call("anime.getEpisodeStream", JSONObject().put("animeId", animeId).put("episodeNumber", episode).put("dub", dub)) as? JSONObject ?: return null
+        if (o.optString("kind") != "embed") return null
+        return o.str("url")?.takeIf { it.startsWith("https://") }
+    }
+
     // TV en vivo
     suspend fun channels() = call("tv.list", JSONObject().put("limit", 500)).asArray().objects().map { Parse.channel(base, it) }
     fun channelStreamUrl(id: String) = "$base/api/tv/stream/$id"
