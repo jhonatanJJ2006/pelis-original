@@ -51,7 +51,27 @@ import pro.verpelis.core.ui.Noir
 import pro.verpelis.core.ui.ProgressLine
 import pro.verpelis.core.ui.SectionHeader
 
-fun Title.meta(): String = listOf(year, genre.split(",").firstOrNull()?.trim().orEmpty(), classification).filter { it.isNotBlank() }.joinToString("  ·  ")
+private val GENRES_ES = mapOf(
+    "action" to "Acción", "adventure" to "Aventura", "comedy" to "Comedia", "drama" to "Drama", "fantasy" to "Fantasía",
+    "horror" to "Terror", "mystery" to "Misterio", "romance" to "Romance", "sci-fi" to "Ciencia ficción", "science fiction" to "Ciencia ficción",
+    "slice of life" to "Recuentos de la vida", "sports" to "Deportes", "supernatural" to "Sobrenatural", "thriller" to "Suspenso",
+    "music" to "Música", "mecha" to "Mecha", "psychological" to "Psicológico", "school" to "Escolar", "historical" to "Histórico",
+    "military" to "Militar", "magic" to "Magia", "ecchi" to "Ecchi", "harem" to "Harem", "isekai" to "Isekai", "martial arts" to "Artes marciales",
+    "animation" to "Animación", "crime" to "Crimen", "family" to "Familia", "documentary" to "Documental", "war" to "Bélica", "western" to "Western",
+    "kids" to "Infantil", "parody" to "Parodia", "police" to "Policial", "space" to "Espacial", "vampire" to "Vampiros", "demons" to "Demonios",
+    "game" to "Juegos", "samurai" to "Samuráis", "super power" to "Superpoderes", "seinen" to "Seinen", "shounen" to "Shōnen", "shoujo" to "Shōjo",
+)
+
+/** Primer género, en español (el catálogo de anime llega en inglés). */
+fun Title.genreEs(): String = genre.split(",").firstOrNull()?.trim().orEmpty().let { g -> GENRES_ES[g.lowercase()] ?: g }
+
+/** «Estreno» solo para títulos del año actual o el anterior. */
+fun Title.isRecent(): Boolean {
+    val y = year.take(4).toIntOrNull() ?: return false
+    return y >= java.util.Calendar.getInstance().get(java.util.Calendar.YEAR) - 1
+}
+
+fun Title.meta(): String = listOf(year, genreEs(), classification).filter { it.isNotBlank() }.joinToString("  ·  ")
 
 @Composable
 fun PosterCard(t: Title, onClick: () -> Unit, modifier: Modifier = Modifier.width(118.dp), badge: String? = null) {
@@ -66,7 +86,7 @@ fun PosterCard(t: Title, onClick: () -> Unit, modifier: Modifier = Modifier.widt
         }
         Spacer(Modifier.height(6.dp))
         Text(t.name, color = Noir.Text, fontSize = 12.sp, fontWeight = FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        Text(t.genre.split(",").firstOrNull().orEmpty(), color = Noir.Muted, fontSize = 10.sp, maxLines = 1)
+        Text(t.genreEs(), color = Noir.Muted, fontSize = 10.sp, maxLines = 1)
     }
 }
 
@@ -162,7 +182,15 @@ fun GhostButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier
 fun <T> LoadBox(state: Load<T>, content: @Composable (T) -> Unit) {
     when (state) {
         is Load.Loading -> Box(Modifier.fillMaxSize(), Alignment.Center) { CircularProgressIndicator(color = Noir.Gold) }
-        is Load.Err -> Box(Modifier.fillMaxSize().padding(24.dp), Alignment.Center) { Text(state.message, color = Noir.Muted) }
+        is Load.Err -> Column(Modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(if (state.offline) "Sin conexión" else "No se pudo cargar", color = Noir.Text, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+            Spacer(Modifier.height(8.dp))
+            Text(
+                if (state.offline) "Revisa tu conexión a internet. Volveremos a cargar en cuanto vuelva la red." else "Inténtalo de nuevo en unos segundos.",
+                color = Noir.Muted, fontSize = 13.sp, textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            )
+            state.retry?.let { r -> Spacer(Modifier.height(16.dp)); GoldButton("Reintentar", r) }
+        }
         is Load.Ok -> content(state.value)
     }
 }
@@ -178,12 +206,16 @@ fun PagedGrid(
     onOpen: (Title) -> Unit,
     load: suspend (offset: Int, limit: Int) -> pro.verpelis.core.data.Page<Title>,
 ) {
-    val pageState = androidx.compose.runtime.remember(key) { androidx.compose.runtime.mutableIntStateOf(0) }
+    // Página y scroll sobreviven a la rotación; cambiar [key] vuelve a la página 1.
+    val pageState = androidx.compose.runtime.saveable.rememberSaveable(key?.toString()) { androidx.compose.runtime.mutableIntStateOf(0) }
     val pageIndex = pageState.intValue
     val limit = pro.verpelis.core.data.PAGE_SIZE
     val state = pro.verpelis.core.ui.rememberLoad(key, pageIndex) { load(pageIndex * limit, limit) }
-    val grid = androidx.compose.foundation.lazy.grid.rememberLazyGridState()
-    androidx.compose.runtime.LaunchedEffect(pageIndex) { grid.scrollToItem(0) }
+    val grid = androidx.compose.runtime.saveable.rememberSaveable(key?.toString(), saver = androidx.compose.foundation.lazy.grid.LazyGridState.Saver) {
+        androidx.compose.foundation.lazy.grid.LazyGridState()
+    }
+    val shownPage = androidx.compose.runtime.saveable.rememberSaveable(key?.toString()) { androidx.compose.runtime.mutableIntStateOf(pageIndex) }
+    androidx.compose.runtime.LaunchedEffect(pageIndex) { if (pageIndex != shownPage.intValue) { shownPage.intValue = pageIndex; grid.scrollToItem(0) } }
     LoadBox(state) { page ->
         if (page.items.isEmpty()) {
             Grid(emptyList(), empty, onOpen)
