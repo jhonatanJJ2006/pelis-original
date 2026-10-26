@@ -15,16 +15,24 @@ object StreamResolution {
     fun isLocalStream(url: String?): Boolean =
         url != null && url.contains("/api/stream/") && url.contains(".m3u8")
 
-    suspend fun pick(base: String, videoUrl: String?, token: String?, resolve: suspend (String) -> ResolveReply): String? {
+    suspend fun pick(base: String, videoUrl: String?, token: String?, resolve: suspend (String) -> ResolveReply): String? =
+        decide(base, videoUrl, token, resolve).url
+
+    /** Igual que [pick], pero distingue "sin sesión" (401) y "sin plan" (403) para mostrar el muro. */
+    suspend fun decide(base: String, videoUrl: String?, token: String?, resolve: suspend (String) -> ResolveReply): Decision {
         val direct = Parse.absolute(base, videoUrl?.trim())
         // URL externa (no es un stream de nuestros discos): el resolver no aplica, igual que la web.
-        if (direct != null && !isLocalStream(direct)) return direct
+        if (direct != null && !isLocalStream(direct)) return Decision(direct)
         if (!token.isNullOrBlank()) {
             val reply = runCatching { resolve(token) }.getOrDefault(ResolveReply(0))
-            if (reply.status in 200..299) Parse.absolute(base, reply.url?.trim())?.let { return it }
+            if (reply.status in 200..299) Parse.absolute(base, reply.url?.trim())?.let { return Decision(it) }
             // Sin sesión o sin plan también aplica a videoUrl: no tiene sentido el respaldo.
-            if (reply.status == 401 || reply.status == 403) return null
+            if (reply.status == 401) return Decision(null, Block.LOGIN)
+            if (reply.status == 403) return Decision(null, Block.PLAN)
         }
-        return direct
+        return Decision(direct)
     }
+
+    enum class Block { LOGIN, PLAN }
+    data class Decision(val url: String?, val block: Block? = null)
 }

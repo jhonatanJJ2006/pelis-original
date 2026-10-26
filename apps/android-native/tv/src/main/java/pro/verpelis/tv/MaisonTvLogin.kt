@@ -82,7 +82,7 @@ import java.util.Calendar
 import java.util.TimeZone
 
 /*
- * Pantalla de inicio de sesión TV "Maison Noir" (Google Stitch, proyecto PELIS Rediseño,
+ * Pantalla de inicio de sesión TV PELIS (Google Stitch, proyecto PELIS Rediseño,
  * pantalla fe4203145f55480985b6537208384423 "PELIS - Iniciar sesión (Android TV 10-Foot)").
  * Panel izquierdo: vincular con el teléfono (QR + código + pasos). Panel derecho: correo y
  * contraseña. Todo navegable con D-pad: foco con borde dorado, halo y escala; los campos de
@@ -91,7 +91,7 @@ import java.util.TimeZone
  * Archivo idéntico en apps/android-tv y apps/android-native/tv (solo cambia el package).
  */
 
-/** Paleta Maison Noir del diseño de Stitch. */
+/** Paleta PELIS del diseño de Stitch. */
 object Mn {
     val Bg = Color(0xFF131315)
     val Lowest = Color(0xFF0E0E10)

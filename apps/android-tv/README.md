@@ -2,7 +2,7 @@
 
 App nativa **Compose for TV**. Fuentes reales en `app/src/` (trackeadas en git).
 
-El APK de distribución `apps/web/public/downloads/pelis-tv.apk` se decompiló con jadx (`LoginScreen`, `HomeScreen`, `NavGraph`, `PelisApiClient`, Maison Noir). Este árbol es esa app **reconstruida en Kotlin limpio** y cableada al pairing de `@pelis/db`.
+El APK de distribución `apps/web/public/downloads/pelis-tv.apk` se decompiló con jadx (`LoginScreen`, `HomeScreen`, `NavGraph`, `PelisApiClient`, PELIS). Este árbol es esa app **reconstruida en Kotlin limpio** y cableada al pairing de `@pelis/db`.
 
 El QR del APK original era un stub (`PROXIMAMENTE` + código local aleatorio). Aquí el login split estilo Netflix habla con `/api/tv-auth/*`.
 

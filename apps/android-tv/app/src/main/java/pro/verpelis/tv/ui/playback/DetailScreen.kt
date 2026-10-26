@@ -76,7 +76,7 @@ import pro.verpelis.tv.ui.components.TvHints
 import pro.verpelis.tv.ui.components.TvLoadError
 
 /**
- * Ficha Maison Noir de película / serie / anime (diseño Stitch
+ * Ficha PELIS de película / serie / anime (diseño Stitch
  * "PELIS - Detalle de Película (Android TV)"): fondo a sangre, insignias,
  * título serif, metadatos, sinopsis, Reproducir / Continuar y selector de episodios.
  */
