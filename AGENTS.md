@@ -149,6 +149,7 @@ Rutas completas: docs/APP.md.
 - docs/HANDOFF-2026-10-25.md — registro del 2026-10-25 (pulido del hero, TV 2.0.4)
 - docs/HANDOFF-2026-10-25b.md — intro con sonido y banner de TV más grande (TV 2.0.5)
 - docs/HANDOFF-2026-10-25c.md — app nativa del celular 1.2.3: reproductor, sin conexión, sinopsis, rotación
+- docs/HANDOFF-2026-10-25d.md — nativa 1.2.4 (muro de planes, invitado) y TV 2.0.6
 - DESIGN.md — UI Maison Noir (tokens cinema-*)
 - docs/APP.md — rutas, auth, fuentes de datos
 - docs/ARCHITECTURE.md — paquetes, flujo, trampas
