@@ -48,7 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es" className="dark">
       <head>
-        {/* Safari / iOS Add to Home Screen — Maison Noir */}
+        {/* Safari / iOS Add to Home Screen — PELIS */}
         <meta name="theme-color" content="#131315" media="(prefers-color-scheme: dark)" />
         <meta name="theme-color" content="#131315" />
         <meta name="apple-mobile-web-app-capable" content="yes" />

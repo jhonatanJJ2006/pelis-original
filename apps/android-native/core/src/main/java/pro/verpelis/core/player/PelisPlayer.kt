@@ -205,7 +205,7 @@ fun PelisPlayer(req: PlaybackRequest, api: PelisApi, fullscreen: Boolean, tv: Bo
                 setShowSubtitleButton(true)
                 setShowBuffering(PlayerView.SHOW_BUFFERING_NEVER)
                 setKeepContentOnPlayerReset(true)
-                // Sin obturador negro: durante la carga se ve el fondo Maison Noir.
+                // Sin obturador negro: durante la carga se ve el fondo PELIS.
                 setShutterBackgroundColor(android.graphics.Color.TRANSPARENT)
                 setBackgroundColor(android.graphics.Color.TRANSPARENT)
                 if (tv) { requestFocus() }

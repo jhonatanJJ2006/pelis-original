@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Tokens canónicos — DESIGN.md (Maison Noir) */
+/* Tokens canónicos — DESIGN.md (PELIS) */
 :root {
   --color-midnight-plum: #131315;
   --color-indigo-surface: #1c1b1d;
@@ -182,7 +182,7 @@
     box-shadow: 0 4px 24px rgba(229, 194, 118, 0.1);
   }
 
-  /* Tarjeta de acceso Maison Noir: filete dorado superior, esquinas rectas */
+  /* Tarjeta de acceso PELIS: filete dorado superior, esquinas rectas */
   .auth-card {
     @apply relative border-cinema-border/80 bg-cinema-surface/95 backdrop-blur-sm;
     border-radius: 2px;
@@ -194,7 +194,7 @@
     @apply absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cinema-accent to-transparent;
   }
 
-  /* Documentos legales Maison Noir: secciones como fichas con filete dorado */
+  /* Documentos legales PELIS: secciones como fichas con filete dorado */
   .legal-doc article {
     @apply max-w-none;
   }
@@ -632,7 +632,7 @@
   }
 }
 
-/* Tablas densas del admin — Maison Noir */
+/* Tablas densas del admin — PELIS */
 @layer components {
   .admin-table thead tr {
     @apply bg-cinema-surface;
